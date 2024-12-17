@@ -1,0 +1,111 @@
+/* src/components/WelcomePage.css */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+}
+
+.WelcomePage {
+  text-align: center;
+  font-family: 'Arial', sans-serif;
+  background: linear-gradient(to right, #dae265, #feb47b);
+  color: white;
+  padding: 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.App-header {
+  margin-bottom: 20px;
+}
+
+.App-header h1 {
+  font-size: 3em;
+  margin-bottom: 0.5em;
+  opacity: 0;
+  transform: translateY(-20px);
+  animation: fadeInSlideIn 1.5s forwards;
+}
+
+@keyframes fadeInSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.welcome-message {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.welcome-message h2 {
+  color: #fff;
+}
+
+.welcome-message p {
+  color: #f1f1f1;
+}
+
+.features {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.features h2 {
+  color: #fff;
+  margin-bottom: 20px;
+}
+
+.features-list {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.feature-item {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  padding: 20px;
+  width: 150px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.feature-item .icon {
+  font-size: 2em;
+  margin-bottom: 10px;
+}
+
+.cta button {
+  background-color: #fff;
+  border: none;
+  color: #ff7e5f;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 20px 2px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.cta button:hover {
+  background-color: #feb47b;
+  transform: scale(1.05);
+}

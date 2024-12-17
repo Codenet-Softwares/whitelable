@@ -1,0 +1,73 @@
+.min-max-column {
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.min-max-label {
+    padding: 3px 8px;
+    margin-right: 5px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.min-max-value {
+    background-color: #d1ecf1;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+table {
+    table-layout: fixed;
+}
+
+th.back-column,
+th.lay-column,
+td.back-cell,
+td.lay-cell {
+    width: 15%;
+    text-align: center;
+}
+
+.min-max-column h6 {
+    display: inline-block;
+    background-color: #d1ecf1;
+    padding: 3px 8px;
+    border-radius: 5px;
+}
+.info_icon{
+    font-size: larger;
+}
+.team-name h5 {
+    margin: 0;
+}
+
+.back-column{
+    border-top-left-radius: 40px;   
+}
+td.back-cell{
+    background: #54A9EE;
+}
+.lay-column{
+    border-top-right-radius: 40px;
+}
+td.lay-cell{
+    background-color: #E5798B;
+}
+.green_icon{
+    color: #5FC652;
+    font-size: large;
+}
+.red_icon{
+    color: #FC3E3E;
+    font-size: large;
+}
+.table-bordered th, .table-bordered td {
+    border: none !important;
+  }
+  .table-bordered th, .table-bordered td {
+    border-left: none !important;
+    border-right: none !important;
+  }
+  
