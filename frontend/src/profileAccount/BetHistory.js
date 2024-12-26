@@ -177,43 +177,44 @@ const BetHistory = ({
               {/* Table */}
               <div class="QA_section">
                 <div class="QA_table mb_30">
-                  <table class="table lms_table_active3 table-bordered p-0 m-0">
+                  <table class="table lms_table_active3 table-bordered p-0 m-0" style={{ tableLayout: "fixed", width: "100%" }}>
                     <thead>
                       <tr
                         style={{
                           backgroundColor: "#e6e9ed",
                           color: "#5562a3",
+                          textAlign:"center"
                         }}
                       >
-                        <th scope="col">
-                          <b>User Name</b>
+                        <th scope="col" style={{ width: "10%" }}>
+                          <b>User <br/> Name</b>
                         </th>
-                        <th scope="col">
-                          <b>Sport Name</b>
+                        <th scope="col" style={{ width: "10%" }}>
+                          <b>Sport<br/> Name</b>
                         </th>
-                        <th scope="col">
+                        <th scope="col" style={{ width: "15%" }}>
                           <b>Event</b>
                         </th>
-                        <th scope="col">
+                        <th scope="col" style={{ width: "13%" }}>
                           <b>Market</b>
                         </th>
-                        <th scope="col">
+                        <th scope="col" style={{ width: "18%" }}>
                           <b>Ticket</b>
                         </th>
-                        <th scope="col">
+                        <th scope="col" style={{ width: "10%" }}>
                           <b>Sem</b>
                         </th>
-                        <th scope="col">
-                          <b>Ticket Price</b>
+                        <th scope="col" style={{ width: "10%" }}>
+                          <b>Ticket <br/> Price</b>
                         </th>
-                        <th scope="col">
+                        <th scope="col" style={{ width: "10%" }}>
                           <b>Amount</b>
                         </th>
-                        <th scope="col">
-                          <b>Place Time</b>
+                        <th scope="col" style={{ width: "10%" }}>
+                          <b>Place <br/> Time</b>
                         </th>
-                        <th scope="col">
-                          <b>Settle Time</b>
+                        <th scope="col" style={{ width: "15%" }}>
+                          <b>Settle <br/> Time</b>
                         </th>
                       </tr>
                       {/* Show a message if no Sport is selected */}
@@ -238,7 +239,7 @@ const BetHistory = ({
                             <td>{history?.marketName}</td>
                             <td>{"WINNER"}</td>
                             <td> 
-                              <div className="dropdown" style={{ position: "relative" }}>
+                              <div className="dropdown" style={{ position: "relative", display: "inline-block"  }}>
                               <button
                                 className="btn btn-link dropdown-toggle"
                                 type="button"
