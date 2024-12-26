@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getLotteryBetList } from "../Utils/service/apiService";
+import { formatDateForUi } from "../Utils/helper";
 
 const BetHistoryLotteryForPl = () => {
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [betList, SetBetList] = useState([]);
-  const { userName, runnerId } = useParams();
-  console.log("userName", userName, runnerId);
+  const { userName, id } = useParams();
+  console.log("userName", userName, id);
   
   const toggleDropdown = (id) => {
     setDropdownOpen(dropdownOpen === id ? null : id);
@@ -15,6 +16,7 @@ const BetHistoryLotteryForPl = () => {
 
     const response = await getLotteryBetList({
       userName: userName,
+      marketId: id
     });
     SetBetList(response?.data);
   };
@@ -165,9 +167,9 @@ const BetHistoryLotteryForPl = () => {
                             <td>{data?.sem}</td>
                             <td>{data?.ticketPrice}</td>
                             <td className="fw-bold">{data?.amount}</td>
-                            {/* <td>{formatDateForUi(data?.placeDate)}</td>
-                            <td>{formatDateForUi(data?.date)}</td> */}
-                            <Link>Info</Link>
+                            <td>{formatDateForUi(data?.placeTime)}</td>
+                            <td>{formatDateForUi(data?.settleTime)}</td>
+                            {/* <Link>Info</Link> */}
                           </tr>
                         ))
                       ) : (

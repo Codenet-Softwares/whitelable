@@ -130,7 +130,7 @@ const ProfitAndLossLotteryEvent = ({
                                                                 style={{ cursor: "pointer" }}
                                                                 onClick={() => {
                                                                     nav(
-                                                                        `/betHistLotteryForPL/${UserName}`
+                                                                        `/betHistLotteryForPL/${UserName}/${data.marketId}`
                                                                     );
                                                                 }}
                                                             >

@@ -1,0 +1,144 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+  
+  .app-container.sidebar-closed body {
+    margin-left: 78px;
+  }
+  
+  /* Sidebar */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 250px;
+    background: #11101d;
+    transition: width 0.5s ease;
+    overflow: hidden;
+  }
+  
+  .sidebar.close {
+    width: 78px;
+  }
+  
+  /* Toggle Button (outside sidebar) */
+  .toggle-button {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    background: #11101d;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    z-index: 1000;
+  }
+  
+  .toggle-button i {
+    font-size: 18px;
+  }
+  
+  /* Logo Section */
+  .logo-details {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    background: #1d1b31;
+  }
+  
+  .logo-details .logo_name {
+    font-size: 18px;
+    font-weight: 500;
+    color: #fff;
+    margin-left: 10px;
+    transition: opacity 0.3s ease;
+  }
+  
+  .sidebar.close .logo_name {
+    opacity: 0;
+    pointer-events: none;
+  }
+  
+  /* Navigation Links */
+  .nav-links {
+    margin-top: 20px;
+  }
+  
+  .nav-links li {
+    list-style: none;
+  }
+  
+  .nav-links li a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 6px;
+    transition: background 0.3s ease;
+  }
+  
+  .nav-links li a:hover {
+    background: #1d1b31;
+  }
+  
+  .nav-links li i {
+    min-width: 30px;
+    font-size: 18px;
+  }
+  
+  /* Dropdown */
+  .iocn-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .sub-menu {
+    margin-left: 20px;
+  }
+  
+  .sub-menu li {
+    padding: 5px 0;
+  }
+  
+  .sub-menu li a {
+    color: #fff;
+    text-decoration: none;
+  }
+  
+  .sub-menu li a:hover {
+    color: #1d1b31;
+  }
+  
+  /* Profile Section */
+  .profile-details {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background: #1d1b31;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .profile-details img {
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+  }
+  
+  .profile-details .name-job {
+    color: #fff;
+  }
+  
+  .sidebar.close .name-job {
+    display: none;
+  }

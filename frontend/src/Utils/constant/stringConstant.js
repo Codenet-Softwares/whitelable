@@ -61,10 +61,11 @@ export class StringConstants {
     { role: 'create-user', name: 'Create User' },
     { role: 'accountStatement', name: 'Account Statement' },
     { role: 'activityLog', name: 'Activity Log' },
-    { role: 'Delete-Admin', name: 'Delete-Admin' },
-    { role: 'restore-admin', name: 'Restore-Admin' },
+    { role: 'delete-admin', name: 'Delete Admin' },
+    { role: 'restore-admin', name: 'Restore Admin' },
     { role: 'move-to-trash', name: 'Move To Trash' },
-    { role: 'trash-view', name: 'Trash-View' },
+    { role: 'trash-view', name: 'Trash View' },
+    { role: 'view-balance', name: 'View Balance' },
   ];
   // roles = [
   //   'transferBalance',

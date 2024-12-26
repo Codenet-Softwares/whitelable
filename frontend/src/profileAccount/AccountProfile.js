@@ -61,30 +61,30 @@ const AccountProfile = ({ props, UserName, createdByUser }) => {
       {/* card */}
       <div class="card w-100 rounded">
         <div
-          class="card-heade text-white p-1"
-          style={{ backgroundColor: "#26416e" }}
+          class="card-heade text-white p-2 text-center text-uppercase rounded"
+          style={{ backgroundColor: "#1E2761" }}
         >
           <b>&nbsp;&nbsp;Account Details</b>
         </div>
         <ul class="list-group list-group-flush">
           <li class="list-group-item p-3">
-            <b style={{ color: "#1c3763" }}>Name : </b> <b>{props.userName}</b>
+            <b style={{ color: "#1c3763"}} className="h6 fw-bold">Name : </b> <b>{props.userName}</b>
           </li>
           <li class="list-group-item p-3">
-            <b style={{ color: "#1c3763" }}>Currency : </b>{" "}
+            <b style={{ color: "#1c3763" }} className="h6 fw-bold">Currency : </b>{" "}
+            <b>No Data From Serverside</b>
+          </li>
+          <li class="list-group-item p-3"> 
+            <b style={{ color: "#1c3763" }} className="h6 fw-bold">Exposure Limit : </b>{" "}
             <b>No Data From Serverside</b>
           </li>
           <li class="list-group-item p-3">
-            <b style={{ color: "#1c3763" }}>Exposure Limit : </b>{" "}
-            <b>No Data From Serverside</b>
-          </li>
-          <li class="list-group-item p-3">
-            <b style={{ color: "#1c3763" }}>Mobile Number : </b>
+            <b style={{ color: "#1c3763" }} className="h6 fw-bold">Mobile Number : </b>
             <b>No Data From Serverside</b>
           </li>
           {createdByUser && store?.admin?.id === createdByUser &&
             <li class="list-group-item p-3">
-              <b style={{ color: "#1c3763" }}>Password : </b>
+              <b style={{ color: "#1c3763" }} className="h6 fw-bold">Password : </b>
               <b>********</b>{" "}
               <img
                 src={EditIcon}

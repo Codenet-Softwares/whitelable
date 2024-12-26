@@ -48,36 +48,68 @@ const NavTop = () => {
 
   return (
     <section className="main_content dashboard_part large_header_bg">
-      <div className="container-fluid g-0">
-        <div className="row">
-          <div className="col-lg-12 p-0 ">
-            <div className="header_iner d-flex justify-content-between align-items-center">
-              <div className="sidebar_icon d-lg-none">
-                <i className="ti-menu"></i>
+    <div className="container-fluid p-0">
+  <div className="row">
+    <div className="col-12">
+      <div className="header_iner d-flex justify-content-between align-items-center flex-wrap">
+        {/* Sidebar Toggle Icon for Mobile */}
+        <div className="sidebar_icon d-lg-none">
+          <i className="ti-menu"></i>
+        </div>
+
+        {/* WhiteLabel Admin Heading */}
+        <h2
+          className="WhiteLabel_heading text-uppercase text-center text-lg-start my-2"
+          style={{
+            color: "#1E2761",
+            fontWeight: "800",
+            flex: "1 1 auto",
+          }}
+        >
+          <span style={{ color: "#F5C93A" }}>{store?.admin?.roles[0]?.role}</span> Admin{" "}
+          <span style={{ color: "#F5C93A" }}>Panel</span>
+        </h2>
+
+        {/* Header Right Section */}
+        <div className="header_right d-flex justify-content-between align-items-center flex-wrap">
+          {/* Profile Info */}
+          <div className="profile_info d-flex align-items-center">
+            <img
+              src="../../img/client_img.png"
+              alt="Profile"
+              className="profile_img"
+              style={{
+                width: "40px",
+                height: "40px",
+                borderRadius: "50%",
+                objectFit: "cover",
+              }}
+            />
+            <div
+              className="profile_info_iner ms-2 text-center text-lg-start"
+              style={{ flex: "1 1 auto" }}
+            >
+              <div className="profile_author_name">
+                <p className="mb-1 small">{store?.admin?.roles[0]?.role}</p>
+                <h5 className="m-0">{store?.admin?.adminName}</h5>
               </div>
-              <div className="line_icon open_miniSide d-none d-lg-block" style={{cursor : "pointer"}} onClick={() => navigate(-1)}>
-                <img src="../../img/line_img.png" alt="" />
-              </div>
-              <div className="header_right d-flex justify-content-between align-items-center">
-                <div className="profile_info">
-                  <img src="../../img/client_img.png" alt="#" />
-                  <div className="profile_info_iner">
-                    <div className="profile_author_name">
-                      <p>{store.admin.roles[0].role} </p>
-                      <h5>{store.admin.adminName}</h5>
-                    </div>
-                    <div className="profile_info_details">
-                      <a style={{ cursor: "pointer" }} onClick={handleLogout}>
-                        <b className="text-danger">Logout</b>
-                      </a>
-                    </div>
-                  </div>
-                </div>
+              <div className="profile_info_details">
+                <a
+                  style={{ cursor: "pointer" }}
+                  onClick={handleLogout}
+                  className="text-danger fw-bold"
+                >
+                  Logout
+                </a>
               </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
       <Layout />
     </section>
   );

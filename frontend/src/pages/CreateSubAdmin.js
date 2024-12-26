@@ -50,14 +50,14 @@ const CreateSubAdmin = () => {
   }
 
   return (
-    <div className="container mt-5">
+    <div className="container" style={{marginTop:"100px"}}>
       <FullScreenLoader show={isLoading} />
       <div className="row justify-content-center">
         <div className="col-lg-8">
-          <div className="card">
+          <div className="card" >
             <div
-              className="card-header text-white p-1"
-              style={{ backgroundColor: "#26416e", textAlign: "center" }}
+              className="card-header text-white p-3"
+              style={{ backgroundColor: "#1E2761", textAlign: "center" }}
             >
               <b className="mb-0">CREATE USER ROLE</b>
             </div>
@@ -111,7 +111,7 @@ const CreateSubAdmin = () => {
                   </span>
                 </div>
 
-                <div className="mb-3">
+                <div className="mb-3 mt-4">
                   <div className="card bg-dark text-white">
                     <h5
                       className="card bg-dark text-white"
@@ -147,7 +147,7 @@ const CreateSubAdmin = () => {
                   </div>
                 </div>
 
-                <div className="d-grid gap-2">
+                <div className=" gap-2">
                   <button
                     className="btn btn-primary"
                     type="button"

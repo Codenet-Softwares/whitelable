@@ -2,6 +2,7 @@
 /* Normal desktop :992px. */
 /* Tablet desktop :768px. */
 /* small mobile :320px. */
+
 @import url('https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400&display=swap');
 /* line 1, G:/admin_project/8 admin/management_html/scss/_extends.scss */
 .CRM_dropdown.dropdown .dropdown-toggle:hover,
@@ -1322,7 +1323,7 @@ table.dataTable tbody td {
 @media (max-width: 575.98px) {
   /* line 925, G:/admin_project/8 admin/management_html/scss/_reset.scss */
   .lms_block {
-    display: block !important;
+    display: block/* line 282, G:/admin_project/8 admin/management_html/scss/_header.scss */ !important;
   }
 }
 
@@ -1561,7 +1562,7 @@ th:focus {
 /* line 1112, G:/admin_project/8 admin/management_html/scss/_reset.scss */
 .lms_checkbox_1 input:checked + .slider-check:before {
   transform: translateX(20px);
-  background: #884ffb;
+  background: #1E2761;
 }
 
 /* line 1122, G:/admin_project/8 admin/management_html/scss/_reset.scss */
@@ -2034,41 +2035,43 @@ p a:hover {
 
 /* line 1478, G:/admin_project/8 admin/management_html/scss/_reset.scss */
 .page-item.active .page-link {
-  background-color: #884ffb;
-  border-color: #884ffb;
+  background-color: #1E2761;
+  border-color: #1E2761;
 }
 
 /* line 1481, G:/admin_project/8 admin/management_html/scss/_reset.scss */
 .page-item.active .page-link:hover {
   color: #fff;
-  background-color: #884ffbe6;
-  border-color: #884ffbe6;
+  background-color: #1E2761e6;
+  border-color: #1E2761e6;
 }
 
 /* line 1487, G:/admin_project/8 admin/management_html/scss/_reset.scss */
 .page-link {
-  color: #884ffb;
+  color: #1E2761;
 }
 
 /* line 1489, G:/admin_project/8 admin/management_html/scss/_reset.scss */
 .page-link:hover {
   color: #fff;
-  background-color: #884ffbe6;
-  border-color: #884ffbe6;
+  background-color: #1E2761e6;
+  border-color: #1E2761e6;
 }
 
 /* line 1495, G:/admin_project/8 admin/management_html/scss/_reset.scss */
 .btn-primary {
   color: #fff;
-  background-color: #884ffb;
-  border-color: #884ffb;
+  background-color: #1E2761;
+  border-color: #1E2761;
 }
 
 /* line 1500, G:/admin_project/8 admin/management_html/scss/_reset.scss */
 .btn-primary:hover {
   color: #fff;
-  background-color: #884ffbe6;
-  border-color: #884ffbe6;
+  background-color: #84B9DF;
+  border-color: #84B9DF;
+  color:#1E2761 ;
+  
 }
 
 @media (max-width: 991px) {
@@ -2088,7 +2091,7 @@ p a:hover {
 
 /* line 1518, G:/admin_project/8 admin/management_html/scss/_reset.scss */
 .dashboard_header .dashboard_header_title h3 span {
-  color: #884ffb;
+  color: #1E2761;
 }
 
 /* line 1522, G:/admin_project/8 admin/management_html/scss/_reset.scss */
@@ -2117,7 +2120,7 @@ p a:hover {
 .dashboard_breadcam ul li {
   font-size: 17px;
   font-weight: 400;
-  color: #884ffb;
+  color: #1E2761;
   padding-left: 14px;
   position: relative;
 }
@@ -2134,7 +2137,7 @@ p a:hover {
 
 /* line 1551, G:/admin_project/8 admin/management_html/scss/_reset.scss */
 .dashboard_breadcam ul li::before {
-  color: #884ffb;
+  color: #1E2761;
   content: '/';
   position: absolute;
   left: 4px;
@@ -2171,7 +2174,7 @@ p a:hover {
 .header_prise h5 {
   font-size: 16px;
   font-weight: 500;
-  color: #884ffb;
+  color: #1E2761;
   margin-bottom: 0;
 }
 
@@ -2257,8 +2260,9 @@ span > .bg-secondary {
 
 /* line 1641, G:/admin_project/8 admin/management_html/scss/_reset.scss */
 .bg-success {
-  background-color: #80cf00 !important;
-  color: #fff;
+  background-color:#b3e95d !important;
+  color: #000;
+  font-weight: bold;
 }
 
 /* line 1645, G:/admin_project/8 admin/management_html/scss/_reset.scss */
@@ -2287,7 +2291,7 @@ span > .bg-secondary {
 
 /* line 1661, G:/admin_project/8 admin/management_html/scss/_reset.scss */
 .bg-dark {
-  background-color: #2c323f !important;
+  background-color:#1E2761 !important;
   color: #fff;
 }
 
@@ -2702,7 +2706,7 @@ span > .bg-secondary {
   display: block;
   color: #fff;
   line-height: 40px;
-  background: #884ffb;
+  background: #1E2761;
   font-size: 15px;
   border-radius: 30px;
   -webkit-transition: 0.3s;
@@ -2754,14 +2758,14 @@ span > .bg-secondary {
   align-items: center;
   border-radius: 10px;
   background: rgba(95, 99, 242, 0.06);
-  color: #884ffb;
+  color: #1E2761;
 }
 
 /******** base color css ********/
 /* line 2, G:/admin_project/8 admin/management_html/scss/_button.scss */
 .btn_1 {
-  background-color: #884ffb;
-  border: 1px solid #884ffb;
+  background-color: #1E2761;
+  border: 1px solid #1E2761;
   color: #fff;
   display: inline-block;
   padding: 9px 25px;
@@ -2783,7 +2787,7 @@ span > .bg-secondary {
 /* line 18, G:/admin_project/8 admin/management_html/scss/_button.scss */
 .btn_1:hover {
   color: #fff;
-  background-color: #884ffb;
+  background-color: #1E2761;
   box-shadow: 0 3px 11px rgba(136, 79, 251, 0.4);
 }
 
@@ -3154,8 +3158,8 @@ span > .bg-secondary {
 
 /* line 302, G:/admin_project/8 admin/management_html/scss/_button.scss */
 .white_btn3:hover {
-  background-color: #884ffb !important;
-  border: 1px solid #884ffb !important;
+  background-color: #1E2761 !important;
+  border: 1px solid #1E2761 !important;
   color: #fff;
   opacity: 1 !important;
 }
@@ -3542,18 +3546,21 @@ table.dataTable.dtr-inline.collapsed > tbody > tr.parent > th:first-child::befor
 /******** header css here *********/
 /* line 2, G:/admin_project/8 admin/management_html/scss/_header.scss */
 .header_iner {
-  position: fixed;
+  /* position: fixed; */
   top: 0;
-  z-index: 99;
-  padding: 20px 30px;
-  position: relative;
+  /* z-index: 99; */
+  padding: 18px 30px;
+  /* position: relative; */
   border-radius: 0px;
   margin: 0;
-  background: #f6f7fb;
-  border-radius: 0;
-  margin: 0;
-  border-radius: 0px;
+  background: linear-gradient(135deg, rgba(132, 185, 223, 0.7), rgba(30, 39, 97, 0.9));
   border-bottom: 2px solid #e8e8e8;
+  /* padding-left: 600px; */
+}
+@media (max-width: 768px) {
+  .WhiteLabel_heading {
+    font-size: 1.25rem;
+  }
 }
 
 /* line 29, G:/admin_project/8 admin/management_html/scss/_header.scss */
@@ -3684,7 +3691,22 @@ table.dataTable.dtr-inline.collapsed > tbody > tr.parent > th:first-child::befor
   background-color: #2e4765;
   border-radius: 50%;
 }
-
+/* .WhiteLabel_heading{
+  text-transform: uppercase;
+	background-image: linear-gradient(to right top, #ffff34, #ffc812, #ff8f2f, #ff554d, #eb1267);
+   background-size: 50% auto;
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+  font-family: 'Poppins', sans-serif;
+  font-size: 36px;
+  font-weight: 600;
+  animation: gradientAnim 7.5s ease  alternate infinite;
+}
+@keyframes gradientAnim {
+  to {
+    background-position: 100% top;
+  }
+} */
 /* line 135, G:/admin_project/8 admin/management_html/scss/_header.scss */
 .header_iner .serach_field-area {
   margin-right: auto;
@@ -3755,7 +3777,7 @@ table.dataTable.dtr-inline.collapsed > tbody > tr.parent > th:first-child::befor
 .header_iner .header_right .header_notification_warp li .serach_button {
   width: 32px;
   height: 32px;
-  background: #884ffb;
+  background: #1E2761;
   border-radius: 50%;
   text-align: center;
   line-height: 32px;
@@ -3891,6 +3913,7 @@ table.dataTable.dtr-inline.collapsed > tbody > tr.parent > th:first-child::befor
   -webkit-border-radius: 15px;
   -moz-border-radius: 15px;
   border-radius: 15px;
+  z-index: 2;
 }
 
 /* line 282, G:/admin_project/8 admin/management_html/scss/_header.scss */
@@ -4339,17 +4362,17 @@ table.dataTable {
 }
 
 /* line 40, G:/admin_project/8 admin/management_html/scss/_sidebar.scss */
-.sidebar .logo {
+/* .sidebar .logo {
   margin: 0px;
   background: #f3f6f9;
   padding: 24px;
   margin-bottom: 20px;
-}
+} */
 
 /* line 46, G:/admin_project/8 admin/management_html/scss/_sidebar.scss */
-.sidebar .logo .large_logo img {
+/* .sidebar .logo .large_logo img {
   width: 100%;
-}
+} */
 
 @media (max-width: 991px) {
   /* line 40, G:/admin_project/8 admin/management_html/scss/_sidebar.scss */
@@ -4649,7 +4672,7 @@ table.dataTable {
 /* line 278, G:/admin_project/8 admin/management_html/scss/_sidebar.scss */
 .sidebar #sidebar_menu > li a {
   font-size: 15px;
-  font-weight: 400;
+  font-weight: 800;
   color: #144339;
   padding: 0px 25px 0px 0px;
   background: #fff;
@@ -4666,14 +4689,20 @@ table.dataTable {
   font-family: 'Mulish', sans-serif;
   padding: 10px 10px 10px 26px;
   background: #fff;
-  border-radius: 0 30px 30px 0;
-  border-radius: 15px;
+  /* border-radius: 0 30px 30px 0;
+  border-radius: 15px; */
+  margin:10px;
+  border: 3px solid #84B9DF;
 }
 
 /* line 299, G:/admin_project/8 admin/management_html/scss/_sidebar.scss */
 .sidebar #sidebar_menu > li a:hover {
-  color: #f65365 !important;
-  background: #f6f7fb;
+  color: #1E2761 !important;
+  background: #84B9DF;
+  font-weight: bold;
+  border: 3px solid #fff;
+
+  /* border-radius: 20px; */
 }
 
 /* line 303, G:/admin_project/8 admin/management_html/scss/_sidebar.scss */
@@ -4753,11 +4782,13 @@ table.dataTable {
 
 /* line 390, G:/admin_project/8 admin/management_html/scss/_sidebar.scss */
 .sidebar #sidebar_menu > li ul {
-  padding: 0px 0px 5px 40px;
+  /* padding: 0px 0px 5px 40px; */
   background: transparent;
-  border-radius: 0 0 4px 4px;
-  margin-left: 30px;
-  background: #fff;
+  /* border-radius: 0 0 4px 4px; */
+  margin-left: 10px;
+  /* margin-right: 10px; */
+  margin-top: 10px;
+  /* background: #fff; */
 }
 
 /* line 403, G:/admin_project/8 admin/management_html/scss/_sidebar.scss */
@@ -4768,13 +4799,13 @@ table.dataTable {
 /* line 407, G:/admin_project/8 admin/management_html/scss/_sidebar.scss */
 .sidebar #sidebar_menu > li ul li a {
   font-size: 14px;
-  color: #8890b5;
-  font-weight: 400;
+  color: #1E2761;
+  font-weight: 800;
   padding: 0;
   white-space: nowrap;
   padding: 0;
   padding: 10px 0 10px 8px !important;
-  margin-top: 0;
+  margin-top: -10px;
   margin-left: 0;
   text-transform: capitalize;
 }
@@ -5003,7 +5034,7 @@ body::-webkit-scrollbar {
   font-family: 'Mulish', sans-serif;
   font-weight: 700;
   font-size: 18px;
-  color: #474d58;
+  color: #1E2761;
 }
 
 /* line 15, G:/admin_project/8 admin/management_html/scss/_body_content.scss */
@@ -5227,6 +5258,7 @@ body::-webkit-scrollbar {
   min-height: 100vh;
   padding-bottom: 70px;
   overflow: hidden;
+  background-color: #84B9DF;
 }
 
 /* line 13, G:/admin_project/8 admin/management_html/scss/_main_content.scss */
@@ -5282,16 +5314,16 @@ body::-webkit-scrollbar {
 }
 
 /* line 44, G:/admin_project/8 admin/management_html/scss/_main_content.scss */
-.main_content .main_content_iner {
+/* .main_content .main_content_iner {
   min-height: 68vh;
   transition: 0.5s;
   position: relative;
-  background: #f6f7fb;
+  background: #408EC6;
   margin: 0;
   z-index: 22;
   border-radius: 0px;
   padding: 30px 30px;
-}
+} */
 
 /* line 54, G:/admin_project/8 admin/management_html/scss/_main_content.scss */
 .main_content .main_content_iner.default_main_contaner_iner {
@@ -5539,38 +5571,54 @@ body::-webkit-scrollbar {
 
 /* line 256, G:/admin_project/8 admin/management_html/scss/_main_content.scss */
 .breadcrumb.page_bradcam.default_bradcam li {
-  color: #9b9aba;
+  color: #1E2761;
+  font-weight: bolder;
+  font-size: large;
+
 }
 
 /* line 258, G:/admin_project/8 admin/management_html/scss/_main_content.scss */
 .breadcrumb.page_bradcam.default_bradcam li a {
-  color: #9b9aba;
+  color: #1E2761;
+  font-weight: bolder;
+  font-size: large;
+
 }
 
 /* line 262, G:/admin_project/8 admin/management_html/scss/_main_content.scss */
 .breadcrumb.page_bradcam.default_bradcam .breadcrumb-item + .breadcrumb-item::before {
   content: '>';
-  color: #9b9aba;
+  color: #1E2761;
+  font-size: large;
+
 }
 
 /* line 267, G:/admin_project/8 admin/management_html/scss/_main_content.scss */
 .breadcrumb.page_bradcam li {
   font-size: 14px;
   font-weight: 400;
-  color: #9b9aba;
+  color: #1E2761;
+  font-weight: bolder;
+  font-size: large;
+
 }
 
 /* line 271, G:/admin_project/8 admin/management_html/scss/_main_content.scss */
 .breadcrumb.page_bradcam li a {
   font-size: 13px;
   font-weight: 400;
-  color: #9b9aba;
+  color: #1E2761;
+  font-weight: bold;
+  font-size: large;
+
 }
 
 /* line 280, G:/admin_project/8 admin/management_html/scss/_main_content.scss */
 .breadcrumb.page_bradcam .breadcrumb-item + .breadcrumb-item::before {
   content: '/';
-  color: #9b9aba;
+  color: #1E2761;
+  font-weight: bolder;
+font-size: large;
 }
 
 /* line 286, G:/admin_project/8 admin/management_html/scss/_main_content.scss */
@@ -5597,13 +5645,15 @@ body::-webkit-scrollbar {
 /* line 306, G:/admin_project/8 admin/management_html/scss/_main_content.scss */
 .page_date_button {
   text-transform: capitalize;
-  color: #9995b6;
+  color:#1E2761;
   border-radius: 5px;
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
   transition: 0.3s;
   min-height: 36px;
+  font-weight: bolder;
+  font-size:medium;
 }
 
 /* line 315, G:/admin_project/8 admin/management_html/scss/_main_content.scss */
@@ -5660,9 +5710,9 @@ body::-webkit-scrollbar {
 .white_box {
   padding: 30px;
   background-color: #ffffff;
-  -webkit-border-radius: 20px;
-  -moz-border-radius: 20px;
-  border-radius: 20px;
+  /* -webkit-border-radius: 20px; */
+  /* -moz-border-radius: 20px;
+  border-radius: 20px; */
 }
 
 @media (max-width: 575.98px) {
@@ -5677,6 +5727,7 @@ body::-webkit-scrollbar {
   font-size: 16px;
   font-weight: 500;
   margin-bottom: 0;
+ 
 }
 
 @media (max-width: 991px) {
@@ -5692,11 +5743,15 @@ body::-webkit-scrollbar {
   -webkit-border-radius: 15px;
   -moz-border-radius: 15px;
   border-radius: 15px;
+  text-align: center;
+  border: 2px solid #1E2761;
+  border-radius: 10px;
 }
 
 /* line 45, G:/admin_project/8 admin/management_html/scss/_dashboard_part.scss */
 .white_card .white_card_header {
   padding: 22px 30px;
+  
 }
 
 /* line 53, G:/admin_project/8 admin/management_html/scss/_dashboard_part.scss */
@@ -5862,7 +5917,6 @@ body::-webkit-scrollbar {
 /* line 172, G:/admin_project/8 admin/management_html/scss/_dashboard_part.scss */
 .QA_section .QA_table .table {
   background: #ffffff;
-  border-radius: 10px;
   margin-bottom: 35px;
   padding-top: 20px;
 }
@@ -6353,7 +6407,7 @@ body::-webkit-scrollbar {
 
 /* line 22, G:/admin_project/8 admin/management_html/scss/_footer.scss */
 .footer_part.fixed_footer .footer_iner {
-  border-top: 2px solid #884ffb;
+  border-top: 2px solid #1E2761;
   background: #fff !important;
 }
 
@@ -6409,7 +6463,7 @@ body::-webkit-scrollbar {
 
 /* line 58, G:/admin_project/8 admin/management_html/scss/_footer.scss */
 .footer_part p a {
-  color: #884ffb;
+  color: #1E2761;
 }
 
 /* line 60, G:/admin_project/8 admin/management_html/scss/_footer.scss */
@@ -6784,7 +6838,7 @@ canvas#highlights {
 
 /* line 144, G:/admin_project/8 admin/management_html/scss/_lms_category.scss */
 .Activity_timeline ul li .activity_bell {
-  background: #884ffb;
+  background: #1E2761;
   width: 14px;
   height: 14px;
   border-radius: 50%;
@@ -7000,13 +7054,13 @@ canvas#highlights {
 /* line 26, G:/admin_project/8 admin/management_html/scss/_summer_note.scss */
 .note-editor.note-frame .note-btn:hover {
   color: #fff;
-  background: #884ffb;
+  background: #1E2761;
 }
 
 /* line 30, G:/admin_project/8 admin/management_html/scss/_summer_note.scss */
 .note-editor.note-frame .note-btn:hover i {
   color: #fff;
-  background: #884ffb;
+  background: #1E2761;
 }
 
 /* line 34, G:/admin_project/8 admin/management_html/scss/_summer_note.scss */
@@ -7954,7 +8008,7 @@ canvas#highlights {
 
 /* line 40, G:/admin_project/8 admin/management_html/scss/_projects.scss */
 .dataTables_paginate a.current {
-  background: #884ffb !important;
+  background: #1E2761 !important;
   box-shadow: 0px 5px 10px rgba(59, 118, 239, 0.3) !important;
   border: 0 !important;
   color: #fff !important;
@@ -7962,7 +8016,7 @@ canvas#highlights {
 
 /* line 46, G:/admin_project/8 admin/management_html/scss/_projects.scss */
 .dataTables_paginate a:hover {
-  background: #884ffb !important;
+  background: #1E2761 !important;
   box-shadow: 0px 5px 10px rgba(59, 118, 239, 0.3);
   border: 0 !important;
   color: #fff !important;
@@ -8002,8 +8056,8 @@ canvas#highlights {
 .dataTables_wrapper .dataTables_paginate .paginate_button.current,
 .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
   color: #fff !important;
-  border: 1px solid #884ffb;
-  background-color: #884ffb !important;
+  border: 1px solid #1E2761;
+  background-color: #1E2761 !important;
   box-shadow: 0px 5px 10px rgba(136, 79, 251, 0.04) !important;
 }
 
@@ -8161,7 +8215,7 @@ canvas#highlights {
   position: relative;
   position: relative;
   padding: 13px 20px;
-  background: #884ffb;
+  background: #1E2761;
   box-shadow: 0px 5px 10px rgba(76, 110, 248, 0.3);
   color: #fff;
   -webkit-transition: 0.3s;
@@ -8270,7 +8324,7 @@ canvas#highlights {
   position: relative;
   position: relative;
   padding: 13px 20px;
-  background: #884ffb;
+  background: #1E2761;
   box-shadow: 0px 5px 10px rgba(76, 110, 248, 0.3);
   color: #fff;
   -webkit-transition: 0.3s;
@@ -8521,8 +8575,8 @@ canvas#highlights {
 
 /* line 282, G:/admin_project/8 admin/management_html/scss/_faq.scss */
 .messages_box_area .messages_chat .single_message_chat .message_content_view.red_border {
-  border: 1px solid #884ffb;
-  background: #884ffb;
+  border: 1px solid #1E2761;
+  background: #1E2761;
 }
 
 /* line 285, G:/admin_project/8 admin/management_html/scss/_faq.scss */
@@ -8703,7 +8757,7 @@ canvas#highlights {
 /* line 30, G:/admin_project/8 admin/management_html/scss/_mailbox.scss */
 .email-sidebar ul li.active a {
   background: rgba(136, 79, 251, 0.1);
-  color: #884ffb !important;
+  color: #1E2761 !important;
 }
 
 /* line 35, G:/admin_project/8 admin/management_html/scss/_mailbox.scss */
@@ -8728,12 +8782,12 @@ canvas#highlights {
 /* line 49, G:/admin_project/8 admin/management_html/scss/_mailbox.scss */
 .email-sidebar ul li a:hover {
   background: rgba(136, 79, 251, 0.1);
-  color: #884ffb !important;
+  color: #1E2761 !important;
 }
 
 /* line 52, G:/admin_project/8 admin/management_html/scss/_mailbox.scss */
 .email-sidebar ul li a:hover i {
-  color: #884ffb;
+  color: #1E2761;
 }
 
 /* line 56, G:/admin_project/8 admin/management_html/scss/_mailbox.scss */
@@ -8793,7 +8847,7 @@ canvas#highlights {
 /* line 44, ../../../../../../xampp/htdocs/CRM_frontend/admin/public/frontend/scss/_predefine.scss */
 /* line 111, G:/admin_project/8 admin/management_html/scss/_mailbox.scss */
 .primary_checkbox input:checked ~ .checkmark {
-  background: #884ffb !important;
+  background: #1E2761 !important;
   box-shadow: 0px 5px 10px rgba(59, 118, 239, 0.3) !important;
   transition: 0.3s;
 }
@@ -9044,7 +9098,7 @@ canvas#highlights {
 
 /* line 153, G:/admin_project/8 admin/management_html/scss/_byer_table.scss */
 .theme_bg_1 {
-  background: #a37bfd !important;
+  background: #1E2761 !important;
 }
 
 /* line 156, G:/admin_project/8 admin/management_html/scss/_byer_table.scss */
@@ -9616,7 +9670,7 @@ canvas#highlights {
 /* line 569, G:/admin_project/8 admin/management_html/scss/_byer_table.scss */
 .common_tab_btn a.active {
   color: #fff;
-  background-color: #884ffb;
+  background-color: #1E2761;
 }
 
 /* line 576, G:/admin_project/8 admin/management_html/scss/_byer_table.scss */
@@ -10228,8 +10282,8 @@ canvas#highlights {
   .datepicker--days
   .datepicker--cells
   .datepicker--cell-day:hover {
-  background: #884ffb;
-  border: 2px solid #884ffb;
+  background: #1E2761;
+  border: 2px solid #1E2761;
   color: #fff;
 }
 
@@ -10262,7 +10316,7 @@ canvas#highlights {
   font-size: 30px;
   color: #2b2b2b;
   font-family: 'Mulish', sans-serif;
-  color: #884ffb;
+  color: #1E2761;
 }
 
 /* line 67, G:/admin_project/8 admin/management_html/scss/_datepicker.scss */
@@ -10336,14 +10390,14 @@ canvas#highlights {
   color: #fff !important;
   border-radius: 15px;
   font-weight: bold;
-  border: 2px solid #884ffb;
-  background: #884ffb;
+  border: 2px solid #1E2761;
+  background: #1E2761;
 }
 
 /* line 130, G:/admin_project/8 admin/management_html/scss/_datepicker.scss */
 .default-datepicker .datepicker--cell.-focus- {
-  background: #884ffb;
-  border: 2px solid #884ffb;
+  background: #1E2761;
+  border: 2px solid #1E2761;
   color: #fff;
 }
 
@@ -10367,14 +10421,14 @@ canvas#highlights {
 /* line 152, G:/admin_project/8 admin/management_html/scss/_datepicker.scss */
 .datepicker--cell.-selected- {
   border: none;
-  background: #884ffb;
+  background: #1E2761;
   color: #fff;
 }
 
 /* line 157, G:/admin_project/8 admin/management_html/scss/_datepicker.scss */
 .datepicker--cell.-selected-.-current- {
   border: none;
-  background: #884ffb;
+  background: #1E2761;
   color: #fff;
 }
 
@@ -10386,7 +10440,7 @@ canvas#highlights {
   .datepicker--days
   .datepicker--cells
   .datepicker--cell.-selected- {
-  background: #884ffb;
+  background: #1E2761;
   color: #fff;
   border-radius: 15px;
   position: relative;
@@ -10394,7 +10448,7 @@ canvas#highlights {
 
 /* line 171, G:/admin_project/8 admin/management_html/scss/_datepicker.scss */
 .datepicker--cell.-focus- {
-  background: #884ffb;
+  background: #1E2761;
   color: #fff;
 }
 
@@ -10403,7 +10457,7 @@ canvas#highlights {
   color: #000;
   border-radius: 5px;
   font-weight: bold;
-  border: 2px solid #884ffb;
+  border: 2px solid #1E2761;
 }
 
 /* line 181, G:/admin_project/8 admin/management_html/scss/_datepicker.scss */
@@ -12821,7 +12875,7 @@ a.pswp__share--download:hover {
   display: inline-block;
   border-radius: 2px;
   padding: 6px 17px;
-  background: #884ffb;
+  background: #1E2761;
   color: #fff;
   transition: 0.3s;
 }
@@ -13301,12 +13355,12 @@ table.lms_table_active3.dataTable thead .sorting_desc::after {
 /* line 52, G:/admin_project/8 admin/management_html/scss/_product.scss */
 .ribbon1 span.rib1-primary::before,
 .ribbon1 span.rib1-primary {
-  background: #884ffb;
+  background: #1E2761;
 }
 
 /* line 55, G:/admin_project/8 admin/management_html/scss/_product.scss */
 .ribbon1.rib1-primary::after {
-  border-top-color: #884ffb;
+  border-top-color: #1E2761;
 }
 
 /* line 58, G:/admin_project/8 admin/management_html/scss/_product.scss */
@@ -13324,7 +13378,7 @@ table.lms_table_active3.dataTable thead .sorting_desc::after {
 /* line 68, G:/admin_project/8 admin/management_html/scss/_product.scss */
 .ribbon1 span.rib1-primary::before,
 .ribbon1 span.rib1-primary {
-  background: #884ffb;
+  background: #1E2761;
 }
 
 /* line 71, G:/admin_project/8 admin/management_html/scss/_product.scss */
@@ -13344,7 +13398,7 @@ table.lms_table_active3.dataTable thead .sorting_desc::after {
 
 /* line 81, G:/admin_project/8 admin/management_html/scss/_product.scss */
 .ribbon1 span.rib1-primary::after {
-  background: #884ffb;
+  background: #1E2761;
 }
 
 /* line 84, G:/admin_project/8 admin/management_html/scss/_product.scss */

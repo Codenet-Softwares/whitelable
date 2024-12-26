@@ -204,7 +204,7 @@ const CustomTransactionModal = (props) => {
         closeButton
         style={{
           height: "5px",
-          backgroundColor: "#006699",
+          backgroundColor: "#1E2761",
           color: "white",
         }}
       >

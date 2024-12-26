@@ -2,8 +2,8 @@
 
 class UrlConstant {
   constructor() {}
-  url_dev = "https://wl.server.dummydoma.in/api";
-  // url_dev = "http://localhost:8000/api";
+  // url_dev = "https://wl.server.dummydoma.in/api";
+  url_dev = "http://localhost:8000/api";
 
   // Admin api
   admin = "admin";
@@ -53,6 +53,7 @@ class UrlConstant {
   getLiveUsers = `${this.url_dev}/get-live-users`;
   getBetBook = `${this.url_dev}/${this.get}-user-master-book`;
   resetPassword = `${this.url_dev}/login-reset-password`; // api needs to be changed
+  betLotteryMarketAnalysis = `${this.url_dev}/${this.get}-lottery-marketAnalysis`;
 }
 
 const urls = new UrlConstant();

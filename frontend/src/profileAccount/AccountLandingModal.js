@@ -461,8 +461,8 @@ const AccountLandingModal = () => {
           <div className="card mt-3" style={{ width: "18rem" }}>
             <ul className="list-group list-group-flush">
               <li
-                className="list-group-item text-white fs-6"
-                style={{ backgroundColor: "#26416e" }}
+                className="list-group-item text-white h6 text-uppercase text-center"
+                style={{ backgroundColor: "#1E2761" }}
               >
                 My Account
               </li>

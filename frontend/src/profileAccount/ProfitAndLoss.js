@@ -268,8 +268,8 @@ const ProfitAndLoss = ({
       {toggle === true ? (
         <div class="card w-100 rounded">
           <div
-            class="card-heade text-white p-1"
-            style={{ backgroundColor: "#26416e" }}
+            class="card-heade text-white p-2 text-center text-uppercase"
+            style={{ backgroundColor: "#1E2761" }}
           >
             <b>&nbsp;&nbsp;Profit & Loss</b>
           </div>

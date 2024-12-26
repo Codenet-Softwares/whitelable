@@ -69,12 +69,12 @@ const User_BetMarket = () => {
 
   const handleOpenUserBookModal = () => {
     setUserBookModalOpen(true);
-     setBodyData({
-       marketId: marketId,
-       adminId: store?.admin?.id,
-       role: store?.admin?.roles[0]?.role,
-       type: "user-book",
-     });
+    setBodyData({
+      marketId: marketId,
+      adminId: store?.admin?.id,
+      role: store?.admin?.roles[0]?.role,
+      type: "user-book",
+    });
   };
   const handleCloseUserBookModal = () => setUserBookModalOpen(false);
 
@@ -172,11 +172,13 @@ const User_BetMarket = () => {
         <div
           className="card-header"
           style={{
-            backgroundColor: "#7D7D7D",
+            backgroundColor: "#1E2761",
             color: "#FFFFFF",
           }}
         >
-          <h3 className="mb-0 fw-bold fs-5">User Bet Market</h3>
+          <h3 className="mb-0 fw-bold fs-5 text-center text-white p-2 text-uppercase">
+            User Bet Market
+          </h3>
         </div>
         <div className="card-body">
           <SingleCard className="mb-5">
@@ -195,7 +197,7 @@ const User_BetMarket = () => {
                     style={{
                       borderTopRightRadius: "28px",
                       padding: "10px",
-                      background: "#1D5E6C",
+                      background: "#1E2761",
                     }}
                   >
                     <h4 className="m-0 text-white px-3 p-2">Featured</h4>
@@ -217,7 +219,7 @@ const User_BetMarket = () => {
                       <th
                         className="back-column text-center"
                         style={{
-                          background: "#54A9EE",
+                          background: "#50A0E2",
                           fontSize: "20px",
                         }}
                       >
@@ -291,7 +293,7 @@ const User_BetMarket = () => {
 
               {/* Side Content */}
               <div className="card">
-                <div className="rounded-top" style={{ background: "#1D5E6C" }}>
+                <div className="rounded-top" style={{ background: "#1E2761" }}>
                   <h4 className="card-header text-white fw-bold">
                     Live Streaming
                   </h4>
@@ -300,7 +302,7 @@ const User_BetMarket = () => {
                 <div className="card mt-3">
                   <h4
                     className="card-header text-white fw-bold rounded-top"
-                    style={{ background: "#1D5E6C" }}
+                    style={{ background: "#1E2761" }}
                   >
                     Score Card
                   </h4>
@@ -317,21 +319,21 @@ const User_BetMarket = () => {
                 <div className="card mt-3">
                   <div
                     className="rounded-top"
-                    style={{ background: "#1D5E6C" }}
+                    style={{ background: "#1E2761" }}
                   >
                     <h4 className="card-header text-white fw-bold">Book</h4>
                   </div>
                   <div className="card-body d-flex justify-content-center align-items-center">
                     <button
                       className="btn me-3 text-white fw-bolder px-5"
-                      style={{ background: "#1D5E6C" }}
+                      style={{ background: "#1E2761" }}
                       onClick={handleOpenModal}
                     >
                       Master Book
                     </button>
                     <button
                       className="btn text-white fw-bolder px-5"
-                      style={{ background: "#1D5E6C" }}
+                      style={{ background: "#1E2761" }}
                       disabled={store?.admin?.roles[0]?.role === "superAdmin"}
                       onClick={handleOpenUserBookModal}
                     >
@@ -342,7 +344,7 @@ const User_BetMarket = () => {
                 <div className="card mt-4">
                   <div
                     className="d-flex align-items-center rounded-top"
-                    style={{ background: "#1D5E6C" }}
+                    style={{ background: "#1E2761" }}
                   >
                     {/* Live Bet Section */}
                     <h4 className="card-header text-white fw-bold py-3 mb-0 bg-transparent me-3">
@@ -482,12 +484,28 @@ const User_BetMarket = () => {
                           <td
                             style={{ border: "1px solid #ddd", padding: "8px" }}
                           >
-                            {master?.runnerBalance?.[0]?.bal || 0}
+                            {master?.runnerBalance?.[0]?.bal >= 0 ? (
+                              <span className="text-success">
+                                {master?.runnerBalance?.[0]?.bal}
+                              </span>
+                            ) : (
+                              <span className="text-danger">
+                                {master?.runnerBalance?.[0]?.bal}
+                              </span>
+                            )}
                           </td>
                           <td
                             style={{ border: "1px solid #ddd", padding: "8px" }}
                           >
-                            {master?.runnerBalance?.[1]?.bal || 0}
+                            {master?.runnerBalance?.[1]?.bal >= 0 ? (
+                              <span className="text-success">
+                                {master?.runnerBalance?.[1]?.bal}
+                              </span>
+                            ) : (
+                              <span className="text-danger">
+                                {master?.runnerBalance?.[1]?.bal}
+                              </span>
+                            )}
                           </td>
                         </tr>
                       );
@@ -559,12 +577,28 @@ const User_BetMarket = () => {
                           <td
                             style={{ border: "1px solid #ddd", padding: "8px" }}
                           >
-                            {master?.runnerBalance?.[0]?.bal || 0}
+                            {master?.runnerBalance?.[0]?.bal >= 0 ? (
+                              <span className="text-success">
+                                {master?.runnerBalance?.[0]?.bal}
+                              </span>
+                            ) : (
+                              <span className="text-danger">
+                                {master?.runnerBalance?.[0]?.bal}
+                              </span>
+                            )}
                           </td>
                           <td
                             style={{ border: "1px solid #ddd", padding: "8px" }}
                           >
-                            {master?.runnerBalance?.[1]?.bal || 0}
+                            {master?.runnerBalance?.[1]?.bal >= 0 ? (
+                              <span className="text-success">
+                                {master?.runnerBalance?.[1]?.bal}
+                              </span>
+                            ) : (
+                              <span className="text-danger">
+                                {master?.runnerBalance?.[1]?.bal}
+                              </span>
+                            )}
                           </td>
                         </tr>
                       );

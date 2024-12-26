@@ -32,15 +32,15 @@ const ActivityLog = ({ props }) => {
     <div className="col-sm-8 mt-3">
       <div className="card w-100 rounded">
         <div
-          className="card-header text-white p-1"
-          style={{ backgroundColor: "#26416e" }}
+          className="card-header text-white p-2 text-center text-uppercase"
+          style={{ backgroundColor: "#1E2761" }}
         >
           <b>&nbsp;&nbsp;Activity Log</b>
         </div>
         <ul className="list-group list-group-flush">
           <li className="list-group-item p-3">
             <table className="table table-bordered table-responsive-sm table-responsive-md table-responsive-lg table-responsive-xl">
-              <thead>
+              <thead style={{background:"#E6E9ED"}}>
                 <tr className="table-active">
                   <th scope="col"> Date & Time</th>
                   <th scope="col">Login Status</th>

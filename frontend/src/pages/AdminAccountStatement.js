@@ -111,24 +111,24 @@ const AdminAccountStatement = () => {
   };
 
   return (
-    <div className="d-flex justify-content-center m-5">
+    <div className="d-flex justify-content-center m-5 rounded-2">
       {/* card */}
-      <div className="card w-100 rounded">
+      <div className="card w-100 ">
         <div
-          className="card-heade text-white p-1"
-          style={{ backgroundColor: "#26416e" }}
+          className="card-heade text-white p-3 text-center h5 rounded-2"
+          style={{ backgroundColor: "#1E2761" }}
         >
-          <b>&nbsp;&nbsp;Account Statement</b>
+          <b className="">&nbsp;&nbsp;Account Statement</b>
         </div>
 
-        <div className="form-group mb-3 mb-md-0 px-2">
+        <div className="form-group mb-3 mb-md-0 px-2 mt-3">
           <div class="container">
             <div class="row">
-              <div class="col-sm">Total Entries</div>
-              <div class="col-sm">Data Source</div>
-              <div class="col-sm">From : </div>
-              <div class="col-sm">To : </div>
-              <div class="col-sm"></div>
+              <div class="col-sm fw-bold">Total Entries</div>
+              <div class="col-sm fw-bold">Data Source</div>
+              <div class="col-sm fw-bold">From : </div>
+              <div class="col-sm fw-bold">To : </div>
+              <div class="col-sm fw-bold"></div>
             </div>
           </div>
           <div class="container">
@@ -172,7 +172,7 @@ const AdminAccountStatement = () => {
                   <option value="olddata">OLD DATA</option>
                 </select>
               </div>
-              <div class="col-sm">
+              <div class="col-sm ">
                 <DatePicker
                   selected={backupDate.startDate}
                   onChange={(date) => setStartDate(date)}
@@ -192,7 +192,7 @@ const AdminAccountStatement = () => {
 
               <div class="col-sm">
                 <button
-                  className="btn btn-primary mb-2"
+                  className="btn mb-2" style={{background:"#84B9DF"}}
                   disabled={
                     backupDate.endDate === null || backupDate.startDate === null
                   }
@@ -210,11 +210,9 @@ const AdminAccountStatement = () => {
               {/* Table */}
               <div className="QA_section">
                 <div className="QA_table mb_30">
-                  <table className="table lms_table_active3">
-                    <thead>
-                      <tr
-                        style={{ backgroundColor: "#e6e9ed", color: "#5562a3" }}
-                      >
+                  <table className="table lms_table_active3 table-border border">
+                    <thead className=" mt-4" style={{background:"#84B9DF", color:"black"}}>
+                      <tr>
                         <th scope="col">
                           <b>Date/Time</b>
                         </th>
@@ -236,7 +234,7 @@ const AdminAccountStatement = () => {
                       </tr>
                     </thead>
                     {state?.statement?.map((transaction) => (
-                      <tr key={transaction._id}>
+                      <tr key={transaction._id} className="border">
                         <th scope="row">
                           <a href="#" className="question_content">
                             {formatDateForUi(transaction.date)}
@@ -276,6 +274,7 @@ const AdminAccountStatement = () => {
                         </td>
                       </tr>
                     ))}
+                   
                   </table>
                   {state.statement.length === 0 && (
                     <div className="alert text-dark bg-light mt-3" role="alert">

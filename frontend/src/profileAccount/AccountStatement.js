@@ -49,8 +49,8 @@ const AccountStatement = ({
     <div className="col-sm-8 mt-3">
       <div className="card mb-3 w-100 rounded">
         <div
-          className="card-header text-white p-1"
-          style={{ backgroundColor: "#26416e" }}
+          className="card-header text-white p-2 text-uppercase text-center"
+          style={{ backgroundColor: "#1E2761" }}
         >
           <b>&nbsp;&nbsp;Get Account Statement</b>
         </div>
@@ -120,8 +120,8 @@ const AccountStatement = ({
       {/* card */}
       <div class="card w-100 rounded">
         <div
-          class="card-heade text-white p-1"
-          style={{ backgroundColor: "#26416e" }}
+          class="card-heade text-white p-2 rounded text-uppercase text-center"
+          style={{ backgroundColor: "#1E2761" }}
         >
           <b>&nbsp;&nbsp;Account Statement</b>
         </div>
@@ -215,7 +215,7 @@ const AccountStatement = ({
 
               {/* No Data Found */}
               {props.length === 0 && (
-                <div className="alert text-dark bg-light mt-3" role="alert">
+                <div className="alert text-dark mt-3" role="alert">
                   <div className="alert-text d-flex justify-content-center">
                     <b> &#128680; No Data Found !! </b>
                   </div>

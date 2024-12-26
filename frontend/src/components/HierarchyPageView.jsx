@@ -104,12 +104,12 @@ const HierarchyPageView = () => {
 
   return (
     <div class="main_content_iner overly_inner ">
-      <div class="container-fluid p-0 ">
+      <div class="container-fluid p-5 ">
         <div class="row">
           <div class="col-12">
+                <h3 class="f_s_25 f_w_700 dark_text mr_30 text-center mt-5 text-uppercase fw-bolder" style={{textDecoration:"underLine", color:"#1E2761"}}>Hierarchy Dashboard</h3>
             <div class="page_title_box d-flex flex-wrap align-items-center justify-content-between">
               <div class="page_title_left d-flex align-items-center">
-                <h3 class="f_s_25 f_w_700 dark_text mr_30">Hierarchy Dashboard</h3>
                 <ol class="breadcrumb page_bradcam mb-0">
                   <li class="breadcrumb-item">
                     <a href="#" onClick={ClearPath}>
@@ -145,7 +145,7 @@ const HierarchyPageView = () => {
               <div class="white_card_body">
                 <div class="QA_section">
                   <div class="white_box_tittle list_header">
-                    <h4>User List </h4>
+                    <h4 className='fw-bolder' style={{color:"#1E2761"}}>User List </h4>
                     <div class="box_right d-flex lms_block gap-5">
                       <select
                         class="form-select form-select-sm w-25"
@@ -203,18 +203,18 @@ const HierarchyPageView = () => {
                     {isLoading ? (<div className='text-center'>Loading...</div>) : hierarchyData?.length > 0 ? (
                       <>
                         {' '}
-                        <table class="table lms_table_active table-bordered">
+                        <table class="table lms_table_active table-bordered table-striped">
                           <thead>
-                            <tr className="text-bolder fs-6 text-center">
-                              <th scope="col">Username</th>
-                              <th scope="col">Credit ref</th>
-                              <th scope="col">Partnership</th>
-                              <th scope="col">Balance</th>
-                              <th scope="col">Exposure</th>
-                              <th scope="col">Avail. Bal.</th>
-                              <th scope="col">Ref. P/L</th>
-                              <th scope="col">Status</th>
-                              <th>Actions</th>
+                            <tr className="text-bolder fs-6 text-center" style={{background:"#1E2761"}}>
+                              <th scope="col" className='text-white'>Username</th>
+                              <th scope="col" className='text-white'>Credit ref</th>
+                              <th scope="col" className='text-white'>Partnership</th>
+                              <th scope="col" className='text-white'>Balance</th>
+                              <th scope="col" className='text-white'>Exposure</th>
+                              <th scope="col" className='text-white'>Avail. Bal.</th>
+                              <th scope="col" className='text-white'>Ref. P/L</th>
+                              <th scope="col" className='text-white'>Status</th>
+                              <th className='text-white'>Actions</th>
 
                               {/* <th scope="col">Action</th> */}
                             </tr>

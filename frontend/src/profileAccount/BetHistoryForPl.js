@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getBetList } from "../Utils/service/apiService";
+import { formatDateForUi } from "../Utils/helper";
 
 const BetHistoryForPl = () => {
   const [betList, SetBetList] = useState([]);
@@ -112,8 +113,8 @@ const BetHistoryForPl = () => {
                                 (-{Math.round(data.value)})
                               </span>
                             </td>
-                            <td>{"NDS"}</td>
-                            <td>{"NDS"}</td>
+                            <td>{formatDateForUi(data?.placeDate)}</td>
+                            <td>{formatDateForUi(data?.matchDate)}</td>
                             <td>
                               <Link>Info</Link>
                             </td>
