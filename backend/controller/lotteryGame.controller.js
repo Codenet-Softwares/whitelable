@@ -63,24 +63,40 @@ export const getLotteryBetHistory = async (req, res) => {
 
 export const lotteryMarketAnalysis = async (req, res) => {
   try {
-    const { marketId } = req.params
+    const { marketId } = req.params;
+    const { page = 1, limit = 10 } = req.query;
     const baseURL = process.env.LOTTERY_URL;
-    const response = await axios.get(`${baseURL}/api/lottery-external-marketAnalysis/${marketId}`);
 
+    const response = await axios.get(`${baseURL}/api/lottery-external-marketAnalysis/${marketId}`, {
+      params: {
+        page,
+        limit,
+      }
+    });
     if (!response.data.success) {
-      return res
-        .status(statusCode.badRequest)
-        .send(
-          apiResponseErr(
-            null,
-            false,
-            statusCode.badRequest,
-            "Failed to fetch data"
-          )
-        );
+      return res.status(statusCode.badRequest).send(
+        apiResponseErr(
+          null,
+          false,
+          statusCode.badRequest,
+          "Failed to fetch data"
+        )
+      );
     }
 
-    return res.status(statusCode.success).send(apiResponseSuccess(response.data.data, true, statusCode.success, 'Success'));
+    const { data, pagination } = response.data;
+    const { page: currentPage, limit: currentLimit, totalItems, totalPages } = pagination;
+
+    const paginationResult = {
+      page: currentPage,
+      limit: currentLimit,
+      totalPages: totalPages, 
+      totalItems: totalItems,  
+    };
+
+    return res.status(statusCode.success).send(
+      apiResponseSuccess(data, true, statusCode.success, 'Success', paginationResult)
+    );
   } catch (error) {
     console.error('Error:', error);
 
