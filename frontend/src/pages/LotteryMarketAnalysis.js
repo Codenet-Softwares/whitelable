@@ -12,7 +12,8 @@ const LotteryMarketAnalysis = () => {
     const fetchLotteryData = async () => {
       const response = await getLotteryMarketAnalysis({ marketId });
       if (response?.success) {
-        setLotteryData(response.data);
+        const fetchedData = response.data?.[0] || {}; // Access the first item in the data array
+        setLotteryData(fetchedData);
       } else {
         toast.error(response?.message || "Failed to fetch data");
       }
@@ -32,7 +33,7 @@ const LotteryMarketAnalysis = () => {
     );
   }
 
-  if (!lotteryData) {
+  if (!lotteryData || !lotteryData.details) {
     return <div className="text-center mt-5">No data available</div>;
   }
 
@@ -58,7 +59,9 @@ const LotteryMarketAnalysis = () => {
           <div className="row text-center mb-4">
             <div className="col-md-4">
               <h4 className="text-secondary">Amount</h4>
-              <h2 className="text-success">₹{lotteryData.amount.toLocaleString()}</h2>
+              <h2 className="text-success">
+                ₹{lotteryData.amount?.toLocaleString() || 0}
+              </h2>
             </div>
             <div className="col-md-4">
               <h4 className="text-secondary">Total SEM Value</h4>
