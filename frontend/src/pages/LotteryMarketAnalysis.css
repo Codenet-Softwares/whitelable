@@ -1,0 +1,28 @@
+@keyframes highlightedBlinkingColors {
+    0% {
+      background-position: 0% 50%;
+      filter: brightness(1);
+    }
+    50% {
+      background-position: 100% 50%;
+      filter: brightness(1.5);
+    }
+    100% {
+      background-position: 0% 50%;
+      filter: brightness(1);
+    }
+  }
+  
+  .live-bet-text {
+    font-size: 1.5rem; /* Increase font size for better visibility */
+    font-weight: bold;
+    background: linear-gradient(90deg, #ff0000, #ffa500, #ffff00, #00ff00, #0000ff, #4b0082, #ee82ee);
+    background-size: 400% 400%; /* Increase gradient size for smoother transition */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: highlightedBlinkingColors 1s infinite ease-in-out; /* Faster animation for more dynamism */
+    margin-right: 10px;
+    display: inline-block;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.7); /* Add glow effect for extra emphasis */
+  }
+  

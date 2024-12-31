@@ -568,7 +568,7 @@ export async function getLotteryMarketAnalysis(body = {}, isToast = false) {
   try {
     const callParams = await getAuthCallParams(strings.GET, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.betLotteryMarketAnalysis}/${body.marketId}`,
+      `${UrlConstant.betLotteryMarketAnalysis}/${body.marketId}?pageSize=${body.totalEntries}&page=${body.pageNumber}`,
       callParams,
       isToast
     );

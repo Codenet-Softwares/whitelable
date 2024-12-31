@@ -131,10 +131,7 @@ const HierarchyPageView = () => {
                 </ol>
               </div>
               <div class="page_title_right">
-                <div class="page_date_button d-flex align-items-center">
-                  <img src="img/icon/calender_icon.svg" alt="" />
-                  {Date()}
-                </div>
+              
               </div>
             </div>
           </div>
