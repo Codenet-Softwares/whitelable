@@ -20,10 +20,11 @@ import Market_Analysis from "./pages/Market_Analysis";
 import User_BetMarket from "./pages/User_BetMarket";
 import BetHistoryForPl from "./profileAccount/BetHistoryForPl";
 import BetHistoryLotteryForPl from "./profileAccount/BetHistoryLotteryForPl";
-import { DemoMarket_Analysis } from "./pages/DemoMarket_Analysis";
+
 import ResetPassword from "./components/ResetPassword/ResetPassword";
 import DemoNavside from "./Layout/DemoNavside";
 import LotteryMarketAnalysis from "./pages/LotteryMarketAnalysis";
+import DemoMarket_Analysis from "./pages/DemoMarket_Analysis";
 // import WelcomePage from "./screen/WelcomePage";
 
 function App() {

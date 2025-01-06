@@ -83,15 +83,13 @@ export const lotteryMarketAnalysis = async (req, res) => {
         )
       );
     }
-
-    const { data, pagination } = response.data;
-    const { page: currentPage, limit: currentLimit, totalItems, totalPages } = pagination;
+    const { data, pagination = {} } = response.data;
 
     const paginationResult = {
-      page: currentPage,
-      limit: currentLimit,
-      totalPages: totalPages, 
-      totalItems: totalItems,  
+      page: pagination.page || page,
+      limit: pagination.limit || limit,
+      totalPages: pagination.totalPages || 0,
+      totalItems: pagination.totalItems || 0,
     };
 
     return res.status(statusCode.success).send(
