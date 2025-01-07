@@ -993,6 +993,10 @@ export const syncWithUserBackend = async (req, res) => {
       { balance: amount, exposure, loadBalance: amount },
       { where: { adminId: userId } },
     );
+    
+    if (user.createdById) {
+      await calculateLoadBalance(user.createdById);
+    }
 
     return res
       .status(statusCode.success)
