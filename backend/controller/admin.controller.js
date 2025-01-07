@@ -990,7 +990,7 @@ export const syncWithUserBackend = async (req, res) => {
 
 
     await admins.update(
-      { balance: amount, exposure },
+      { balance: amount, exposure, loadBalance: amount },
       { where: { adminId: userId } },
     );
 
