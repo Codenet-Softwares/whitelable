@@ -286,10 +286,10 @@ const Card = ({
           <td
             scope="row"
             className={`fs-6 text-center ${
-              loadBalance - creditRef < 0 ? "text-danger" : "text-dark"
+              balance - creditRef < 0 ? "text-danger" : "text-dark"
             }`}
           >
-            {isNaN(loadBalance - creditRef) ? balance : loadBalance - creditRef}
+            {isNaN(balance - creditRef) ? balance : balance - creditRef}
           </td>
           <td scope="row" className="fs-6 text-center">
             <p
