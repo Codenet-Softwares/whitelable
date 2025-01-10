@@ -123,7 +123,21 @@ export const restoreAdminUser = async (req, res) => {
   try {
     const { adminId } = req.body;
     const existingAdminUser = await trash.findOne({ where: { adminId } });
+ 
+    const  createdId = existingAdminUser.createdById;
 
+    const createdByAdmin = await admins.findOne({
+        where: { adminId: createdId },
+        attributes: ["isActive", "locked"], 
+    })
+
+    if (createdByAdmin.isActive === false) {
+      throw apiResponseErr(null, false, statusCode.badRequest, "Account is inactive");
+    }
+
+    if (createdByAdmin.locked === false) {
+      throw apiResponseErr(null, false, statusCode.unauthorize, "Account is locked");
+    }
     if (!existingAdminUser) {
       return res.status(statusCode.notFound).json(apiResponseErr(null, false, statusCode.notFound, 'Admin not found in trash'));
     }
@@ -170,6 +184,7 @@ export const restoreAdminUser = async (req, res) => {
   }
     return res.status(statusCode.success).json(apiResponseSuccess(null, statusCode.success, true, 'Admin restored from trash' + " " + message));
   } catch (error) {
+    console.log("error",error)
     res
       .status(statusCode.internalServerError)
       .send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
