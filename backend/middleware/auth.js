@@ -54,6 +54,7 @@ export const Authorize = (roles) => {
       const checkRoles = [
         string.superAdmin,
         string.whiteLabel,
+        string.superAgent,
         string.hyperAgent,
         string.masterAgent
       ];

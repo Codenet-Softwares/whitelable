@@ -25,17 +25,47 @@ export const createAdmin = async (req, res) => {
   try {
     const user = req.user;
     const { userName, password, roles } = req.body;
+    const checkRolesMap = {
+      [string.superAdmin]: [
+        string.whiteLabel,
+        string.superAgent,
+        string.hyperAgent,
+        string.masterAgent,
+      ],
+      [string.whiteLabel]: [
+        string.superAgent,
+        string.hyperAgent,
+        string.masterAgent,
+        string.user,
+      ],
+      [string.superAgent]: [
+        string.hyperAgent,
+        string.masterAgent,
+        string.user,
+      ],
+      [string.hyperAgent]: [
+        string.masterAgent,
+        string.user,
+      ],
+      [string.masterAgent]: [string.user],
+    };
 
-    const isUserRole = roles.includes('user');
+    const allowedRoles = checkRolesMap[user.roles[0].role] || [];
 
-    const existingAdmin = await admins.findOne({ where: { userName } });
-    const existingTrashUser = await trash.findOne({ where: { userName } });
+    const isValidRole = roles.every((role) => allowedRoles.includes(role));
+    if (!isValidRole) {
+      return res.status(statusCode.forbidden).send(
+        apiResponseErr(null, false, statusCode.forbidden, "You are not authorized to create one or more of the specified roles.")
+      );
+    }
 
-    console.log("existingAdmin", existingAdmin);
-    console.log("existingTrashUser", existingTrashUser);
+    const [existingAdmin, existingTrashUser] = await Promise.all([
+      admins.findOne({ where: { userName } }),
+      trash.findOne({ where: { userName } }),
+    ]);
 
     if (existingAdmin || existingTrashUser) {
-      const errorMessage = isUserRole ? messages.userExists : messages.adminExists;
+      const errorMessage = roles.includes('user') ? messages.userExists : messages.adminExists;
       throw apiResponseErr(null, false, statusCode.exist, errorMessage);
     }
 
