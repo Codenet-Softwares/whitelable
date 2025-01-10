@@ -5,6 +5,7 @@ import trash from '../models/trash.model.js';
 import { statusCode } from '../helper/statusCodes.js';
 import axios from 'axios';
 import { string } from '../constructor/string.js';
+import { Op } from 'sequelize';
 
 export const moveAdminToTrash = async (req, res) => {
   try {
@@ -90,10 +91,15 @@ export const moveAdminToTrash = async (req, res) => {
 export const viewTrash = async (req, res) => {
   try {
     const adminId = req.params.createdById;
-    const { page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 10, search = "" } = req.query;
+
     const offset = parseInt(page - 1) * limit;
+    const searched = {
+      createdById: adminId,
+      ...(search && { userName: { [Op.like]: `%${search}%` } }), 
+    };
     const { count, rows: trashEntries } = await trash.findAndCountAll({
-      where: { createdById: adminId },
+      where: searched,
       offset: parseInt(offset),
       limit: parseInt(limit),
     });
