@@ -90,11 +90,24 @@ export const moveAdminToTrash = async (req, res) => {
 export const viewTrash = async (req, res) => {
   try {
     const adminId = req.params.createdById;
-    const viewTrash = await trash.findAll({where:{createdById:adminId}});
-    if (!viewTrash || viewTrash.length === 0) {
+    const { page = 1, limit = 10 } = req.query;
+    const offset = parseInt(page - 1) * limit;
+    const { count, rows: trashEntries } = await trash.findAndCountAll({
+      where: { createdById: adminId },
+      offset: parseInt(offset),
+      limit: parseInt(limit),
+    });
+    if (trashEntries.length === 0) {
       return res.status(statusCode.success).json(apiResponseSuccess([], true, statusCode.success, 'No entries found in Trash'));
     }
-    return res.status(statusCode.success).json(apiResponseSuccess(viewTrash, true, statusCode.success, 'successfully'));
+    const paginatedData = {
+      page: parseInt(page),
+      limit,
+      totalPages: Math.ceil(count / limit),
+      totalItems: count,
+    };
+    
+    return res.status(statusCode.success).json(apiResponseSuccess(trashEntries, true, statusCode.success, 'successfully', paginatedData ));
   } catch (error) {
     res
       .status(statusCode.internalServerError)
