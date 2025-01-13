@@ -30,6 +30,7 @@ export const adminLogin = async (req, res) => {
         }
 
         const passwordValid = await bcrypt.compare(password, existingAdmin.password);
+        console.log(" passwordValid..........", passwordValid)
         if (!passwordValid) {
             await existingAdmin.update({ loginStatus: 'login failed' });
             return res.status(statusCode.badRequest).send(apiResponseErr(null, false, statusCode.badRequest, messages.invalidPassword));
@@ -126,6 +127,7 @@ export const adminLogin = async (req, res) => {
         }
 
     } catch (error) {
+        console.log("error",error)
         res.status(statusCode.internalServerError).send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
     }
 };
@@ -190,26 +192,32 @@ export const adminPasswordResetCode = async (req, res) => {
             password
         }
 
-        const response = await axios.post(
-            `${baseUrl}/api/external-reset-password`,
-            dataToSend,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            }
-        );
+        if(existingUser.roles[0].role === "user"){
+            const response = await axios.post(
+                `${baseUrl}/api/external-reset-password`,
+                dataToSend,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
 
-        if (!response.data.success) {
-            return res
-                .status(statusCode.badRequest)
-                .send(apiResponseErr(null, false, statusCode.badRequest, "Failed to fetch data"));
+            if (!response.data.success) {
+                return res
+                    .status(statusCode.badRequest)
+                    .send(apiResponseErr(null, false, statusCode.badRequest, "Failed to fetch data"));
+            }
         }
+        
+
+      
 
         await admins.update({ password: encryptedPassword }, { where: { userName } });
 
         return res.status(statusCode.success).send(apiResponseSuccess(existingUser, true, statusCode.success, 'Password Reset Successful!'));
     } catch (error) {
+        console.log("errer...........",error)
         res.status(statusCode.internalServerError).send(apiResponseErr(null, false, statusCode.internalServerError, error.message));
     }
 };
