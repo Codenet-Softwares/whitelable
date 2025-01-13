@@ -172,6 +172,16 @@ export const adminPasswordResetCode = async (req, res) => {
 
             return res.status(statusCode.badRequest).send(apiResponseErr(null, false, statusCode.badRequest, 'Admin Does not have permission to reset Password'));
         }
+
+        if (existingUser.isActive === false) {
+            return res.status(statusCode.badRequest).send(apiResponseErr(null, false, statusCode.badRequest, 'Account is inactive'));
+
+          }
+      
+          if (existingUser.locked === false) {
+            return res.status(statusCode.badRequest).send(apiResponseErr(null, false, statusCode.unauthorize, "Account is locked"));
+            
+          }
         const isAdminPasswordCorrect = await bcrypt.compare(adminPassword, admin.password);
         if (!isAdminPasswordCorrect) {
             return res.status(statusCode.badRequest).send(apiResponseErr(null, false, statusCode.badRequest, 'Invalid Admin password'));
@@ -217,7 +227,6 @@ export const adminPasswordResetCode = async (req, res) => {
 
         return res.status(statusCode.success).send(apiResponseSuccess(existingUser, true, statusCode.success, 'Password Reset Successful!'));
     } catch (error) {
-        console.log("errer...........",error)
         res.status(statusCode.internalServerError).send(apiResponseErr(null, false, statusCode.internalServerError, error.message));
     }
 };
