@@ -7,37 +7,66 @@ import axios from 'axios';
 import { string } from '../constructor/string.js';
 import { Op } from 'sequelize';
 
+async function checkHierarchyBalance(adminId) {
+  const subAdmins = await admins.findAll({ where: { createdById: adminId } });
+
+  for (const subAdmin of subAdmins) {
+    if (subAdmin.balance !== 0) {
+      return true;
+    }
+
+    const result = await checkHierarchyBalance(subAdmin.adminId);
+    if (result) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 export const moveAdminToTrash = async (req, res) => {
   try {
     const { requestId } = req.body;
 
-    const adminId = await admins.findOne({ where: { adminId: requestId } });
-     
-    if (!adminId) {
-      return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, `Admin User not found with id: ${requestId}`));
+    const admin = await admins.findOne({ where: { adminId: requestId } });
+
+    if (!admin) {
+      return res.status(statusCode.badRequest).json(
+        apiResponseErr(null, false, statusCode.badRequest, `Admin User not found with id: ${requestId}`)
+      );
     }
 
-    if (adminId.balance !== 0) {
-      return res
-        .status(statusCode.badRequest)
-        .json(apiResponseErr(null, false, statusCode.badRequest, `Balance should be 0 to move the Admin User to Trash`));
+    if (admin.balance !== 0) {
+      return res.status(statusCode.badRequest).json(
+        apiResponseErr(null, false, statusCode.badRequest, `Balance should be 0 to move to Trash`)
+      );
     }
 
-    if (!adminId.isActive) {
+    // Recursively check the hierarchy
+    const hasSubAdmins = await checkHierarchyBalance(admin.adminId);
+
+    if (hasSubAdmins) {
+      return res.status(statusCode.badRequest).json(
+        apiResponseErr(null, false, statusCode.badRequest, `Hierarchy Balance should be 0 to move to Trash`)
+      );
+    }
+
+
+    if (!admin.isActive) {
       return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, `Admin is inactive or locked`));
     }
 
     const updatedTransactionData = {
-      adminId: adminId.adminId,
-      roles: adminId.roles || [],
-      userName: adminId.userName,
-      password: adminId.password,
-      balance: adminId.balance || 0,
-      loadBalance: adminId.loadBalance || 0,
-      creditRefs: adminId.creditRefs || [],
-      partnerships: adminId.partnerships || [],
-      createdById: adminId.createdById || '',
-      createdByUser: adminId.createdByUser || '',
+      adminId: admin.adminId,
+      roles: admin.roles || [],
+      userName: admin.userName,
+      password: admin.password,
+      balance: admin.balance || 0,
+      loadBalance: admin.loadBalance || 0,
+      creditRefs: admin.creditRefs || [],
+      partnerships: admin.partnerships || [],
+      createdById: admin.createdById || '',
+      createdByUser: admin.createdByUser || '',
     };
 
     const trashEntry = await trash.create({
@@ -58,15 +87,15 @@ export const moveAdminToTrash = async (req, res) => {
       return res.status(statusCode.badRequest).json(apiResponseErr(null, statusCode.badRequest, false, `Failed to backup Admin User`));
     }
 
-    const deleteResult = await adminId.destroy();
-    
+    const deleteResult = await admin.destroy();
+
     if (!deleteResult) {
       return res.status(statusCode.badRequest).json(apiResponseErr(null, statusCode.badRequest, false, `Failed to delete Admin User with id: ${requestId}`));
     }
-    
+
     // sync with colorgame user
     let message = '';
-    if (adminId.roles[0].role === string.user) {
+    if (admin.roles[0].role === string.user) {
       const dataToSend = {
         userId: requestId,
       };
@@ -92,7 +121,6 @@ export const viewTrash = async (req, res) => {
   try {
     const adminId = req.params.createdById;
     const { page = 1, limit = 10, search = "" } = req.query;
-
     const offset = parseInt(page - 1) * limit;
     const searched = {
       createdById: adminId,
@@ -124,19 +152,50 @@ export const viewTrash = async (req, res) => {
 export const deleteTrashData = async (req, res) => {
   try {
     const trashId = req.params.trashId;
+
     const record = await trash.findOne({ where: { trashId } });
+
     if (!record) {
-      return res.status(statusCode.notFound).json(apiResponseErr('Data not found', false, statusCode.notFound, 'Data not found'));
+      return res
+        .status(statusCode.notFound)
+        .json(apiResponseErr('Data not found', false, statusCode.notFound, 'Data not found'));
     }
+
+    const adminId = record.adminId;
+
+    const deleteHierarchy = async (adminId) => {
+      const subAdmins = await admins.findAll({ where: { createdById: adminId } });
+
+      for (const subAdmin of subAdmins) {
+        await deleteHierarchy(subAdmin.adminId);
+        await subAdmin.destroy();
+      }
+    };
+
+    // Delete the hierarchy
+    await deleteHierarchy(adminId);
+
+    // Delete the trash record
     await record.destroy();
-    return res.status(statusCode.success).json(apiResponseSuccess(null, true, statusCode.success, 'Data deleted successfully'));
+
+    return res
+      .status(statusCode.success)
+      .json(apiResponseSuccess(null, true, statusCode.success, 'Data deleted successfully'));
   } catch (error) {
     console.error('Error in deleteTrashData:', error);
     res
       .status(statusCode.internalServerError)
-      .send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
+      .send(
+        apiResponseErr(
+          error.data ?? null,
+          false,
+          error.responseCode ?? statusCode.internalServerError,
+          error.errMessage ?? error.message
+        )
+      );
   }
 };
+
 
 export const restoreAdminUser = async (req, res) => {
   try {
