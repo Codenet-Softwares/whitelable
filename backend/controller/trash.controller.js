@@ -5,6 +5,7 @@ import trash from '../models/trash.model.js';
 import { statusCode } from '../helper/statusCodes.js';
 import axios from 'axios';
 import { string } from '../constructor/string.js';
+import { Op } from 'sequelize';
 
 async function checkHierarchyBalance(adminId) {
   const subAdmins = await admins.findAll({ where: { createdById: adminId } });
@@ -119,11 +120,28 @@ export const moveAdminToTrash = async (req, res) => {
 export const viewTrash = async (req, res) => {
   try {
     const adminId = req.params.createdById;
-    const viewTrash = await trash.findAll({ where: { createdById: adminId } });
-    if (!viewTrash || viewTrash.length === 0) {
+    const { page = 1, limit = 10, search = "" } = req.query;
+    const offset = parseInt(page - 1) * limit;
+    const searched = {
+      createdById: adminId,
+      ...(search && { userName: { [Op.like]: `%${search}%` } }), 
+    };
+    const { count, rows: trashEntries } = await trash.findAndCountAll({
+      where: searched,
+      offset: parseInt(offset),
+      limit: parseInt(limit),
+    });
+    if (trashEntries.length === 0) {
       return res.status(statusCode.success).json(apiResponseSuccess([], true, statusCode.success, 'No entries found in Trash'));
     }
-    return res.status(statusCode.success).json(apiResponseSuccess(viewTrash, true, statusCode.success, 'successfully'));
+    const paginatedData = {
+      page: parseInt(page),
+      limit,
+      totalPages: Math.ceil(count / limit),
+      totalItems: count,
+    };
+    
+    return res.status(statusCode.success).json(apiResponseSuccess(trashEntries, true, statusCode.success, 'successfully', paginatedData ));
   } catch (error) {
     res
       .status(statusCode.internalServerError)
@@ -183,7 +201,21 @@ export const restoreAdminUser = async (req, res) => {
   try {
     const { adminId } = req.body;
     const existingAdminUser = await trash.findOne({ where: { adminId } });
+ 
+    const  createdId = existingAdminUser.createdById;
 
+    const createdByAdmin = await admins.findOne({
+        where: { adminId: createdId },
+        attributes: ["isActive", "locked"], 
+    })
+
+    if (createdByAdmin.isActive === false) {
+      throw apiResponseErr(null, false, statusCode.badRequest, "Account is inactive");
+    }
+
+    if (createdByAdmin.locked === false) {
+      throw apiResponseErr(null, false, statusCode.unauthorize, "Account is locked");
+    }
     if (!existingAdminUser) {
       return res.status(statusCode.notFound).json(apiResponseErr(null, false, statusCode.notFound, 'Admin not found in trash'));
     }
@@ -230,6 +262,7 @@ export const restoreAdminUser = async (req, res) => {
   }
     return res.status(statusCode.success).json(apiResponseSuccess(null, statusCode.success, true, 'Admin restored from trash' + " " + message));
   } catch (error) {
+    console.log("error",error)
     res
       .status(statusCode.internalServerError)
       .send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
