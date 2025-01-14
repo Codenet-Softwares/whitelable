@@ -309,3 +309,18 @@ export const loginResetPasswordSchema = [
 export const logOutValidate = [
   body("adminId").notEmpty().withMessage("Admin ID is required.").isUUID(4).withMessage("Admin Id is not a valid."),
 ];
+
+export const validateResetPassword = [
+  body("userName")
+    .trim()
+    .notEmpty()
+    .withMessage("Username is required"),
+  body("oldPassword")
+    .trim()
+    .notEmpty()
+    .withMessage("Old Password is required"),
+  body("newPassword")
+    .trim()
+    .notEmpty()
+    .withMessage("New Password is required")
+];
