@@ -107,7 +107,6 @@ export const transactionRoute = (app) => {
       string.subHyperAgent,
       string.subSuperAgent,
       string.subMasterAgent,
-      string.viewBalance
     ]),
     viewBalance,
   );
