@@ -58,14 +58,14 @@ export const createAdmin = async (req, res) => {
         apiResponseErr(null, false, statusCode.forbidden, "You are not authorized to create one or more of the specified roles.")
       );
     }
-
+    const isUserRole = roles.includes(string.user)
     const [existingAdmin, existingTrashUser] = await Promise.all([
       admins.findOne({ where: { userName } }),
       trash.findOne({ where: { userName } }),
     ]);
 
     if (existingAdmin || existingTrashUser) {
-      const errorMessage = roles.includes('user') ? messages.userExists : messages.adminExists;
+      const errorMessage = isUserRole ? messages.userExists : messages.adminExists;
       throw apiResponseErr(null, false, statusCode.exist, errorMessage);
     }
 
@@ -1023,7 +1023,7 @@ export const syncWithUserBackend = async (req, res) => {
       { balance: amount, exposure, loadBalance: amount },
       { where: { adminId: userId } },
     );
-    
+
     if (user.createdById) {
       await calculateLoadBalance(user.createdById);
     }

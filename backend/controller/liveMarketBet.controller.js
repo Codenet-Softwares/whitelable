@@ -510,6 +510,8 @@ export const userLiveBet = async (req, res) => {
         userDetails.some((detail) => detail.userName === bet.userName)
       )
       .map((bet) => ({
+        userName: bet.userName,
+        userId: bet.userId,
         marketName: bet.marketName,
         marketId: bet.marketId,
         runnerId: bet.runnerId,
