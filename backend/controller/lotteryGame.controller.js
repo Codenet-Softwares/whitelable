@@ -64,13 +64,14 @@ export const getLotteryBetHistory = async (req, res) => {
 export const lotteryMarketAnalysis = async (req, res) => {
   try {
     const { marketId } = req.params;
-    const { page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 10, search } = req.query;
     const baseURL = process.env.LOTTERY_URL;
 
     const response = await axios.get(`${baseURL}/api/lottery-external-marketAnalysis/${marketId}`, {
       params: {
         page,
         limit,
+        search
       }
     });
     if (!response.data.success) {
@@ -85,15 +86,22 @@ export const lotteryMarketAnalysis = async (req, res) => {
     }
     const { data, pagination = {} } = response.data;
 
+    let filteredData = data;
+    if (search) {
+      filteredData = data.filter(item => 
+        item.userName && item.userName.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
     const paginationResult = {
       page: pagination.page || page,
       limit: pagination.limit || limit,
-      totalPages: pagination.totalPages || 0,
-      totalItems: pagination.totalItems || 0,
+      totalPages: pagination.totalPages || Math.ceil(filteredData.length / limit),
+      totalItems: pagination.totalItems || filteredData.length,
     };
 
     return res.status(statusCode.success).send(
-      apiResponseSuccess(data, true, statusCode.success, 'Success', paginationResult)
+      apiResponseSuccess(filteredData, true, statusCode.success, 'Success', paginationResult)
     );
   } catch (error) {
     console.error('Error:', error);
