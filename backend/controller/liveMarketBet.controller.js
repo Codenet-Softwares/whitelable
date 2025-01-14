@@ -111,7 +111,7 @@ export const getLiveBetGames = async (req, res) => {
 
     const lotteryData = lotteryResponse.data?.data || [];
     const liveGames = response.data.data || [];
-    
+
     const combinedData = [
       ...lotteryData.map(lottery => ({
         marketId: lottery.marketId,
@@ -120,11 +120,11 @@ export const getLiveBetGames = async (req, res) => {
       })),
       ...liveGames,
     ];
-    
+
     const uniqueData = Array.from(
-      new Set(combinedData.map(item => item.marketId)) 
-    ).map(uniqueMarketId => 
-      combinedData.find(item => item.marketId === uniqueMarketId) 
+      new Set(combinedData.map(item => item.marketId))
+    ).map(uniqueMarketId =>
+      combinedData.find(item => item.marketId === uniqueMarketId)
     );
     return res
       .status(statusCode.success)
@@ -460,3 +460,72 @@ export const getUserMasterBook = async (req, res) => {
   }
 };
 
+export const userLiveBet = async (req, res) => {
+  try {
+    const { marketId, adminId, role } = req.body;
+
+    const token = jwt.sign(
+      { roles: req.user.roles },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: "1h" }
+    );
+
+    const baseUrl = process.env.COLOR_GAME_URL;
+    const response = await axios.get(
+      `${baseUrl}/api/external/user-live-bet/${marketId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!response.data.success) {
+      return res
+        .status(statusCode.badRequest)
+        .send(apiResponseErr(null, false, statusCode.badRequest, "Failed to fetch data"));
+    }
+
+    const { data } = response.data;
+
+    if (!data || data.length === 0) {
+      return res
+        .status(statusCode.success)
+        .send(apiResponseSuccess([], true, statusCode.success, "No data found"));
+    }
+
+    if (role === 'superAdmin') {
+      return res
+        .status(statusCode.forbidden)
+        .send(apiResponseErr(null, false, statusCode.forbidden, "Don't have users"));
+    }
+
+    const userDetails = await admins.findAll({
+      where: { createdById: adminId },
+      attributes: ["userName", "createdById", "createdByUser"],
+    });
+
+    const users = data
+      .filter((bet) =>
+        userDetails.some((detail) => detail.userName === bet.userName)
+      )
+      .map((bet) => ({
+        marketName: bet.marketName,
+        marketId: bet.marketId,
+        runnerId: bet.runnerId,
+        runnerName: bet.runnerName,
+        rate: bet.rate,
+        value: bet.value,
+        type: bet.type,
+      }));
+
+    return res
+      .status(statusCode.success)
+      .send(apiResponseSuccess(users, true, statusCode.success, "Success"));
+  } catch (error) {
+    console.error("error", error);
+    return res
+      .status(statusCode.internalServerError)
+      .send(apiResponseErr(null, false, statusCode.internalServerError, error.message));
+  }
+};
