@@ -7,6 +7,7 @@ import {
 import {
   GetBetBook,
   GetLiveUsers,
+  getMarket_LiveBet,
   getUserGetMarket,
   GetUsersBook,
 } from "../Utils/service/apiService";
@@ -24,6 +25,9 @@ const User_BetMarket = () => {
   const [user_marketWithRunnerData, setUser_marketWithRunnerData] = useState(
     getMarketWithRunnerDataInitialState()
   );
+
+  const [user_LiveBet, setUser_LiveBet] = useState([]);
+
   const { marketId, userName } = useParams();
   const [isModalOpen, setModalOpen] = useState(false);
   const [nestedModalOpen, setNestedModalOpen] = useState(false);
@@ -31,11 +35,17 @@ const User_BetMarket = () => {
   const [userBookModalOpen, setUserBookModalOpen] = useState(false);
   const [betBookData, setBetBookData] = useState([]);
   const [bodyData, setBodyData] = useState(get_betBook());
+  const [liveToggle, setLiveToggle] = useState(false);
 
-  console.log("====>>> response from line 24", bodyData);
+  console.log("77", liveToggle);
 
   // useEffect(()=>{fetch_BetBookData()},[bodyData])
 
+  const handleLiveToggle = () => {
+    setLiveToggle(!liveToggle);
+  };
+
+  console.log("liveBet", user_LiveBet);
   // Function to open the modal
   const handleOpenModal = () => {
     setModalOpen(true);
@@ -91,6 +101,25 @@ const User_BetMarket = () => {
     };
     fetchLiveUsers();
   }, [marketId]);
+
+  useEffect(() => {
+    if (liveToggle) {
+      getView_LiveBet();
+    }
+  }, [liveToggle]);
+
+  async function getView_LiveBet() {
+    try {
+      const response = await getMarket_LiveBet({
+        marketId: marketId,
+        adminId: store?.admin?.id,
+        role: store?.admin?.roles[0]?.role,
+      });
+      setUser_LiveBet(response.data);
+    } catch (error) {
+      toast.error(customErrorHandler(error));
+    }
+  }
 
   async function getView_User_BetMarket() {
     try {
@@ -353,9 +382,11 @@ const User_BetMarket = () => {
                     <div className="form-check form-switch mt-1 me-3">
                       <input
                         className="form-check-input"
+                        value={liveToggle}
                         type="checkbox"
                         id="liveBetToggle1"
                         style={{ transform: "scale(1.5)" }}
+                        onClick={handleLiveToggle}
                       />
                     </div>
 
@@ -377,7 +408,7 @@ const User_BetMarket = () => {
                     </h4>
                   </div>
 
-                  <div className="card-body text-center">
+                  <div className="card-body ">
                     <h5
                       style={{
                         fontSize: "20px",
@@ -385,7 +416,131 @@ const User_BetMarket = () => {
                         color: "gray",
                       }}
                     >
-                      There are no any bet.
+                      <div style={{ padding: "20px" }}>
+                        <h2>Market Details</h2>
+                        <div
+                          style={{
+                            border: "1px solid #ddd",
+                            borderRadius: "4px",
+                            margin: "10px",
+                            padding: "10px",
+                            backgroundColor: "#e6f2ff",
+                          }}
+                        >
+                          {/* <div style={{ fontSize: "12px", color: "#555" }}>
+                            <strong>Time:</strong> Dec 26, 2024, 4:28:31 PM
+                          </div> */}
+                          {liveToggle ? (
+                            user_LiveBet.map((data) => {
+                              return (
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    marginTop: "5px",
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                    }}
+                                  >
+                                    {data.type === "back" ? (
+                                      <button
+                                        style={{
+                                          backgroundColor: "#007bff",
+                                          color: "#fff",
+                                          border: "none",
+                                          padding: "5px 10px",
+                                          borderRadius: "3px",
+                                          marginRight: "10px",
+                                          fontSize: "14px",
+                                        }}
+                                      >
+                                        {data.type}
+                                      </button>
+                                    ) : (
+                                      <button
+                                        style={{
+                                          backgroundColor: "#FFB6C1",
+                                          color: "#fff",
+                                          border: "none",
+                                          padding: "5px 10px",
+                                          borderRadius: "3px",
+                                          marginRight: "10px",
+                                          fontSize: "14px",
+                                        }}
+                                      >
+                                        {data.type}
+                                      </button>
+                                    )}
+
+                                    <div>
+                                      <div
+                                        style={{
+                                          fontWeight: "bold",
+                                          fontSize: "14px",
+                                        }}
+                                      >
+                                        {data.runnerName}
+                                      </div>
+                                      <div
+                                        style={{
+                                          fontSize: "12px",
+                                          color: "#555",
+                                        }}
+                                      >
+                                        Match Odds
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div style={{ display: "flex", gap: "30px" }}>
+                                    <div style={{ fontWeight: "bold" }}>
+                                      {data.rate}
+                                    </div>
+                                    <div style={{ fontWeight: "bold" }}>
+                                      {data.value}
+                                    </div>
+                                    {data.type === "back" ? (
+                                      <div
+                                        style={{
+                                          fontWeight: "bold",
+                                          color: "#007bff",
+                                        }}
+                                      >
+                                        {data.userName}
+                                      </div>
+                                    ) : (
+                                      <div
+                                        style={{
+                                          fontWeight: "bold",
+                                          color: "#FFB6C1",
+                                        }}
+                                      >
+                                        {data.userName}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })
+                          ) : (
+                            <div className="card-body text-center">
+                              <h5
+                                style={{
+                                  fontSize: "20px",
+                                  fontWeight: "bold",
+                                  color: "gray",
+                                }}
+                              >
+                                There are no any bet.
+                              </h5>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </h5>
                   </div>
                 </div>
