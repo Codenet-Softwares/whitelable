@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { getLotteryMarketAnalysis } from "../Utils/service/apiService";
 import Pagination from "../components/common/Pagination";
 import "./LotteryMarketAnalysis.css";
+import TicketModal from "../modal/TicketModal";
 
 const LotteryMarketAnalysis = () => {
   const { marketId } = useParams();
@@ -15,13 +16,40 @@ const LotteryMarketAnalysis = () => {
     totalData: 0,
     totalEntries: 10, // Number of entries per page
   });
+  // modal usestate
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedTickets, setSelectedTickets] = useState([]);
+  const [selectedUser, setSelectedUser] = useState("");
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  const openModal = (details, userName) => {
+    setSelectedTickets(details);
+    setSelectedUser(userName);
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedTickets([]);
+    setSelectedUser("");
+  };
   const fetchLotteryData = async (page) => {
     setLoading(true);
     const response = await getLotteryMarketAnalysis({
       marketId,
       totalEntries: paginationData.totalEntries,
       pageNumber: page,
+      search: debouncedSearchTerm,
     });
 
     if (response?.success) {
@@ -53,8 +81,16 @@ const LotteryMarketAnalysis = () => {
 
   useEffect(() => {
     fetchLotteryData(paginationData.currentPage); // Update when page changes
-  }, [marketId, paginationData.currentPage, paginationData.totalEntries]);
+  }, [
+    marketId,
+    paginationData.currentPage,
+    paginationData.totalEntries,
+    debouncedSearchTerm,
+  ]);
 
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
   // Calculate startIndex and endIndex based on paginationData
   const startIndex = Math.max(
     (paginationData.currentPage - 1) * paginationData.totalEntries + 1,
@@ -84,142 +120,137 @@ const LotteryMarketAnalysis = () => {
     );
   }
 
-  if (lotteryData.length === 0) {
-    return <div className="text-center mt-5">No data available</div>;
-  }
+  // if (lotteryData.length === 0) {
+  //   return <div className="text-center mt-5">No data available</div>;
+  // }
 
   return (
     <div className="container-fluid p-4" style={{ backgroundColor: "#f5f7fa" }}>
-      <div className="card shadow-lg border-0">
-        <div
-          className="card-header text-center text-white"
-          style={{
-            background: "linear-gradient(to right, #001f3f, #0074d9)",
-            fontSize: "1.5rem",
-            fontWeight: "bold",
-          }}
-        >
-          Lottery Market Analysis
-        </div>
-        <div className="card-body">
-          {lotteryData.map((user, index) => (
-            <div key={index} className="user-section mb-4">
-              <h3 className="text-info">Username: {user.userName}</h3>
-              <div className="row text-center mb-4">
-                <div className="col-md-4">
-                  <h4 className="text-secondary">Amount</h4>
-                  <h2 className="text-success">
-                    ₹{user.amount?.toLocaleString() || 0}
-                  </h2>
-                </div>
-                <div className="col-md-4">
-                  <h4 className="text-secondary">Total SEM Value</h4>
-                  <h2 className="text-warning">
-                    {user.details.reduce(
-                      (sum, detail) => sum + (detail.sem || 0),
-                      0
-                    )}
-                  </h2>
-                  <p className="text-muted">Username: {user.userName}</p>{" "}
-                  {/* Display Username beside Total SEM Value */}
-                </div>
-                <div className="col-md-4">
-                  <h4 className="text-secondary">Total Tickets</h4>
-                  <h2 className="text-primary">
-                    {user.details.reduce(
-                      (count, detail) => count + (detail.tickets?.length || 0),
-                      0
-                    )}
-                  </h2>
-                </div>
-              </div>
-
-              {user.details.map((detail, detailIndex) => (
-                <div
-                  key={detailIndex}
-                  className="card border-0 shadow mb-3"
-                  style={{
-                    background: "linear-gradient(to bottom, #f0f9ff, #cbebff)",
-                    maxHeight: "500px",
-                    overflowY: "auto",
-                  }}
-                >
-                  <div className="card-header text-white bg-primary d-flex justify-content-between align-items-center">
-                    <span>SEM Value: {detail.sem}</span>
-                    <span>Username: {user.userName}</span>{" "}
-                    {/* Username next to SEM Value for each detail */}
-                    <span
-  className="live-bet-text"
->
-  Live Bet
-</span>
-                    <button
-                      className="btn btn-light text-primary"
-                      type="button"
-                      data-bs-toggle="collapse"
-                      data-bs-target={`#ticketsCollapse${detailIndex}`}
-                      aria-expanded="false"
-                      aria-controls={`ticketsCollapse${detailIndex}`}
-                      style={{
-                        fontWeight: "bold",
-                        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                      }}
-                    >
-                      Show Tickets
-                    </button>
-                    {/* <span
-            className="live-bet-text ms-3"
-            style={{
-              fontSize: "1rem",
-              fontWeight: "bold",
-              color: "#ff4500",
-              animation: "blinking 1.5s infinite",
-            }}
-          >
-            Live Bet
-          </span> */}
-                  </div>
-                  <div
-                    id={`ticketsCollapse${detailIndex}`}
-                    className="collapse"
-                    style={{
-                      backgroundColor: "#f8f9fa",
-                      borderTop: "1px solid #dee2e6",
-                      padding: "1rem",
-                      maxHeight: "300px",
-                      overflowY: "auto",
-                    }}
-                  >
-                    {detail.tickets.map((ticket, ticketIndex) => (
-                      <div
-                        key={ticketIndex}
-                        className="p-2 rounded mb-2"
-                        style={{
-                          backgroundColor: "#ffffff",
-                          border: "1px solid #dee2e6",
-                          boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
-                        }}
-                      >
-                        <span className="text-secondary">{ticket}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ))}
-
-          <Pagination
-            currentPage={paginationData.currentPage}
-            totalPages={paginationData.totalPages}
-            handlePageChange={handlePageChange}
-            startIndex={startIndex}
-            endIndex={endIndex}
-            totalData={paginationData.totalData}
+    <div className="card shadow-lg border-0">
+      <div
+        className="card-header text-center text-white"
+        style={{
+          background: "linear-gradient(to right, #001f3f, #0074d9)",
+          fontSize: "1.5rem",
+          fontWeight: "bold",
+        }}
+      >
+        Lottery Market Analysis
+        <span className="ms-3 text-warning">
+          {lotteryData[0]?.marketName || "Unknown Market"}
+        </span>
+      </div>
+      <div className="card-body">
+        {/* Search bar container */}
+        <div className="search-bar-container mb-4">
+          <input
+            type="text"
+            className="search-bar form-control"
+            placeholder="Search by username..."
+            value={searchTerm}
+            onChange={handleSearchChange}
           />
         </div>
+        
+        {/* Conditional rendering of lottery data */}
+        <div className="lottery-data-container">
+          {lotteryData.length === 0 ? (
+            <div className="text-center mt-5">No data available</div>
+          ) : (
+            lotteryData.map((user, index) => (
+              <div
+                key={index}
+                className="user-section mb-4p-3 rounded shadow-sm"
+                style={{ backgroundColor: "#f9f9fc" }}
+              >
+                <h3 className="text-info text-center mb-4">
+                  <span className="badge bg-info text-white p-2">
+                    Username: {user.userName}
+                  </span>
+                </h3>
+                <div className="row justify-content-center text-center mb-4 align-items-center ">
+                  <span className="live-bet-text ">Live Bets</span>
+  
+                  <div className="col-md-3">
+                    <div className="card border-0 shadow-sm p-3" style={{ backgroundColor: "#e6f7ff" }}>
+                      <h4 className="text-secondary">
+                        <i className="fas fa-wallet me-2"></i> Total Amount
+                      </h4>
+                      <h2 className="text-success fw-bold">
+                        ₹{user.amount?.toLocaleString() || 0}
+                      </h2>
+                    </div>
+                  </div>
+  
+                  <div className="col-md-3">
+                    <div className="card border-0 shadow-sm p-3" style={{ backgroundColor: "#fff7e6" }}>
+                      <h4 className="text-secondary mb-2">
+                        <i className="fas fa-chart-line me-2"></i>Total SEM Value
+                      </h4>
+                      <h2 className="text-warning fw-bold">
+                        {user.details.reduce(
+                          (sum, detail) => sum + (detail.sem || 0),
+                          0
+                        )}
+                      </h2>
+                    </div>
+                  </div>
+  
+                  <div className="col-md-3">
+                    <div className="card border-0 shadow-sm p-3" style={{ backgroundColor: "#f0f9ff" }}>
+                      <h4 className="text-secondary mb-2">
+                        <i className="fas fa-ticket-alt me-2"></i>Total Tickets
+                      </h4>
+                      <h2 className="text-primary fw-bold">
+                        {user.details.reduce(
+                          (count, detail) => count + (detail.tickets?.length || 0),
+                          0
+                        )}
+                      </h2>
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <div className="card border-0 shadow-sm" style={{ backgroundColor: "#f0f9ff" }}>
+                      <button
+                        className="btn btn-primary mt-2 text-white me-2"
+                        onClick={() =>
+                          openModal(
+                            user.details.flatMap((detail) => detail || []),
+                            user.userName
+                          )
+                        }
+                      >
+                        Show Purchased Tickets
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+  
+        {/* Pagination */}
+        <Pagination
+          currentPage={paginationData.currentPage}
+          totalPages={paginationData.totalPages}
+          handlePageChange={handlePageChange}
+          startIndex={startIndex}
+          endIndex={endIndex}
+          totalData={paginationData.totalData}
+        />
+  
+        {/* Ticket Modal */}
+        <TicketModal
+          isOpen={modalOpen}
+          onClose={closeModal}
+          tickets={selectedTickets}
+          userName={selectedUser}
+        />
       </div>
     </div>
+  </div>
+  
   );
 };
 
