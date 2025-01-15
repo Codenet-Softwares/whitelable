@@ -289,7 +289,7 @@ export async function viewTrash_api(body = {}, isToast = false) {
   try {
     const callParams = await getAuthCallParams(strings.GET, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.viewTrash}/${body.adminId}`,
+      `${UrlConstant.viewTrash}/${body.adminId}?search=${body.search}&page=${body.page}&limit=${body.pageLimit}`,
       callParams,
       isToast
     );
@@ -576,4 +576,70 @@ export async function getLotteryMarketAnalysis(body = {}, isToast = false) {
   } catch (error) {
     throw error;
   }
+
+
+}
+
+export async function getMarket_LiveBet(body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.POST, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.liveBet}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+
+
+}
+
+export async function resetPasswordSuperAdmin(body = {}, isToast = true) {
+  try {
+    const callParams = await getAuthCallParams(strings.POST, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.resetSuperAdmin}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+
+
+}
+
+export async function resetPasswordSubAdmin(body = {}, isToast = true) {
+  try {
+    const callParams = await getAuthCallParams(strings.POST, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.resetSubAdmin}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+
+
+}
+
+export async function deleteSubAdmin(body = {}, isToast = true) {
+  try {
+    const callParams = await getAuthCallParams(strings.POST, body);
+    const response = await makeCall(
+      `${UrlConstant.deleteSubAdmin}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+
+
 }

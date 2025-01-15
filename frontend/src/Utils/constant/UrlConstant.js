@@ -1,9 +1,9 @@
 // import strings from "./stringConstant";
 
 class UrlConstant {
-  constructor() {}
+  constructor() { }
   //url_dev = "https://wl.server.dummydoma.in/api";
-   url_dev = "http://localhost:8000/api";
+  url_dev = "http://localhost:8000/api";
 
   // Admin api
   admin = "admin";
@@ -54,7 +54,12 @@ class UrlConstant {
   getBetBook = `${this.url_dev}/${this.get}-user-master-book`;
   resetPassword = `${this.url_dev}/login-reset-password`; // api needs to be changed
   betLotteryMarketAnalysis = `${this.url_dev}/${this.get}-lottery-marketAnalysis`;
+  liveBet = `${this.url_dev}/${this.get}-${this.user}-live-bet`
+  resetSuperAdmin = `${this.url_dev}/superAdmin-reset-password`
+  resetSubAdmin = `${this.url_dev}/${this.admin}/reset-password`
+  deleteSubAdmin = `${this.url_dev}/${this.admin}/move-to-trash-user`
 }
+
 
 const urls = new UrlConstant();
 export default urls;
