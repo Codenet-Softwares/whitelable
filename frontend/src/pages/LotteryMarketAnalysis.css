@@ -14,15 +14,61 @@
   }
   
   .live-bet-text {
-    font-size: 1.5rem; /* Increase font size for better visibility */
+    font-size: 1.5rem; 
     font-weight: bold;
     background: linear-gradient(90deg, #ff0000, #ffa500, #ffff00, #00ff00, #0000ff, #4b0082, #ee82ee);
-    background-size: 400% 400%; /* Increase gradient size for smoother transition */
+    background-size: 400% 400%; 
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    animation: highlightedBlinkingColors 1s infinite ease-in-out; /* Faster animation for more dynamism */
-    margin-right: 10px;
+    animation: highlightedBlinkingColors 1s infinite ease-in-out;
+    margin-right: 2050px;
+    transform: translateY(-60px);
     display: inline-block;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.7); /* Add glow effect for extra emphasis */
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.7); 
+    /* position: absolute; */
+    /* top: 10px;  */
+    /* left: 10px;  */
+    /* z-index: 2;  */
+    /* white-space: nowrap;  */
   }
+  .lottery-data-container {
+    max-height: 500px; /* Limit the height for 4 entries */
+    overflow-y: scroll;
+    padding-right: 15px; /* Prevent content cutoff */
+    scrollbar-width: none; /* For Firefox, hide scrollbar */
+  }
+  
+  .lottery-data-container::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for WebKit browsers */
+  }
+  
+  .search-bar-container {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .search-bar {
+    width: 95%; /* Almost fills the width */
+    padding: 10px 20px;
+    border-radius: 30px; /* Pill shape */
+    border: 2px solid #0074d9; /* Subtle border color */
+    font-size: 1.1rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+    transition: all 0.3s ease; /* Smooth transition on focus */
+    background-color: #f0f9ff; /* Light blue background */
+  }
+  
+  .search-bar:focus {
+    outline: none;
+    border-color: #0056b3; /* Darker blue border on focus */
+    box-shadow: 0 4px 12px rgba(0, 86, 179, 0.3); /* Enhanced focus shadow */
+  }
+  
+  .search-bar::placeholder {
+    color: #7f8c8d; /* Lighter placeholder text color */
+  }
+  
+
   
