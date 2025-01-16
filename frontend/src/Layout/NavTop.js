@@ -85,7 +85,7 @@ const NavTop = () => {
     }
 
     const payload = {
-      userName: "demoadmin",
+      userName: store?.admin?.adminName,
       oldPassword,
       newPassword,
     };
