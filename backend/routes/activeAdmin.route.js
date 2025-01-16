@@ -24,6 +24,7 @@ export const activeAdminRoute = (app) => {
     ]),
     async (req, res) => {
       try {
+        const reqAdmin = req.user
         const { adminId } = req.params;
         const { isActive, locked, password } = req.body;
 
@@ -36,7 +37,7 @@ export const activeAdminRoute = (app) => {
         }
 
         // Validate password
-        const isPasswordValid = await bcrypt.compare(password, admin.password);
+        const isPasswordValid = await bcrypt.compare(password, reqAdmin.password);
         if (!isPasswordValid) {
           throw new CustomError("Invalid password", null, statusCode.badRequest);
         }
