@@ -341,6 +341,10 @@ export const superAdminResetPassword = async (req, res) => {
       if (!isPasswordMatch) {
         return res.status(statusCode.badRequest).send(apiResponseErr(null, false, statusCode.badRequest, 'Invalid old password.'));
       }
+      const passwordIsDuplicate = await bcrypt.compare(newPassword, existingUser.password);
+      if (passwordIsDuplicate) {
+          return res.status(statusCode.badRequest).send(apiResponseErr(null, false, statusCode.badRequest, 'New Password Cannot Be The Same As Existing Password'));
+      }
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(newPassword, salt);
   
