@@ -1,5 +1,5 @@
-import express from 'express';
 import dotenv from 'dotenv';
+import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import sequelize from './db.js';
@@ -13,6 +13,14 @@ import { liveMarketBetRoute } from './routes/liveMarketBet.route.js';
 import { activeAdminRoute } from './routes/activeAdmin.route.js';
 import { lotteryGameModule } from './routes/lotteryGame.route.js';
 
+if (process.env.NODE_ENV === 'production') {
+  dotenv.config({ path: '.env.production' });
+} else {
+  dotenv.config({ path: '.env' });
+}
+
+console.log('Running in environment:', process.env.NODE_ENV);
+
 dotenv.config();
 const app = express();
 app.use(bodyParser.json({ limit: '50mb' }));
@@ -23,7 +31,11 @@ app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 
 app.get('/', (req, res) => {
-  res.send('Status : OK');
+  if (process.env.NODE_ENV === 'production') {
+    res.send('Production environment is running.');
+  } else {
+    res.send('Development environment is running.');
+  }
 });
 
 adminRoute(app);
