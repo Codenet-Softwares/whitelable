@@ -252,7 +252,9 @@ export const restoreAdminUser = async (req, res) => {
       userId : adminId,
     };
    
-    const { data: response }  = await axios.post('https://cg.server.dummydoma.in/api/extrernal/restore-trash-user', dataToSend);
+    const baseUrl = process.env.COLOR_GAME_URL;
+
+    const { data: response }  = await axios.post(`${baseUrl}/api/extrernal/restore-trash-user`, dataToSend);
 
     if(!response.success) {
       message = 'Failed restored user';

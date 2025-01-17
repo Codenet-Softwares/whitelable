@@ -263,8 +263,9 @@ export const getUserBetHistory = async (req, res) => {
       type
     };
     console.log("type..", type)
+    const baseUrl = process.env.COLOR_GAME_URL;
 
-    const response = await axios.get(`https://cg.server.dummydoma.in/api/external-user-betHistory/${userName}/${gameId}`, {
+    const response = await axios.get(`${baseUrl}/api/external-user-betHistory/${userName}/${gameId}`, {
       params,
       headers: {
         Authorization: `Bearer ${token}`,
@@ -371,7 +372,9 @@ export const marketProfitLoss = async (req, res) => {
       limit
     };
 
-    const response = await axios.get(`https://cg.server.dummydoma.in/api/external-profit_loss_market/${userName}/${gameId}`, {
+    const baseUrl = process.env.COLOR_GAME_URL;
+
+    const response = await axios.get(`${baseUrl}/api/external-profit_loss_market/${userName}/${gameId}`, {
       params,
       headers: {
         Authorization: `Bearer ${token}`,
@@ -426,7 +429,9 @@ export const runnerProfitLoss = async (req, res) => {
       limit
     };
 
-    const response = await axios.get(`https://cg.server.dummydoma.in/api/external-profit_loss_runner/${userName}/${marketId}`, {
+    const baseUrl = process.env.COLOR_GAME_URL;
+
+    const response = await axios.get(`${baseUrl}/api/external-profit_loss_runner/${userName}/${marketId}`, {
       params,
       headers: {
         Authorization: `Bearer ${token}`,
@@ -587,7 +592,9 @@ export const getUserBetList = async (req, res) => {
       runnerId
     };
 
-    const response = await axios.get(`https://cg.server.dummydoma.in/api/user-external-betList/${userName}/${runnerId}`, { params });
+    const baseUrl = process.env.COLOR_GAME_URL;
+
+    const response = await axios.get(`${baseUrl}/api/user-external-betList/${userName}/${runnerId}`, { params });
 
     if (!response.data.success) {
       return res
