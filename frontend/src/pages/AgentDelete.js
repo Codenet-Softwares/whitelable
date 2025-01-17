@@ -25,8 +25,8 @@ const AgentDelete = () => {
     const response = await viewTrash_api({ adminId: id, page, pageLimit, search });
     console.log("======>>> response", response);
     setViewAgentDelete(response.data);
-    setTotalData(response.pagination.totalItems)
-    setTotalPage(response.pagination.totalPages)
+    setTotalData(response?.pagination?.totalItems)
+    setTotalPage(response?.pagination?.totalPages)
   }
 
   const selectPageHandler = (selectedPage) => {
