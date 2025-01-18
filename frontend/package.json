@@ -26,7 +26,9 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "format": "npx prettier --write . --config .prettier"
+    "format": "npx prettier --write . --config .prettier",
+    "start:prod": "cross-env REACT_APP_ENV=production react-scripts start",
+    "build:prod": "cross-env REACT_APP_ENV=production react-scripts build"
   },
   "eslintConfig": {
     "extends": [

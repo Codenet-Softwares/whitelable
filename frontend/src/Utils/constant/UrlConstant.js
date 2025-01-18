@@ -2,9 +2,7 @@
 
 class UrlConstant {
   constructor() { }
-  url_dev = "https://wl.server.dummydoma.in/api";
-  //url_dev = "http://localhost:8000/api";
-
+  url_dev = process.env.REACT_APP_API_URL;
   // Admin api
   admin = "admin";
   view = "view";
