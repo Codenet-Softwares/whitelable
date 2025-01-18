@@ -139,6 +139,7 @@ const LotteryMarketAnalysis = () => {
         <span className="ms-3 text-warning">
           {lotteryData[0]?.marketName || "Unknown Market"}
         </span>
+        <span className="live-bet-text text-truncate ">Live Bets</span> 
       </div>
       <div className="card-body">
         {/* Search bar container */}
