@@ -143,9 +143,13 @@ const Authform = ({ purpose, authFormApi }) => {
             <div className="col-lg-6">
               <div className="modal-content cs_modal">
                 <div className="modal-header justify-content-center theme_bg_1">
-                  <h5 className="modal-title text_white text-uppercase">
+                  
+                  <h5 className="modal-title text_white ">
                     {purpose === "create" && "Create"}
-                    {purpose === "login" && "Log In"}
+                    {purpose === "login" && <div>
+                      <div className="text-uppercase text-center">Whitelabel</div>
+                      <div className="text-center h6 mt-2">Hi! Please Enter Your Login Credentials!</div>
+                      </div>}
                   </h5>
                 </div>
                 <div className="modal-body">
@@ -154,7 +158,7 @@ const Authform = ({ purpose, authFormApi }) => {
                       <input
                         type="text"
                         className="form-control "
-                        placeholder="Enter UserName"
+                        placeholder="Enter Username"
                         name="userName"
                         // style={{ border: '1px solid black' }}
                         value={values.userName}
