@@ -104,26 +104,23 @@ export const transferAmount = async (req, res) => {
 
     const parsedTransferAmount = parseFloat(transferAmount);
     const parsedWithdrawalAmt = parseFloat(withdrawalAmt);
-    
+
     let balance = 0
 
     if (parsedWithdrawalAmt) {
       if (receiverAdmin.balance < parsedWithdrawalAmt) {
         return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, 'Insufficient Balance For Withdrawal'));
       }
-    
+
       const receiver_admin_balance = await admin_Balance(receiveUserId)
-      console.log("receiver_admin_balance", receiver_admin_balance);
-      
       const deductionBalance = receiver_admin_balance - parsedWithdrawalAmt;
 
       const sender_admin_balance = await admin_Balance(adminId)
-      console.log("sender_admin_balance", sender_admin_balance);
       const creditAmount = sender_admin_balance + parsedWithdrawalAmt;
 
       const withdrawalRecord = {
         transactionType: 'withdrawal',
-        receiver_adminId : receiverAdmin.adminId,
+        receiver_adminId: receiverAdmin.adminId,
         amount: Math.round(parsedWithdrawalAmt),
         transferFromUserAccount: receiverAdmin.userName,
         transferToUserAccount: senderAdmin.userName,
@@ -184,10 +181,14 @@ export const transferAmount = async (req, res) => {
       //   date: new Date(),
       //   remarks,
       // };
+      const sender_admin_balance = await admin_Balance(adminId)
+      const senderBalance = sender_admin_balance - parsedTransferAmount;
 
+      const receiver_admin_balance = await admin_Balance(adminId)
+      const receiverBalance = receiver_admin_balance + parsedTransferAmount;
 
-      const senderBalance = senderAdmin.balance - parsedTransferAmount;
-      const receiverBalance = receiverAdmin.balance + parsedTransferAmount;
+      // const senderBalance = senderAdmin.balance - parsedTransferAmount;
+      // const receiverBalance = receiverAdmin.balance + parsedTransferAmount;
 
       const transferRecordCredit = {
         transactionType: 'credit',
@@ -482,8 +483,8 @@ export const viewAdminBalance = async (req, res) => {
   try {
     const adminId = req.params.adminId;
     let balance = 0;
-    const admin_transaction = await selfTransactions.findAll({ where : { adminId } })
-    const admin_withdraw_transaction = await transaction.findAll({ where : { adminId } })
+    const admin_transaction = await selfTransactions.findAll({ where: { adminId } })
+    const admin_withdraw_transaction = await transaction.findAll({ where: { adminId } })
     for (const transaction of admin_transaction) {
       if (transaction.amount) {
         balance += parseFloat(transaction.amount);
@@ -497,7 +498,7 @@ export const viewAdminBalance = async (req, res) => {
         balance += parseFloat(transaction.amount);
       }
     }
-    return res.status(statusCode.success).json(apiResponseSuccess({balance}, statusCode.success, true, 'Successfully'));
+    return res.status(statusCode.success).json(apiResponseSuccess({ balance }, statusCode.success, true, 'Successfully'));
   } catch (error) {
     res
       .status(statusCode.internalServerError)
@@ -507,23 +508,29 @@ export const viewAdminBalance = async (req, res) => {
 
 // genraic admin balance function
 export const admin_Balance = async (adminId) => {
-   try{
+  try {
     let balance = 0;
-    const admin_transaction = await transaction.findAll({ where: { 
-        [Op.or]: [{ adminId }, { receiver_adminId: adminId }] 
-      } })
-    console.log("admin_transaction", admin_transaction);
+    const admin_transaction = await transaction.findAll({
+      where: {
+        [Op.or]: [{ adminId }, { receiver_adminId: adminId }]
+      }
+    })
+    
+    // console.log("admin_transaction", admin_transaction);
     for (const transaction of admin_transaction) {
       if (transaction.transactionType === 'credit') {
         balance += parseFloat(transaction.amount);
-      }if (transaction.transactionType === 'withdrawal') {
-        balance -= parseFloat(transaction.withdrawAmount);
+        console.log("balance..1",balance)
+      } if (transaction.transactionType === 'withdrawal') {
+        balance -= parseFloat(transaction.amount);
+        console.log("balance..2",balance)
+
       }
     }
     return balance;
-   }catch(error){
-      throw new Error(error)
-   }
+  } catch (error) {
+    throw new Error(error)
+  }
 };
 
 
