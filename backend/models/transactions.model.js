@@ -17,6 +17,10 @@ const transaction = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    receiver_adminId: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     amount: {
       type: DataTypes.INTEGER,
       allowNull: false,

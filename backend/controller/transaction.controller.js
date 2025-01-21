@@ -111,13 +111,19 @@ export const transferAmount = async (req, res) => {
       if (receiverAdmin.balance < parsedWithdrawalAmt) {
         return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, 'Insufficient Balance For Withdrawal'));
       }
+    
+      const receiver_admin_balance = await admin_Balance(receiveUserId)
+      console.log("receiver_admin_balance", receiver_admin_balance);
+      
+      const deductionBalance = receiver_admin_balance - parsedWithdrawalAmt;
 
-
-      const deductionBalance = receiverAdmin.balance - parsedWithdrawalAmt;
-      const creditAmount = senderAdmin.balance + parsedWithdrawalAmt;
+      const sender_admin_balance = await admin_Balance(adminId)
+      console.log("sender_admin_balance", sender_admin_balance);
+      const creditAmount = sender_admin_balance + parsedWithdrawalAmt;
 
       const withdrawalRecord = {
         transactionType: 'withdrawal',
+        receiver_adminId : receiverAdmin.adminId,
         amount: Math.round(parsedWithdrawalAmt),
         transferFromUserAccount: receiverAdmin.userName,
         transferToUserAccount: senderAdmin.userName,
@@ -144,22 +150,22 @@ export const transferAmount = async (req, res) => {
       };
 
       let message = '';
-      try {
+      // try {
 
-        const baseUrl = process.env.COLOR_GAME_URL;
+      //   const baseUrl = process.env.COLOR_GAME_URL;
 
-        const { data: response } = await axios.post(`${baseUrl}/api/extrnal/balance-update`, dataToSend);
-        console.log('Balance update response:', response);
+      //   const { data: response } = await axios.post(`${baseUrl}/api/extrnal/balance-update`, dataToSend);
+      //   console.log('Balance update response:', response);
 
-        if (!response.success) {
-          if (response.responseCode === 400 && response.errMessage === 'User Not Found') {
-            message = 'Failed to update user balance.';
-          }
-        }
-      } catch (error) {
-        console.error('Error updating balance:', error);
-        message = 'Please register in the portal.';
-      }
+      //   if (!response.success) {
+      //     if (response.responseCode === 400 && response.errMessage === 'User Not Found') {
+      //       message = 'Failed to update user balance.';
+      //     }
+      //   }
+      // } catch (error) {
+      //   console.error('Error updating balance:', error);
+      //   message = 'Please register in the portal.';
+      // }
 
       await calculateLoadBalance(adminId);
 
@@ -185,6 +191,7 @@ export const transferAmount = async (req, res) => {
 
       const transferRecordCredit = {
         transactionType: 'credit',
+        receiver_adminId: receiverAdmin.adminId,
         amount: Math.round(parsedTransferAmount),
         transferFromUserAccount: senderAdmin.userName,
         transferToUserAccount: receiverAdmin.userName,
@@ -217,21 +224,21 @@ export const transferAmount = async (req, res) => {
       };
 
       let message = '';
-      try {
-        const baseUrl = process.env.COLOR_GAME_URL;
+      // try {
+      //   const baseUrl = process.env.COLOR_GAME_URL;
 
-        const { data: response } = await axios.post(`${baseUrl}/api/extrnal/balance-update`, dataToSend);
-        console.log('Balance update response:', response);
+      //   const { data: response } = await axios.post(`${baseUrl}/api/extrnal/balance-update`, dataToSend);
+      //   console.log('Balance update response:', response);
 
-        if (!response.success) {
-          if (response.responseCode === 400 && response.errMessage === 'User Not Found') {
-            message = 'Failed to update user balance.';
-          }
-        }
-      } catch (error) {
-        console.error('Error updating balance:', error);
-        message = 'Please register in the portal.';
-      }
+      //   if (!response.success) {
+      //     if (response.responseCode === 400 && response.errMessage === 'User Not Found') {
+      //       message = 'Failed to update user balance.';
+      //     }
+      //   }
+      // } catch (error) {
+      //   console.error('Error updating balance:', error);
+      //   message = 'Please register in the portal.';
+      // }
 
       await calculateLoadBalance(adminId);
 
@@ -470,20 +477,53 @@ export const accountStatement = async (req, res) => {
 };
 
 
-
-export const viewBalance = async (req, res) => {
+// Admin Main balance 
+export const viewAdminBalance = async (req, res) => {
   try {
     const adminId = req.params.adminId;
-    const admin = await admins.findOne({ where: { adminId } });
-    const amount = {
-      balance: admin.balance,
-    };
-    return res.status(statusCode.success).json(apiResponseSuccess(amount, statusCode.success, true, 'Successfully'));
+    let balance = 0;
+    const admin_transaction = await selfTransactions.findAll({ where : { adminId } })
+    const admin_withdraw_transaction = await transaction.findAll({ where : { adminId } })
+    for (const transaction of admin_transaction) {
+      if (transaction.amount) {
+        balance += parseFloat(transaction.amount);
+      }
+    }
+    for (const transaction of admin_withdraw_transaction) {
+      if (transaction.transactionType === 'credit') {
+        balance -= parseFloat(transaction.amount);
+      }
+      if (transaction.transactionType === 'withdrawal') {
+        balance += parseFloat(transaction.amount);
+      }
+    }
+    return res.status(statusCode.success).json(apiResponseSuccess({balance}, statusCode.success, true, 'Successfully'));
   } catch (error) {
     res
       .status(statusCode.internalServerError)
       .send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
   }
+};
+
+// genraic admin balance function
+export const admin_Balance = async (adminId) => {
+   try{
+    let balance = 0;
+    const admin_transaction = await transaction.findAll({ where: { 
+        [Op.or]: [{ adminId }, { receiver_adminId: adminId }] 
+      } })
+    console.log("admin_transaction", admin_transaction);
+    for (const transaction of admin_transaction) {
+      if (transaction.transactionType === 'credit') {
+        balance += parseFloat(transaction.amount);
+      }if (transaction.transactionType === 'withdrawal') {
+        balance -= parseFloat(transaction.withdrawAmount);
+      }
+    }
+    return balance;
+   }catch(error){
+      throw new Error(error)
+   }
 };
 
 

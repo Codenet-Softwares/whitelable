@@ -10,6 +10,7 @@ import trash from '../models/trash.model.js';
 import axios from 'axios';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import { admin_Balance } from './transaction.controller.js';
 dotenv.config();
 
 /**
@@ -318,7 +319,20 @@ export const viewAllCreates = async (req, res) => {
       limit: pageSize,
       order: [['createdAt', 'DESC']],
     });
+    console.log("adminsData", adminsData[0].adminId);
 
+    // const admin_Id = adminsData.map((admin) => {
+    //   admin.adminId
+    // })
+
+    const admin_Id = adminsData[0].adminId
+
+ const adminBalance = await admin_Balance(admin_Id)
+ console.log("adminBalance", adminBalance);
+ 
+    console.log("admin_Id", admin_Id);
+    
+    
     const users = adminsData.map(admin => {
       let creditRefs = [];
       let partnerships = [];
@@ -338,12 +352,11 @@ export const viewAllCreates = async (req, res) => {
           partnerships = [];
         }
       }
-
       return {
         adminId: admin.adminId,
         userName: admin.userName,
         roles: admin.roles,
-        balance: admin.balance,
+        balance: adminBalance,
         loadBalance: admin.loadBalance,
         creditRefs,
         createdById: admin.createdById,
