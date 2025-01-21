@@ -104,6 +104,8 @@ export const transferAmount = async (req, res) => {
 
     const parsedTransferAmount = parseFloat(transferAmount);
     const parsedWithdrawalAmt = parseFloat(withdrawalAmt);
+    
+    let balance = 0
 
     if (parsedWithdrawalAmt) {
       if (receiverAdmin.balance < parsedWithdrawalAmt) {
