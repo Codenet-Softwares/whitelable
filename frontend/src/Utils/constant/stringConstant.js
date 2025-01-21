@@ -58,7 +58,7 @@ export class StringConstants {
     { role: 'partnership-view', name: 'Partnership view' },
     { role: 'user-profile-view', name: 'User Profile View' },
     { role: 'create-Admin', name: 'Create Admin' },
-    { role: 'create-user', name: 'Create User' },
+    // { role: 'create-user', name: 'Create User' },
     { role: 'accountStatement', name: 'Account Statement' },
     { role: 'activityLog', name: 'Activity Log' },
     { role: 'delete-admin', name: 'Delete Admin' },

@@ -589,20 +589,18 @@ const User_BetMarket = () => {
                     <th style={{ border: "1px solid #ddd", padding: "8px" }}>
                       Role
                     </th>
-                    <th style={{ border: "1px solid #ddd", padding: "8px" }}>
-                      {betBookData?.length > 0 &&
-                        betBookData[0].runnerBalance?.[0]?.runnerName}
-                    </th>
-                    <th style={{ border: "1px solid #ddd", padding: "8px" }}>
-                      {betBookData?.length > 0 &&
-                        betBookData[0].runnerBalance?.[1]?.runnerName}
-                    </th>
+                    {betBookData[0]?.runnerBalance?.map((balance) => (
+                      <th style={{ border: "1px solid #ddd", padding: "8px" }}>
+                        {balance?.runnerName}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
+
                 <tbody>
                   {betBookData?.length > 0 ? (
                     betBookData.map((master, index) => {
-                      // console.log("master====", master?.runnerBalance);
+                      console.log("master====", master?.runnerBalance);
                       return (
                         <tr key={index}>
                           {permissionObj.allAdmin.includes(master?.roles) ? (
@@ -636,32 +634,28 @@ const User_BetMarket = () => {
                           >
                             {master?.roles}
                           </td>
-                          <td
-                            style={{ border: "1px solid #ddd", padding: "8px" }}
-                          >
-                            {master?.runnerBalance?.[0]?.bal >= 0 ? (
-                              <span className="text-success">
-                                {master?.runnerBalance?.[0]?.bal}
-                              </span>
-                            ) : (
-                              <span className="text-danger">
-                                {master?.runnerBalance?.[0]?.bal}
-                              </span>
-                            )}
-                          </td>
-                          <td
-                            style={{ border: "1px solid #ddd", padding: "8px" }}
-                          >
-                            {master?.runnerBalance?.[1]?.bal >= 0 ? (
-                              <span className="text-success">
-                                {master?.runnerBalance?.[1]?.bal}
-                              </span>
-                            ) : (
-                              <span className="text-danger">
-                                {master?.runnerBalance?.[1]?.bal}
-                              </span>
-                            )}
-                          </td>
+                          {master?.runnerBalance?.map((data) => {
+                            console.log("firstdata", data);
+                            return (
+                              <td
+                                style={{
+                                  border: "1px solid #ddd",
+                                  padding: "8px",
+                                }}
+                              >
+                                {data?.bal >= 0 ? (
+                                  <span className="text-success">
+                                    {data?.bal}
+                                  </span>
+                                ) : (
+                                  <span className="text-danger">
+                                    {data?.bal}
+                                  </span>
+                                )}
+                              </td>
+                            );
+                          })}
+                        
                         </tr>
                       );
                     })
