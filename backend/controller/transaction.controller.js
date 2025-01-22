@@ -114,7 +114,7 @@ export const transferAmount = async (req, res) => {
 
       const withdrawalRecord = {
         transactionType: 'withdrawal',
-        receiver_adminId: receiverAdmin.adminId,
+        // receiver_adminId: receiverAdmin.adminId,
         amount: Math.round(parsedWithdrawalAmt),
         transferFromUserAccount: receiverAdmin.userName,
         transferToUserAccount: senderAdmin.userName,
@@ -469,24 +469,59 @@ export const viewAdminBalance = async (req, res) => {
   try {
     const adminId = req.params.adminId;
     let balance = 0;
-
-    const admin_withdraw_transaction = await transaction.findAll({
-      where: {
-        [Op.or]: [{ adminId }, { receiver_adminId: adminId }]
+    const roles = req.user?.dataValues?.roles;
+    console.log('Roles:', roles[0].role);
+    const role = roles[0].role
+    const admin_transactions = await transaction.findAll({ where: { adminId } });
+    console.log("admin_transactions", admin_transactions);
+    
+    if(role === 'superAdmin'){
+    for (const transaction of admin_transactions) {
+      console.log("transaction", transaction);
+      if (transaction.transactionType === 'credit') {
+        balance -= parseFloat(transaction.amount);
       }
-    })
+      if (transaction.transactionType === 'withdrawal') {
+        balance += parseFloat(transaction.amount);
+      }
+      if (transaction.transactionType === 'self_credit') {
+        balance += parseFloat(transaction.amount);
+      }
+    }
+    } else {
+      console.log("innnnnnnnnnnnnnnnnn");
+      
+      for (const transaction of admin_transactions) {
+        console.log("transaction", transaction);
+        
+        if (transaction.transactionType === 'credit') {
+          balance += parseFloat(transaction.amount);
+        }
+        if (transaction.transactionType === 'withdrawal') {
+          balance -= parseFloat(transaction.amount);
+        }
+      }
+    }
+    return res.status(statusCode.success).json(apiResponseSuccess({ balance }, statusCode.success, true, 'Successfully'));
+  } catch (error) {
+    res.status(statusCode.internalServerError).send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
+  }
+};
 
-    for (const transaction of admin_withdraw_transaction) {
+export const viewSubAdminBalance = async (req, res) => {
+  try {
+    const adminId = req.params.adminId;
+    let balance = 0;
+
+    const admin_transaction = await transaction.findAll({ where : { adminId } })
+
+    for (const transaction of admin_transaction) {
       if (transaction.transactionType === 'credit') {
         balance += parseFloat(transaction.amount);
       }
       if (transaction.transactionType === 'withdrawal') {
         balance -= parseFloat(transaction.amount);
       }
-      if (transaction.transactionType === 'self_credit') {
-        balance += parseFloat(transaction.amount);
-      }
-
     }
     return res.status(statusCode.success).json(apiResponseSuccess({ balance }, statusCode.success, true, 'Successfully'));
   } catch (error) {
@@ -500,12 +535,7 @@ export const viewAdminBalance = async (req, res) => {
 export const admin_Balance = async (adminId) => {
   try {
     let balance = 0;
-    const admin_transaction = await transaction.findAll({
-      where: {
-        [Op.or]: [{ adminId }, { receiver_adminId: adminId }]
-      }
-    })
-    
+    const admin_transaction = await transaction.findAll({ where : { adminId } })
     for (const transaction of admin_transaction) {
       if (transaction.transactionType === 'credit') {
         balance += parseFloat(transaction.amount);
@@ -513,10 +543,6 @@ export const admin_Balance = async (adminId) => {
       if (transaction.transactionType === 'withdrawal') {
         balance -= parseFloat(transaction.amount);
       }
-      if (transaction.transactionType === 'self_credit') {
-        balance += parseFloat(transaction.amount);
-      }
-
     }
     return balance;
   } catch (error) {
