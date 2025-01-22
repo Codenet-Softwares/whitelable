@@ -409,7 +409,7 @@ export const accountStatement = async (req, res) => {
     }
 
     const adminUserName = admin.userName;
-    const adminMainBalance = admin.balance;
+    const adminMainBalance = await admin_Balance(adminId);
 
     const transactionQuery = {
       where: {
