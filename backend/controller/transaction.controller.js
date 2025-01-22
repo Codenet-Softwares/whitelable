@@ -513,7 +513,7 @@ export const viewAdminBalance = async (req, res) => {
   }
 };
 
-// Gen
+// Genric admin Balance function
 export const admin_Balance = async (adminId) => {
   try {
     let balance = 0;
