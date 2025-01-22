@@ -256,10 +256,16 @@ export const getIpDetail = async (req, res) => {
 };
 
 export const calculateLoadBalance = async (adminId) => {
+  let loadBalance = 0
+
   const admin = await admins.findOne({ where: { adminId } });
   if (!admin) return 0;
 
-  let totalBalance = admin.balance;
+  const adminBalance = await admin_Balance(admin.adminId)
+
+  let totalBalance = adminBalance;
+
+  // let totalBalance = admin.balance;
 
   const children = await admins.findAll({
     where: { createdById: adminId },
@@ -270,12 +276,11 @@ export const calculateLoadBalance = async (adminId) => {
     totalBalance += childBalance;
   }
 
-  if (admin.loadBalance !== totalBalance) {
-    console.log(`Updating loadBalance for adminId ${adminId}: ${admin.loadBalance} -> ${totalBalance}`);
-    await admin.update({ loadBalance: totalBalance });
+  if (loadBalance !== totalBalance) {
+    loadBalance = totalBalance
   }
 
-  return totalBalance;
+return totalBalance;
 };
 
 
@@ -293,19 +298,23 @@ export const viewAllCreates = async (req, res) => {
       string.hyperAgent,
       string.superAgent,
       string.masterAgent,
-      string.user
+      string.user,
     ];
 
     const totalRecords = await admins.count({
       where: {
         createdById,
         ...searchQuery,
-        [Op.or]: allowedRoles.map(role => fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))),
+        [Op.or]: allowedRoles.map((role) =>
+          fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))
+        ),
       },
     });
 
     if (totalRecords === 0) {
-      return res.status(statusCode.success).json(apiResponseSuccess(null, true, statusCode.success, messages.noRecordsFound));
+      return res
+        .status(statusCode.success)
+        .json(apiResponseSuccess(null, true, statusCode.success, messages.noRecordsFound));
     }
 
     const offset = (page - 1) * pageSize;
@@ -313,83 +322,83 @@ export const viewAllCreates = async (req, res) => {
       where: {
         createdById,
         ...searchQuery,
-        [Op.or]: allowedRoles.map(role => fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))),
+        [Op.or]: allowedRoles.map((role) =>
+          fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))
+        ),
       },
       offset,
       limit: pageSize,
       order: [['createdAt', 'DESC']],
     });
-    console.log("adminsData", adminsData[0].adminId);
 
-    // const admin_Id = adminsData.map((admin) => {
-    //   admin.adminId
-    // })
+    // Map through adminsData and calculate load balance
+    const users = await Promise.all(
+      adminsData.map(async (admin) => {
+        let creditRefs = [];
+        let partnerships = [];
 
-    const admin_Id = adminsData[0].adminId
-
- const adminBalance = await admin_Balance(admin_Id)
- console.log("adminBalance", adminBalance);
- 
-    console.log("admin_Id", admin_Id);
-    
-    
-    const users = adminsData.map(admin => {
-      let creditRefs = [];
-      let partnerships = [];
-
-      if (admin.creditRefs) {
-        try {
-          creditRefs = JSON.parse(admin.creditRefs);
-        } catch {
-          creditRefs = [];
+        if (admin.creditRefs) {
+          try {
+            creditRefs = JSON.parse(admin.creditRefs);
+          } catch {
+            creditRefs = [];
+          }
         }
-      }
 
-      if (admin.partnerships) {
-        try {
-          partnerships = JSON.parse(admin.partnerships);
-        } catch {
-          partnerships = [];
+        if (admin.partnerships) {
+          try {
+            partnerships = JSON.parse(admin.partnerships);
+          } catch {
+            partnerships = [];
+          }
         }
-      }
-      return {
-        adminId: admin.adminId,
-        userName: admin.userName,
-        roles: admin.roles,
-        balance: adminBalance,
-        loadBalance: admin.loadBalance,
-        creditRefs,
-        createdById: admin.createdById,
-        createdByUser: admin.createdByUser,
-        partnerships,
-        status: admin.isActive ? "Active" : !admin.locked ? "Locked" : !admin.isActive ? "Suspended" : "",
-        exposure: admin.exposure
-      };
-    });
+
+        const adminBalance = await admin_Balance(admin.adminId);
+        const loadBalance = await calculateLoadBalance(admin.adminId); 
+
+        return {
+          adminId: admin.adminId,
+          userName: admin.userName,
+          roles: admin.roles,
+          balance: adminBalance,
+          loadBalance, // Add loadBalance to response
+          creditRefs,
+          createdById: admin.createdById,
+          createdByUser: admin.createdByUser,
+          partnerships,
+          status: admin.isActive
+            ? 'Active'
+            : !admin.locked
+            ? 'Locked'
+            : !admin.isActive
+            ? 'Suspended'
+            : '',
+          exposure: admin.exposure,
+        };
+      })
+    );
 
     const totalPages = Math.ceil(totalRecords / pageSize);
 
     return res.status(statusCode.success).json(
-      apiResponseSuccess(
-        users,
-        true,
-        statusCode.success,
-        messages.success,
-        {
-          totalRecords,
-          totalPages,
-          currentPage: page,
-          pageSize,
-        }
-      ),
+      apiResponseSuccess(users, true, statusCode.success, messages.success, {
+        totalRecords,
+        totalPages,
+        currentPage: page,
+        pageSize,
+      })
     );
   } catch (error) {
     return res.status(statusCode.internalServerError).json(
-      apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message),
+      apiResponseErr(
+        error.data ?? null,
+        false,
+        error.responseCode ?? statusCode.internalServerError,
+        error.errMessage ?? error.message
+      )
     );
   }
 };
-
 
 // done
 export const viewAllSubAdminCreates = async (req, res) => {

@@ -30,19 +30,11 @@ export const depositTransaction = async (req, res) => {
       amount: depositAmount,
       userName: admin.userName,
       date: new Date(),
-      transactionType: 'deposit',
+      transactionType: 'self_credit',
     };
 
-    const newDepositBalance = admin.depositBalance + depositAmount;
-    const newAdminBalance = admin.balance + depositAmount;
-
-    await admin.update({
-      balance: newAdminBalance,
-      depositBalance: newDepositBalance,
-    });
-
-    await selfTransactions.create({
-      selfTransactionId: uuidv4(),
+    await transaction.create({
+      transactionId: uuidv4(),
       adminId: adminId,
       amount: depositTransactionData.amount,
       userName: depositTransactionData.userName,
@@ -108,14 +100,16 @@ export const transferAmount = async (req, res) => {
     let balance = 0
 
     if (parsedWithdrawalAmt) {
-      if (receiverAdmin.balance < parsedWithdrawalAmt) {
+
+      const receiver_admin_balance = await admin_Balance(receiveUserId)
+      const sender_admin_balance = await admin_Balance(adminId)
+
+      if (receiver_admin_balance < parsedWithdrawalAmt) {
         return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, 'Insufficient Balance For Withdrawal'));
       }
 
-      const receiver_admin_balance = await admin_Balance(receiveUserId)
       const deductionBalance = receiver_admin_balance - parsedWithdrawalAmt;
 
-      const sender_admin_balance = await admin_Balance(adminId)
       const creditAmount = sender_admin_balance + parsedWithdrawalAmt;
 
       const withdrawalRecord = {
@@ -168,23 +162,16 @@ export const transferAmount = async (req, res) => {
 
       return res.status(statusCode.create).json(apiResponseSuccess(null, true, statusCode.create, 'Balance Deducted Successfully' + ' ' + message));
     } else {
-      if (senderAdmin.balance < parsedTransferAmount) {
+
+      const sender_admin_balance = await admin_Balance(adminId)
+      const receiver_admin_balance = await admin_Balance(receiveUserId)
+      console.log("sender_admin_balance", sender_admin_balance)
+      if (sender_admin_balance < parsedTransferAmount) {
         return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, 'Insufficient Balance For Transfer'));
       }
 
-      // const transferRecordDebit = {
-      //   transactionType: 'debit',
-      //   amount: Math.round(parsedTransferAmount),
-      //   transferFromUserAccount: senderAdmin.userName,
-      //   transferToUserAccount: receiverAdmin.userName,
-      //   userName: senderAdmin.userName,
-      //   date: new Date(),
-      //   remarks,
-      // };
-      const sender_admin_balance = await admin_Balance(adminId)
       const senderBalance = sender_admin_balance - parsedTransferAmount;
 
-      const receiver_admin_balance = await admin_Balance(adminId)
       const receiverBalance = receiver_admin_balance + parsedTransferAmount;
 
       // const senderBalance = senderAdmin.balance - parsedTransferAmount;
@@ -477,26 +464,29 @@ export const accountStatement = async (req, res) => {
   }
 };
 
-
 // Admin Main balance 
 export const viewAdminBalance = async (req, res) => {
   try {
     const adminId = req.params.adminId;
     let balance = 0;
-    const admin_transaction = await selfTransactions.findAll({ where: { adminId } })
-    const admin_withdraw_transaction = await transaction.findAll({ where: { adminId } })
-    for (const transaction of admin_transaction) {
-      if (transaction.amount) {
-        balance += parseFloat(transaction.amount);
+
+    const admin_withdraw_transaction = await transaction.findAll({
+      where: {
+        [Op.or]: [{ adminId }, { receiver_adminId: adminId }]
       }
-    }
+    })
+
     for (const transaction of admin_withdraw_transaction) {
       if (transaction.transactionType === 'credit') {
-        balance -= parseFloat(transaction.amount);
-      }
-      if (transaction.transactionType === 'withdrawal') {
         balance += parseFloat(transaction.amount);
       }
+      if (transaction.transactionType === 'withdrawal') {
+        balance -= parseFloat(transaction.amount);
+      }
+      if (transaction.transactionType === 'self_credit') {
+        balance += parseFloat(transaction.amount);
+      }
+
     }
     return res.status(statusCode.success).json(apiResponseSuccess({ balance }, statusCode.success, true, 'Successfully'));
   } catch (error) {
@@ -506,7 +496,7 @@ export const viewAdminBalance = async (req, res) => {
   }
 };
 
-// genraic admin balance function
+// generic admin balance function
 export const admin_Balance = async (adminId) => {
   try {
     let balance = 0;
@@ -516,16 +506,17 @@ export const admin_Balance = async (adminId) => {
       }
     })
     
-    // console.log("admin_transaction", admin_transaction);
     for (const transaction of admin_transaction) {
       if (transaction.transactionType === 'credit') {
         balance += parseFloat(transaction.amount);
-        console.log("balance..1",balance)
-      } if (transaction.transactionType === 'withdrawal') {
-        balance -= parseFloat(transaction.amount);
-        console.log("balance..2",balance)
-
       }
+      if (transaction.transactionType === 'withdrawal') {
+        balance -= parseFloat(transaction.amount);
+      }
+      if (transaction.transactionType === 'self_credit') {
+        balance += parseFloat(transaction.amount);
+      }
+
     }
     return balance;
   } catch (error) {
