@@ -1,5 +1,4 @@
 import { apiResponseErr, apiResponseSuccess, apiResponsePagination } from '../helper/errorHandler.js';
-import selfTransactions from '../models/selfTransaction.model.js';
 import transaction from '../models/transactions.model.js';
 import admins from '../models/admin.model.js';
 import { v4 as uuidv4 } from 'uuid';
@@ -133,30 +132,30 @@ export const transferAmount = async (req, res) => {
         ...withdrawalRecord,
       });
 
-      // const dataToSend = {
-      //   ...withdrawalRecord,
-      //   userId: receiveUserId,
-      //   transactionId: withdrawalRecord.transactionId,
-      //   type: 'debit',
-      // };
+      const dataToSend = {
+        ...withdrawalRecord,
+        userId: receiveUserId,
+        transactionId: withdrawalRecord.transactionId,
+        type: 'withdrawal',
+      };
 
       let message = '';
-      // try {
+      try {
 
-      //   const baseUrl = process.env.COLOR_GAME_URL;
+        const baseUrl = process.env.COLOR_GAME_URL;
 
-      //   const { data: response } = await axios.post(`${baseUrl}/api/extrnal/balance-update`, dataToSend);
-      //   console.log('Balance update response:', response);
+        const { data: response } = await axios.post(`${baseUrl}demo_superdemo_super`, dataToSend);
+        console.log('Balance update response:', response);
 
-      //   if (!response.success) {
-      //     if (response.responseCode === 400 && response.errMessage === 'User Not Found') {
-      //       message = 'Failed to update user balance.';
-      //     }
-      //   }
-      // } catch (error) {
-      //   console.error('Error updating balance:', error);
-      //   message = 'Please register in the portal.';
-      // }
+        if (!response.success) {
+          if (response.responseCode === 400 && response.errMessage === 'User Not Found') {
+            message = 'Failed to update user balance.';
+          }
+        }
+      } catch (error) {
+        console.error('Error updating balance:', error);
+        message = 'Please register in the portal.';
+      }
 
       await calculateLoadBalance(adminId);
 
@@ -174,8 +173,6 @@ export const transferAmount = async (req, res) => {
 
       const receiverBalance = receiver_admin_balance + parsedTransferAmount;
 
-      // const senderBalance = senderAdmin.balance - parsedTransferAmount;
-      // const receiverBalance = receiverAdmin.balance + parsedTransferAmount;
 
       const transferRecordCredit = {
         transactionType: 'credit',
@@ -192,12 +189,6 @@ export const transferAmount = async (req, res) => {
       await receiverAdmin.update({ balance: receiverBalance });
       await senderAdmin.update({ balance: senderBalance });
 
-      // await transaction.create({
-      //   transactionId: uuidv4(),
-      //   adminId,
-      //   ...transferRecordDebit,
-      // });
-
       await transaction.create({
         transactionId: uuidv4(),
         adminId,
@@ -212,21 +203,21 @@ export const transferAmount = async (req, res) => {
       };
 
       let message = '';
-      // try {
-      //   const baseUrl = process.env.COLOR_GAME_URL;
+      try {
+        const baseUrl = process.env.COLOR_GAME_URL;
 
-      //   const { data: response } = await axios.post(`${baseUrl}/api/extrnal/balance-update`, dataToSend);
-      //   console.log('Balance update response:', response);
+        const { data: response } = await axios.post(`${baseUrl}/api/extrnal/balance-update`, dataToSend);
+        console.log('Balance update response:', response);
 
-      //   if (!response.success) {
-      //     if (response.responseCode === 400 && response.errMessage === 'User Not Found') {
-      //       message = 'Failed to update user balance.';
-      //     }
-      //   }
-      // } catch (error) {
-      //   console.error('Error updating balance:', error);
-      //   message = 'Please register in the portal.';
-      // }
+        if (!response.success) {
+          if (response.responseCode === 400 && response.errMessage === 'User Not Found') {
+            message = 'Failed to update user balance.';
+          }
+        }
+      } catch (error) {
+        console.error('Error updating balance:', error);
+        message = 'Please register in the portal.';
+      }
 
       await calculateLoadBalance(adminId);
 
@@ -486,14 +477,14 @@ export const viewAdminBalance = async (req, res) => {
         } else if (transactionType === "withdrawal") {
           balance -= parsedAmount;
         }
-     
+
       } else {
         if (transactionType === "credit") {
-          balance -= parsedAmount; 
+          balance -= parsedAmount;
         } else if (transactionType === "withdrawal") {
-          balance += parsedAmount; 
+          balance += parsedAmount;
         } else if (transactionType === "self_credit") {
-          balance += parsedAmount; 
+          balance += parsedAmount;
         }
       }
     }
@@ -560,9 +551,9 @@ export const viewAddBalance = async (req, res) => {
     page = parseInt(page)
     limit = parseInt(limit)
     const offset = (page - 1) * limit;
-    
-    const { count, rows :  paginatedTransactions } = await transaction.findAndCountAll({
-      where: { adminId, transactionType : 'self_credit' },
+
+    const { count, rows: paginatedTransactions } = await transaction.findAndCountAll({
+      where: { adminId, transactionType: 'self_credit' },
       order: [['createdAt', 'DESC']],
       offset,
       limit,

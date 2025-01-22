@@ -280,7 +280,7 @@ export const calculateLoadBalance = async (adminId) => {
     loadBalance = totalBalance
   }
 
-return totalBalance;
+  return totalBalance;
 };
 
 
@@ -354,7 +354,7 @@ export const viewAllCreates = async (req, res) => {
         }
 
         const adminBalance = await admin_Balance(admin.adminId);
-        const loadBalance = await calculateLoadBalance(admin.adminId); 
+        const loadBalance = await calculateLoadBalance(admin.adminId);
 
         return {
           adminId: admin.adminId,
@@ -369,10 +369,10 @@ export const viewAllCreates = async (req, res) => {
           status: admin.isActive
             ? 'Active'
             : !admin.locked
-            ? 'Locked'
-            : !admin.isActive
-            ? 'Suspended'
-            : '',
+              ? 'Locked'
+              : !admin.isActive
+                ? 'Suspended'
+                : '',
           exposure: admin.exposure,
         };
       })
@@ -802,35 +802,43 @@ export const buildRootPath = async (req, res) => {
         limit: pageSize,
       });
 
-      const userDetails = {
-        createdUsers: createdUsers.map((createdUser) => {
+      const createdUsersDetails = await Promise.all(
+        createdUsers.map(async (createdUser) => {
           let creditRef = [];
           let refProfitLoss = [];
           let partnership = [];
-
+      
           try {
             creditRef = createdUser.creditRefs ? JSON.parse(createdUser.creditRefs) : [];
             refProfitLoss = createdUser.refProfitLoss ? JSON.parse(createdUser.refProfitLoss) : [];
             partnership = createdUser.partnerships ? JSON.parse(createdUser.partnerships) : [];
           } catch (e) {
-            // console.error('JSON parsing error:', e);
+            console.error("JSON parsing error:", e);
           }
-
+      
+          const adminBalance = await admin_Balance(createdUser.adminId);
+          const loadBalance = await calculateLoadBalance(createdUser.adminId);
+      
           return {
             id: createdUser.adminId,
             userName: createdUser.userName,
             roles: createdUser.roles,
-            balance: createdUser.balance,
-            loadBalance: createdUser.loadBalance,
+            balance: adminBalance,
+            loadBalance: loadBalance,
             creditRef: creditRef,
             refProfitLoss: refProfitLoss,
             partnership: partnership,
-            status: createdUser.isActive ? "Active" : !createdUser.locked ? "Locked" : !createdUser.isActive ? "Suspended" : "",
-            exposure: createdUser.exposure
+            status: createdUser.isActive
+              ? "Active"
+              : createdUser.locked
+              ? "Locked"
+              : "Suspended",
+            exposure: createdUser.exposure,
           };
-        }),
-      };
-
+        })
+      );
+      
+      const userDetails = { createdUsers: createdUsersDetails };
       const message = 'Path stored successfully';
       return res.status(statusCode.create).json(
         apiResponseSuccess(
