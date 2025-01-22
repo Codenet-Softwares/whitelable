@@ -114,7 +114,7 @@ export const transferAmount = async (req, res) => {
 
       const withdrawalRecord = {
         transactionType: 'withdrawal',
-        // receiver_adminId: receiverAdmin.adminId,
+        receiver_adminId: receiverAdmin.adminId,
         amount: Math.round(parsedWithdrawalAmt),
         transferFromUserAccount: receiverAdmin.userName,
         transferToUserAccount: senderAdmin.userName,
@@ -133,12 +133,12 @@ export const transferAmount = async (req, res) => {
         ...withdrawalRecord,
       });
 
-      const dataToSend = {
-        ...withdrawalRecord,
-        userId: receiveUserId,
-        transactionId: withdrawalRecord.transactionId,
-        type: 'debit',
-      };
+      // const dataToSend = {
+      //   ...withdrawalRecord,
+      //   userId: receiveUserId,
+      //   transactionId: withdrawalRecord.transactionId,
+      //   type: 'debit',
+      // };
 
       let message = '';
       // try {
@@ -469,51 +469,64 @@ export const viewAdminBalance = async (req, res) => {
   try {
     const adminId = req.params.adminId;
     let balance = 0;
-    const roles = req.user?.dataValues?.roles;
-    console.log('Roles:', roles[0].role);
-    const role = roles[0].role
-    const admin_transactions = await transaction.findAll({ where: { adminId } });
-    console.log("admin_transactions", admin_transactions);
-    
-    if(role === 'superAdmin'){
-    for (const transaction of admin_transactions) {
-      console.log("transaction", transaction);
-      if (transaction.transactionType === 'credit') {
-        balance -= parseFloat(transaction.amount);
-      }
-      if (transaction.transactionType === 'withdrawal') {
-        balance += parseFloat(transaction.amount);
-      }
-      if (transaction.transactionType === 'self_credit') {
-        balance += parseFloat(transaction.amount);
-      }
-    }
-    } else {
-      console.log("innnnnnnnnnnnnnnnnn");
-      
-      for (const transaction of admin_transactions) {
-        console.log("transaction", transaction);
-        
-        if (transaction.transactionType === 'credit') {
-          balance += parseFloat(transaction.amount);
+
+    const adminTransactions = await transaction.findAll({
+      where: {
+        [Op.or]: [{ adminId }, { receiver_adminId: adminId }],
+      },
+    });
+
+    console.log("Admin Transactions:", adminTransactions);
+
+    // Calculate the balance based on transaction type
+    for (const transaction of adminTransactions) {
+      const { receiver_adminId, transactionType, amount } = transaction;
+      const parsedAmount = parseFloat(amount);
+
+      if (receiver_adminId === adminId) {
+        if (transactionType === "credit") {
+          balance += parsedAmount;
+        } else if (transactionType === "withdrawal") {
+          balance -= parsedAmount;
         }
-        if (transaction.transactionType === 'withdrawal') {
-          balance -= parseFloat(transaction.amount);
+     
+      } else {
+        if (transactionType === "credit") {
+          balance -= parsedAmount; // Sender credits reduce the balance
+        } else if (transactionType === "withdrawal") {
+          balance += parsedAmount; // Sender withdrawals increase the balance
+        } else if (transactionType === "self_credit") {
+          balance += parsedAmount; // Self credits increase the balance
         }
       }
     }
-    return res.status(statusCode.success).json(apiResponseSuccess({ balance }, statusCode.success, true, 'Successfully'));
+
+    // Respond with the calculated balance
+    return res
+      .status(statusCode.success)
+      .json(apiResponseSuccess({ balance }, true, statusCode.success, "Balance calculated successfully."));
   } catch (error) {
-    res.status(statusCode.internalServerError).send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
+    console.error("Error in viewAdminBalance:", error);
+    return res
+      .status(statusCode.internalServerError)
+      .json(
+        apiResponseErr(
+          null,
+          false,
+          statusCode.internalServerError,
+          error.message || "An error occurred while fetching the admin balance."
+        )
+      );
   }
 };
+
 
 export const viewSubAdminBalance = async (req, res) => {
   try {
     const adminId = req.params.adminId;
     let balance = 0;
 
-    const admin_transaction = await transaction.findAll({ where : { adminId } })
+    const admin_transaction = await transaction.findAll({ where: { adminId } })
 
     for (const transaction of admin_transaction) {
       if (transaction.transactionType === 'credit') {
@@ -535,18 +548,41 @@ export const viewSubAdminBalance = async (req, res) => {
 export const admin_Balance = async (adminId) => {
   try {
     let balance = 0;
-    const admin_transaction = await transaction.findAll({ where : { adminId } })
-    for (const transaction of admin_transaction) {
-      if (transaction.transactionType === 'credit') {
-        balance += parseFloat(transaction.amount);
-      }
-      if (transaction.transactionType === 'withdrawal') {
-        balance -= parseFloat(transaction.amount);
+    const admin_transactions = await transaction.findAll({
+      where: {
+        [Op.or]: [
+          { adminId }, // Transactions initiated by this admin
+          { receiver_adminId: adminId }, // Transactions where this admin is the receiver
+        ],
+      },
+    });
+
+    for (const transaction of admin_transactions) {
+      if (transaction.receiver_adminId === adminId) {
+        // Only include balance calculation for transactions where this admin is the receiver
+        if (transaction.transactionType === 'credit') {
+          balance += parseFloat(transaction.amount);
+        }
+        if (transaction.transactionType === 'withdrawal') {
+          balance -= parseFloat(transaction.amount);
+        }
+
+      } else {
+        // Transactions initiated by this admin but not for them as a receiver
+        if (transaction.transactionType === 'credit') {
+          balance -= parseFloat(transaction.amount); // Subtract for credits
+        }
+        if (transaction.transactionType === 'withdrawal') {
+          balance += parseFloat(transaction.amount); // Add for withdrawals
+        }
+        if (transaction.transactionType === 'self_credit') {
+          balance += parseFloat(transaction.amount);
+        }
       }
     }
     return balance;
   } catch (error) {
-    throw new Error(error)
+    throw new Error(`Error calculating balance: ${error.message}`);
   }
 };
 
