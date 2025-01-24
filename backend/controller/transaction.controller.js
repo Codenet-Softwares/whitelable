@@ -101,7 +101,6 @@ export const transferAmount = async (req, res) => {
     if (parsedWithdrawalAmt) {
 
       const receiver_admin_balance = await admin_Balance(receiveUserId)
-      const sender_admin_balance = await admin_Balance(adminId)
 
       if (receiver_admin_balance < parsedWithdrawalAmt) {
         return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, 'Insufficient Balance For Withdrawal'));
@@ -109,9 +108,8 @@ export const transferAmount = async (req, res) => {
 
       const deductionBalance = receiver_admin_balance - parsedWithdrawalAmt;
 
-      const creditAmount = sender_admin_balance + parsedWithdrawalAmt;
-
       const withdrawalRecord = {
+        transactionId: uuidv4(),
         transactionType: 'withdrawal',
         receiver_adminId: receiverAdmin.adminId,
         amount: Math.round(parsedWithdrawalAmt),
@@ -123,11 +121,7 @@ export const transferAmount = async (req, res) => {
         currentBalance: deductionBalance
       };
 
-      await receiverAdmin.update({ balance: deductionBalance });
-      await senderAdmin.update({ balance: creditAmount });
-
       await transaction.create({
-        transactionId: uuidv4(),
         adminId,
         ...withdrawalRecord,
       });
@@ -135,7 +129,6 @@ export const transferAmount = async (req, res) => {
       const dataToSend = {
         ...withdrawalRecord,
         userId: receiveUserId,
-        transactionId: withdrawalRecord.transactionId,
         type: 'withdrawal',
       };
 
@@ -144,7 +137,7 @@ export const transferAmount = async (req, res) => {
 
         const baseUrl = process.env.COLOR_GAME_URL;
 
-        const { data: response } = await axios.post(`${baseUrl}demo_superdemo_super`, dataToSend);
+        const { data: response } = await axios.post(`${baseUrl}/api/extrnal/balance-update`, dataToSend);
         console.log('Balance update response:', response);
 
         if (!response.success) {
@@ -169,12 +162,12 @@ export const transferAmount = async (req, res) => {
         return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, 'Insufficient Balance For Transfer'));
       }
 
-      const senderBalance = sender_admin_balance - parsedTransferAmount;
-
       const receiverBalance = receiver_admin_balance + parsedTransferAmount;
 
-
+      const transactionId = uuidv4();
+      
       const transferRecordCredit = {
+        transactionId,
         transactionType: 'credit',
         receiver_adminId: receiverAdmin.adminId,
         amount: Math.round(parsedTransferAmount),
@@ -186,11 +179,7 @@ export const transferAmount = async (req, res) => {
         currentBalance: receiverBalance
       }
 
-      await receiverAdmin.update({ balance: receiverBalance });
-      await senderAdmin.update({ balance: senderBalance });
-
       await transaction.create({
-        transactionId: uuidv4(),
         adminId,
         ...transferRecordCredit,
       });
@@ -198,7 +187,6 @@ export const transferAmount = async (req, res) => {
       const dataToSend = {
         ...transferRecordCredit,
         userId: receiveUserId,
-        transactionId: transferRecordCredit.transactionId,
         type: 'credit',
       };
 
@@ -507,6 +495,7 @@ export const viewAdminBalance = async (req, res) => {
 // Genric admin Balance function
 export const admin_Balance = async (adminId) => {
   try {
+    
     let balance = 0;
     const admin_transactions = await transaction.findAll({
       where: {
@@ -516,6 +505,7 @@ export const admin_Balance = async (adminId) => {
         ],
       },
     });
+
     for (const transaction of admin_transactions) {
       if (transaction.receiver_adminId === adminId) {
         if (transaction.transactionType === 'credit') {
