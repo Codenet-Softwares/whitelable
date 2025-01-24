@@ -85,6 +85,13 @@ const ProfitAndLoss = ({
     profitLossRunnerData.searchItem,
   ]);
 
+  useEffect(() => {
+    if (profitLossLotteryEventData.currentPage > 1) {
+      getLotteryProfitLossEventWise()
+      SetComponent("ProfitAndLossLotteryEvent")
+    }
+  }, [profitLossLotteryEventData.currentPage]);
+
   async function getProfitLossEventWise(gameId, componentName) {
     // if useEffcet  added give condition toggle must be false for end point to hit
     SetToggle(false);
@@ -112,7 +119,7 @@ const ProfitAndLoss = ({
       userName: UserName,
       // gameId: gameId,
       pageNumber: profitLossLotteryEventData.currentPage,
-      dataLimit: profitLossLotteryEventData.itemPerPage, 
+      dataLimit: profitLossLotteryEventData.itemPerPage,
       searchName: profitLossLotteryEventData.searchItem,
     });
     console.log("event=>>>", response);
@@ -123,6 +130,16 @@ const ProfitAndLoss = ({
       totalData: response?.pagination?.totalItems,
     }));
   }
+
+
+  const handelProfitLossLotteryEventDataPage = (page) => {
+    console.log("first",page)
+    SetProfitLossLotteryEventData((prevState) => ({
+      ...prevState,
+      currentPage: page,
+    }));
+  };
+
 
   console.log("component", component);
   let componentToRender;
@@ -151,16 +168,17 @@ const ProfitAndLoss = ({
     );
   } else if (component === "ProfitAndLossLotteryEvent") {
     componentToRender = (
-    <ProfitAndLossLotteryEvent
-      data={profitLossLotteryEventData}
-      SetComponent={SetComponent}
-      SetMarketId={SetMarketId}
-      SetProfitLossEventData={SetProfitLossLotteryEventData}
-      currentPage={profitLossLotteryEventData.currentPage}
-      SetToggle={SetToggle}
-      totalItems={profitLossLotteryEventData.totalData}
+      <ProfitAndLossLotteryEvent
+        data={profitLossLotteryEventData}
+        SetComponent={SetComponent}
+        SetMarketId={SetMarketId}
+        SetProfitLossEventData={SetProfitLossLotteryEventData}
+        currentPage={profitLossLotteryEventData.currentPage}
+        SetToggle={SetToggle}
+        totalItems={profitLossLotteryEventData.totalData}
         UserName={UserName}
-    />
+        handlePageChange={(page) => handelProfitLossLotteryEventDataPage(page)}
+      />
     )
   } else {
 

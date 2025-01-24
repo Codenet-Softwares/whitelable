@@ -11,7 +11,8 @@ const ProfitAndLossLotteryEvent = ({
     currentPage,
     SetToggle,
     totalItems,
-    UserName
+    UserName,
+    handlePageChange
 }) => {
 
     const nav = useNavigate()
@@ -85,12 +86,12 @@ const ProfitAndLossLotteryEvent = ({
                                     style={{ height: "100px" }}
                                 >
                                     <tr align="center">
-                                            <td colSpan="10"> {/* Fixed typo from colspan="10" to colSpan="10" */}
-                                                <div className="alert alert-info fw-bold" role="alert">
-                                                    No Data Found !!
-                                                </div>
-                                            </td>
-                                        </tr>
+                                        <td colSpan="10"> {/* Fixed typo from colspan="10" to colSpan="10" */}
+                                            <div className="alert alert-info fw-bold" role="alert">
+                                                No Data Found !!
+                                            </div>
+                                        </td>
+                                    </tr>
                                 </div>
                             ) : (
                                 // Table
@@ -180,7 +181,10 @@ const ProfitAndLossLotteryEvent = ({
                             <Pagination
                                 currentPage={data.currentPage}
                                 totalPages={data.totalPages}
-                                handlePageChange={data.handlePageChange}
+                                handlePageChange={(page) => {
+                                    console.log('Changing page to:', page);
+                                    handlePageChange(page);
+                                }}
                                 startIndex={startIndex}
                                 endIndex={endIndex}
                                 totalData={data.totalData}
