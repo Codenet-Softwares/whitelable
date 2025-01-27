@@ -492,7 +492,7 @@ export const viewAdminBalance = async (req, res) => {
   }
 };
 
-// Genric admin Balance function
+// Generic admin Balance function
 export const admin_Balance = async (adminId) => {
   try {
     
