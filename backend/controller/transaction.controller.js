@@ -5,10 +5,11 @@ import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcrypt';
 import { statusCode } from '../helper/statusCodes.js';
 import { Sequelize } from 'sequelize';
-import { messages } from '../constructor/string.js';
+import { messages, string } from '../constructor/string.js';
 import axios from 'axios';
 import { calculateLoadBalance } from './admin.controller.js';
 import { Op } from 'sequelize'
+import { Admin } from 'mongodb';
 
 export const depositTransaction = async (req, res) => {
   try {
@@ -165,7 +166,7 @@ export const transferAmount = async (req, res) => {
       const receiverBalance = receiver_admin_balance + parsedTransferAmount;
 
       const transactionId = uuidv4();
-      
+
       const transferRecordCredit = {
         transactionId,
         transactionType: 'credit',
@@ -495,7 +496,7 @@ export const viewAdminBalance = async (req, res) => {
 // Generic admin Balance function
 export const admin_Balance = async (adminId) => {
   try {
-    
+
     let balance = 0;
     const admin_transactions = await transaction.findAll({
       where: {
@@ -527,6 +528,17 @@ export const admin_Balance = async (adminId) => {
         }
       }
     }
+
+    const get_id = await admins.findOne({ where: { adminId } })
+    if (get_id.roles[0].role ===  string.user) {
+      const baseUrl = process.env.COLOR_GAME_URL;
+      const user_balance = await axios.get(`${baseUrl}/api/external/get-user-balance/${adminId}`)
+      const { data } = user_balance
+      console.log("data", data.balance);
+      balance = data.balance
+    }
+
+
     return balance;
   } catch (error) {
     throw new Error(`Error calculating balance: ${error.message}`);
