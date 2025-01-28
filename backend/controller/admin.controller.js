@@ -28,8 +28,8 @@ export const createAdmin = async (req, res) => {
     const checkRolesMap = {
       [string.superAdmin]: [
         string.whiteLabel,
-        string.superAgent,
         string.hyperAgent,
+        string.superAgent,
         string.masterAgent,
       ],
       [string.whiteLabel]: [
@@ -38,12 +38,12 @@ export const createAdmin = async (req, res) => {
         string.masterAgent,
         string.user,
       ],
-      [string.superAgent]: [
-        string.hyperAgent,
+      [string.hyperAgent]: [
+        string.superAgent,
         string.masterAgent,
         string.user,
       ],
-      [string.hyperAgent]: [
+      [string.superAgent]: [
         string.masterAgent,
         string.user,
       ],
