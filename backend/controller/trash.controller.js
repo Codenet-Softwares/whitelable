@@ -6,6 +6,7 @@ import { statusCode } from '../helper/statusCodes.js';
 import axios from 'axios';
 import { string } from '../constructor/string.js';
 import { Op } from 'sequelize';
+import { admin_Balance } from './transaction.controller.js';
 
 async function checkHierarchyBalance(adminId) {
   const subAdmins = await admins.findAll({ where: { createdById: adminId } });
@@ -36,7 +37,9 @@ export const moveAdminToTrash = async (req, res) => {
       );
     }
 
-    if (admin.balance !== 0) {
+    const adminBalance = await admin_Balance(admin.adminId)
+
+    if (adminBalance !== 0) {
       return res.status(statusCode.badRequest).json(
         apiResponseErr(null, false, statusCode.badRequest, `Balance should be 0 to move to Trash`)
       );
