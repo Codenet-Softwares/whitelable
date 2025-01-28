@@ -10,6 +10,7 @@ import trash from '../models/trash.model.js';
 import axios from 'axios';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import { admin_Balance } from './transaction.controller.js';
 dotenv.config();
 
 /**
@@ -255,10 +256,16 @@ export const getIpDetail = async (req, res) => {
 };
 
 export const calculateLoadBalance = async (adminId) => {
+  let loadBalance = 0
+
   const admin = await admins.findOne({ where: { adminId } });
   if (!admin) return 0;
 
-  let totalBalance = admin.balance;
+  const adminBalance = await admin_Balance(admin.adminId)
+
+  let totalBalance = adminBalance;
+
+  // let totalBalance = admin.balance;
 
   const children = await admins.findAll({
     where: { createdById: adminId },
@@ -269,9 +276,8 @@ export const calculateLoadBalance = async (adminId) => {
     totalBalance += childBalance;
   }
 
-  if (admin.loadBalance !== totalBalance) {
-    console.log(`Updating loadBalance for adminId ${adminId}: ${admin.loadBalance} -> ${totalBalance}`);
-    await admin.update({ loadBalance: totalBalance });
+  if (loadBalance !== totalBalance) {
+    loadBalance = totalBalance
   }
 
   return totalBalance;
@@ -292,19 +298,23 @@ export const viewAllCreates = async (req, res) => {
       string.hyperAgent,
       string.superAgent,
       string.masterAgent,
-      string.user
+      string.user,
     ];
 
     const totalRecords = await admins.count({
       where: {
         createdById,
         ...searchQuery,
-        [Op.or]: allowedRoles.map(role => fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))),
+        [Op.or]: allowedRoles.map((role) =>
+          fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))
+        ),
       },
     });
 
     if (totalRecords === 0) {
-      return res.status(statusCode.success).json(apiResponseSuccess(null, true, statusCode.success, messages.noRecordsFound));
+      return res
+        .status(statusCode.success)
+        .json(apiResponseSuccess(null, true, statusCode.success, messages.noRecordsFound));
     }
 
     const offset = (page - 1) * pageSize;
@@ -312,71 +322,92 @@ export const viewAllCreates = async (req, res) => {
       where: {
         createdById,
         ...searchQuery,
-        [Op.or]: allowedRoles.map(role => fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))),
+        [Op.or]: allowedRoles.map((role) =>
+          fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))
+        ),
       },
       offset,
       limit: pageSize,
       order: [['createdAt', 'DESC']],
     });
 
-    const users = adminsData.map(admin => {
-      let creditRefs = [];
-      let partnerships = [];
+    // Map through adminsData and calculate load balance
+    const users = await Promise.all(
+      adminsData.map(async (admin) => {
+        let creditRefs = [];
+        let partnerships = [];
 
-      if (admin.creditRefs) {
-        try {
-          creditRefs = JSON.parse(admin.creditRefs);
-        } catch {
-          creditRefs = [];
+        if (admin.creditRefs) {
+          try {
+            creditRefs = JSON.parse(admin.creditRefs);
+          } catch {
+            creditRefs = [];
+          }
         }
-      }
 
-      if (admin.partnerships) {
-        try {
-          partnerships = JSON.parse(admin.partnerships);
-        } catch {
-          partnerships = [];
+        if (admin.partnerships) {
+          try {
+            partnerships = JSON.parse(admin.partnerships);
+          } catch {
+            partnerships = [];
+          }
         }
-      }
+        let exposure
 
-      return {
-        adminId: admin.adminId,
-        userName: admin.userName,
-        roles: admin.roles,
-        balance: admin.balance,
-        loadBalance: admin.loadBalance,
-        creditRefs,
-        createdById: admin.createdById,
-        createdByUser: admin.createdByUser,
-        partnerships,
-        status: admin.isActive ? "Active" : !admin.locked ? "Locked" : !admin.isActive ? "Suspended" : "",
-        exposure: admin.exposure
-      };
-    });
+        if (admin.roles[0].role === string.user) {
+          const baseUrl = process.env.COLOR_GAME_URL;
+          const user_Exposure = await axios.get(`${baseUrl}/api/external/get-exposure/${admin.adminId}`)
+          const { data } = user_Exposure
+          console.log("data.....", data.exposure);
+          exposure = data.exposure
+        }
+
+        const adminBalance = await admin_Balance(admin.adminId);
+        const loadBalance = await calculateLoadBalance(admin.adminId);
+
+        return {
+          adminId: admin.adminId,
+          userName: admin.userName,
+          roles: admin.roles,
+          balance: adminBalance,
+          loadBalance, // Add loadBalance to response
+          creditRefs,
+          createdById: admin.createdById,
+          createdByUser: admin.createdByUser,
+          partnerships,
+          status: admin.isActive
+            ? 'Active'
+            : !admin.locked
+              ? 'Locked'
+              : !admin.isActive
+                ? 'Suspended'
+                : '',
+          exposure: exposure,
+        };
+      })
+    );
 
     const totalPages = Math.ceil(totalRecords / pageSize);
 
     return res.status(statusCode.success).json(
-      apiResponseSuccess(
-        users,
-        true,
-        statusCode.success,
-        messages.success,
-        {
-          totalRecords,
-          totalPages,
-          currentPage: page,
-          pageSize,
-        }
-      ),
+      apiResponseSuccess(users, true, statusCode.success, messages.success, {
+        totalRecords,
+        totalPages,
+        currentPage: page,
+        pageSize,
+      })
     );
   } catch (error) {
     return res.status(statusCode.internalServerError).json(
-      apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message),
+      apiResponseErr(
+        error.data ?? null,
+        false,
+        error.responseCode ?? statusCode.internalServerError,
+        error.errMessage ?? error.message
+      )
     );
   }
 };
-
 
 // done
 export const viewAllSubAdminCreates = async (req, res) => {
@@ -780,8 +811,8 @@ export const buildRootPath = async (req, res) => {
         limit: pageSize,
       });
 
-      const userDetails = {
-        createdUsers: createdUsers.map((createdUser) => {
+      const createdUsersDetails = await Promise.all(
+        createdUsers.map(async (createdUser) => {
           let creditRef = [];
           let refProfitLoss = [];
           let partnership = [];
@@ -791,24 +822,42 @@ export const buildRootPath = async (req, res) => {
             refProfitLoss = createdUser.refProfitLoss ? JSON.parse(createdUser.refProfitLoss) : [];
             partnership = createdUser.partnerships ? JSON.parse(createdUser.partnerships) : [];
           } catch (e) {
-            // console.error('JSON parsing error:', e);
+            console.error("JSON parsing error:", e);
+          }
+
+          const adminBalance = await admin_Balance(createdUser.adminId);
+          const loadBalance = await calculateLoadBalance(createdUser.adminId);
+
+          let exposure ;
+          
+          if (createdUser.roles[0].role === string.user) {
+            const baseUrl = process.env.COLOR_GAME_URL;
+            const user_Exposure = await axios.get(`${baseUrl}/api/external/get-exposure/${createdUser.adminId}`)
+            const { data } = user_Exposure
+            console.log("data.....", data.exposure);
+            exposure = data.exposure
           }
 
           return {
             id: createdUser.adminId,
             userName: createdUser.userName,
             roles: createdUser.roles,
-            balance: createdUser.balance,
-            loadBalance: createdUser.loadBalance,
+            balance: adminBalance,
+            loadBalance: loadBalance,
             creditRef: creditRef,
             refProfitLoss: refProfitLoss,
             partnership: partnership,
-            status: createdUser.isActive ? "Active" : !createdUser.locked ? "Locked" : !createdUser.isActive ? "Suspended" : "",
-            exposure: createdUser.exposure
+            status: createdUser.isActive
+              ? "Active"
+              : createdUser.locked
+                ? "Locked"
+                : "Suspended",
+            exposure: exposure,
           };
-        }),
-      };
+        })
+      );
 
+      const userDetails = { createdUsers: createdUsersDetails };
       const message = 'Path stored successfully';
       return res.status(statusCode.create).json(
         apiResponseSuccess(

@@ -1,15 +1,15 @@
 import { apiResponseErr, apiResponseSuccess, apiResponsePagination } from '../helper/errorHandler.js';
-import selfTransactions from '../models/selfTransaction.model.js';
 import transaction from '../models/transactions.model.js';
 import admins from '../models/admin.model.js';
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcrypt';
 import { statusCode } from '../helper/statusCodes.js';
 import { Sequelize } from 'sequelize';
-import { messages } from '../constructor/string.js';
+import { messages, string } from '../constructor/string.js';
 import axios from 'axios';
 import { calculateLoadBalance } from './admin.controller.js';
 import { Op } from 'sequelize'
+import { Admin } from 'mongodb';
 
 export const depositTransaction = async (req, res) => {
   try {
@@ -30,19 +30,11 @@ export const depositTransaction = async (req, res) => {
       amount: depositAmount,
       userName: admin.userName,
       date: new Date(),
-      transactionType: 'deposit',
+      transactionType: 'self_credit',
     };
 
-    const newDepositBalance = admin.depositBalance + depositAmount;
-    const newAdminBalance = admin.balance + depositAmount;
-
-    await admin.update({
-      balance: newAdminBalance,
-      depositBalance: newDepositBalance,
-    });
-
-    await selfTransactions.create({
-      selfTransactionId: uuidv4(),
+    await transaction.create({
+      transactionId: uuidv4(),
       adminId: adminId,
       amount: depositTransactionData.amount,
       userName: depositTransactionData.userName,
@@ -105,17 +97,22 @@ export const transferAmount = async (req, res) => {
     const parsedTransferAmount = parseFloat(transferAmount);
     const parsedWithdrawalAmt = parseFloat(withdrawalAmt);
 
+    let balance = 0
+
     if (parsedWithdrawalAmt) {
-      if (receiverAdmin.balance < parsedWithdrawalAmt) {
+
+      const receiver_admin_balance = await admin_Balance(receiveUserId)
+
+      if (receiver_admin_balance < parsedWithdrawalAmt) {
         return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, 'Insufficient Balance For Withdrawal'));
       }
 
-
-      const deductionBalance = receiverAdmin.balance - parsedWithdrawalAmt;
-      const creditAmount = senderAdmin.balance + parsedWithdrawalAmt;
+      const deductionBalance = receiver_admin_balance - parsedWithdrawalAmt;
 
       const withdrawalRecord = {
+        transactionId: uuidv4(),
         transactionType: 'withdrawal',
+        receiver_adminId: receiverAdmin.adminId,
         amount: Math.round(parsedWithdrawalAmt),
         transferFromUserAccount: receiverAdmin.userName,
         transferToUserAccount: senderAdmin.userName,
@@ -125,11 +122,7 @@ export const transferAmount = async (req, res) => {
         currentBalance: deductionBalance
       };
 
-      await receiverAdmin.update({ balance: deductionBalance });
-      await senderAdmin.update({ balance: creditAmount });
-
       await transaction.create({
-        transactionId: uuidv4(),
         adminId,
         ...withdrawalRecord,
       });
@@ -137,8 +130,7 @@ export const transferAmount = async (req, res) => {
       const dataToSend = {
         ...withdrawalRecord,
         userId: receiveUserId,
-        transactionId: withdrawalRecord.transactionId,
-        type: 'debit',
+        type: 'withdrawal',
       };
 
       let message = '';
@@ -163,26 +155,22 @@ export const transferAmount = async (req, res) => {
 
       return res.status(statusCode.create).json(apiResponseSuccess(null, true, statusCode.create, 'Balance Deducted Successfully' + ' ' + message));
     } else {
-      if (senderAdmin.balance < parsedTransferAmount) {
+
+      const sender_admin_balance = await admin_Balance(adminId)
+      const receiver_admin_balance = await admin_Balance(receiveUserId)
+      console.log("sender_admin_balance", sender_admin_balance)
+      if (sender_admin_balance < parsedTransferAmount) {
         return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, 'Insufficient Balance For Transfer'));
       }
 
-      // const transferRecordDebit = {
-      //   transactionType: 'debit',
-      //   amount: Math.round(parsedTransferAmount),
-      //   transferFromUserAccount: senderAdmin.userName,
-      //   transferToUserAccount: receiverAdmin.userName,
-      //   userName: senderAdmin.userName,
-      //   date: new Date(),
-      //   remarks,
-      // };
+      const receiverBalance = receiver_admin_balance + parsedTransferAmount;
 
-
-      const senderBalance = senderAdmin.balance - parsedTransferAmount;
-      const receiverBalance = receiverAdmin.balance + parsedTransferAmount;
+      const transactionId = uuidv4();
 
       const transferRecordCredit = {
+        transactionId,
         transactionType: 'credit',
+        receiver_adminId: receiverAdmin.adminId,
         amount: Math.round(parsedTransferAmount),
         transferFromUserAccount: senderAdmin.userName,
         transferToUserAccount: receiverAdmin.userName,
@@ -192,17 +180,7 @@ export const transferAmount = async (req, res) => {
         currentBalance: receiverBalance
       }
 
-      await receiverAdmin.update({ balance: receiverBalance });
-      await senderAdmin.update({ balance: senderBalance });
-
-      // await transaction.create({
-      //   transactionId: uuidv4(),
-      //   adminId,
-      //   ...transferRecordDebit,
-      // });
-
       await transaction.create({
-        transactionId: uuidv4(),
         adminId,
         ...transferRecordCredit,
       });
@@ -210,7 +188,6 @@ export const transferAmount = async (req, res) => {
       const dataToSend = {
         ...transferRecordCredit,
         userId: receiveUserId,
-        transactionId: transferRecordCredit.transactionId,
         type: 'credit',
       };
 
@@ -412,7 +389,7 @@ export const accountStatement = async (req, res) => {
     }
 
     const adminUserName = admin.userName;
-    const adminMainBalance = admin.balance;
+    const adminMainBalance = await admin_Balance(adminId);
 
     const transactionQuery = {
       where: {
@@ -467,20 +444,104 @@ export const accountStatement = async (req, res) => {
   }
 };
 
-
-
-export const viewBalance = async (req, res) => {
+// Admin Main balance 
+export const viewAdminBalance = async (req, res) => {
   try {
     const adminId = req.params.adminId;
-    const admin = await admins.findOne({ where: { adminId } });
-    const amount = {
-      balance: admin.balance,
-    };
-    return res.status(statusCode.success).json(apiResponseSuccess(amount, statusCode.success, true, 'Successfully'));
+    let balance = 0;
+
+    const adminTransactions = await transaction.findAll({
+      where: {
+        [Op.or]: [{ adminId }, { receiver_adminId: adminId }],
+      },
+    });
+
+    for (const transaction of adminTransactions) {
+      const { receiver_adminId, transactionType, amount } = transaction;
+      const parsedAmount = parseFloat(amount);
+
+      if (receiver_adminId === adminId) {
+        if (transactionType === "credit") {
+          balance += parsedAmount;
+        } else if (transactionType === "withdrawal") {
+          balance -= parsedAmount;
+        }
+
+      } else {
+        if (transactionType === "credit") {
+          balance -= parsedAmount;
+        } else if (transactionType === "withdrawal") {
+          balance += parsedAmount;
+        } else if (transactionType === "self_credit") {
+          balance += parsedAmount;
+        }
+      }
+    }
+    return res.status(statusCode.success).json(apiResponseSuccess({ balance }, true, statusCode.success, "Balance calculated successfully."));
   } catch (error) {
-    res
+    console.error("Error in viewAdminBalance:", error);
+    return res
       .status(statusCode.internalServerError)
-      .send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
+      .json(
+        apiResponseErr(
+          null,
+          false,
+          statusCode.internalServerError,
+          error.message || "An error occurred while fetching the admin balance."
+        )
+      );
+  }
+};
+
+// Generic admin Balance function
+export const admin_Balance = async (adminId) => {
+  try {
+
+    let balance = 0;
+    const admin_transactions = await transaction.findAll({
+      where: {
+        [Op.or]: [
+          { adminId },
+          { receiver_adminId: adminId },
+        ],
+      },
+    });
+
+    for (const transaction of admin_transactions) {
+      if (transaction.receiver_adminId === adminId) {
+        if (transaction.transactionType === 'credit') {
+          balance += parseFloat(transaction.amount);
+        }
+        if (transaction.transactionType === 'withdrawal') {
+          balance -= parseFloat(transaction.amount);
+        }
+
+      } else {
+        if (transaction.transactionType === 'credit') {
+          balance -= parseFloat(transaction.amount);
+        }
+        if (transaction.transactionType === 'withdrawal') {
+          balance += parseFloat(transaction.amount);
+        }
+        if (transaction.transactionType === 'self_credit') {
+          balance += parseFloat(transaction.amount);
+        }
+      }
+    }
+
+    const get_id = await admins.findOne({ where: { adminId } })
+    
+    if (get_id.roles[0].role ===  string.user) {
+      const baseUrl = process.env.COLOR_GAME_URL;
+      const user_balance = await axios.get(`${baseUrl}/api/external/get-user-balance/${adminId}`)
+      const { data } = user_balance
+      console.log("data", data.balance);
+      balance = data.balance
+    }
+
+    return balance;
+  } catch (error) {
+    throw new Error(`Error calculating balance: ${error.message}`);
   }
 };
 
@@ -492,34 +553,34 @@ export const viewAddBalance = async (req, res) => {
     page = parseInt(page)
     limit = parseInt(limit)
     const offset = (page - 1) * limit;
-    const allTransactions = await selfTransactions.findAll({ where: { adminId } });
-    if (allTransactions.length === 0) {
-      return res
-        .status(statusCode.success)
-        .send(apiResponseSuccess({ transactions: [] }, true, statusCode.success, 'Data Not Found'));
-    }
-    const paginatedTransactions = await selfTransactions.findAll({
-      where: { adminId },
+
+    const { count, rows: paginatedTransactions } = await transaction.findAndCountAll({
+      where: { adminId, transactionType: 'self_credit' },
       order: [['createdAt', 'DESC']],
       offset,
       limit,
     });
-    const totalItems = await selfTransactions.count({ where: { adminId } });
-    const totalPages = Math.ceil(totalItems / limit)
+    if (paginatedTransactions.length === 0) {
+      return res
+        .status(statusCode.success)
+        .send(apiResponseSuccess({ transactions: [] }, true, statusCode.success, 'Data Not Found'));
+    }
+
     const balanceInfo = {
       transactions: paginatedTransactions.map((transaction) => ({
         amount: transaction.amount,
         date: transaction.date
       })),
     };
+    const paginatedData = {
+      page: parseInt(page),
+      limit,
+      totalPages: Math.ceil(count / limit),
+      totalItems: count,
+    };
     return res
       .status(statusCode.success)
-      .send(apiResponseSuccess(balanceInfo, true, statusCode.success, 'Balance Retrieved Successfully!', {
-        page,
-        limit,
-        totalItems,
-        totalPages,
-      }));
+      .send(apiResponseSuccess(balanceInfo, true, statusCode.success, 'Balance Retrieved Successfully!', paginatedData));
   } catch (error) {
     res
       .status(statusCode.internalServerError)

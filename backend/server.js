@@ -47,7 +47,7 @@ liveMarketBetRoute(app);
 activeAdminRoute(app);
 lotteryGameModule(app);
 
-sequelize.sync({ alter: false })
+sequelize.sync({ alter: true })
   .then(() => {
     console.log('Database & tables created!');
   })

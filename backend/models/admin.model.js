@@ -35,14 +35,6 @@ const admins = sequelize.define(
       type: DataTypes.JSON,
       allowNull: true,
     },
-    balance: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
-    },
-    depositBalance: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
-    },
     lastLoginTime: {
       type: DataTypes.DATE,
       allowNull: true,
@@ -62,10 +54,6 @@ const admins = sequelize.define(
     timezone: {
       type: DataTypes.STRING,
       allowNull: true,
-    },
-    loadBalance: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
     },
     createdById: {
       type: DataTypes.STRING,

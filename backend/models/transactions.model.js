@@ -17,6 +17,10 @@ const transaction = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    receiver_adminId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     amount: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -35,15 +39,15 @@ const transaction = sequelize.define(
     },
     transferFromUserAccount: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     transferToUserAccount: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     remarks: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     currentBalance :{
       type: DataTypes.INTEGER,

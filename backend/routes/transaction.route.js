@@ -4,7 +4,7 @@ import {
   transactionView,
   transferAmount,
   viewAddBalance,
-  viewBalance,
+  viewAdminBalance,
 } from '../controller/transaction.controller.js';
 import customErrorHandler from '../helper/customErrorHandler.js';
 import { Authorize } from '../middleware/auth.js';
@@ -108,7 +108,7 @@ export const transactionRoute = (app) => {
       string.subSuperAgent,
       string.subMasterAgent,
     ]),
-    viewBalance,
+    viewAdminBalance,
   );
 
   //view the main Balance
