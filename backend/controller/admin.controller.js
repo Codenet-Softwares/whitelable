@@ -352,6 +352,15 @@ export const viewAllCreates = async (req, res) => {
             partnerships = [];
           }
         }
+        let exposure
+
+        if (admin.roles[0].role === string.user) {
+          const baseUrl = process.env.COLOR_GAME_URL;
+          const user_Exposure = await axios.get(`${baseUrl}/api/external/get-exposure/${admin.adminId}`)
+          const { data } = user_Exposure
+          console.log("data.....", data.exposure);
+          exposure = data.exposure
+        }
 
         const adminBalance = await admin_Balance(admin.adminId);
         const loadBalance = await calculateLoadBalance(admin.adminId);
@@ -373,7 +382,7 @@ export const viewAllCreates = async (req, res) => {
               : !admin.isActive
                 ? 'Suspended'
                 : '',
-          exposure: admin.exposure,
+          exposure: exposure,
         };
       })
     );
@@ -807,7 +816,7 @@ export const buildRootPath = async (req, res) => {
           let creditRef = [];
           let refProfitLoss = [];
           let partnership = [];
-      
+
           try {
             creditRef = createdUser.creditRefs ? JSON.parse(createdUser.creditRefs) : [];
             refProfitLoss = createdUser.refProfitLoss ? JSON.parse(createdUser.refProfitLoss) : [];
@@ -815,10 +824,10 @@ export const buildRootPath = async (req, res) => {
           } catch (e) {
             console.error("JSON parsing error:", e);
           }
-      
+
           const adminBalance = await admin_Balance(createdUser.adminId);
           const loadBalance = await calculateLoadBalance(createdUser.adminId);
-      
+
           return {
             id: createdUser.adminId,
             userName: createdUser.userName,
@@ -831,13 +840,13 @@ export const buildRootPath = async (req, res) => {
             status: createdUser.isActive
               ? "Active"
               : createdUser.locked
-              ? "Locked"
-              : "Suspended",
+                ? "Locked"
+                : "Suspended",
             exposure: createdUser.exposure,
           };
         })
       );
-      
+
       const userDetails = { createdUsers: createdUsersDetails };
       const message = 'Path stored successfully';
       return res.status(statusCode.create).json(
