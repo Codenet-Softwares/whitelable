@@ -9,7 +9,7 @@ import FullScreenLoader from "../FullScreenLoader";
 
 const Authform = ({ purpose, authFormApi }) => {
   const [authForm] = useState(getAuthForm);
-  const { dispatch, store } = useAppContext();
+  const { dispatch, store, showLoader, hideLoader } = useAppContext();
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
@@ -29,10 +29,16 @@ const Authform = ({ purpose, authFormApi }) => {
 
       return (
         <>
-          <option hidden value="" style={{textTransform:"uppercase"}}>Open This Select Role</option>
+          <option hidden value="" style={{ textTransform: "uppercase" }}>
+            Open This Select Role
+          </option>
 
           {availableRoles.map((option) => (
-            <option key={option} value={option} style={{textTransform:"uppercase"}}>
+            <option
+              key={option}
+              value={option}
+              style={{ textTransform: "uppercase" }}
+            >
               {option}
             </option>
           ))}
@@ -41,29 +47,29 @@ const Authform = ({ purpose, authFormApi }) => {
     }
     return null;
   };
-
-  const {
-    values,
-    errors,
-    touched,
-    handleBlur,
-    handleChange,
-    handleSubmit,
-    resetForm,
-    setFieldValue,
-  } = useFormik({
-    initialValues: {
-      ...authForm,
-      roles: authForm.roles || [], // Ensure role is an array
-    },
-    validationSchema: LoginSchema,
-    onSubmit: (values, action) => {
-      console.log("values++===============>", values);
-      authFormHandler(values);
-      resetForm();
-    },
-    enableReinitialize: true,
-  });
+//need not delete this part this is the old portion for formik down is the new portion changed by me tamoghna sanyal
+  // const {
+  //   values,
+  //   errors,
+  //   touched,
+  //   handleBlur,
+  //   handleChange,
+  //   handleSubmit,
+  //   resetForm,
+  //   setFieldValue,
+  // } = useFormik({
+  //   initialValues: {
+  //     ...authForm,
+  //     roles: authForm.roles || [], // Ensure role is an array
+  //   },
+  //   validationSchema: LoginSchema,
+  //   onSubmit: (values, action) => {
+  //     console.log("values++===============>", values);
+  //     authFormHandler(values);
+  //     resetForm();
+  //   },
+  //   enableReinitialize: true,
+  // });
   // async function authFormHandler(values) {
   //   console.log(values);
   //   dispatch({
@@ -89,6 +95,41 @@ const Authform = ({ purpose, authFormApi }) => {
   //   });
   //   setIsLoading(false);
   // }
+
+  const {
+    values,
+    errors,
+    touched,
+    handleBlur,
+    handleChange,
+    handleSubmit,
+    resetForm,
+    setFieldValue,
+  } = useFormik({
+    initialValues: {
+      ...authForm,
+      roles: authForm.roles || [], // Ensure role is an array
+    },
+    validationSchema: LoginSchema,
+    onSubmit: async (values, action) => {
+
+
+      showLoader(); // Show loader before starting the async operation
+
+      try {
+        console.log("values++===============>", values);
+        await authFormHandler(values); // Assuming authFormHandler is an async function
+
+        resetForm(); // Reset the form after successful submission
+      } catch (error) {
+        alert("There was an error during authentication"); // Handle error, if any
+      } finally {
+        hideLoader(); // Hide loader after the async operation is complete
+      }
+    },
+    enableReinitialize: true,
+  });
+
   async function authFormHandler(values) {
     console.log(values);
     dispatch({
@@ -98,7 +139,8 @@ const Authform = ({ purpose, authFormApi }) => {
     setIsLoading(true);
 
     // API call to authenticate
-    const response = values?.roles[0]?.length == 0 ? "" : await authFormApi(values, true);
+    const response =
+      values?.roles[0]?.length == 0 ? "" : await authFormApi(values, true);
     console.log("res from login", response);
 
     if (response && response.data) {
@@ -143,13 +185,18 @@ const Authform = ({ purpose, authFormApi }) => {
             <div className="col-lg-6">
               <div className="modal-content cs_modal">
                 <div className="modal-header justify-content-center theme_bg_1">
-                  
                   <h5 className="modal-title text_white ">
                     {purpose === "create" && "Create"}
-                    {purpose === "login" && <div>
-                      <div className="text-uppercase text-center">Whitelabel</div>
-                      <div className="text-center h6 mt-2">Hi! Please Enter Your Login Credentials!</div>
-                      </div>}
+                    {purpose === "login" && (
+                      <div>
+                        <div className="text-uppercase text-center">
+                          Whitelabel
+                        </div>
+                        <div className="text-center h6 mt-2">
+                          Hi! Please Enter Your Login Credentials!
+                        </div>
+                      </div>
+                    )}
                   </h5>
                 </div>
                 <div className="modal-body">

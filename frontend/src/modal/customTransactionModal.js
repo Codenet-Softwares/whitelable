@@ -11,13 +11,14 @@ import {
 import { useAppContext } from "../contextApi/context";
 import { toast } from "react-toastify";
 const CustomTransactionModal = (props) => {
+
   const { setIsLoading } = props;
   const [formData, setFormData] = useState({
     amount: null,
     password: "",
     remarks: "",
   });
-  const { store } = useAppContext();
+  const { store, showLoader, hideLoader } = useAppContext();
   console.log("store from modal", store);
   console.log("from modal=>>>>", props?.differentiate);
   console.log("from modal adminId=>>>>", props?.adminId);
@@ -56,7 +57,7 @@ const CustomTransactionModal = (props) => {
             creditRef: formData.amount,
             password: formData.password,
           };
-
+          showLoader(); // Show loader before starting the async operation
           setIsLoading(true);
           const creditRefResponse = await updateCreditRef(
             {
@@ -71,6 +72,7 @@ const CustomTransactionModal = (props) => {
             resetForm();
             props.setRefresh(creditRefResponse);
           }
+          hideLoader(); // Hide loader once the async operation is complete
           setIsLoading(false);
           break;
         } else {
@@ -88,6 +90,7 @@ const CustomTransactionModal = (props) => {
             partnership: formData.amount,
             password: formData.password,
           };
+          showLoader(); // Show loader before starting the async operation
           setIsLoading(true);
           const partnershipResponse = await updatePartnership(
             {
@@ -102,6 +105,7 @@ const CustomTransactionModal = (props) => {
             resetForm();
             props.setRefresh(partnershipResponse);
           }
+          hideLoader(); // Hide loader once the async operation is complete
           setIsLoading(false);
           break;
         } else {
@@ -153,7 +157,9 @@ const CustomTransactionModal = (props) => {
         remarks: formData.remarks,
         receiveUserId: props?.adminId,
       };
+
       setIsLoading(true);
+      showLoader(); // Show loader before starting the async operation
       const creditRefResponse = await transferAmount(
         {
           adminId: store.admin.id,
@@ -167,6 +173,7 @@ const CustomTransactionModal = (props) => {
         resetForm();
         props.setRefresh(creditRefResponse);
       }
+      hideLoader(); // Hide loader once the async operation is complete
       setIsLoading(false);
     } else {
       const DepositData = {
@@ -176,6 +183,7 @@ const CustomTransactionModal = (props) => {
         receiveUserId: props?.adminId,
       };
       setIsLoading(true);
+      showLoader(); // Show loader before starting the async operation
       const creditRefResponse = await transferAmount(
         {
           adminId: store.admin.id,
@@ -189,6 +197,7 @@ const CustomTransactionModal = (props) => {
         resetForm();
         props.setRefresh(creditRefResponse);
       }
+      hideLoader(); // Hide loader once the async operation is complete
       setIsLoading(false);
     }
   }

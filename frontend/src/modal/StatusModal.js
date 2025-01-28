@@ -5,6 +5,7 @@ import { activeInactiveInitialState } from "../Utils/service/initiateState";
 import { StatusChange } from "../Utils/service/apiService";
 import { toast } from "react-toastify";
 import { customErrorHandler } from "../Utils/helper";
+import { useAppContext } from "../contextApi/context";
 
 const StatusModal = ({
   show,
@@ -15,6 +16,7 @@ const StatusModal = ({
   adminIdForStatus,
   setRefresh,
 }) => {
+  const { showLoader, hideLoader } = useAppContext();
   const [state, setState] = useState(activeInactiveInitialState());
 
   // Set modal state based on Status when it opens
@@ -84,6 +86,7 @@ const StatusModal = ({
     }
 
     if (state.isClicked) {
+      showLoader(); // Show the loader before starting the async operation
       try {
         const response = await StatusChange(
           {
@@ -102,6 +105,8 @@ const StatusModal = ({
         }
       } catch (error) {
         toast.error(customErrorHandler(error));
+      }finally {
+        hideLoader(); // Hide the loader once the async operation is complete, regardless of success or failure
       }
     } else {
       toast.error("Please select a status to continue");

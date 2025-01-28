@@ -135,7 +135,7 @@ const LotteryMarketAnalysis = () => {
           fontWeight: "bold",
         }}
       >
-        Lottery Market Analysis
+        LOTTERY MARKET ANALYSIS
         <span className="ms-3 text-warning">
           {lotteryData[0]?.marketName || "Unknown Market"}
         </span>

@@ -6,14 +6,17 @@ import { ResetAdminPassword } from "../../Utils/service/apiService";
 import { getAdminResetPasswordInitialState } from "../../Utils/service/initiateState"; 
 import { ReusableInput } from "../common/Resuableinput"; 
 import { resetPasswordSchema } from "../../Utils/schema"; 
+import { useAppContext } from "../../contextApi/context";
 
 const ResetPassword = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const state = location?.state || {}; 
+  const { showLoader, hideLoader } = useAppContext();
 
   const handleResetPassword = async (values) => {
     const { confirmPassword, ...resetValues } = values; 
+    showLoader(); // Show loader before starting the async operation 
     try {
       const response = await ResetAdminPassword(resetValues, true);
       if (response?.success) {
@@ -24,6 +27,8 @@ const ResetPassword = () => {
       }
     } catch (error) {
       toast.error("An error occurred. Please try again.");
+    }finally {
+      hideLoader(); // Hide loader in the finally block to ensure it always runs
     }
   };
 
@@ -65,7 +70,7 @@ const ResetPassword = () => {
             color: "#4682B4",
             fontSize: "1.5rem",
             letterSpacing: "2px",
-            animation: "glow 2s infinite alternate",
+            // animation: "glow 2s infinite alternate",
           }}
         >
           {formik.values.userName}

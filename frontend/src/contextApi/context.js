@@ -1,7 +1,8 @@
-import { createContext, useContext, useReducer, useEffect } from 'react';
+import { createContext, useContext, useReducer, useEffect, useState } from 'react';
 import { reducer } from './reducer';
 import { getAdminInitialState } from '../Utils/service/initiateState';
 import strings from '../Utils/constant/stringConstant';
+import './loader.css';
 
 const AppContext = createContext();
 
@@ -11,19 +12,29 @@ const initialState = {
 
 const AppProvider = ({ children }) => {
   const [store, dispatch] = useReducer(reducer, initialState, () => {
-    // Load state from local storage if available
     const storedState = localStorage.getItem(strings.LOCAL_STORAGE_KEY);
     return storedState ? JSON.parse(storedState) : initialState;
   });
 
-  // Save state to local storage whenever it changes
+  const [isLoading, setIsLoading] = useState(false); // Initially false, loader should be hidden
+  const showLoader = () => setIsLoading(true);
+  const hideLoader = () => setIsLoading(false);
+
   useEffect(() => {
     const dummyStore = { ...store };
-    // delete dummyStore.isLoading
     localStorage.setItem(strings.LOCAL_STORAGE_KEY, JSON.stringify(dummyStore));
   }, [store]);
 
-  return <AppContext.Provider value={{ store, dispatch }}>{children}</AppContext.Provider>;
+  return (
+    <AppContext.Provider value={{ store, dispatch, isLoading, showLoader, hideLoader }}>
+      {isLoading && (
+        <div className="loader">
+          <div className="spinner"></div>
+        </div>
+      )}
+      {children}
+    </AppContext.Provider>
+  );
 };
 
 const useAppContext = () => {
