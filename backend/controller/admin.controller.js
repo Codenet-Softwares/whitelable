@@ -828,6 +828,16 @@ export const buildRootPath = async (req, res) => {
           const adminBalance = await admin_Balance(createdUser.adminId);
           const loadBalance = await calculateLoadBalance(createdUser.adminId);
 
+          let exposure ;
+          
+          if (createdUser.roles[0].role === string.user) {
+            const baseUrl = process.env.COLOR_GAME_URL;
+            const user_Exposure = await axios.get(`${baseUrl}/api/external/get-exposure/${createdUser.adminId}`)
+            const { data } = user_Exposure
+            console.log("data.....", data.exposure);
+            exposure = data.exposure
+          }
+
           return {
             id: createdUser.adminId,
             userName: createdUser.userName,
@@ -842,7 +852,7 @@ export const buildRootPath = async (req, res) => {
               : createdUser.locked
                 ? "Locked"
                 : "Suspended",
-            exposure: createdUser.exposure,
+            exposure: exposure,
           };
         })
       );
