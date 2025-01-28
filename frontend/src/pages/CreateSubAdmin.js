@@ -8,10 +8,32 @@ import { createSubAdmin } from "../Utils/service/apiService";
 import FullScreenLoader from "../components/FullScreenLoader";
 
 const CreateSubAdmin = () => {
-  const { store, dispatch } = useAppContext();
+  const { store, dispatch, showLoader, hideLoader  } = useAppContext();
   const [createSubAdminState] = useState(getCreateSubAdmin);
   const [isLoading, setIsLoading] = useState(false)
 
+  // const {
+  //   values,
+  //   errors,
+  //   touched,
+  //   handleBlur,
+  //   handleChange,
+  //   handleSubmit,
+  //   resetForm,
+  //   setFieldValue,
+  // } = useFormik({
+  //   initialValues: {
+  //     ...createSubAdminState,
+  //     roles: createSubAdminState.roles || [{ permission: [] }],
+  //   },
+  //   validationSchema: CreateSubAdminSchema,
+  //   onSubmit: async (values, action) => {
+  //     console.log("values++===============>", values);
+  //     await create_SubAdmin(values);
+  //     resetForm();
+  //   },
+  //   enableReinitialize: true,
+  // });
   const {
     values,
     errors,
@@ -29,12 +51,19 @@ const CreateSubAdmin = () => {
     validationSchema: CreateSubAdminSchema,
     onSubmit: async (values, action) => {
       console.log("values++===============>", values);
-      await create_SubAdmin(values);
-      resetForm();
+      showLoader(); // Show loader before starting the async operation
+      try {
+        await create_SubAdmin(values);
+        resetForm();
+      } catch (error) {
+        console.error("Error in creating sub-admin:", error);
+      } finally {
+        hideLoader(); // Hide loader in the finally block
+      }
     },
     enableReinitialize: true,
   });
-
+  
   const handleCheckboxChange = (event) => {
     const { name, checked } = event.target;
     const updatedPermissions = checked

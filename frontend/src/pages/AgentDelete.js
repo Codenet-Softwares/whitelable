@@ -10,7 +10,7 @@ import Pagination from "../components/common/Pagination";
 
 
 const AgentDelete = () => {
-  const { store } = useAppContext();
+  const { store, showLoader, hideLoader } = useAppContext();
   console.log("======>>> id from store", store);
   const [viewAgentDelete, setViewAgentDelete] = useState([]);
   const [reload, setReload] = useState(false); // state to trigger reload
@@ -41,25 +41,60 @@ const AgentDelete = () => {
   const startIndex = Math.min((page - 1) * pageLimit + 1);
   const endIndex = Math.min(page * pageLimit, totalData);
 
+  // async function handleDeleteAgent(id) {
+  //   console.log("onclick user trash id", id);
+
+  //   const response = await deleteTrash_api({ trashId: id });
+  //   if (response) {
+  //     toast.info(response.message);
+  //     setReload(!reload);
+  //   }
+  // }
+
+  // async function handleRestore(adminId) {
+  //   console.log("onclick adminId ===== >>", adminId);
+  //   const data = { adminId: adminId };
+  //   const response = await restoreTrash_api(data);
+  //   if (response) {
+  //     toast.info(response.message);
+  //     setReload(!reload);
+  //   }
+  // }
   async function handleDeleteAgent(id) {
     console.log("onclick user trash id", id);
-
-    const response = await deleteTrash_api({ trashId: id });
-    if (response) {
-      toast.info(response.message);
-      setReload(!reload);
+  
+    showLoader(); // Show loader before starting the async operation
+    try {
+      const response = await deleteTrash_api({ trashId: id });
+      if (response) {
+        toast.info(response.message);
+        setReload(!reload);
+      }
+    } catch (error) {
+      toast.error("An error occurred while deleting. Please try again.");
+    } finally {
+      hideLoader(); // Hide loader in the finally block
     }
   }
-
+  
   async function handleRestore(adminId) {
     console.log("onclick adminId ===== >>", adminId);
+  
     const data = { adminId: adminId };
-    const response = await restoreTrash_api(data);
-    if (response) {
-      toast.info(response.message);
-      setReload(!reload);
+    showLoader(); // Show loader before starting the async operation
+    try {
+      const response = await restoreTrash_api(data);
+      if (response) {
+        toast.info(response.message);
+        setReload(!reload);
+      }
+    } catch (error) {
+      toast.error("An error occurred while restoring. Please try again.");
+    } finally {
+      hideLoader(); // Hide loader in the finally block
     }
   }
+  
 
   return (
     <>
