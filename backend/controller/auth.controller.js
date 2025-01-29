@@ -30,7 +30,6 @@ export const adminLogin = async (req, res) => {
         }
 
         const passwordValid = await bcrypt.compare(password, existingAdmin.password);
-        console.log(" passwordValid..........", passwordValid)
         if (!passwordValid) {
             await existingAdmin.update({ loginStatus: 'login failed' });
             return res.status(statusCode.badRequest).send(apiResponseErr(null, false, statusCode.badRequest, messages.invalidPassword));
@@ -127,38 +126,9 @@ export const adminLogin = async (req, res) => {
         }
 
     } catch (error) {
-        console.log("error",error)
         res.status(statusCode.internalServerError).send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
     }
 };
-
-// done
-// export const adminPasswordResetCode = async (req, res) => {
-//     try {
-//         const { userName, adminPassword, password } = req.body;
-//         const existingUser = await admins.findOne({ where: { userName } });
-//         if (!existingUser) {
-//             return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, messages.adminNotFound));
-//         }
-//         //   if (!existingUser.isActive || !existingUser.locked) {
-//         //     return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, 'Account is Not Active'));
-//         //   }
-//         // const oldPasswordIsCorrect = await bcrypt.compare(oldPassword, existingUser.password);
-//         // if (!oldPasswordIsCorrect) {
-//         //     return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, 'Invalid old password'));
-//         // }
-//         const passwordIsDuplicate = await bcrypt.compare(password, existingUser.password);
-//         if (passwordIsDuplicate) {
-//             return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, 'New Password Cannot Be The Same As Existing Password'));
-//         }
-//         const passwordSalt = await bcrypt.genSalt();
-//         const encryptedPassword = await bcrypt.hash(password, passwordSalt);
-//         await admins.update({ password: encryptedPassword }, { where: { userName } });
-//         return res.status(statusCode.success).json(apiResponseSuccess(null, true, statusCode.success, 'Password Reset Successful!'));
-//     } catch (error) {
-//         res.status(statusCode.internalServerError).send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
-//     }
-// };
 
 export const adminPasswordResetCode = async (req, res) => {
     try {
@@ -272,9 +242,7 @@ export const loginResetPassword = async (req, res) => {
     try {
         const { userName, oldPassword, newPassword } = req.body;
 
-        const existingUser = await admins.findOne({ where: { userName } });
-        console.log('existingUser', existingUser)
-       
+        const existingUser = await admins.findOne({ where: { userName } });       
         const isPasswordMatch = await bcrypt.compare(oldPassword, existingUser.password);
         if (!isPasswordMatch) {
             return res.status(statusCode.badRequest).send(apiResponseErr(null, false, statusCode.badRequest, 'Invalid old password.'));

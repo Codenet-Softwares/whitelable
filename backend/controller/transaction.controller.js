@@ -9,7 +9,6 @@ import { messages, string } from '../constructor/string.js';
 import axios from 'axios';
 import { calculateLoadBalance } from './admin.controller.js';
 import { Op } from 'sequelize'
-import { Admin } from 'mongodb';
 
 export const depositTransaction = async (req, res) => {
   try {
@@ -139,7 +138,6 @@ export const transferAmount = async (req, res) => {
         const baseUrl = process.env.COLOR_GAME_URL;
 
         const { data: response } = await axios.post(`${baseUrl}/api/extrnal/balance-update`, dataToSend);
-        console.log('Balance update response:', response);
 
         if (!response.success) {
           if (response.responseCode === 400 && response.errMessage === 'User Not Found') {
@@ -147,7 +145,6 @@ export const transferAmount = async (req, res) => {
           }
         }
       } catch (error) {
-        console.error('Error updating balance:', error);
         message = 'Please register in the portal.';
       }
 
@@ -158,7 +155,6 @@ export const transferAmount = async (req, res) => {
 
       const sender_admin_balance = await admin_Balance(adminId)
       const receiver_admin_balance = await admin_Balance(receiveUserId)
-      console.log("sender_admin_balance", sender_admin_balance)
       if (sender_admin_balance < parsedTransferAmount) {
         return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, 'Insufficient Balance For Transfer'));
       }
@@ -196,7 +192,6 @@ export const transferAmount = async (req, res) => {
         const baseUrl = process.env.COLOR_GAME_URL;
 
         const { data: response } = await axios.post(`${baseUrl}/api/extrnal/balance-update`, dataToSend);
-        console.log('Balance update response:', response);
 
         if (!response.success) {
           if (response.responseCode === 400 && response.errMessage === 'User Not Found') {
@@ -204,7 +199,6 @@ export const transferAmount = async (req, res) => {
           }
         }
       } catch (error) {
-        console.error('Error updating balance:', error);
         message = 'Please register in the portal.';
       }
 
@@ -213,7 +207,6 @@ export const transferAmount = async (req, res) => {
       return res.status(statusCode.create).json(apiResponseSuccess(null, true, statusCode.create, 'Balance Debited Successfully' + ' ' + message));
     }
   } catch (error) {
-    console.error('Error in transferAmount:', error);
     res.status(statusCode.internalServerError).send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
   }
 };
@@ -479,7 +472,6 @@ export const viewAdminBalance = async (req, res) => {
     }
     return res.status(statusCode.success).json(apiResponseSuccess({ balance }, true, statusCode.success, "Balance calculated successfully."));
   } catch (error) {
-    console.error("Error in viewAdminBalance:", error);
     return res
       .status(statusCode.internalServerError)
       .json(
@@ -535,7 +527,6 @@ export const admin_Balance = async (adminId) => {
       const baseUrl = process.env.COLOR_GAME_URL;
       const user_balance = await axios.get(`${baseUrl}/api/external/get-user-balance/${adminId}`)
       const { data } = user_balance
-      console.log("data", data.balance);
       balance = data.balance
     }
 
