@@ -6,7 +6,6 @@ import { formatDateForUi } from "../Utils/helper";
 const BetHistoryForPl = () => {
   const [betList, SetBetList] = useState([]);
   const { userName, runnerId } = useParams();
-  console.log("userName", userName, runnerId);
 
   const fetchBetList = async () => {
     const response = await getBetList({
@@ -19,8 +18,6 @@ const BetHistoryForPl = () => {
   useEffect(() => {
     fetchBetList();
   }, []);
-
-  console.log("betList", betList);
 
   return (
     <div className="m-4">

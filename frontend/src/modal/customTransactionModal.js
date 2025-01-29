@@ -19,11 +19,6 @@ const CustomTransactionModal = (props) => {
     remarks: "",
   });
   const { store, showLoader, hideLoader } = useAppContext();
-  console.log("store from modal", store);
-  console.log("from modal=>>>>", props?.differentiate);
-  console.log("from modal adminId=>>>>", props?.adminId);
-  console.log("from modal adminName=>>>>", props?.adminName);
-  console.log("from modal adminName=>>>>", props?.role);
 
   // Setting Modal Title
   let modalTitle = "";
@@ -68,7 +63,6 @@ const CustomTransactionModal = (props) => {
           );
           if (creditRefResponse) {
             props.onHide();
-            console.log(creditRefResponse);
             resetForm();
             props.setRefresh(creditRefResponse);
           }
@@ -101,7 +95,6 @@ const CustomTransactionModal = (props) => {
           );
           if (partnershipResponse) {
             props.onHide();
-            console.log(partnershipResponse);
             resetForm();
             props.setRefresh(partnershipResponse);
           }
@@ -129,7 +122,6 @@ const CustomTransactionModal = (props) => {
           );
           if (addCashResponse) {
             props.onHide();
-            console.log(addCashResponse);
             resetForm();
             props.setRefresh(addCashResponse);
           }
@@ -143,10 +135,8 @@ const CustomTransactionModal = (props) => {
         }
 
       default:
-        console.log(props.differentiate);
     }
 
-    console.log("formData", formData);
   }
   // API Hitting for Wallet provider
   async function handelDepositAndWithdraw(modeOfTransaction) {
@@ -169,7 +159,6 @@ const CustomTransactionModal = (props) => {
       );
       if (creditRefResponse) {
         props.onHide();
-        console.log(creditRefResponse);
         resetForm();
         props.setRefresh(creditRefResponse);
       }
@@ -193,7 +182,6 @@ const CustomTransactionModal = (props) => {
       );
       if (creditRefResponse) {
         props.onHide();
-        console.log(creditRefResponse);
         resetForm();
         props.setRefresh(creditRefResponse);
       }

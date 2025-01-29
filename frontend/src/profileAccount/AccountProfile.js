@@ -8,7 +8,6 @@ import { useAppContext } from "../contextApi/context";
 
 const AccountProfile = ({ props, UserName, createdByUser }) => {
   const { store } = useAppContext();
-  console.log("store----->", store)
   const [passtoggle, setPassToggle] = useState(true);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -22,11 +21,9 @@ const AccountProfile = ({ props, UserName, createdByUser }) => {
 
 
   const handleshowPasChange = () => setShowPasChange(true);
-  console.log("Im here in the Line no.10 of profile", UserName);
   // const auth = useAuth();
 
   //   const funChangePassword = () => {
-  //     console.log("funChangePassword clicked line 14");
   //     if (newPassword && confirmPassword && oldPassword === "") {
   //       alert("Fields Cann't be Empty");
   //       return;
@@ -98,9 +95,6 @@ const AccountProfile = ({ props, UserName, createdByUser }) => {
             </li>}
         </ul>
       </div>
-      {console.log("idadmin", store.admin.id === createdByUser)}
-
-
       <ResetModal show={showPasChange} handleClose={handleClosePasChange} userName={UserName} />
     
       {/* card end */}

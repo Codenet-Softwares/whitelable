@@ -28,7 +28,6 @@ const CreateSubAdmin = () => {
   //   },
   //   validationSchema: CreateSubAdminSchema,
   //   onSubmit: async (values, action) => {
-  //     console.log("values++===============>", values);
   //     await create_SubAdmin(values);
   //     resetForm();
   //   },
@@ -50,7 +49,6 @@ const CreateSubAdmin = () => {
     },
     validationSchema: CreateSubAdminSchema,
     onSubmit: async (values, action) => {
-      console.log("values++===============>", values);
       showLoader(); // Show loader before starting the async operation
       try {
         await create_SubAdmin(values);

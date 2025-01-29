@@ -3,7 +3,6 @@ import Modal from "react-modal";
 import { getTicketStyle } from "../Utils/helper";
 
 const TicketModal = ({ isOpen, onClose, tickets, userName }) => {
-    console.log( 'tickets', tickets)
   const [expandedSems, setExpandedSems] = useState({});
 
   const toggleSem = (purchaseId) => {

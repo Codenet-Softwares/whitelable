@@ -38,14 +38,12 @@ const BetHistory = ({
     }));
   };
   const handelItemPerPage = (event) => {
-    console.log("event.target.value", event.target.value);
     setData((prevState) => ({
       ...prevState,
       itemPerPage: Number(event.target.value),
       currentPage: Number(currentPage),
     }));
   };
-  console.log("game Id SelectedGameId", data.SelectedGameId);
   return (
     <div className="col-sm-8 mt-3">
       <div className="card mb-3 w-100 rounded">

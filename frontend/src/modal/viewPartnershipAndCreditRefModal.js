@@ -9,9 +9,7 @@ import {
 import { getCreditRefAndPartnership } from "../Utils/service/initiateState";
 
 const ViewPartnershipAndCreditRefModal = (props) => {
-  console.log("from modal=>>>>", props?.differentiate);
-  console.log("from modal adminId=>>>>", props?.adminId);
-  console.log("from modal adminName=>>>>", props?.adminName);
+
   const [viewPartnershipData, SetViewPartnershipData] = useState(
     getCreditRefAndPartnership()
   );
@@ -31,7 +29,6 @@ const ViewPartnershipAndCreditRefModal = (props) => {
     });
 
     if (response) {
-      console.log(response);
       SetViewCreditRefData(response.data.creditRefs);
     }
   }
@@ -42,7 +39,6 @@ const ViewPartnershipAndCreditRefModal = (props) => {
     });
 
     if (response) {
-      console.log(response);
       SetViewPartnershipData(response.data.partnerships);
     }
   }
@@ -54,7 +50,6 @@ const ViewPartnershipAndCreditRefModal = (props) => {
 
   // Commented for developer purpose
   // const handelHi = () => {
-  //   console.log('viewCreditRefData', getCreditRefData());
   // };
 
   return (

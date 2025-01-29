@@ -25,7 +25,6 @@ const ViewSubAdminPermission = () => {
     const response = await getviewSubAdminPermission({
       _id: id,
     });
-    console.log("res==========>", response)
     if (response) {
       setSubAdminPersionData({
         userName: response.data.userName,
@@ -33,10 +32,6 @@ const ViewSubAdminPermission = () => {
       });
     }
   }
-
-  console.log('subAdminPermissionData', subAdminPermissionData?.roles[0]?.permission);
-
-
   const handleEditSubAdminPermission = async () => {
     const permissions = subAdminPermissionData?.roles[0]?.permission;
 
@@ -55,11 +50,7 @@ const ViewSubAdminPermission = () => {
       setDisplayEdit(true);
     }
   };
-
-
-
   const handleChange = () => {
-    console.log('first');
     setDisplayEdit(false);
     getSubAdminPermissionData();
   };

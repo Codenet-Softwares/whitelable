@@ -7,7 +7,6 @@ const BetHistoryLotteryForPl = () => {
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [betList, SetBetList] = useState([]);
   const { userName, id } = useParams();
-  console.log("userName", userName, id);
   
   const toggleDropdown = (id) => {
     setDropdownOpen(dropdownOpen === id ? null : id);
@@ -24,10 +23,6 @@ const BetHistoryLotteryForPl = () => {
   useEffect(() => {
     fetchBetList();
   }, []);
-
-
-
-  console.log("betList", betList);
 
   return (
     <div className="m-4">

@@ -27,7 +27,6 @@ const NavTop = () => {
 
   const navigate = useNavigate();
   const { store, dispatch } = useAppContext();
-  // console.log("store=>>>", store);
 
   useEffect(() => {
     let logoutPerformed = false;

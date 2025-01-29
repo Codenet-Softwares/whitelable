@@ -8,7 +8,6 @@ import DatePicker from "react-datepicker";
 
 const AdminAccountStatement = () => {
   const { dispatch, store } = useAppContext();
-  console.log("========>>> _id", store);
 
   const [state, setState] = useState(adminAccountStatementInitialState());
   const [backupDate, setbackupDate] = useState({
@@ -37,7 +36,6 @@ const AdminAccountStatement = () => {
     return `${year}-${month}-${day}`;
   };
 
-  console.log("=====>>> stored data", state);
   async function AccountStatement() {
     const response = await getAccountStatement_api({
       _id: store?.admin?.id,
@@ -47,7 +45,6 @@ const AdminAccountStatement = () => {
       toDate: state.endDate,
       dataSource: state.dataSource,
     });
-    // console.log("======>>>>>> response", response.pagination);
 
     setState((prevState) => ({
       ...prevState,
@@ -58,8 +55,6 @@ const AdminAccountStatement = () => {
   }
 
   function handlePageChange(page) {
-    console.log("========>>>> page change", page);
-
     setState((prevState) => ({
       ...prevState,
       currentPage: page,

@@ -22,12 +22,6 @@ const AccountStatement = ({
   handleDateStatement,
   dataSource,
 }) => {
-  console.log(
-    "======>>> user profile data in account statement PAGE",
-    totalData,
-    currentPage,
-    totalPages
-  );
 
   function formatDate(dateString) {
     const options = {

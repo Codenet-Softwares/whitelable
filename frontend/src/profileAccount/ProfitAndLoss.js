@@ -67,7 +67,6 @@ const ProfitAndLoss = ({
       limit: profitLossRunnerData.itemPerPage,
       searchName: profitLossRunnerData.searchItem,
     });
-    console.log("runner=>>>", response);
     SetProfitLossRunnerData((prevState) => ({
       ...prevState,
       data: response.data,
@@ -102,7 +101,6 @@ const ProfitAndLoss = ({
       // limit: profitLossEventData.itemPerPage,  //Work pending by serverSide
       searchName: profitLossEventData.searchItem,
     });
-    console.log("event=>>>", response);
     SetProfitLossEventData((prevState) => ({
       ...prevState,
       data: response.data,
@@ -122,7 +120,6 @@ const ProfitAndLoss = ({
       dataLimit: profitLossLotteryEventData.itemPerPage,
       searchName: profitLossLotteryEventData.searchItem,
     });
-    console.log("event=>>>", response);
     SetProfitLossLotteryEventData((prevState) => ({
       ...prevState,
       data: response?.data,
@@ -133,15 +130,12 @@ const ProfitAndLoss = ({
 
 
   const handelProfitLossLotteryEventDataPage = (page) => {
-    console.log("first",page)
     SetProfitLossLotteryEventData((prevState) => ({
       ...prevState,
       currentPage: page,
     }));
   };
 
-
-  console.log("component", component);
   let componentToRender;
   if (component === "ProfitAndLossEvent") {
     componentToRender = (
@@ -185,7 +179,6 @@ const ProfitAndLoss = ({
   }
 
   const handelItemPerPage = (event) => {
-    console.log("event.target.value", event.target.value);
     SetProfitLossData((prevState) => ({
       ...prevState,
       itemPerPage: Number(event.target.value),

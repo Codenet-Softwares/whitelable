@@ -11,7 +11,6 @@ import Pagination from "../components/common/Pagination";
 
 const AgentDelete = () => {
   const { store, showLoader, hideLoader } = useAppContext();
-  console.log("======>>> id from store", store);
   const [viewAgentDelete, setViewAgentDelete] = useState([]);
   const [reload, setReload] = useState(false); // state to trigger reload
   const [page, setPage] = useState(1)
@@ -23,14 +22,12 @@ const AgentDelete = () => {
 
   async function viewApprovedDelete() {
     const response = await viewTrash_api({ adminId: id, page, pageLimit, search });
-    console.log("======>>> response", response);
     setViewAgentDelete(response.data);
     setTotalData(response?.pagination?.totalItems)
     setTotalPage(response?.pagination?.totalPages)
   }
 
   const selectPageHandler = (selectedPage) => {
-    console.log(selectedPage);
     setPage(selectedPage);
   };
 
@@ -42,7 +39,6 @@ const AgentDelete = () => {
   const endIndex = Math.min(page * pageLimit, totalData);
 
   // async function handleDeleteAgent(id) {
-  //   console.log("onclick user trash id", id);
 
   //   const response = await deleteTrash_api({ trashId: id });
   //   if (response) {
@@ -52,7 +48,6 @@ const AgentDelete = () => {
   // }
 
   // async function handleRestore(adminId) {
-  //   console.log("onclick adminId ===== >>", adminId);
   //   const data = { adminId: adminId };
   //   const response = await restoreTrash_api(data);
   //   if (response) {
@@ -60,9 +55,7 @@ const AgentDelete = () => {
   //     setReload(!reload);
   //   }
   // }
-  async function handleDeleteAgent(id) {
-    console.log("onclick user trash id", id);
-  
+  async function handleDeleteAgent(id) {  
     showLoader(); // Show loader before starting the async operation
     try {
       const response = await deleteTrash_api({ trashId: id });
@@ -78,8 +71,6 @@ const AgentDelete = () => {
   }
   
   async function handleRestore(adminId) {
-    console.log("onclick adminId ===== >>", adminId);
-  
     const data = { adminId: adminId };
     showLoader(); // Show loader before starting the async operation
     try {

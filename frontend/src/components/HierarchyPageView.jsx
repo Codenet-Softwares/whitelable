@@ -26,7 +26,6 @@ const HierarchyPageView = () => {
     totalEntries: 5,
   });
 
-  // console.log('========>Hierechy',totalPages)
   const takeMeToAccount = (userName) => {
     navigate(`/account-landing/${userName}`);
   };
@@ -44,7 +43,6 @@ const HierarchyPageView = () => {
 
     const response = await getHierarchy(data);
     if (response.successCode) {
-      console.log(response);
       navigate(`/wallet`);
     }
   }
@@ -58,7 +56,6 @@ const HierarchyPageView = () => {
       pageNumber: paginationData.currentPage,
     });
     if (res) {
-      console.log('Response=>> HIERECHY', res.data);
       setHierarchyData(res.data.userDetails.createdUsers);
       setPathData(res.data.path);
       setIsLoading(false);
@@ -85,16 +82,11 @@ const HierarchyPageView = () => {
   //       setPathData(res.data.path);
   //     })
   //     .catch((err) => {
-  //       console.log(err);
   //     });
   // }, [userId, auth]);
 
-  console.log('hierarchy data=>>>', hierarchyData);
-  console.log('Path data=>>>', pathData);
-  console.log('demoData', demoData);
 
   const handlePageChange = (page) => {
-    console.log('Changing to page:', page);
     setPaginationData({
       ...paginationData,
       currentPage: page,
@@ -219,7 +211,6 @@ const HierarchyPageView = () => {
                           {hierarchyData.map((data, i) => {
                             // const creditRefLength = data.creditRef.length;
                             // const partnershipLength = data.partnership.length;
-                            console.log('data', data);
                             return (
                               <Card
                                 userName={data.userName}
