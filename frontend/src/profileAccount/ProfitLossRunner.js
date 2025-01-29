@@ -11,12 +11,10 @@ const ProfitAndLossRunner = ({
   totalItems,
   UserName,
 }) => {
-  console.log("data", data);
   const startIndex = Math.min((data.currentPage - 1) * 10 + 1);
   const endIndex = Math.min(data.currentPage * 10, data.totalData);
 
   const handelItemPerPage = (event) => {
-    console.log("event.target.value", event.target.value);
     SetProfitLossRunnerData((prevState) => ({
       ...prevState,
       itemPerPage: Number(event.target.value),

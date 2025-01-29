@@ -21,7 +21,6 @@ const ProfitAndLossLotteryEvent = ({
 
 
     const handelItemPerPage = (event) => {
-        console.log("event.target.value", event.target.value);
         SetProfitLossEventData((prevState) => ({
             ...prevState,
             itemPerPage: Number(event.target.value),
@@ -182,7 +181,6 @@ const ProfitAndLossLotteryEvent = ({
                                 currentPage={data.currentPage}
                                 totalPages={data.totalPages}
                                 handlePageChange={(page) => {
-                                    console.log('Changing page to:', page);
                                     handlePageChange(page);
                                 }}
                                 startIndex={startIndex}

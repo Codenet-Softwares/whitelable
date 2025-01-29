@@ -3,10 +3,8 @@ import React, { useState, useEffect } from "react";
 // import MyAccountServices from "../../Services/AccountServices";
 
 const ActivityLog = ({ props }) => {
-  // console.log('====>>> props data ',props)
   const lastLoginTimeUTC = props.lastLoginTime;
   const lastLoginTimeLocal = new Date(lastLoginTimeUTC).toLocaleString();
-  console.log("Props  Activity Log =>>>", props);
   const [activityLog, setActivityLog] = useState({
     iP: "Loading..",
     region: "Loading..",
@@ -22,7 +20,6 @@ const ActivityLog = ({ props }) => {
 
     fetchData();
   }, [props]);
-  console.log("====>>> IP ", activityLog.iP);
   // Render null if activityLog is still null
   if (activityLog === null) {
     return null;

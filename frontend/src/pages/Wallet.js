@@ -31,7 +31,6 @@ const Wallet = () => {
   );
 
   const handleChange = (name, value) => {
-    console.log("=====>>>> values onchange", name, value);
     setWalletCard((prevData) => ({
       ...prevData,
       [name]: value,
@@ -116,7 +115,6 @@ const Wallet = () => {
   );
 
   const handlePageChange = (page) => {
-    console.log("Changing to page:", page);
     handleChange("currentPage", page);
   };
 
@@ -199,7 +197,6 @@ const Wallet = () => {
                     <input
                       value={walletCard.name}
                       onChange={(e) => {
-                        console.log("Input changed"); // Confirm onChange is firing
                         handleChange("name", e.target.value);
                       }}
                       type="text"

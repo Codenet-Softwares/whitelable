@@ -9,10 +9,7 @@ import { customErrorHandler } from '../Utils/helper';
 
 const View_AddCash_history = () => {
     const { dispatch, store } = useAppContext();
-    console.log("========>>> _id", store);
-
     const [state, setState] = useState(view_AddCashHistory_InitialState());
-    console.log('=====>>> stored data', state)
     async function getView_AddCash_history() {
         try {
             const response = await getView_AddCash_history_api({
@@ -20,8 +17,6 @@ const View_AddCash_history = () => {
                 pageNumber: state.currentPage,
                 dataLimit: state.totalEntries,
             });
-            console.log("======>>>>>> response", response.pagination);
-
             setState((prevState) => ({
                 ...prevState,
                 history: response?.data?.transactions,
@@ -35,7 +30,6 @@ const View_AddCash_history = () => {
 
 
     function handlePageChange(page) {
-        console.log("========>>>> page change", page);
 
         setState((prevState) => ({
             ...prevState,

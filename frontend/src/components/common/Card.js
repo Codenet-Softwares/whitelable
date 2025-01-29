@@ -33,7 +33,6 @@ const Card = ({
   setIsLoading,
   exposure,
 }) => {
-  console.log("userrole ======>>>> ", role, userName);
 
   const navigate = useNavigate();
   const { dispatch, store } = useAppContext();
@@ -42,10 +41,6 @@ const Card = ({
   const [differentiate, setDifferentiate] = useState("");
   const [adminIdForStatus, setAdminIdForStatus] = useState("");
   const [showModal, setShowModal] = useState(false);
-  console.log("userId", adminId);
-  console.log("name&role", userName, role);
-
-  console.log("store", store);
 
   const handelOpenTransactionModal = (boolParam, differentiateParam) => {
     setTransactionModalShow(boolParam);
@@ -60,20 +55,16 @@ const Card = ({
   };
 
   const handleStatusChange = (status) => {
-    console.log("Status changed to:", status);
   };
 
   async function handleDelete() {
-    console.log("======>>>> onclick the id", adminId);
     const userConfirmed = window.confirm(
       "Balance should be 0 to move the Admin User to trash"
     );
 
     if (userConfirmed) {
       const response = await moveToTrash_api({ requestId: adminId });
-      console.log("Im here in line 94");
       if (response) {
-        console.log(response);
         adminDelete(response);
         toast.info(response.message);
       }
@@ -99,7 +90,6 @@ const Card = ({
         action: action,
       });
       if (response.successCode) {
-        console.log("response", response);
         navigate(`/hierarchyView/${userName}`);
       }
     }
@@ -353,7 +343,6 @@ const Card = ({
                     type="button"
                     onClick={() => handleStatusModalShow(adminId)}
                   >
-                    {console.log("====a===s", adminId)}
                     <i className="fa-thin fas fa-gear"></i>
                   </button>
                 </span>

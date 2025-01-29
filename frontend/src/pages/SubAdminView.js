@@ -34,8 +34,6 @@ const SubAdminView = () => {
   };
 
   const { store, dispatch } = useAppContext();
-  console.log("(=====>> store line 15)", store);
-
   const handleChange = (name, value) => {
     setSubAdminData((prevData) => ({
       ...prevData,
@@ -85,7 +83,6 @@ const SubAdminView = () => {
   }
 
   const handlePageChange = (page) => {
-    console.log("Changing to page:", page);
     handleChange("currentPage", page);
   };
 
@@ -93,15 +90,10 @@ const SubAdminView = () => {
     (Number(subAdminData.currentPage) - 1) * Number(subAdminData.totalEntries) +
     1
   );
-  console.log("startIndex", subAdminData.currentPage);
   let endIndex = Math.min(
     Number(subAdminData.currentPage) * Number(subAdminData.totalEntries),
     Number(subAdminData.totalData)
   );
-
-  console.log("data", subAdminData.userList);
-
-
   const openModal = (userName) => {
     setUserName(userName)
     setIsModalOpen(true);
@@ -300,7 +292,6 @@ const SubAdminView = () => {
                                         )
                                       }
                                     >
-                                      {console.log("====a===s", user)}
                                       <i className="fa-thin fas fa-gear"></i>
                                     </button>
                                   </span>

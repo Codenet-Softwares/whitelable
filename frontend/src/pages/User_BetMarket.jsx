@@ -37,15 +37,12 @@ const User_BetMarket = () => {
   const [bodyData, setBodyData] = useState(get_betBook());
   const [liveToggle, setLiveToggle] = useState(false);
 
-  console.log("77", liveToggle);
-
   // useEffect(()=>{fetch_BetBookData()},[bodyData])
 
   const handleLiveToggle = () => {
     setLiveToggle(!liveToggle);
   };
 
-  console.log("liveBet", user_LiveBet);
   // Function to open the modal
   const handleOpenModal = () => {
     setModalOpen(true);
@@ -176,8 +173,6 @@ const User_BetMarket = () => {
   const nextUserName = getNextUserName(store?.admin?.id);
 
   const handleClick_To_InnerHierarcy = async (id, role) => {
-    console.log("role---id", id, role);
-
     setBodyData((prevData) => ({
       ...prevData,
       adminId: id,
@@ -600,7 +595,6 @@ const User_BetMarket = () => {
                 <tbody>
                   {betBookData?.length > 0 ? (
                     betBookData.map((master, index) => {
-                      console.log("master====", master?.runnerBalance);
                       return (
                         <tr key={index}>
                           {permissionObj.allAdmin.includes(master?.roles) ? (
@@ -635,7 +629,6 @@ const User_BetMarket = () => {
                             {master?.roles}
                           </td>
                           {master?.runnerBalance?.map((data) => {
-                            console.log("firstdata", data);
                             return (
                               <td
                                 style={{

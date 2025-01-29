@@ -64,22 +64,18 @@ const Authform = ({ purpose, authFormApi }) => {
   //   },
   //   validationSchema: LoginSchema,
   //   onSubmit: (values, action) => {
-  //     console.log("values++===============>", values);
   //     authFormHandler(values);
   //     resetForm();
   //   },
   //   enableReinitialize: true,
   // });
   // async function authFormHandler(values) {
-  //   console.log(values);
   //   dispatch({
   //     type: strings.isLoading,
   //     payload: true,
   //   });
   //   setIsLoading(true);
   //   const response = await authFormApi(values, true);
-  //   console.log("res from login", response);
-
   //   if (purpose === "login" && response) {
   //     dispatch({
   //       type: strings.LOG_IN,
@@ -117,7 +113,6 @@ const Authform = ({ purpose, authFormApi }) => {
       showLoader(); // Show loader before starting the async operation
 
       try {
-        console.log("values++===============>", values);
         await authFormHandler(values); // Assuming authFormHandler is an async function
 
         resetForm(); // Reset the form after successful submission
@@ -131,7 +126,6 @@ const Authform = ({ purpose, authFormApi }) => {
   });
 
   async function authFormHandler(values) {
-    console.log(values);
     dispatch({
       type: strings.isLoading,
       payload: true,
@@ -141,7 +135,6 @@ const Authform = ({ purpose, authFormApi }) => {
     // API call to authenticate
     const response =
       values?.roles[0]?.length == 0 ? "" : await authFormApi(values, true);
-    console.log("res from login", response);
 
     if (response && response.data) {
       if (purpose === "login") {
@@ -251,7 +244,6 @@ const Authform = ({ purpose, authFormApi }) => {
                       </div>
                     )}
 
-                    {console.log("===>> roles ", values.roles)}
                     {purpose === "create" && values.roles.length > 0 && (
                       <a
                         className="btn_1 full_width text-center"
@@ -264,9 +256,6 @@ const Authform = ({ purpose, authFormApi }) => {
                         {purpose === "login" && "Log In"}
                       </a>
                     )}
-
-                    {console.log("===>> roles ", values.roles)}
-
                     {purpose === "login" && (
                       <a
                         className="btn_1 full_width text-center"

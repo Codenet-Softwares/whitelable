@@ -24,7 +24,6 @@ import strings from "../Utils/constant/stringConstant";
 
 const AccountLandingModal = () => {
   const { userName } = useParams();
-  console.log("======>>> username", userName);
   const [state, setState] = useState(accountStatementInitialState());
   const [backupDate, setbackupDate] = useState({
     endDate: null,
@@ -128,16 +127,11 @@ const AccountLandingModal = () => {
 
   async function getAll_userProfileStatement() {
     const response = await getUserProfileView({ userName });
-    console.log("=======>>> response for user-profile-view", response);
     setState((prevState) => ({
       ...prevState,
       profileView: response.data,
     }));
   }
-  console.log("User=>>>", state?.profileView?.roles[0]?.role);
-  console.log("User=>>>", state);
-
-  console.log("tom===>", formatDate(state.startDate));
 
   async function getAll_transactionView() {
     const response = await getAllTransactionView({
@@ -148,7 +142,6 @@ const AccountLandingModal = () => {
       limit: state.totalEntries,
       dataSource: state.dataSource,
     });
-    console.log("response for transaction view line 67", response);
     setState((prevState) => ({
       ...prevState,
       statementView: response.data,
@@ -198,7 +191,6 @@ const AccountLandingModal = () => {
   
   // For Bet History Data to show
   async function getHistoryForBetHistory() {
-    console.log("page info", betHistoryData.currentPage)
     const response = await getBetHistory({
       userName,
       gameId: betHistoryData.SelectedGameId,
@@ -209,7 +201,6 @@ const AccountLandingModal = () => {
       dataSource: betHistoryData.dataSource,
       dataType: betHistoryData.dataType,
     });
-    console.log("res->>", response);
     SetBetHistoryData((prevState) => ({
       ...prevState,
       dataHistory: response?.data,
@@ -219,7 +210,6 @@ const AccountLandingModal = () => {
   }
 
   async function getHistoryForLotteryBetHistory() {
-    console.log("page info", betHistoryData.currentPage)
     const response = await getLotteryBetHistory({
       userName,
       gameId: betHistoryData.SelectedGameId,
@@ -230,7 +220,6 @@ const AccountLandingModal = () => {
       dataSource: betHistoryData.dataSource,
       dataType: betHistoryData.dataType,
     });
-    console.log("res->>", response);
     SetBetHistoryData((prevState) => ({
       ...prevState,
       dataHistory: response?.data,
@@ -249,7 +238,6 @@ const AccountLandingModal = () => {
       searchName: profitLossData.searchItem,
       dataSource: profitLossData.dataSource,
     });
-    console.log("getProfitLossGameWise", response);
     SetProfitLossData((prevState) => ({
       ...prevState,
       dataGameWise: response.data,
@@ -257,10 +245,6 @@ const AccountLandingModal = () => {
       totalData: response.pagination.totalItems,
     }));
   }
-  // console.log("getProfitLossGameWise", profitLossData);
-
-  console.log("getHistoryForBetHistory", betHistoryData);
-
   const startIndex = Math.min((state.currentPage - 1) * state.totalEntries + 1);
   const endIndex = Math.min(
     state.currentPage * state.totalEntries,
@@ -276,7 +260,6 @@ const AccountLandingModal = () => {
   );
 
   const handlePageChange = (page) => {
-    console.log("Changing to page:", page);
     setState((prevState) => ({
       ...prevState,
       currentPage: page,
@@ -284,7 +267,6 @@ const AccountLandingModal = () => {
   };
 
   const handleGetStatement = (startDate, endDate) => {
-    console.log("From Date:", startDate, "To Date:", endDate);
     setState((prevState) => ({
       ...prevState,
       startDate,
@@ -451,8 +433,6 @@ const AccountLandingModal = () => {
       />
     );
   }
-
-  console.log("createdByUser", state.profileView.createdById);
   return (
     <div className="container">
       <div className="row row-no-gutters">

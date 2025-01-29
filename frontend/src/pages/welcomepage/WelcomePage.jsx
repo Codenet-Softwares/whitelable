@@ -5,7 +5,6 @@ import { useAppContext } from "../../contextApi/context";
 const WelcomePage = () => {
   const { store } = useAppContext();
 
-  console.log(store);
   return (
     <div>
       <div className="WelcomePage">

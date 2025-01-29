@@ -24,8 +24,6 @@ const Market_Analysis = () => {
                 // pageNumber: state.currentPage,
                 // dataLimit: state.totalEntries,
             });
-            console.log("======>>>>>> response", response.data);
-
             setLiveGmes((prevState) => ({
                 ...prevState,
                 data: response?.data,
@@ -36,9 +34,6 @@ const Market_Analysis = () => {
             toast.error(customErrorHandler(error));
         }
     }
-
-    console.log("======>>>>>> liveGmes", liveGmes);
-
     useEffect(() => {
         if (store?.admin) {
             if (
