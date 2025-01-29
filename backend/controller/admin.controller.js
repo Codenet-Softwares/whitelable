@@ -216,13 +216,11 @@ export const createSubAdmin = async (req, res) => {
 export const getIpDetail = async (req, res) => {
   try {
     const userName = req.params.userName;
-    console.log('userName', userName);
     let admin = await admins.findOne({ where: { userName } });
     if (!admin) {
       return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, messages.adminNotFound));
     }
     const loginTime = admin.lastLoginTime;
-    console.log('loginTime', loginTime);
     let clientIP = req.ip;
     const forwardedFor = req.headers['x-forwarded-for'];
     if (forwardedFor) {
@@ -358,7 +356,6 @@ export const viewAllCreates = async (req, res) => {
           const baseUrl = process.env.COLOR_GAME_URL;
           const user_Exposure = await axios.get(`${baseUrl}/api/external/get-exposure/${admin.adminId}`)
           const { data } = user_Exposure
-          console.log("data.....", data.exposure);
           exposure = data.exposure
         }
 
@@ -834,7 +831,6 @@ export const buildRootPath = async (req, res) => {
             const baseUrl = process.env.COLOR_GAME_URL;
             const user_Exposure = await axios.get(`${baseUrl}/api/external/get-exposure/${createdUser.adminId}`)
             const { data } = user_Exposure
-            console.log("data.....", data.exposure);
             exposure = data.exposure
           }
 

@@ -113,7 +113,6 @@ export const moveAdminToTrash = async (req, res) => {
 
     return res.status(statusCode.success).json(apiResponseSuccess(null, statusCode.success, true, 'Admin User moved to Trash' + " " + message));
   } catch (error) {
-    console.error('Error in moveAdminToTrash:', error);
     res
       .status(statusCode.internalServerError)
       .send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
@@ -185,7 +184,6 @@ export const deleteTrashData = async (req, res) => {
       .status(statusCode.success)
       .json(apiResponseSuccess(null, true, statusCode.success, 'Data deleted successfully'));
   } catch (error) {
-    console.error('Error in deleteTrashData:', error);
     res
       .status(statusCode.internalServerError)
       .send(
@@ -267,7 +265,6 @@ export const restoreAdminUser = async (req, res) => {
   }
     return res.status(statusCode.success).json(apiResponseSuccess(null, statusCode.success, true, 'Admin restored from trash' + " " + message));
   } catch (error) {
-    console.log("error",error)
     res
       .status(statusCode.internalServerError)
       .send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));

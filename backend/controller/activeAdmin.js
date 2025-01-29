@@ -5,7 +5,6 @@ import CustomError from "../helper/extendError.js";
 
 export const activateAdmin = async (adminId, isActive, locked) => {
   try {
-    console.log("adminId:", adminId);
 
     const admin = await admins.findOne({ where: { adminId } });
 

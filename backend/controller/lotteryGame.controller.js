@@ -14,7 +14,6 @@ export const getLotteryBetHistory = async (req, res) => {
       page,
       limit,
     };
-    console.log("params", params);
     const response = await axios.post(
       `${baseURL}/api/lottery-external-bet-history`,
       { userName },
@@ -140,7 +139,6 @@ export const getLotteryP_L = async (req, res) => {
         
     return res.status(statusCode.success).send(apiResponseSuccess(data, true, statusCode.success, 'Success',pagination));
   } catch (error) {
-      console.log("error......", error)
     return res.status(statusCode.internalServerError).send(apiResponseErr(null, false, statusCode.internalServerError, error.message));
   }
 };
@@ -170,8 +168,6 @@ export const getBetHistoryP_L = async (req, res) => {
     return res.status(statusCode.success).send(apiResponseSuccess(data, true, statusCode.success, "Success"));
 
   } catch (error) {
-    console.error("Error:", error);
-
     return res.status(statusCode.internalServerError).send(apiResponseErr(null, false, statusCode.internalServerError, error.message));
   }
 }

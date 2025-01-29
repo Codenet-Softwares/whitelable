@@ -11,9 +11,8 @@ dotenv.config();
 
 export const userGame = async (req, res) => {
   try {
-    const response = await axios.get('http://localhost:7000/api/user-games');
-
-    console.log("response", response.data)
+    const baseUrl = process.env.COLOR_GAME_URL
+    const response = await axios.get(`${baseUrl}/api/user-games`);
 
     if (!response.data.success) {
       return res
@@ -50,9 +49,7 @@ export const getUserBetHistory = async (req, res) => {
       dataType,
       type
     };
-    console.log("type..", type)
     const baseUrl = process.env.COLOR_GAME_URL;
-
     const response = await axios.get(`${baseUrl}/api/external-user-betHistory/${userName}/${gameId}`, {
       params,
       headers: {
@@ -151,7 +148,6 @@ export const marketProfitLoss = async (req, res) => {
     const { page = 1, pageSize = 10, search = '' } = req.query;
     const limit = parseInt(pageSize);
     const token = jwt.sign({ roles: req.user.roles }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
-    console.log("first", search)
     const params = {
       userName,
       gameId,
