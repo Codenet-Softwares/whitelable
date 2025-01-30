@@ -10,7 +10,7 @@ import trash from '../models/trash.model.js';
 import axios from 'axios';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-import { admin_Balance } from './transaction.controller.js';
+import { admin_Balance, balance_hierarchy } from './transaction.controller.js';
 dotenv.config();
 
 /**
@@ -154,7 +154,6 @@ export const createAdmin = async (req, res) => {
   };
 }
 
-
 // done
 export const createSubAdmin = async (req, res) => {
   try {
@@ -255,32 +254,101 @@ export const getIpDetail = async (req, res) => {
 
 export const calculateLoadBalance = async (adminId) => {
   let loadBalance = 0
+  let totalBalance
 
   const admin = await admins.findOne({ where: { adminId } });
   if (!admin) return 0;
 
   const adminBalance = await admin_Balance(admin.adminId)
+  const hierarchyBalance = await balance_hierarchy(admin.adminId)
 
-  let totalBalance = adminBalance;
+  let exposure
 
-  // let totalBalance = admin.balance;
+  if (admin.roles[0].role === string.user) {
+    const baseUrl = process.env.COLOR_GAME_URL;
+    const user_Exposure = await axios.get(`${baseUrl}/api/external/get-exposure/${admin.adminId}`)
+    const { data } = user_Exposure
+    exposure = data.exposure
+  }
+  if (exposure === 0) {
+    totalBalance = adminBalance;
+
+    const children = await admins.findAll({
+      where: { createdById: adminId },
+    });
+
+    for (const child of children) {
+      const childBalance = await calculateLoadBalance(child.adminId);
+      totalBalance += childBalance;
+    }
+
+    if (loadBalance !== totalBalance) {
+      loadBalance = totalBalance
+    }
+  }
+
+  else {
+    totalBalance = hierarchyBalance;
+
+    const children = await admins.findAll({
+      where: { createdById: adminId },
+    });
+
+    for (const child of children) {
+      const childBalance = await calculateLoadBalance(child.adminId);
+      totalBalance += childBalance;
+    }
+
+    if (loadBalance !== totalBalance) {
+      loadBalance = totalBalance
+    }
+  }
+
+
+  return totalBalance;
+};
+
+export const calculateExposure = async (adminId) => {
+  let loadExposure = 0;
+  let totalExposure = 0;
+
+  const admin = await admins.findOne({ where: { adminId } });
+  if (!admin) return 0;
+
+  let exposure = 0;
+
+  if (admin.roles[0].role === string.user) {
+    const baseUrl = process.env.COLOR_GAME_URL;
+    try {
+      const user_Exposure = await axios.get(`${baseUrl}/api/external/get-exposure/${admin.adminId}`);
+      const { data } = user_Exposure;
+      exposure = Number(data.exposure) || 0;
+    } catch (error) {
+      console.error("Error fetching exposure:", error.message);
+      exposure = 0;
+    }
+  }
+
+  totalExposure = exposure;
 
   const children = await admins.findAll({
     where: { createdById: adminId },
   });
 
   for (const child of children) {
-    const childBalance = await calculateLoadBalance(child.adminId);
-    totalBalance += childBalance;
+    let childExposure = await calculateExposure(child.adminId);
+
+    childExposure = Number(childExposure) || 0;
+    totalExposure += childExposure;
+
   }
 
-  if (loadBalance !== totalBalance) {
-    loadBalance = totalBalance
+  if (loadExposure !== totalExposure) {
+    loadExposure = totalExposure;
   }
 
-  return totalBalance;
+  return totalExposure;
 };
-
 
 // done
 export const viewAllCreates = async (req, res) => {
@@ -350,17 +418,10 @@ export const viewAllCreates = async (req, res) => {
             partnerships = [];
           }
         }
-        let exposure
-
-        if (admin.roles[0].role === string.user) {
-          const baseUrl = process.env.COLOR_GAME_URL;
-          const user_Exposure = await axios.get(`${baseUrl}/api/external/get-exposure/${admin.adminId}`)
-          const { data } = user_Exposure
-          exposure = data.exposure
-        }
 
         const adminBalance = await admin_Balance(admin.adminId);
         const loadBalance = await calculateLoadBalance(admin.adminId);
+        const loadTotalExposure = await calculateExposure(admin.adminId);
 
         return {
           adminId: admin.adminId,
@@ -379,7 +440,7 @@ export const viewAllCreates = async (req, res) => {
               : !admin.isActive
                 ? 'Suspended'
                 : '',
-          exposure: exposure,
+          exposure: loadTotalExposure,
         };
       })
     );
@@ -824,15 +885,7 @@ export const buildRootPath = async (req, res) => {
 
           const adminBalance = await admin_Balance(createdUser.adminId);
           const loadBalance = await calculateLoadBalance(createdUser.adminId);
-
-          let exposure ;
-          
-          if (createdUser.roles[0].role === string.user) {
-            const baseUrl = process.env.COLOR_GAME_URL;
-            const user_Exposure = await axios.get(`${baseUrl}/api/external/get-exposure/${createdUser.adminId}`)
-            const { data } = user_Exposure
-            exposure = data.exposure
-          }
+          const loadTotalExposure = await calculateExposure(createdUser.adminId);
 
           return {
             id: createdUser.adminId,
@@ -848,7 +901,7 @@ export const buildRootPath = async (req, res) => {
               : createdUser.locked
                 ? "Locked"
                 : "Suspended",
-            exposure: exposure,
+            exposure: loadTotalExposure,
           };
         })
       );
