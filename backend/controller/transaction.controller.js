@@ -536,7 +536,6 @@ export const admin_Balance = async (adminId) => {
   }
 };
 
-
 export const viewAddBalance = async (req, res) => {
   try {
     const { adminId } = req.params;
@@ -579,3 +578,43 @@ export const viewAddBalance = async (req, res) => {
   }
 };
 
+export const balance_hierarchy = async (adminId) => {
+  try {
+
+    let balance = 0;
+    const admin_transactions = await transaction.findAll({
+      where: {
+        [Op.or]: [
+          { adminId },
+          { receiver_adminId: adminId },
+        ],
+      },
+    });
+
+    for (const transaction of admin_transactions) {
+      if (transaction.receiver_adminId === adminId) {
+        if (transaction.transactionType === 'credit') {
+          balance += parseFloat(transaction.amount);
+        }
+        if (transaction.transactionType === 'withdrawal') {
+          balance -= parseFloat(transaction.amount);
+        }
+
+      } else {
+        if (transaction.transactionType === 'credit') {
+          balance -= parseFloat(transaction.amount);
+        }
+        if (transaction.transactionType === 'withdrawal') {
+          balance += parseFloat(transaction.amount);
+        }
+        if (transaction.transactionType === 'self_credit') {
+          balance += parseFloat(transaction.amount);
+        }
+      }
+    }
+
+    return balance;
+  } catch (error) {
+    throw new Error(`Error calculating balance: ${error.message}`);
+  }
+};
