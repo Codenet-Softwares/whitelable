@@ -268,7 +268,7 @@ const Card = ({
             {loadBalance}
           </td>
           <td scope="row" className="fs-6 text-center text-danger">
-          ({exposure}) 
+          ({Number(exposure) % 1 === 0 ? Number(exposure) : Number(exposure).toFixed(2)})
           </td>
           <td scope="row" className="fs-6 text-center">
             {balance}
@@ -276,10 +276,11 @@ const Card = ({
           <td
             scope="row"
             className={`fs-6 text-center ${
-              balance - creditRef < 0 ? "text-danger" : "text-dark"
+              loadBalance-creditRef < 0 ? "text-danger" : "text-dark"
             }`}
           >
-            {isNaN(balance - creditRef) ? balance : balance - creditRef}
+            {isNaN(creditRef-loadBalance) ? loadBalance : loadBalance-creditRef}
+       
           </td>
           <td scope="row" className="fs-6 text-center">
             <p
