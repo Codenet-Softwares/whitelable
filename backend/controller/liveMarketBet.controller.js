@@ -78,7 +78,7 @@ export const getLiveBetGames = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const { search } = req.query;
+    const { search, type } = req.query; 
     const offset = (page - 1) * limit;
     const token = jwt.sign(
       { roles: req.user.roles },
@@ -86,9 +86,6 @@ export const getLiveBetGames = async (req, res) => {
       { expiresIn: "1h" }
     );
 
-
-
-    // Fetch live games data
 
     const baseUrl = process.env.COLOR_GAME_URL;
     const response = await axios.get(
@@ -117,22 +114,30 @@ export const getLiveBetGames = async (req, res) => {
 
     const lotteryData = lotteryResponse.data?.data || [];
     const liveGames = response.data.data || [];
-
     const combinedData = [
       ...lotteryData.map((lottery) => ({
         marketId: lottery.marketId,
         marketName: lottery.marketName,
         gameName: lottery.gameName,
+        source: "lottery",
       })),
-      ...liveGames,
+      ...liveGames.map(game => ({
+        ...game,
+        source: "colorgame",
+      })),
     ];
 
     let filteredData = combinedData;
+    
+    if (type) {
+      filteredData = filteredData.filter(item => item.source === type);
+    }
 
     if (search) {
       filteredData = filteredData.filter(item =>
-        item.marketName.toLowerCase().includes(search.toLowerCase()) ||
-        item.gameName.toLowerCase().includes(search.toLowerCase())
+        item.marketName?.toLowerCase().includes(search.toLowerCase()) ||
+        (item.source === "colorgame" &&
+          item.gameName?.toLowerCase().includes(search.toLowerCase()))
       );
     }
 
@@ -160,6 +165,7 @@ export const getLiveBetGames = async (req, res) => {
     );
   }
 };
+
 
 
 export const getLiveUserBet = async (req, res) => {
