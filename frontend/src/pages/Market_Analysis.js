@@ -6,23 +6,20 @@ import { customErrorHandler } from '../Utils/helper';
 import { useAppContext } from '../contextApi/context';
 import { permissionObj } from '../Utils/constant/permission';
 import SingleCard from '../components/common/singleCard';
-import { Link , useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Market_Analysis = () => {
-    const { dispatch, store } = useAppContext();
+    const { store } = useAppContext();
     const [liveGmes, setLiveGmes] = useState(get_liveGames());
     const navigate = useNavigate();
-
-    const handleClearSearch = () => {
-        // Placeholder for clearing search functionality
-    };
 
     async function getView_LiveGames() {
         try {
             const response = await getLiveGames({
-                // Uncomment and modify these lines if pagination is implemented
-                // pageNumber: state.currentPage,
-                // dataLimit: state.totalEntries,
+                pageNumber: liveGmes.currentPage,
+                dataLimit: liveGmes.totalEntries,
+                search: liveGmes.search,
+                type: liveGmes.type
             });
             setLiveGmes((prevState) => ({
                 ...prevState,
@@ -34,6 +31,7 @@ const Market_Analysis = () => {
             toast.error(customErrorHandler(error));
         }
     }
+
     useEffect(() => {
         if (store?.admin) {
             if (
@@ -53,6 +51,14 @@ const Market_Analysis = () => {
         }
     };
 
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setLiveGmes((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+
     return (
         <div className="container my-5">
             <div className="card shadow-sm">
@@ -66,6 +72,44 @@ const Market_Analysis = () => {
                     <h3 className="mb-0 fw-bold fs-5 text-light text-center text-uppercase p-3">Live Bet Game</h3>
                 </div>
                 <div className="card-body">
+
+                    <div className="white_box_tittle list_header">
+                        <div className="col-2 text-center">
+                            <select
+                                className="form-select form-select-sm"
+                                aria-label=".form-select-sm example"
+                                name="type"
+                                value={liveGmes.type}
+                                onChange={handleChange}
+                            >
+                                <option value="10">All</option>
+                                <option value="colorgame">Colorgame</option>
+                                <option value="lottery">Lottery</option>
+                            </select>
+                        </div>
+
+                        <div
+                            className="serach_field_2 ms-auto"
+                            style={{ marginLeft: "-10px" }}
+                        >
+                            <div className="search_inner">
+                                <form Active="#">
+                                    <div className="search_field">
+                                        <input
+                                            value={liveGmes.search}
+                                            onChange={handleChange}
+                                            type="text"
+                                            placeholder="Search content here..."
+                                        />
+                                    </div>
+                                    {/* <button type="submit">
+                                        {" "}
+                                        <i className="ti-search"></i>{" "}
+                                    </button> */}
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                     {/* Table */}
                     <SingleCard
                         className="mb-5"
@@ -87,7 +131,7 @@ const Market_Analysis = () => {
                                         position: "sticky",
                                         top: 0,
                                         zIndex: 1,
-                                        background:"#84B9DF"
+                                        background: "#84B9DF"
                                     }}
                                 >
                                     <tr>
@@ -98,28 +142,7 @@ const Market_Analysis = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {liveGmes.data.length > 0 ? (
-                                        liveGmes.data.map((data, i) => (
-                                            <tr className='fw-bold' key={data.marketId}>
-                                                <td>{i + 1}</td>
-                                                <td>{data.gameName}</td>
-                                                <td>{data.marketName}</td>
-                                                <td>
-                                                    {/* <Link to={`/User_BetMarket/${data.marketId}`}> */}
-                                                        <button type="button" className="text-white p-2 border-0 rounded-3 betMarket_btn " style={{background:"#1E2761"}} onClick={() => handleRedirect(data)}>
-                                                        {data.gameName === "Lottery" ? "Go To Lottery Analysis" : "Go To Bet Market"}
-                                                        </button>
-                                                    {/* </Link> */}
-                                                </td>
-                                            </tr>
-                                        ))
-                                    ) : (
-                                        <tr>
-                                            <td colSpan="4" className="text-center">
-                                                No Live bet games found.
-                                            </td>
-                                        </tr>
-                                    )}
+
                                 </tbody>
                             </table>
                         </div>
