@@ -32,7 +32,7 @@ export const getUserBetMarket = async (req, res) => {
     const params = {
       marketId,
     };
-    const baseUrl = process.env.COLOR_GAME_URL
+    const baseUrl = process.env.COLOR_GAME_URL;
     const response = await axios.get(
       `${baseUrl}/api/user-external-liveBet/${marketId}`,
       {
@@ -86,6 +86,10 @@ export const getLiveBetGames = async (req, res) => {
       { expiresIn: "1h" }
     );
 
+
+
+    // Fetch live games data
+
     const baseUrl = process.env.COLOR_GAME_URL;
     const response = await axios.get(
       `${baseUrl}/api/user-external-liveGamesBet`,
@@ -106,7 +110,6 @@ export const getLiveBetGames = async (req, res) => {
         )
       );
     }
-
     const baseUrlLottery = process.env.LOTTERY_URL;
     const lotteryResponse = await axios.get(
       `${baseUrlLottery}/api/get-live-markets`
@@ -116,7 +119,7 @@ export const getLiveBetGames = async (req, res) => {
     const liveGames = response.data.data || [];
 
     const combinedData = [
-      ...lotteryData.map(lottery => ({
+      ...lotteryData.map((lottery) => ({
         marketId: lottery.marketId,
         marketName: lottery.marketName,
         gameName: lottery.gameName,
@@ -165,10 +168,21 @@ export const getLiveUserBet = async (req, res) => {
     const loggedInAdminId = req.user.adminId;
     const baseUrl = process.env.COLOR_GAME_URL;
 
-    const response = await axios.get(`${baseUrl}/api/users-liveBet/${marketId}`);
+    const response = await axios.get(
+      `${baseUrl}/api/users-liveBet/${marketId}`
+    );
 
     if (!response.data.success) {
-      return res.status(statusCode.badRequest).send(apiResponseErr(null, false, statusCode.badRequest, "Failed to fetch data"));
+      return res
+        .status(statusCode.badRequest)
+        .send(
+          apiResponseErr(
+            null,
+            false,
+            statusCode.badRequest,
+            "Failed to fetch data"
+          )
+        );
     }
 
     const { data } = response.data;
@@ -176,7 +190,9 @@ export const getLiveUserBet = async (req, res) => {
     if (!data || !Array.isArray(data.runners) || data.runners.length === 0) {
       return res
         .status(statusCode.notFound)
-        .send(apiResponseErr(null, false, statusCode.notFound, "No data found"));
+        .send(
+          apiResponseErr(null, false, statusCode.notFound, "No data found")
+        );
     }
 
     if (data && Array.isArray(data.usersDetails)) {
@@ -207,7 +223,10 @@ export const getLiveUserBet = async (req, res) => {
             const adminInfo = {
               // adminId: subAdmin.adminId,
               createdById: subAdmin.createdById,
-              createdByUser: subAdmin.createdById === loggedInAdminId ? undefined : subAdmin.createdByUser,
+              createdByUser:
+                subAdmin.createdById === loggedInAdminId
+                  ? undefined
+                  : subAdmin.createdByUser,
               users: relevantUsers.length > 0 ? relevantUsers : undefined,
               subAdmins: subHierarchy.length > 0 ? subHierarchy : undefined, // Include subAdmins if any
             };
@@ -272,7 +291,6 @@ export const getLiveUserBet = async (req, res) => {
   }
 };
 
-
 export const getLiveUserBetMarket = async (req, res) => {
   try {
     const { marketId } = req.params;
@@ -282,7 +300,7 @@ export const getLiveUserBetMarket = async (req, res) => {
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );
-    const baseUrl = process.env.COLOR_GAME_URL
+    const baseUrl = process.env.COLOR_GAME_URL;
     const response = await axios.get(
       `${baseUrl}/api/users-liveBet/${marketId}`,
       {
@@ -307,7 +325,6 @@ export const getLiveUserBetMarket = async (req, res) => {
     }
 
     const { data } = response.data;
-
 
     const userDetails = await admins.findAll({
       where: {
@@ -368,7 +385,14 @@ export const getUserMasterBook = async (req, res) => {
     if (!response.data.success) {
       return res
         .status(statusCode.badRequest)
-        .send(apiResponseErr(null, false, statusCode.badRequest, "Failed to fetch data"));
+        .send(
+          apiResponseErr(
+            null,
+            false,
+            statusCode.badRequest,
+            "Failed to fetch data"
+          )
+        );
     }
 
     const { data } = response.data;
@@ -376,17 +400,25 @@ export const getUserMasterBook = async (req, res) => {
     if (!data || !Array.isArray(data.runners) || data.runners.length === 0) {
       return res
         .status(statusCode.success)
-        .send(apiResponseSuccess([], true, statusCode.success, "No data found"));
+        .send(
+          apiResponseSuccess([], true, statusCode.success, "No data found")
+        );
     }
 
     let users = [];
 
     if (type === "user-book") {
-
-      if (role === 'superAdmin') {
+      if (role === "superAdmin") {
         return res
           .status(statusCode.forbidden)
-          .send(apiResponseErr(null, false, statusCode.forbidden, "Don't have users"));
+          .send(
+            apiResponseErr(
+              null,
+              false,
+              statusCode.forbidden,
+              "Don't have users"
+            )
+          );
       }
 
       const userDetails = await admins.findAll({
@@ -406,22 +438,27 @@ export const getUserMasterBook = async (req, res) => {
           marketId: user.marketId,
           runnerBalance: user.runnerBalance,
         }));
-
     } else if (type === "master-book") {
-
       const subAdmins = await admins.findAll({
         where: {
           createdById: adminId,
         },
-        attributes: ["userName", "adminId", "createdById", "createdByUser", "roles"],
+        attributes: [
+          "userName",
+          "adminId",
+          "createdById",
+          "createdByUser",
+          "roles",
+        ],
       });
 
       const allUsers = data.usersDetails
-        .filter(user =>
-          user.createdById === adminId ||
-          subAdmins.some(subAdmin => subAdmin.userName === user.userName)
+        .filter(
+          (user) =>
+            user.createdById === adminId ||
+            subAdmins.some((subAdmin) => subAdmin.userName === user.userName)
         )
-        .map(user => ({
+        .map((user) => ({
           userName: user.userName,
           roles: string.user,
           userId: user.userId,
@@ -429,21 +466,27 @@ export const getUserMasterBook = async (req, res) => {
           runnerBalance: user.runnerBalance,
         }));
 
-      const userIds = data.usersDetails.map(user => user.userId);
+      const userIds = data.usersDetails.map((user) => user.userId);
 
       const subAdminsDetails = await admins.findAll({
         where: { adminId: { [Op.in]: userIds } },
-        attributes: ["userName", "adminId", "createdById", "createdByUser", "roles"],
+        attributes: [
+          "userName",
+          "adminId",
+          "createdById",
+          "createdByUser",
+          "roles",
+        ],
       });
 
       const filteredSubAdmins = subAdmins.filter(
-        subAdmin => !subAdmin.roles.some(role => role.role === "user")
+        (subAdmin) => !subAdmin.roles.some((role) => role.role === "user")
       );
 
       const formattedSubAdmins = await Promise.all(
-        filteredSubAdmins.map(async subAdmin => {
+        filteredSubAdmins.map(async (subAdmin) => {
           const matchingUser = subAdminsDetails.find(
-            userDetail => userDetail.createdById === subAdmin.adminId
+            (userDetail) => userDetail.createdById === subAdmin.adminId
           );
 
           if (matchingUser) {
@@ -458,21 +501,32 @@ export const getUserMasterBook = async (req, res) => {
         })
       );
 
-      users = [...allUsers, ...formattedSubAdmins.filter(subAdmin => subAdmin !== null)];
+      users = [
+        ...allUsers,
+        ...formattedSubAdmins.filter((subAdmin) => subAdmin !== null),
+      ];
     }
 
     return res
       .status(statusCode.success)
       .send(apiResponseSuccess(users, true, statusCode.success, "Success"));
-
   } catch (error) {
-    return res.status(statusCode.internalServerError).send(apiResponseErr(null, false, statusCode.internalServerError, error.message));
+    return res
+      .status(statusCode.internalServerError)
+      .send(
+        apiResponseErr(
+          null,
+          false,
+          statusCode.internalServerError,
+          error.message
+        )
+      );
   }
 };
 
 export const userLiveBet = async (req, res) => {
   try {
-    const { marketId, adminId, role } = req.body;
+    const { marketId, adminId } = req.body;
 
     const token = jwt.sign(
       { roles: req.user.roles },
@@ -493,31 +547,35 @@ export const userLiveBet = async (req, res) => {
     if (!response.data.success) {
       return res
         .status(statusCode.badRequest)
-        .send(apiResponseErr(null, false, statusCode.badRequest, "Failed to fetch data"));
+        .send(
+          apiResponseErr(
+            null,
+            false,
+            statusCode.badRequest,
+            "Failed to fetch data"
+          )
+        );
     }
 
     const { data } = response.data;
-
-    if (!data || data.length === 0) {
-      return res
-        .status(statusCode.success)
-        .send(apiResponseSuccess([], true, statusCode.success, "No data found"));
-    }
-
-    if (role === 'superAdmin') {
-      return res
-        .status(statusCode.forbidden)
-        .send(apiResponseErr(null, false, statusCode.forbidden, "Don't have users"));
-    }
-
-    const userDetails = await admins.findAll({
-      where: { createdById: adminId },
-      attributes: ["userName", "createdById", "createdByUser"],
+    const subAdmins = await admins.findAll({
+      where: {
+        createdById: adminId,
+      },
+      attributes: [
+        "userName",
+        "adminId",
+        "createdById",
+        "createdByUser",
+        "roles",
+      ],
     });
 
-    const users = data
-      .filter((bet) =>
-        userDetails.some((detail) => detail.userName === bet.userName)
+    const allUsers = data
+      .filter(
+        (user) =>
+          user.createdById === adminId ||
+          subAdmins.some((subAdmin) => subAdmin.userName === user.userName)
       )
       .map((bet) => ({
         userName: bet.userName,
@@ -531,13 +589,59 @@ export const userLiveBet = async (req, res) => {
         type: bet.type,
       }));
 
+    const userIds = data.map((user) => user.userId);
+
+    const subAdminsDetails = await admins.findAll({
+      where: { adminId: { [Op.in]: userIds } },
+      attributes: [
+        "userName",
+        "adminId",
+        "createdById",
+        "createdByUser",
+        "roles",
+      ],
+    });
+
+    const filteredSubAdmins = subAdmins.filter(
+      (subAdmin) => !subAdmin.roles.some((role) => role.role === "user")
+    );
+
+    const formattedSubAdmins = await Promise.all(
+      filteredSubAdmins.map(async (subAdmin) => {
+        const matchingUser = subAdminsDetails.find(
+          (userDetail) => userDetail.createdById === subAdmin.adminId
+        );
+
+        if (matchingUser) {
+          return {
+            adminId: subAdmin.adminId,
+            userName: subAdmin.userName,
+            roles: subAdmin.roles[0]?.role || null,
+          };
+        }
+
+        return null;
+      })
+    );
+
+    let users = [
+      ...allUsers,
+      ...formattedSubAdmins.filter((subAdmin) => subAdmin !== null),
+    ];
+
     return res
       .status(statusCode.success)
       .send(apiResponseSuccess(users, true, statusCode.success, "Success"));
   } catch (error) {
-    console.error("error", error);
     return res
       .status(statusCode.internalServerError)
-      .send(apiResponseErr(null, false, statusCode.internalServerError, error.message));
+      .send(
+        apiResponseErr(
+          null,
+          false,
+          statusCode.internalServerError,
+          error.message
+        )
+      );
   }
 };
