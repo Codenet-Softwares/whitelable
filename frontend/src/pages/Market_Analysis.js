@@ -143,7 +143,28 @@ const Market_Analysis = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-
+                                    {liveGmes.data.length > 0 ? (
+                                        liveGmes.data.map((data, i) => (
+                                            <tr className='fw-bold' key={data.marketId}>
+                                                <td>{i + 1}</td>
+                                                <td>{data.gameName}</td>
+                                                <td>{data.marketName}</td>
+                                                <td>
+                                                    {/* <Link to={`/User_BetMarket/${data.marketId}`}> */}
+                                                        <button type="button" className="text-white p-2 border-0 rounded-3 betMarket_btn " style={{background:"#1E2761"}} onClick={() => handleRedirect(data)}>
+                                                        {data.gameName === "Lottery" ? "Go To Lottery Analysis" : "Go To Bet Market"}
+                                                        </button>
+                                                    {/* </Link> */}
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="4" className="text-center">
+                                                No Live bet games found.
+                                            </td>
+                                        </tr>
+                                    )}
                                 </tbody>
                             </table>
                         </div>
