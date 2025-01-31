@@ -86,10 +86,10 @@ export const getLiveBetGames = async (req, res) => {
       { expiresIn: "1h" }
     );
 
-<<<<<<< Updated upstream
-=======
+
+
     // Fetch live games data
->>>>>>> Stashed changes
+
     const baseUrl = process.env.COLOR_GAME_URL;
     const response = await axios.get(
       `${baseUrl}/api/user-external-liveGamesBet`,
@@ -110,10 +110,6 @@ export const getLiveBetGames = async (req, res) => {
         )
       );
     }
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
     const baseUrlLottery = process.env.LOTTERY_URL;
     const lotteryResponse = await axios.get(
       `${baseUrlLottery}/api/get-live-markets`
@@ -141,7 +137,6 @@ export const getLiveBetGames = async (req, res) => {
     }
 
     const uniqueData = Array.from(
-<<<<<<< Updated upstream
       new Set(filteredData.map(item => item.marketId))
     ).map(uniqueMarketId =>
       filteredData.find(item => item.marketId === uniqueMarketId)
@@ -158,11 +153,6 @@ export const getLiveBetGames = async (req, res) => {
 
     return res.status(statusCode.success).send(
       apiResponseSuccess(paginatedData, true, statusCode.success, "Success", pagination)
-=======
-      new Set(combinedData.map((item) => item.marketId))
-    ).map((uniqueMarketId) =>
-      combinedData.find((item) => item.marketId === uniqueMarketId)
->>>>>>> Stashed changes
     );
   } catch (error) {
     res.status(statusCode.internalServerError).send(
