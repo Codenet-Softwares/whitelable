@@ -7,6 +7,7 @@ export function getAdminInitialState(body = {}) {
     roles: body?.roles ?? [],
     createdById: body?.createdById ?? null,
     createdByUser: body?.createdByUser ?? null,
+    AdminWallet: body?.balance?? null
   };
 }
 

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 // import MyAccountServices from "../../Services/AccountServices";
 
 const ActivityLog = ({ props }) => {
+  const isLocalhost = window.location.hostname === "localhost";
   const lastLoginTimeUTC = props.lastLoginTime;
   const lastLoginTimeLocal = new Date(lastLoginTimeUTC).toLocaleString();
   const [activityLog, setActivityLog] = useState({
@@ -37,7 +38,7 @@ const ActivityLog = ({ props }) => {
         <ul className="list-group list-group-flush">
           <li className="list-group-item p-3">
             <table className="table table-bordered table-responsive-sm table-responsive-md table-responsive-lg table-responsive-xl">
-              <thead style={{background:"#E6E9ED"}}>
+              <thead style={{ background: "#E6E9ED" }}>
                 <tr className="table-active">
                   <th scope="col"> Date & Time</th>
                   <th scope="col">Login Status</th>
@@ -49,10 +50,18 @@ const ActivityLog = ({ props }) => {
               <tbody>
                 <tr>
                   <td scope="row">{lastLoginTimeLocal}</td>
-                  <td>No Data From Serverside</td>
+
+                  <td>
+                    {isLocalhost
+                      ? "No Data From Serverside"
+                      : activityLog.loginStatus}
+                  </td>
 
                   <td>{activityLog.iP}</td>
-                  <td>No Data From Serverside</td>
+
+                  <td>
+                    {isLocalhost ? "No Data From Serverside" : activityLog.isp}
+                  </td>
                   <td>
                     {activityLog.region} / {activityLog.country}
                   </td>
