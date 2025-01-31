@@ -76,14 +76,17 @@ export const getUserBetMarket = async (req, res) => {
 
 export const getLiveBetGames = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const { search } = req.query;
+    const offset = (page - 1) * limit;
     const token = jwt.sign(
       { roles: req.user.roles },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );
 
-    // Fetch live games data
-    const baseUrl = process.env.COLOR_GAME_URL
+    const baseUrl = process.env.COLOR_GAME_URL;
     const response = await axios.get(
       `${baseUrl}/api/user-external-liveGamesBet`,
       {
@@ -94,18 +97,17 @@ export const getLiveBetGames = async (req, res) => {
     );
 
     if (!response.data.success) {
-      return res
-        .status(statusCode.badRequest)
-        .send(
-          apiResponseErr(
-            null,
-            false,
-            statusCode.badRequest,
-            "Failed to fetch data"
-          )
-        );
+      return res.status(statusCode.badRequest).send(
+        apiResponseErr(
+          null,
+          false,
+          statusCode.badRequest,
+          "Failed to fetch live games data"
+        )
+      );
     }
-      const baseUrlLottery = process.env.LOTTERY_URL
+
+    const baseUrlLottery = process.env.LOTTERY_URL;
     const lotteryResponse = await axios.get(
       `${baseUrlLottery}/api/get-live-markets`
     );
@@ -122,33 +124,40 @@ export const getLiveBetGames = async (req, res) => {
       ...liveGames,
     ];
 
+    let filteredData = combinedData;
+
+    if (search) {
+      filteredData = filteredData.filter(item =>
+        item.marketName.toLowerCase().includes(search.toLowerCase()) ||
+        item.gameName.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
     const uniqueData = Array.from(
-      new Set(combinedData.map(item => item.marketId))
+      new Set(filteredData.map(item => item.marketId))
     ).map(uniqueMarketId =>
-      combinedData.find(item => item.marketId === uniqueMarketId)
+      filteredData.find(item => item.marketId === uniqueMarketId)
     );
-    return res
-      .status(statusCode.success)
-      .send(
-        apiResponseSuccess(uniqueData, true, statusCode.success, "Success")
-      );
+
+    const paginatedData = uniqueData.slice(offset, offset + limit);
+
+    const pagination = {
+      Page: page,
+      limit: limit,
+      totalItems: uniqueData.length,
+      totalPages: Math.ceil(uniqueData.length / limit),
+    };
+
+    return res.status(statusCode.success).send(
+      apiResponseSuccess(paginatedData, true, statusCode.success, "Success", pagination)
+    );
   } catch (error) {
-    console.error(
-      "Error from API:",
-      error.response ? error.response.data : error.message
+    res.status(statusCode.internalServerError).send(
+      apiResponseErr(null, false, statusCode.internalServerError, error.message)
     );
-    res
-      .status(statusCode.internalServerError)
-      .send(
-        apiResponseErr(
-          null,
-          false,
-          statusCode.internalServerError,
-          error.message
-        )
-      );
   }
 };
+
 
 export const getLiveUserBet = async (req, res) => {
   try {
