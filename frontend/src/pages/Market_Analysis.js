@@ -41,7 +41,7 @@ const Market_Analysis = () => {
                 getView_LiveGames();
             }
         }
-    }, []);
+    }, [liveGmes.search,liveGmes.type]);
 
     const handleRedirect = (data) => {
         if (data.gameName === "Lottery") {
