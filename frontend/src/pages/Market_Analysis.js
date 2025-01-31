@@ -41,7 +41,7 @@ const Market_Analysis = () => {
                 getView_LiveGames();
             }
         }
-    }, [liveGmes.search,liveGmes.type]);
+    }, [liveGmes.search, liveGmes.type]);
 
     const handleRedirect = (data) => {
         if (data.gameName === "Lottery") {
@@ -99,6 +99,7 @@ const Market_Analysis = () => {
                                             value={liveGmes.search}
                                             onChange={handleChange}
                                             type="text"
+                                            name='search'
                                             placeholder="Search content here..."
                                         />
                                     </div>
