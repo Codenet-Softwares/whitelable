@@ -11,7 +11,6 @@ import {
 import { useAppContext } from "../contextApi/context";
 import { toast } from "react-toastify";
 const CustomTransactionModal = (props) => {
-
   const { setIsLoading } = props;
   const [formData, setFormData] = useState({
     amount: null,
@@ -19,6 +18,7 @@ const CustomTransactionModal = (props) => {
     remarks: "",
   });
   const { store, showLoader, hideLoader } = useAppContext();
+  console.log("=====>>> line 21", store);
 
   // Setting Modal Title
   let modalTitle = "";
@@ -27,7 +27,17 @@ const CustomTransactionModal = (props) => {
   } else if (props.differentiate === "partnershipProvider") {
     modalTitle = "Provide Edit PartnerShip Amount";
   } else if (props.differentiate === "walletAmountProvider") {
-    modalTitle = "Provide Transfer Amount";
+    modalTitle = (
+      <>
+        Provide Transfer Amount
+        <span className="text-info fw-bold ms-2">
+          | Balance {store.admin.adminName}:{" "}
+          <span className="bg-success text-dark px-2 py-0.5 rounded">
+            {store.admin.AdminWallet}
+          </span>
+        </span>
+      </>
+    );
   } else if (props.differentiate === "addCashProvider") {
     modalTitle = "Add Cash";
   }
@@ -77,9 +87,11 @@ const CustomTransactionModal = (props) => {
         }
 
       case "partnershipProvider":
-        if (formData.amount >= 0 &&
+        if (
+          formData.amount >= 0 &&
           formData.password !== "" &&
-          formData.amount !== null) {
+          formData.amount !== null
+        ) {
           const partnershipData = {
             partnership: formData.amount,
             password: formData.password,
@@ -136,7 +148,6 @@ const CustomTransactionModal = (props) => {
 
       default:
     }
-
   }
   // API Hitting for Wallet provider
   async function handelDepositAndWithdraw(modeOfTransaction) {
@@ -201,7 +212,7 @@ const CustomTransactionModal = (props) => {
         closeButton
         style={{
           height: "5px",
-          backgroundColor: "#1E2761",
+          backgroundColor: "#006699",
           color: "white",
         }}
       >
@@ -211,9 +222,35 @@ const CustomTransactionModal = (props) => {
         <div className="my-2">
           {props?.differentiate !== "addCashProvider" ? (
             <React.Fragment>
-              <span style={{ fontWeight: "bold" }}>{props?.role}</span>
-              <br />
-              <span>{props?.adminName}</span>
+              <span
+                style={{
+                  background: "#F5C93A",
+                  color: "white",
+                  padding: "6px 12px",
+                  borderRadius: "50px",
+                  fontWeight: "bold",
+                  fontSize: "14px",
+                  display: "inline-block",
+                  minWidth: "100px",
+                  textAlign: "center",
+                  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+                }}
+              >
+                {props?.role}
+              </span>
+              <span
+                style={{
+                  fontFamily: "'Poppins', sans-serif",
+                  fontSize: "16px",
+                  fontWeight: "600",
+                  marginLeft: "10px",
+                  color: "#333",
+                  letterSpacing: "0.5px",
+                  display: "inline-block",
+                }}
+              >
+                {props?.adminName}
+              </span>
             </React.Fragment>
           ) : (
             <React.Fragment>

@@ -5,12 +5,11 @@ import { getAuthForm } from "../../Utils/service/initiateState";
 import { LoginSchema } from "../../Utils/schema";
 import { useAppContext } from "../../contextApi/context";
 import strings from "../../Utils/constant/stringConstant";
-import FullScreenLoader from "../FullScreenLoader";
 
 const Authform = ({ purpose, authFormApi }) => {
   const [authForm] = useState(getAuthForm);
   const { dispatch, store, showLoader, hideLoader } = useAppContext();
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -47,7 +46,7 @@ const Authform = ({ purpose, authFormApi }) => {
     }
     return null;
   };
-//need not delete this part this is the old portion for formik down is the new portion changed by me tamoghna sanyal
+  //need not delete this part this is the old portion for formik down is the new portion changed by me tamoghna sanyal
   // const {
   //   values,
   //   errors,
@@ -108,8 +107,6 @@ const Authform = ({ purpose, authFormApi }) => {
     },
     validationSchema: LoginSchema,
     onSubmit: async (values, action) => {
-
-
       showLoader(); // Show loader before starting the async operation
 
       try {
@@ -130,7 +127,7 @@ const Authform = ({ purpose, authFormApi }) => {
       type: strings.isLoading,
       payload: true,
     });
-    setIsLoading(true);
+    // setIsLoading(true);
 
     // API call to authenticate
     const response =
@@ -161,7 +158,7 @@ const Authform = ({ purpose, authFormApi }) => {
       type: strings.isLoading,
       payload: false,
     });
-    setIsLoading(false);
+    // setIsLoading(false);
   }
 
   const handleRoleChange = (event) => {
@@ -171,7 +168,6 @@ const Authform = ({ purpose, authFormApi }) => {
 
   return (
     <div className="main_content_iner ">
-      <FullScreenLoader show={isLoading} />
       <div className="container-fluid" style={{ marginTop: "15rem" }}>
         <div className="col-lg-12">
           <div className="row justify-content-center">

@@ -16,8 +16,10 @@ const StatusModal = ({
   adminIdForStatus,
   setRefresh,
 }) => {
-  const { showLoader, hideLoader } = useAppContext();
+  const { store,showLoader, hideLoader } = useAppContext();
   const [state, setState] = useState(activeInactiveInitialState());
+  console.log('Line 21',store)
+
 
   // Set modal state based on Status when it opens
   useEffect(() => {
@@ -105,7 +107,7 @@ const StatusModal = ({
         }
       } catch (error) {
         toast.error(customErrorHandler(error));
-      }finally {
+      } finally {
         hideLoader(); // Hide the loader once the async operation is complete, regardless of success or failure
       }
     } else {
@@ -141,9 +143,35 @@ const StatusModal = ({
       <Modal.Body>
         <div className="d-flex justify-content-between mb-3">
           <div>
-            <span style={{ fontWeight: "bold" }}>{userRole}</span>
-            <br />
-            <span>{name}</span>
+            <span
+              style={{
+                background: "#F5C93A",
+                color: "white",
+                padding: "6px 12px",
+                borderRadius: "50px",
+                fontWeight: "bold",
+                fontSize: "14px",
+                display: "inline-block",
+                minWidth: "100px",
+                textAlign: "center",
+                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+              }}
+            >
+              {name}
+            </span>
+            <span
+              style={{
+                fontFamily: "'Poppins', sans-serif",
+                fontSize: "16px",
+                fontWeight: "600",
+                marginLeft: "10px",
+                color: "#333",
+                letterSpacing: "0.5px",
+                display: "inline-block",
+              }}
+            >
+              {userRole}
+            </span>
           </div>
           <span style={{ fontWeight: "bold" }}>{Status}</span>
         </div>
