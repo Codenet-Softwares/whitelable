@@ -155,9 +155,10 @@ export function get_liveGames(body = {}) {
     data: [],
     currentPage: 1,
     totalPages: "",
-    totalEntries: 5,
-    name: "",
+    totalEntries: 10,
+    search: "",
     totalData: "",
+    type:""
   };
 }
 
