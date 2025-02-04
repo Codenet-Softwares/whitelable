@@ -37,7 +37,8 @@ import {
   singleSubAdmin,
   subAdminPermission,
   userStatus,
-  syncWithUserBackend
+  syncWithUserBackend,
+  fetchUserHierarchy
 } from '../controller/admin.controller.js';
 import { string } from '../constructor/string.js';
 
@@ -308,4 +309,5 @@ export const adminRoute = (app) => {
 
   app.post('/api/admin/extrnal/balance-update', exUpdateBalanceSchema, customErrorHandler, syncWithUserBackend);
   
+  app.get("/api/user-hierarchy/:userName", fetchUserHierarchy);
 };

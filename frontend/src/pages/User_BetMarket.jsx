@@ -278,24 +278,22 @@ const User_BetMarket = () => {
                             </h4>
                             <span className="number">
                               <i
-                                className={`fa fa-arrow-right fw-bold ${
-                                  runnerData?.runnerName?.bal <= 0
-                                    ? "green_icon"
-                                    : "red_icon"
-                                }`}
+                                className={`fa fa-arrow-right fw-bold ${runnerData?.runnerName?.bal <= 0
+                                  ? "green_icon"
+                                  : "red_icon"
+                                  }`}
                                 aria-hidden="true"
                               ></i>
                               <span
-                                className={`px-2 fw-bold ${
-                                  runnerData?.runnerName?.bal <= 0
-                                    ? "green_icon"
-                                    : "red_icon"
-                                }`}
+                                className={`px-2 fw-bold ${runnerData?.runnerName?.bal <= 0
+                                  ? "green_icon"
+                                  : "red_icon"
+                                  }`}
                               >
                                 {runnerData?.runnerName?.bal <= 0
                                   ? `+${Math.abs(
-                                      runnerData?.runnerName?.bal || 0
-                                    )}`
+                                    runnerData?.runnerName?.bal || 0
+                                  )}`
                                   : `-${runnerData?.runnerName?.bal}`}
                               </span>
                             </span>
@@ -325,7 +323,8 @@ const User_BetMarket = () => {
                 {/* Additional Cards */}
                 <div className="card mt-3">
                   <h4
-                    className="card-header text-white fw-bold rounded-top text-uppercase"
+                    className="card-header text-white fw-bold rounded-top "
+
                     style={{ background: "#1E2761" }}
                   >
                     Score Card
@@ -402,8 +401,7 @@ const User_BetMarket = () => {
                       View More...
                     </h4>
                   </div>
-
-                  <div className="card-body ">
+                  {/* <div className="card-body ">
                     <h5
                       style={{
                         fontSize: "20px",
@@ -411,20 +409,18 @@ const User_BetMarket = () => {
                         color: "gray",
                       }}
                     >
-                      <div style={{ padding: "20px" }}>
                         <h2 className="text-uppercase">Market Details</h2>
+                      <div>
                         <div
                           style={{
                             border: "1px solid #ddd",
                             borderRadius: "4px",
-                            margin: "10px",
+                            margin: "5px",
                             padding: "10px",
                             backgroundColor: "#e6f2ff",
                           }}
                         >
-                          {/* <div style={{ fontSize: "12px", color: "#555" }}>
-                            <strong>Time:</strong> Dec 26, 2024, 4:28:31 PM
-                          </div> */}
+                          
                           {liveToggle ? (
                             user_LiveBet.map((data) => {
                               return (
@@ -537,7 +533,130 @@ const User_BetMarket = () => {
                         </div>
                       </div>
                     </h5>
+                  </div> */}
+
+                  <div className="card-body">
+                    <h5
+                      style={{
+                        fontSize: "20px",
+                        fontWeight: "bold",
+                        color: "gray",
+                      }}
+                    >
+                      <div>
+                        {/* <h2>Market Details</h2> */}
+                        <div className="col-12">
+                          <div className="row text-center">
+                            <div className="col-4"><p className="fw-bold text-dark">Market Name</p></div>
+                            <div className="col-2"><p className="fw-bold text-dark">Odds</p></div>
+                            <div className="col-3"><p className="fw-bold text-dark">Stake</p></div>
+                            <div className="col-3"><p className="fw-bold text-dark">Username</p></div>
+                          </div>
+                        </div>
+                        <div
+                          style={{
+                            border: "1px solid #ddd",
+                            borderRadius: "4px",
+                            padding: "7px",
+                            backgroundColor: "#BEDCF4",
+                          }}
+                        >
+                          {liveToggle ? (
+                            user_LiveBet.map((data) => {
+                              return (
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    marginTop: "5px",
+                                  }}
+                                  key={data.id}
+                                >
+                                  <div style={{ display: "flex", alignItems: "center" }}>
+                                    {data.type === "back" ? (
+                                      <button
+                                        style={{
+                                          backgroundColor: "#7DBCE8",
+                                          border: "none",
+                                          borderRadius: "3px",
+                                          marginRight: "10px",
+                                          fontSize: "12px",
+                                          textTransform: "uppercase",
+                                          width: "40px"
+                                        }}
+                                      >
+                                        {data.type}
+                                      </button>
+                                    ) : (
+                                      <button
+                                        style={{
+                                          backgroundColor: "#FFB6C1",
+                                          // color: "#fff",
+                                          border: "none",
+                                          borderRadius: "3px",
+                                          marginRight: "10px",
+                                          fontSize: "12px",
+                                          textTransform: "uppercase",
+                                          width: "40px"
+                                        }}
+                                      >
+                                        {data.type}
+                                      </button>
+                                    )}
+
+                                    <div>
+                                      <div
+                                        style={{
+                                          // fontWeight: "bold",
+                                          fontSize: "12px",
+                                        }}
+                                      >
+                                        {data.runnerName}
+                                      </div>
+                                      <div
+                                        style={{
+                                          fontSize: "12px",
+                                          color: "#555",                           
+                                        }}
+                                      >
+                                        Match Odds
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div style={{ display: "flex", gap: "88px" }}>
+                                    <div style={{fontWeight: "bold", fontSize: "14px"}}>{data.rate}</div>
+                                    <div style={{ fontWeight: "bold", fontSize: "14px" }}>{data.value}</div>
+                                    <div
+                                      style={{
+                                        fontWeight: "bold", fontSize: "15px",
+                                        color: data.type === "back" ? "#007bff" : "#FFB6C1",
+                                      }}
+                                    >
+                                      {data.userName}
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })
+                          ) : (
+                            <div className="card-body text-center">
+                              <h5
+                                style={{
+                                  fontSize: "20px",
+                                  fontWeight: "bold",
+                                  color: "gray",
+                                }}
+                              >
+                                There are no any bet.
+                              </h5>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </h5>
                   </div>
+
                 </div>
               </div>
             </div>
@@ -648,7 +767,7 @@ const User_BetMarket = () => {
                               </td>
                             );
                           })}
-                        
+
                         </tr>
                       );
                     })

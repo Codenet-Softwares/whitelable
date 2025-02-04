@@ -7,6 +7,7 @@ export function getAdminInitialState(body = {}) {
     roles: body?.roles ?? [],
     createdById: body?.createdById ?? null,
     createdByUser: body?.createdByUser ?? null,
+    AdminWallet: body?.balance?? null
   };
 }
 
@@ -154,9 +155,10 @@ export function get_liveGames(body = {}) {
     data: [],
     currentPage: 1,
     totalPages: "",
-    totalEntries: 5,
-    name: "",
+    totalEntries: 10,
+    search: "",
     totalData: "",
+    type:""
   };
 }
 

@@ -6,6 +6,7 @@ import { messages, string } from '../constructor/string.js';
 import { statusCode } from '../helper/statusCodes.js';
 import CustomError from '../helper/extendError.js';
 import axios from 'axios';
+import { admin_Balance } from './transaction.controller.js';
 
 // done
 export const adminLogin = async (req, res) => {
@@ -71,11 +72,14 @@ export const adminLogin = async (req, res) => {
                 adminIdToSend = existingAdmin.adminId;
             }
 
+            const adminBalance = await admin_Balance(existingAdmin.adminId)
+
             const accessTokenResponse = {
                 adminId: adminIdToSend,
                 createdById: existingAdmin.createdById,
                 createdByUser: existingAdmin.createdByUser,
                 userName: existingAdmin.userName,
+                balance : adminBalance,
                 roles: existingAdmin.roles.map((role) => ({
                     role: role.role,
                     permission: role.permission,
@@ -94,6 +98,7 @@ export const adminLogin = async (req, res) => {
                 createdById: existingAdmin.createdById,
                 createdByUser: existingAdmin.createdByUser,
                 userName: existingAdmin.userName,
+                balance : adminBalance,
                 roles: existingAdmin.roles.map((role) => ({
                     role: role.role,
                     permission: role.permission,

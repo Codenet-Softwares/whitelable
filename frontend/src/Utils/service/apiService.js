@@ -427,7 +427,7 @@ export async function getLiveGames(body = {}, isToast = false) {
   try {
     const callParams = await getAuthCallParams(strings.GET, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.get_Live_BetGame}`, ///&limit=${body.limit}&search=${body.searchName} ((by search sending blank server is not giving data))
+      `${UrlConstant.get_Live_BetGame}?page=${body.pageNumber}&limit=${body.dataLimit}&search=${body.search}&type=${body.type}`, ///&limit=${body.limit}&search=${body.searchName} ((by search sending blank server is not giving data))
       callParams,
       isToast
     );

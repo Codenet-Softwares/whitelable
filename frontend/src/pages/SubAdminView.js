@@ -75,9 +75,9 @@ const SubAdminView = () => {
     if (response) {
       setSubAdminData({
         ...subAdminData,
-        userList: response.data,
-        totalPages: response.pagination.totalPages,
-        totalData: response.pagination.totalRecords,
+        userList: response?.data,
+        totalPages: response?.pagination?.totalPages,
+        totalData: response?.pagination?.totalRecords,
       });
     }
   }

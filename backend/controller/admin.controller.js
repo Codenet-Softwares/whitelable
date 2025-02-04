@@ -11,6 +11,7 @@ import axios from 'axios';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import { admin_Balance, balance_hierarchy } from './transaction.controller.js';
+import { findCreatorHierarchy } from '../helper/createHierarchy.js';
 dotenv.config();
 
 /**
@@ -493,7 +494,7 @@ export const viewAllSubAdminCreates = async (req, res) => {
     });
 
     if (totalRecords === 0) {
-      return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, messages.noRecordsFound));
+      return res.status(statusCode.success).json(apiResponseSuccess([], true, statusCode.success, messages.noRecordsFound));
     }
 
     const offset = (page - 1) * pageSize;
@@ -1139,4 +1140,29 @@ export const syncWithUserBackend = async (req, res) => {
   }
 };
 
+export const fetchUserHierarchy = async (req, res) => {
+  const { userName } = req.params;
+  try {
+    const hierarchy = await findCreatorHierarchy(userName);
 
+    if (!hierarchy) {
+      return res
+      .status(statusCode.notFound)
+      .json(apiResponseErr(null, false, statusCode.notFound, 'User Not Found'));
+    }
+
+    const formattedHierarchy = hierarchy.map(item => ({
+      userName: item.userName,
+      createdByUser: item.createdByUser,
+      createdById: item.createdById,
+      roles: item.roles,
+    }));
+    return res
+      .status(statusCode.success)
+      .json(apiResponseSuccess(formattedHierarchy, true, statusCode.success, 'Hierarchy retractive successfully'));
+  } catch (error) {
+    res
+    .status(statusCode.internalServerError)
+    .json(apiResponseErr(null, false, statusCode.internalServerError, error.message));
+  }
+};

@@ -32,7 +32,7 @@ export const getUserBetMarket = async (req, res) => {
     const params = {
       marketId,
     };
-    const baseUrl = process.env.COLOR_GAME_URL
+    const baseUrl = process.env.COLOR_GAME_URL;
     const response = await axios.get(
       `${baseUrl}/api/user-external-liveBet/${marketId}`,
       {
@@ -76,14 +76,18 @@ export const getUserBetMarket = async (req, res) => {
 
 export const getLiveBetGames = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const { search, type } = req.query;
+    const offset = (page - 1) * limit;
     const token = jwt.sign(
       { roles: req.user.roles },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );
 
-    // Fetch live games data
-    const baseUrl = process.env.COLOR_GAME_URL
+
+    const baseUrl = process.env.COLOR_GAME_URL;
     const response = await axios.get(
       `${baseUrl}/api/user-external-liveGamesBet`,
       {
@@ -91,6 +95,87 @@ export const getLiveBetGames = async (req, res) => {
           Authorization: `Bearer ${token}`,
         },
       }
+    );
+
+    if (!response.data.success) {
+      return res.status(statusCode.badRequest).send(
+        apiResponseErr(
+          null,
+          false,
+          statusCode.badRequest,
+          "Failed to fetch live games data"
+        )
+      );
+    }
+    const baseUrlLottery = process.env.LOTTERY_URL;
+    const lotteryResponse = await axios.get(
+      `${baseUrlLottery}/api/get-live-markets`
+    );
+
+    const lotteryData = lotteryResponse.data?.data || [];
+    const liveGames = response.data.data || [];
+    const combinedData = [
+      ...lotteryData.map((lottery) => ({
+        marketId: lottery.marketId,
+        marketName: lottery.marketName,
+        gameName: lottery.gameName,
+        source: "lottery",
+      })),
+      ...liveGames.map(game => ({
+        ...game,
+        source: "colorgame",
+      })),
+    ];
+
+    let filteredData = combinedData;
+
+    if (type) {
+      filteredData = filteredData.filter(item => item.source === type);
+    }
+
+    if (search) {
+      filteredData = filteredData.filter(item =>
+        item.marketName?.toLowerCase().includes(search.toLowerCase()) ||
+        (item.source === "colorgame" &&
+          item.gameName?.toLowerCase().includes(search.toLowerCase()))
+      );
+    }
+
+    const uniqueData = Array.from(
+      new Set(filteredData.map(item => item.marketId))
+    ).map(uniqueMarketId =>
+      filteredData.find(item => item.marketId === uniqueMarketId)
+    );
+
+    const paginatedData = uniqueData.slice(offset, offset + limit);
+
+    const pagination = {
+      Page: page,
+      limit: limit,
+      totalItems: uniqueData.length,
+      totalPages: Math.ceil(uniqueData.length / limit),
+    };
+
+    return res.status(statusCode.success).send(
+      apiResponseSuccess(paginatedData, true, statusCode.success, "Success", pagination)
+    );
+  } catch (error) {
+    res.status(statusCode.internalServerError).send(
+      apiResponseErr(null, false, statusCode.internalServerError, error.message)
+    );
+  }
+};
+
+
+
+export const getLiveUserBet = async (req, res) => {
+  try {
+    const { marketId } = req.params;
+    const loggedInAdminId = req.user.adminId;
+    const baseUrl = process.env.COLOR_GAME_URL;
+
+    const response = await axios.get(
+      `${baseUrl}/api/users-liveBet/${marketId}`
     );
 
     if (!response.data.success) {
@@ -105,69 +190,15 @@ export const getLiveBetGames = async (req, res) => {
           )
         );
     }
-      const baseUrlLottery = process.env.LOTTERY_URL
-    const lotteryResponse = await axios.get(
-      `${baseUrlLottery}/api/get-live-markets`
-    );
-
-    const lotteryData = lotteryResponse.data?.data || [];
-    const liveGames = response.data.data || [];
-
-    const combinedData = [
-      ...lotteryData.map(lottery => ({
-        marketId: lottery.marketId,
-        marketName: lottery.marketName,
-        gameName: lottery.gameName,
-      })),
-      ...liveGames,
-    ];
-
-    const uniqueData = Array.from(
-      new Set(combinedData.map(item => item.marketId))
-    ).map(uniqueMarketId =>
-      combinedData.find(item => item.marketId === uniqueMarketId)
-    );
-    return res
-      .status(statusCode.success)
-      .send(
-        apiResponseSuccess(uniqueData, true, statusCode.success, "Success")
-      );
-  } catch (error) {
-    console.error(
-      "Error from API:",
-      error.response ? error.response.data : error.message
-    );
-    res
-      .status(statusCode.internalServerError)
-      .send(
-        apiResponseErr(
-          null,
-          false,
-          statusCode.internalServerError,
-          error.message
-        )
-      );
-  }
-};
-
-export const getLiveUserBet = async (req, res) => {
-  try {
-    const { marketId } = req.params;
-    const loggedInAdminId = req.user.adminId;
-    const baseUrl = process.env.COLOR_GAME_URL;
-
-    const response = await axios.get(`${baseUrl}/api/users-liveBet/${marketId}`);
-
-    if (!response.data.success) {
-      return res.status(statusCode.badRequest).send(apiResponseErr(null, false, statusCode.badRequest, "Failed to fetch data"));
-    }
 
     const { data } = response.data;
 
     if (!data || !Array.isArray(data.runners) || data.runners.length === 0) {
       return res
         .status(statusCode.notFound)
-        .send(apiResponseErr(null, false, statusCode.notFound, "No data found"));
+        .send(
+          apiResponseErr(null, false, statusCode.notFound, "No data found")
+        );
     }
 
     if (data && Array.isArray(data.usersDetails)) {
@@ -198,7 +229,10 @@ export const getLiveUserBet = async (req, res) => {
             const adminInfo = {
               // adminId: subAdmin.adminId,
               createdById: subAdmin.createdById,
-              createdByUser: subAdmin.createdById === loggedInAdminId ? undefined : subAdmin.createdByUser,
+              createdByUser:
+                subAdmin.createdById === loggedInAdminId
+                  ? undefined
+                  : subAdmin.createdByUser,
               users: relevantUsers.length > 0 ? relevantUsers : undefined,
               subAdmins: subHierarchy.length > 0 ? subHierarchy : undefined, // Include subAdmins if any
             };
@@ -263,7 +297,6 @@ export const getLiveUserBet = async (req, res) => {
   }
 };
 
-
 export const getLiveUserBetMarket = async (req, res) => {
   try {
     const { marketId } = req.params;
@@ -273,7 +306,7 @@ export const getLiveUserBetMarket = async (req, res) => {
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );
-    const baseUrl = process.env.COLOR_GAME_URL
+    const baseUrl = process.env.COLOR_GAME_URL;
     const response = await axios.get(
       `${baseUrl}/api/users-liveBet/${marketId}`,
       {
@@ -298,7 +331,6 @@ export const getLiveUserBetMarket = async (req, res) => {
     }
 
     const { data } = response.data;
-
 
     const userDetails = await admins.findAll({
       where: {
@@ -359,7 +391,14 @@ export const getUserMasterBook = async (req, res) => {
     if (!response.data.success) {
       return res
         .status(statusCode.badRequest)
-        .send(apiResponseErr(null, false, statusCode.badRequest, "Failed to fetch data"));
+        .send(
+          apiResponseErr(
+            null,
+            false,
+            statusCode.badRequest,
+            "Failed to fetch data"
+          )
+        );
     }
 
     const { data } = response.data;
@@ -367,17 +406,25 @@ export const getUserMasterBook = async (req, res) => {
     if (!data || !Array.isArray(data.runners) || data.runners.length === 0) {
       return res
         .status(statusCode.success)
-        .send(apiResponseSuccess([], true, statusCode.success, "No data found"));
+        .send(
+          apiResponseSuccess([], true, statusCode.success, "No data found")
+        );
     }
 
     let users = [];
 
     if (type === "user-book") {
-
-      if (role === 'superAdmin') {
+      if (role === "superAdmin") {
         return res
           .status(statusCode.forbidden)
-          .send(apiResponseErr(null, false, statusCode.forbidden, "Don't have users"));
+          .send(
+            apiResponseErr(
+              null,
+              false,
+              statusCode.forbidden,
+              "Don't have users"
+            )
+          );
       }
 
       const userDetails = await admins.findAll({
@@ -397,22 +444,27 @@ export const getUserMasterBook = async (req, res) => {
           marketId: user.marketId,
           runnerBalance: user.runnerBalance,
         }));
-
     } else if (type === "master-book") {
-
       const subAdmins = await admins.findAll({
         where: {
           createdById: adminId,
         },
-        attributes: ["userName", "adminId", "createdById", "createdByUser", "roles"],
+        attributes: [
+          "userName",
+          "adminId",
+          "createdById",
+          "createdByUser",
+          "roles",
+        ],
       });
 
       const allUsers = data.usersDetails
-        .filter(user =>
-          user.createdById === adminId ||
-          subAdmins.some(subAdmin => subAdmin.userName === user.userName)
+        .filter(
+          (user) =>
+            user.createdById === adminId ||
+            subAdmins.some((subAdmin) => subAdmin.userName === user.userName)
         )
-        .map(user => ({
+        .map((user) => ({
           userName: user.userName,
           roles: string.user,
           userId: user.userId,
@@ -420,21 +472,27 @@ export const getUserMasterBook = async (req, res) => {
           runnerBalance: user.runnerBalance,
         }));
 
-      const userIds = data.usersDetails.map(user => user.userId);
+      const userIds = data.usersDetails.map((user) => user.userId);
 
       const subAdminsDetails = await admins.findAll({
         where: { adminId: { [Op.in]: userIds } },
-        attributes: ["userName", "adminId", "createdById", "createdByUser", "roles"],
+        attributes: [
+          "userName",
+          "adminId",
+          "createdById",
+          "createdByUser",
+          "roles",
+        ],
       });
 
       const filteredSubAdmins = subAdmins.filter(
-        subAdmin => !subAdmin.roles.some(role => role.role === "user")
+        (subAdmin) => !subAdmin.roles.some((role) => role.role === "user")
       );
 
       const formattedSubAdmins = await Promise.all(
-        filteredSubAdmins.map(async subAdmin => {
+        filteredSubAdmins.map(async (subAdmin) => {
           const matchingUser = subAdminsDetails.find(
-            userDetail => userDetail.createdById === subAdmin.adminId
+            (userDetail) => userDetail.createdById === subAdmin.adminId
           );
 
           if (matchingUser) {
@@ -449,21 +507,35 @@ export const getUserMasterBook = async (req, res) => {
         })
       );
 
-      users = [...allUsers, ...formattedSubAdmins.filter(subAdmin => subAdmin !== null)];
+      users = [
+        ...allUsers,
+        ...formattedSubAdmins.filter((subAdmin) => subAdmin !== null),
+      ];
     }
 
     return res
       .status(statusCode.success)
       .send(apiResponseSuccess(users, true, statusCode.success, "Success"));
-
   } catch (error) {
-    return res.status(statusCode.internalServerError).send(apiResponseErr(null, false, statusCode.internalServerError, error.message));
+    return res
+      .status(statusCode.internalServerError)
+      .send(
+        apiResponseErr(
+          null,
+          false,
+          statusCode.internalServerError,
+          error.message
+        )
+      );
   }
 };
 
 export const userLiveBet = async (req, res) => {
   try {
-    const { marketId, adminId, role } = req.body;
+    const { marketId } = req.body;
+
+    const admin = req.user;
+    const adminId = admin.adminId;
 
     const token = jwt.sign(
       { roles: req.user.roles },
@@ -489,27 +561,22 @@ export const userLiveBet = async (req, res) => {
 
     const { data } = response.data;
 
-    if (!data || data.length === 0) {
+    if (!Array.isArray(data) || data.length === 0) {
       return res
         .status(statusCode.success)
         .send(apiResponseSuccess([], true, statusCode.success, "No data found"));
     }
 
-    if (role === 'superAdmin') {
-      return res
-        .status(statusCode.forbidden)
-        .send(apiResponseErr(null, false, statusCode.forbidden, "Don't have users"));
+    const connectedUsers = await getAllConnectedUsers(adminId);
+
+    if (!Array.isArray(connectedUsers)) {
+      return res.status(statusCode.internalServerError).send(
+        apiResponseErr(null, false, statusCode.internalServerError, "Connected users data is invalid")
+      );
     }
 
-    const userDetails = await admins.findAll({
-      where: { createdById: adminId },
-      attributes: ["userName", "createdById", "createdByUser"],
-    });
-
     const users = data
-      .filter((bet) =>
-        userDetails.some((detail) => detail.userName === bet.userName)
-      )
+      .filter((bet) => connectedUsers.includes(bet.userName))
       .map((bet) => ({
         userName: bet.userName,
         userId: bet.userId,
@@ -522,13 +589,40 @@ export const userLiveBet = async (req, res) => {
         type: bet.type,
       }));
 
-    return res
-      .status(statusCode.success)
-      .send(apiResponseSuccess(users, true, statusCode.success, "Success"));
+      if (users.length === 0) {
+        return res
+          .status(statusCode.success)
+          .send(apiResponseSuccess([], true, statusCode.success, "No bets found"));
+      }
+
+    return res.status(statusCode.success).send(apiResponseSuccess(users, true, statusCode.success, "Success"));
+
   } catch (error) {
-    console.error("error", error);
+    console.error("Error:", error);
     return res
       .status(statusCode.internalServerError)
       .send(apiResponseErr(null, false, statusCode.internalServerError, error.message));
   }
+};
+
+
+const getAllConnectedUsers = async (adminId) => {
+  let allUsers = [adminId];
+  let queue = [adminId];
+
+  while (queue.length) {
+    let currentId = queue.shift();
+
+    const users = await admins.findAll({
+      where: { createdById: currentId },
+      attributes: ["userName", "adminId"],
+    });
+
+    users.forEach((user) => {
+      allUsers.push(user.userName);
+      queue.push(user.adminId);
+    });
+  }
+
+  return allUsers;
 };

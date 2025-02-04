@@ -45,7 +45,7 @@ class ResponseMessages {
         this.accountInactive = 'Account is in Inactive Mode';
         this.invalidRole = 'Invalid user role for creating sub-admin';
         this.adminNotFound = 'Admin not found';
-        this.noRecordsFound = 'No records found';
+        this.noRecordsFound = 'No data found';
         this.success = 'Success';
         this.dataFetched = 'Data Fetched';
         this.somethingWentWrong = 'Something went wrong';
