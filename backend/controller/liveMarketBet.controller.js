@@ -534,8 +534,8 @@ export const userLiveBet = async (req, res) => {
   try {
     const { marketId } = req.body;
 
-    const admin = req.user
-    const adminId = admin.adminId
+    const admin = req.user;
+    const adminId = admin.adminId;
 
     const token = jwt.sign(
       { roles: req.user.roles },
@@ -561,13 +561,19 @@ export const userLiveBet = async (req, res) => {
 
     const { data } = response.data;
 
-    if (!data || data.length === 0) {
+    if (!Array.isArray(data) || data.length === 0) {
       return res
         .status(statusCode.success)
         .send(apiResponseSuccess([], true, statusCode.success, "No data found"));
     }
 
     const connectedUsers = await getAllConnectedUsers(adminId);
+
+    if (!Array.isArray(connectedUsers)) {
+      return res.status(statusCode.internalServerError).send(
+        apiResponseErr(null, false, statusCode.internalServerError, "Connected users data is invalid")
+      );
+    }
 
     const users = data
       .filter((bet) => connectedUsers.includes(bet.userName))
@@ -582,29 +588,35 @@ export const userLiveBet = async (req, res) => {
         value: bet.value,
         type: bet.type,
       }));
+
     return res.status(statusCode.success).send(apiResponseSuccess(users, true, statusCode.success, "Success"));
 
   } catch (error) {
-    console.error("error", error);
+    console.error("Error:", error);
     return res
       .status(statusCode.internalServerError)
       .send(apiResponseErr(null, false, statusCode.internalServerError, error.message));
   }
 };
 
+
 const getAllConnectedUsers = async (adminId) => {
-  let allUsers = [];
+  let allUsers = [adminId];
   let queue = [adminId];
 
   while (queue.length) {
     let currentId = queue.shift();
+
     const users = await admins.findAll({
       where: { createdById: currentId },
       attributes: ["userName", "adminId"],
     });
+
     users.forEach((user) => {
       allUsers.push(user.userName);
       queue.push(user.adminId);
     });
   }
-}
+
+  return allUsers;
+};
