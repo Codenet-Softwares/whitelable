@@ -1078,6 +1078,7 @@ table.dataTable tbody td {
   padding: 34px 0 30px 0px;
   align-items: center;
   border-bottom: 0px solid transparent;
+  text-transform: uppercase;
 }
 
 /* line 739, G:/admin_project/8 admin/management_html/scss/_reset.scss */
