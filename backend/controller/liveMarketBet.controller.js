@@ -78,7 +78,7 @@ export const getLiveBetGames = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const { search, type } = req.query; 
+    const { search, type } = req.query;
     const offset = (page - 1) * limit;
     const token = jwt.sign(
       { roles: req.user.roles },
@@ -128,7 +128,7 @@ export const getLiveBetGames = async (req, res) => {
     ];
 
     let filteredData = combinedData;
-    
+
     if (type) {
       filteredData = filteredData.filter(item => item.source === type);
     }
@@ -532,7 +532,10 @@ export const getUserMasterBook = async (req, res) => {
 
 export const userLiveBet = async (req, res) => {
   try {
-    const { marketId, adminId } = req.body;
+    const { marketId } = req.body;
+
+    const admin = req.user
+    const adminId = admin.adminId
 
     const token = jwt.sign(
       { roles: req.user.roles },
@@ -553,36 +556,21 @@ export const userLiveBet = async (req, res) => {
     if (!response.data.success) {
       return res
         .status(statusCode.badRequest)
-        .send(
-          apiResponseErr(
-            null,
-            false,
-            statusCode.badRequest,
-            "Failed to fetch data"
-          )
-        );
+        .send(apiResponseErr(null, false, statusCode.badRequest, "Failed to fetch data"));
     }
 
     const { data } = response.data;
-    const subAdmins = await admins.findAll({
-      where: {
-        createdById: adminId,
-      },
-      attributes: [
-        "userName",
-        "adminId",
-        "createdById",
-        "createdByUser",
-        "roles",
-      ],
-    });
 
-    const allUsers = data
-      .filter(
-        (user) =>
-          user.createdById === adminId ||
-          subAdmins.some((subAdmin) => subAdmin.userName === user.userName)
-      )
+    if (!data || data.length === 0) {
+      return res
+        .status(statusCode.success)
+        .send(apiResponseSuccess([], true, statusCode.success, "No data found"));
+    }
+
+    const connectedUsers = await getAllConnectedUsers(adminId);
+
+    const users = data
+      .filter((bet) => connectedUsers.includes(bet.userName))
       .map((bet) => ({
         userName: bet.userName,
         userId: bet.userId,
@@ -594,60 +582,29 @@ export const userLiveBet = async (req, res) => {
         value: bet.value,
         type: bet.type,
       }));
+    return res.status(statusCode.success).send(apiResponseSuccess(users, true, statusCode.success, "Success"));
 
-    const userIds = data.map((user) => user.userId);
-
-    const subAdminsDetails = await admins.findAll({
-      where: { adminId: { [Op.in]: userIds } },
-      attributes: [
-        "userName",
-        "adminId",
-        "createdById",
-        "createdByUser",
-        "roles",
-      ],
-    });
-
-    const filteredSubAdmins = subAdmins.filter(
-      (subAdmin) => !subAdmin.roles.some((role) => role.role === "user")
-    );
-
-    const formattedSubAdmins = await Promise.all(
-      filteredSubAdmins.map(async (subAdmin) => {
-        const matchingUser = subAdminsDetails.find(
-          (userDetail) => userDetail.createdById === subAdmin.adminId
-        );
-
-        if (matchingUser) {
-          return {
-            adminId: subAdmin.adminId,
-            userName: subAdmin.userName,
-            roles: subAdmin.roles[0]?.role || null,
-          };
-        }
-
-        return null;
-      })
-    );
-
-    let users = [
-      ...allUsers,
-      ...formattedSubAdmins.filter((subAdmin) => subAdmin !== null),
-    ];
-
-    return res
-      .status(statusCode.success)
-      .send(apiResponseSuccess(users, true, statusCode.success, "Success"));
   } catch (error) {
+    console.error("error", error);
     return res
       .status(statusCode.internalServerError)
-      .send(
-        apiResponseErr(
-          null,
-          false,
-          statusCode.internalServerError,
-          error.message
-        )
-      );
+      .send(apiResponseErr(null, false, statusCode.internalServerError, error.message));
   }
 };
+
+const getAllConnectedUsers = async (adminId) => {
+  let allUsers = [];
+  let queue = [adminId];
+
+  while (queue.length) {
+    let currentId = queue.shift();
+    const users = await admins.findAll({
+      where: { createdById: currentId },
+      attributes: ["userName", "adminId"],
+    });
+    users.forEach((user) => {
+      allUsers.push(user.userName);
+      queue.push(user.adminId);
+    });
+  }
+}
