@@ -223,63 +223,63 @@ const Wallet = () => {
                 <tr>
                   <th
                     scope="col"
-                    className="text-bolder fs-6"
+                    className="text-bolder fs-6 text-uppercase"
                     style={{ fontWeight: "bold", color: "white" }}
                   >
                     Username
                   </th>
                   <th
                     scope="col"
-                    className="text-bolder fs-6 text-center"
+                    className="text-bolder fs-6 text-center text-uppercase"
                     style={{ fontWeight: "bold", color: "white" }}
                   >
                     Credit Ref.
                   </th>
                   <th
                     scope="col"
-                    className="text-bolder fs-6 text-center"
+                    className="text-bolder fs-6 text-center text-uppercase"
                     style={{ fontWeight: "bold", color: "white" }}
                   >
                     Partnership
                   </th>
                   <th
                     scope="col"
-                    className="text-bolder fs-6 text-center"
+                    className="text-bolder fs-6 text-center text-uppercase"
                     style={{ fontWeight: "bold", color: "white" }}
                   >
                     Balance
                   </th>
                   <th
                     scope="col"
-                    className="text-bolder fs-6 text-center"
+                    className="text-bolder fs-6 text-center text-uppercase"
                     style={{ fontWeight: "bold", color: "white" }}
                   >
                     Exposure
                   </th>
                   <th
                     scope="col"
-                    className="text-bolder fs-6 text-center"
+                    className="text-bolder fs-6 text-center text-uppercase"
                     style={{ fontWeight: "bold", color: "white" }}
                   >
                     Avail. Bal.
                   </th>
                   <th
                     scope="col"
-                    className="text-bolder fs-6 text-center"
+                    className="text-bolder fs-6 text-center text-uppercase"
                     style={{ fontWeight: "bold", color: "white" }}
                   >
                     Ref. P/L
                   </th>
                   <th
                     scope="col"
-                    className="text-bolder fs-6 text-center"
+                    className="text-bolder fs-6 text-center text-uppercase"
                     style={{ fontWeight: "bold", color: "white" }}
                   >
                     Status
                   </th>
                   <th
                     scope="col"
-                    className="text-bolder fs-6 text-center"
+                    className="text-bolder fs-6 text-center text-uppercase"
                     style={{ fontWeight: "bold", color: "white" }}
                   >
                     Actions

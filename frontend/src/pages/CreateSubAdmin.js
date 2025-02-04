@@ -86,7 +86,7 @@ const CreateSubAdmin = () => {
               className="card-header text-white p-3"
               style={{ backgroundColor: "#1E2761", textAlign: "center" }}
             >
-              <b className="mb-0">CREATE USER ROLE</b>
+              <b className="mb-0 text-uppercase">CREATE USER ROLE</b>
             </div>
 
             <div className="card-body">

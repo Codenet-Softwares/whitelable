@@ -224,7 +224,7 @@ const User_BetMarket = () => {
                       background: "#1E2761",
                     }}
                   >
-                    <h4 className="m-0 text-white px-3 p-2">Featured</h4>
+                    <h4 className="m-0 text-white px-3 p-2 text-uppercase">Featured</h4>
                     <i
                       className="fa fa-info-circle text-white px-4 mt-3 info_icon"
                       aria-hidden="true"
@@ -241,7 +241,7 @@ const User_BetMarket = () => {
                     <tr>
                       <th className="team-name-column"></th>
                       <th
-                        className="back-column text-center"
+                        className="back-column text-center text-uppercase"
                         style={{
                           background: "#50A0E2",
                           fontSize: "20px",
@@ -250,7 +250,7 @@ const User_BetMarket = () => {
                         Back
                       </th>
                       <th
-                        className="lay-column text-center"
+                        className="lay-column text-center text-uppercase"
                         style={{
                           background: "#E5798B",
                           fontSize: "20px",
@@ -318,14 +318,14 @@ const User_BetMarket = () => {
               {/* Side Content */}
               <div className="card">
                 <div className="rounded-top" style={{ background: "#1E2761" }}>
-                  <h4 className="card-header text-white fw-bold">
+                  <h4 className="card-header text-white fw-bold text-uppercase">
                     Live Streaming
                   </h4>
                 </div>
                 {/* Additional Cards */}
                 <div className="card mt-3">
                   <h4
-                    className="card-header text-white fw-bold rounded-top"
+                    className="card-header text-white fw-bold rounded-top text-uppercase"
                     style={{ background: "#1E2761" }}
                   >
                     Score Card
@@ -345,18 +345,18 @@ const User_BetMarket = () => {
                     className="rounded-top"
                     style={{ background: "#1E2761" }}
                   >
-                    <h4 className="card-header text-white fw-bold">Book</h4>
+                    <h4 className="card-header text-white fw-bold text-uppercase">Book</h4>
                   </div>
                   <div className="card-body d-flex justify-content-center align-items-center">
                     <button
-                      className="btn me-3 text-white fw-bolder px-5"
+                      className="btn me-3 text-white fw-bolder px-5 text-uppercase"
                       style={{ background: "#1E2761" }}
                       onClick={handleOpenModal}
                     >
                       Master Book
                     </button>
                     <button
-                      className="btn text-white fw-bolder px-5"
+                      className="btn text-white fw-bolder px-5 text-uppercase"
                       style={{ background: "#1E2761" }}
                       disabled={store?.admin?.roles[0]?.role === "superAdmin"}
                       onClick={handleOpenUserBookModal}
@@ -371,7 +371,7 @@ const User_BetMarket = () => {
                     style={{ background: "#1E2761" }}
                   >
                     {/* Live Bet Section */}
-                    <h4 className="card-header text-white fw-bold py-3 mb-0 bg-transparent me-3">
+                    <h4 className="card-header text-white fw-bold py-3 mb-0 bg-transparent me-3 text-uppercase">
                       Live Bet
                     </h4>
                     <div className="form-check form-switch mt-1 me-3">
@@ -386,7 +386,7 @@ const User_BetMarket = () => {
                     </div>
 
                     {/* Partnership Book Section */}
-                    <h4 className="card-header text-white fw-bold py-3 mb-0 bg-transparent me-3">
+                    <h4 className="card-header text-white fw-bold py-3 mb-0 bg-transparent me-3 text-uppercase">
                       Partnership Book
                     </h4>
                     <div className="form-check form-switch mt-1 me-3">
@@ -398,8 +398,8 @@ const User_BetMarket = () => {
                       />
                     </div>
                     {/* View More Section */}
-                    <h4 className="card-header text-white fw-bold py-3 mb-0 bg-transparent ms-auto">
-                      View More
+                    <h4 className="card-header text-white fw-bold py-3 mb-0 bg-transparent ms-auto text-uppercase">
+                      View More...
                     </h4>
                   </div>
 
@@ -412,7 +412,7 @@ const User_BetMarket = () => {
                       }}
                     >
                       <div style={{ padding: "20px" }}>
-                        <h2>Market Details</h2>
+                        <h2 className="text-uppercase">Market Details</h2>
                         <div
                           style={{
                             border: "1px solid #ddd",
