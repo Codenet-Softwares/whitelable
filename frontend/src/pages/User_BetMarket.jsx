@@ -19,6 +19,7 @@ import { useParams } from "react-router-dom";
 import Picture from "../Assets/Picture.webp";
 import "./DemoMarket_Analysis.css";
 import ReusableModal from "../components/common/ReusableModal";
+import HierarchyModal from "./HierarchyModal";
 
 const User_BetMarket = () => {
   const { dispatch, store } = useAppContext();
@@ -36,9 +37,20 @@ const User_BetMarket = () => {
   const [betBookData, setBetBookData] = useState([]);
   const [bodyData, setBodyData] = useState(get_betBook());
   const [liveToggle, setLiveToggle] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [isHirerchyModalOpen, setHirerchyModalOpen] = useState(false);
 
   // useEffect(()=>{fetch_BetBookData()},[bodyData])
+  const handleUsernameClick = (userName) => {
+    console.log("onclick", userName);
+    setSelectedUser(userName);
+    setHirerchyModalOpen(true); // Open the modal when a username is clicked
+  };
 
+  const handleHirerchyCloseModal = () => {
+    setHirerchyModalOpen(false);
+    setSelectedUser(null); // Reset user selection when closing the modal
+  };
   const handleLiveToggle = () => {
     setLiveToggle(!liveToggle);
   };
@@ -224,7 +236,9 @@ const User_BetMarket = () => {
                       background: "#1E2761",
                     }}
                   >
-                    <h4 className="m-0 text-white px-3 p-2 text-uppercase">Featured</h4>
+                    <h4 className="m-0 text-white px-3 p-2 text-uppercase">
+                      Featured
+                    </h4>
                     <i
                       className="fa fa-info-circle text-white px-4 mt-3 info_icon"
                       aria-hidden="true"
@@ -278,22 +292,24 @@ const User_BetMarket = () => {
                             </h4>
                             <span className="number">
                               <i
-                                className={`fa fa-arrow-right fw-bold ${runnerData?.runnerName?.bal <= 0
-                                  ? "green_icon"
-                                  : "red_icon"
-                                  }`}
+                                className={`fa fa-arrow-right fw-bold ${
+                                  runnerData?.runnerName?.bal <= 0
+                                    ? "green_icon"
+                                    : "red_icon"
+                                }`}
                                 aria-hidden="true"
                               ></i>
                               <span
-                                className={`px-2 fw-bold ${runnerData?.runnerName?.bal <= 0
-                                  ? "green_icon"
-                                  : "red_icon"
-                                  }`}
+                                className={`px-2 fw-bold ${
+                                  runnerData?.runnerName?.bal <= 0
+                                    ? "green_icon"
+                                    : "red_icon"
+                                }`}
                               >
                                 {runnerData?.runnerName?.bal <= 0
                                   ? `+${Math.abs(
-                                    runnerData?.runnerName?.bal || 0
-                                  )}`
+                                      runnerData?.runnerName?.bal || 0
+                                    )}`
                                   : `-${runnerData?.runnerName?.bal}`}
                               </span>
                             </span>
@@ -542,119 +558,152 @@ const User_BetMarket = () => {
                       }}
                     >
                       <div>
-                        {/* <h2>Market Details</h2> */}
-                        <div className="col-12">
-                          <div className="row text-center">
-                            <div className="col-4"><p className="fw-bold text-dark">Market Name</p></div>
-                            <div className="col-2"><p className="fw-bold text-dark">Odds</p></div>
-                            <div className="col-3"><p className="fw-bold text-dark">Stake</p></div>
-                            <div className="col-3"><p className="fw-bold text-dark">Username</p></div>
-                          </div>
-                        </div>
-                        <div
-                          style={{
-                            border: "1px solid #ddd",
-                            borderRadius: "4px",
-                            padding: "7px",
-                            backgroundColor: "#BEDCF4",
-                          }}
-                        >
-                          {liveToggle ? (
-                            user_LiveBet.map((data) => {
-                              return (
+                        {liveToggle ? (
+                          <>
+                            {/* Table Headers */}
+                            <div className="col-12">
+                              <div className="row text-center">
+                                <div className="col-4">
+                                  <p className="fw-bold text-dark">
+                                    Market Name
+                                  </p>
+                                </div>
+                                <div className="col-2">
+                                  <p className="fw-bold text-dark">Odds</p>
+                                </div>
+                                <div className="col-3">
+                                  <p className="fw-bold text-dark">Stake</p>
+                                </div>
+                                <div className="col-3">
+                                  <p className="fw-bold text-dark">Username</p>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Table Data */}
+                            <div
+                              style={{
+                                border: "1px solid #ddd",
+                                borderRadius: "4px",
+                                padding: "7px",
+                                backgroundColor: "#BEDCF4",
+                              }}
+                            >
+                              {user_LiveBet.length > 0 ? (
                                 <div
                                   style={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    alignItems: "center",
-                                    marginTop: "5px",
+                                    maxHeight: "300px", // Set the height of the scrollable area
+                                    overflowY: "auto", // Enable vertical scroll when content exceeds
                                   }}
-                                  key={data.id}
                                 >
-                                  <div style={{ display: "flex", alignItems: "center" }}>
-                                    {data.type === "back" ? (
-                                      <button
-                                        style={{
-                                          backgroundColor: "#7DBCE8",
-                                          border: "none",
-                                          borderRadius: "3px",
-                                          marginRight: "10px",
-                                          fontSize: "12px",
-                                          textTransform: "uppercase",
-                                          width: "40px"
-                                        }}
-                                      >
-                                        {data.type}
-                                      </button>
-                                    ) : (
-                                      <button
-                                        style={{
-                                          backgroundColor: "#FFB6C1",
-                                          // color: "#fff",
-                                          border: "none",
-                                          borderRadius: "3px",
-                                          marginRight: "10px",
-                                          fontSize: "12px",
-                                          textTransform: "uppercase",
-                                          width: "40px"
-                                        }}
-                                      >
-                                        {data.type}
-                                      </button>
-                                    )}
-
-                                    <div>
-                                      <div
-                                        style={{
-                                          // fontWeight: "bold",
-                                          fontSize: "12px",
-                                        }}
-                                      >
-                                        {data.runnerName}
-                                      </div>
-                                      <div
-                                        style={{
-                                          fontSize: "12px",
-                                          color: "#555",                           
-                                        }}
-                                      >
-                                        Match Odds
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div style={{ display: "flex", gap: "88px" }}>
-                                    <div style={{fontWeight: "bold", fontSize: "14px"}}>{data.rate}</div>
-                                    <div style={{ fontWeight: "bold", fontSize: "14px" }}>{data.value}</div>
+                                  {user_LiveBet.map((data) => (
                                     <div
+                                      className="row text-center align-items-center"
                                       style={{
-                                        fontWeight: "bold", fontSize: "15px",
-                                        color: data.type === "back" ? "#007bff" : "#FFB6C1",
+                                        borderBottom: "1px solid #ddd",
+                                        padding: "8px 0",
                                       }}
+                                      key={data.id}
                                     >
-                                      {data.userName}
+                                      {/* Market Name & Type */}
+                                      <div className="col-4 d-flex align-items-center justify-content-center">
+                                        <button
+                                          style={{
+                                            backgroundColor:
+                                              data.type === "back"
+                                                ? "#7DBCE8"
+                                                : "#FFB6C1",
+                                            border: "none",
+                                            borderRadius: "3px",
+                                            marginRight: "10px",
+                                            fontSize: "12px",
+                                            textTransform: "uppercase",
+                                            width: "40px",
+                                          }}
+                                        >
+                                          {data.type}
+                                        </button>
+                                        <div>
+                                          <div style={{ fontSize: "12px" }}>
+                                            {data.runnerName}
+                                          </div>
+                                          <div
+                                            style={{
+                                              fontSize: "12px",
+                                              color: "#555",
+                                            }}
+                                          >
+                                            Match Odds
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      {/* Odds */}
+                                      <div
+                                        className="col-2 fw-bold"
+                                        style={{ fontSize: "14px" }}
+                                      >
+                                        {data.rate}
+                                      </div>
+
+                                      {/* Stake */}
+                                      <div
+                                        className="col-3 fw-bold"
+                                        style={{ fontSize: "14px" }}
+                                      >
+                                        {data.value}
+                                      </div>
+
+                                      {/* Username */}
+                                      <div
+                                        className="col-3 fw-bold"
+                                        style={{
+                                          fontSize: "15px",
+                                          color:
+                                            data.type === "back"
+                                              ? "#007bff"
+                                              : "#FFB6C1",
+                                        }}
+                                        onClick={() =>
+                                          handleUsernameClick(data.userName)
+                                        }
+                                      >
+                                        {data.userName}
+                                      </div>
                                     </div>
-                                  </div>
+                                  ))}
                                 </div>
-                              );
-                            })
-                          ) : (
-                            <div className="card-body text-center">
-                              <h5
-                                style={{
-                                  fontSize: "20px",
-                                  fontWeight: "bold",
-                                  color: "gray",
-                                }}
-                              >
-                                There are no any bet.
-                              </h5>
+                              ) : (
+                                <div className="text-center p-3">
+                                  <h5
+                                    style={{
+                                      fontSize: "18px",
+                                      fontWeight: "bold",
+                                      color: "gray",
+                                    }}
+                                  >
+                                    There are no any bet.
+                                  </h5>
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </div>
+                          </>
+                        ) : (
+                          <div className="card-body text-center">
+                            <h5
+                              style={{
+                                fontSize: "20px",
+                                fontWeight: "bold",
+                                color: "gray",
+                              }}
+                            >
+                              There are no any bet.
+                            </h5>
+                          </div>
+                        )}
                       </div>
                     </h5>
                   </div>
-
                 </div>
               </div>
             </div>
@@ -765,7 +814,6 @@ const User_BetMarket = () => {
                               </td>
                             );
                           })}
-
                         </tr>
                       );
                     })
@@ -879,6 +927,11 @@ const User_BetMarket = () => {
           }
         />
       </div>
+      <HierarchyModal
+        selectedUser={selectedUser}
+        isOpen={isHirerchyModalOpen}
+        onRequestClose={handleHirerchyCloseModal}
+      />
     </div>
   );
 };

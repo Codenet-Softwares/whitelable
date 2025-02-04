@@ -642,3 +642,20 @@ export async function deleteSubAdmin(body = {}, isToast = true) {
 
 
 }
+
+
+export async function getUserHirerchy(body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.GET, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.userHirerchy}/${body.userName}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+
+
+}
