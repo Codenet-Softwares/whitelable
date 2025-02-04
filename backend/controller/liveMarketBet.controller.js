@@ -589,6 +589,12 @@ export const userLiveBet = async (req, res) => {
         type: bet.type,
       }));
 
+      if (users.length === 0) {
+        return res
+          .status(statusCode.success)
+          .send(apiResponseSuccess([], true, statusCode.success, "No bets found"));
+      }
+
     return res.status(statusCode.success).send(apiResponseSuccess(users, true, statusCode.success, "Success"));
 
   } catch (error) {
