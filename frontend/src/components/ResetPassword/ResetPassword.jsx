@@ -7,6 +7,7 @@ import { getAdminResetPasswordInitialState } from "../../Utils/service/initiateS
 import { ReusableInput } from "../common/Resuableinput"; 
 import { resetPasswordSchema } from "../../Utils/schema"; 
 import { useAppContext } from "../../contextApi/context";
+import { customErrorHandler } from "../../Utils/helper";
 
 const ResetPassword = () => {
   const navigate = useNavigate();
@@ -22,11 +23,9 @@ const ResetPassword = () => {
       if (response?.success) {
         navigate("/login");
         toast.success("Password changed successfully!");
-      } else {
-        toast.error(response?.message || "Failed to reset password. Please try again.");
-      }
+      } 
     } catch (error) {
-      toast.error("An error occurred. Please try again.");
+      toast.error(customErrorHandler(error));
     }finally {
       hideLoader(); // Hide loader in the finally block to ensure it always runs
     }
