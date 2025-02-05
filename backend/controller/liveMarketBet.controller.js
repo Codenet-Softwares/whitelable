@@ -166,8 +166,6 @@ export const getLiveBetGames = async (req, res) => {
   }
 };
 
-
-
 export const getLiveUserBet = async (req, res) => {
   try {
     const { marketId } = req.params;
@@ -472,30 +470,15 @@ export const getUserMasterBook = async (req, res) => {
           runnerBalance: user.runnerBalance,
         }));
 
-      const userIds = data.usersDetails.map((user) => user.userId);
-
-      const subAdminsDetails = await admins.findAll({
-        where: { adminId: { [Op.in]: userIds } },
-        attributes: [
-          "userName",
-          "adminId",
-          "createdById",
-          "createdByUser",
-          "roles",
-        ],
-      });
-
       const filteredSubAdmins = subAdmins.filter(
         (subAdmin) => !subAdmin.roles.some((role) => role.role === "user")
       );
 
       const formattedSubAdmins = await Promise.all(
         filteredSubAdmins.map(async (subAdmin) => {
-          const matchingUser = subAdminsDetails.find(
-            (userDetail) => userDetail.createdById === subAdmin.adminId
-          );
-
-          if (matchingUser) {
+          const matchingUsersInSubAdmin = await checkSubAdminForUsers(subAdmin.adminId, data.usersDetails);
+          
+          if (matchingUsersInSubAdmin.length > 0) {
             return {
               adminId: subAdmin.adminId,
               userName: subAdmin.userName,
@@ -528,6 +511,23 @@ export const getUserMasterBook = async (req, res) => {
         )
       );
   }
+};
+
+const checkSubAdminForUsers = async (subAdminId, userDetails) => {
+  const children = await admins.findAll({
+    where: { createdById: subAdminId },
+  });
+
+  let usersUnderSubAdmin = userDetails.filter((user) =>
+    children.some((child) => child.userName === user.userName)
+  );
+
+  for (const child of children) {
+    const childUsers = await checkSubAdminForUsers(child.adminId, userDetails);
+    usersUnderSubAdmin = [...usersUnderSubAdmin, ...childUsers];
+  }
+
+  return usersUnderSubAdmin;
 };
 
 export const userLiveBet = async (req, res) => {
