@@ -102,7 +102,7 @@ export const transferAmountSchema = [
   body('password').trim().notEmpty().withMessage('Password is required'),
   body().custom((value, { req }) => {
     if ((req.body.transferAmount && req.body.withdrawalAmt) || (!req.body.transferAmount && !req.body.withdrawalAmt)) {
-      throw new Error('Either transferAmount or withdrawalAmt must be provided, but not both.');
+      throw new Error('Transfer amount is required.');
     }
     return true;
   })
