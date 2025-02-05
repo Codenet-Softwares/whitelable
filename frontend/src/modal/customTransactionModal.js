@@ -309,9 +309,9 @@ const CustomTransactionModal = (props) => {
           ) : (
             <React.Fragment>
               <Alert variant="primary">
-                Transaction By — {store.admin.adminName}
+                  Transaction By — {store?.admin?.adminName}
               </Alert>
-              {(props.differentiate = "walletAmountProvider" && props.balance)}
+           
             </React.Fragment>
           )}
         </div>
