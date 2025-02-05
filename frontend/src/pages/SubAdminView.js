@@ -362,6 +362,7 @@ const SubAdminView = () => {
             </div>
           </div>
         </div>
+        {subAdminData?.userList.length > 0  && (
         <Pagination
           currentPage={subAdminData.currentPage}
           totalPages={subAdminData.totalPages}
@@ -370,6 +371,8 @@ const SubAdminView = () => {
           endIndex={endIndex}
           totalData={subAdminData.totalData}
         />
+        )
+}
         <StatusModal
           show={showModal}
           handleClose={handleClose}
