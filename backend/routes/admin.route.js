@@ -73,6 +73,7 @@ export const adminRoute = (app) => {
       string.superAdmin,
       string.whiteLabel,
       string.hyperAgent,
+      string.superAgent,
       string.subSuperAgent,
       string.masterAgent,
       string.subWhiteLabel,
