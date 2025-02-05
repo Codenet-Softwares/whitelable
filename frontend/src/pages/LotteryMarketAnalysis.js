@@ -120,9 +120,7 @@ const LotteryMarketAnalysis = () => {
     );
   }
 
-  // if (lotteryData.length === 0) {
-  //   return <div className="text-center mt-5">No data available</div>;
-  // }
+
 
   return (
     <div className="container-fluid p-4" style={{ backgroundColor: "#f5f7fa" }}>

@@ -1,0 +1,54 @@
+.balance-container {
+    display: flex;
+    align-items: center; /* Ensures everything is in a single line */
+    gap: 8px; /* Space between elements */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .balance-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: bold;
+    color: #0dcaf0;
+  }
+  
+  .balance-pill {
+    display: inline-block;
+    width: 80px;
+    height: 22px;
+    background-color: #28a745;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    text-align: center;
+    overflow: hidden;
+    position: relative;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 20px; /* Keeps text centered inside the pill */
+  }
+  
+  .balance-text {
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Scroll animation only if balance exceeds 4 digits */
+  @keyframes scrollText {
+    0% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+  
+  .balance-pill:hover .balance-text {
+    animation: scrollText 3s linear infinite;
+  }
+  
