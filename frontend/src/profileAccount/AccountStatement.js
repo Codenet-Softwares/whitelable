@@ -85,6 +85,8 @@ const AccountStatement = ({
                     onChange={(date) => setStartDate(date)}
                     placeholderText={"Select Start Date"}
                     disabled={dataSource === "live"}
+                    readonly // Prevent manual typing 
+                    onKeyDown={(e) => e.preventDefault()} // Block manual input from keyboard
                   />
                 </div>
                 <div class="col-sm">
@@ -94,6 +96,8 @@ const AccountStatement = ({
                     onChange={(date) => setEndDate(date)}
                     placeholderText={"Select End Date"}
                     disabled={dataSource === "live"}
+                    readonly // Prevent manual typing 
+                    onKeyDown={(e) => e.preventDefault()} // Block manual input from keyboard
                   />
                 </div>
                 <div class="col-sm">

@@ -249,6 +249,8 @@ const ProfitAndLoss = ({
                       selected={startDate}
                       onChange={(date) => setStartDate(date)}
                       placeholderText={"Select Start Date"}
+                      readonly // Prevent manual typing 
+                      onKeyDown={(e) => e.preventDefault()} // Block manual input from keyboard
                     />
                   </div>
                   <div class="col-sm">
@@ -257,6 +259,8 @@ const ProfitAndLoss = ({
                       selected={endDate}
                       onChange={(date) => setEndDate(date)}
                       placeholderText={"Select End Date"}
+                      readonly // Prevent manual typing 
+                      onKeyDown={(e) => e.preventDefault()} // Block manual input from keyboard
                     />
                   </div>
                   <div class="col-sm">
