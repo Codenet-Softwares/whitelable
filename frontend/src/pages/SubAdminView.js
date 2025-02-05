@@ -8,6 +8,7 @@ import { getAllSubAdminCreateState } from "../Utils/service/initiateState";
 import strings from "../Utils/constant/stringConstant";
 import StatusModal from "../modal/StatusModal";
 import { toast } from "react-toastify";
+import { customErrorHandler } from "../Utils/helper";
 
 const SubAdminView = () => {
   const [subAdminData, setSubAdminData] = useState(getAllSubAdminCreateState());
@@ -107,41 +108,82 @@ const SubAdminView = () => {
       confirmPassword: ""
     });
   };
+// needs to be cross checked
+  // const handleResetPassword = async () => {
+  //   const { adminPassword, password, confirmPassword } = formValues;
 
-  const handleResetPassword = async () => {
-    const { adminPassword, password, confirmPassword } = formValues;
+  //   if (password !== confirmPassword) {
+  //     alert("New Password and Confirm Password do not match!");
+  //     return;
+  //   }
 
-    if (password !== confirmPassword) {
-      alert("New Password and Confirm Password do not match!");
-      return;
-    }
+  //   const payload = {
+  //     userName: userName,
+  //     adminPassword,
+  //     password,
+  //   };
 
-    const payload = {
-      userName: userName,
-      adminPassword,
-      password,
-    };
+  //   try {
+  //     const response = await resetPasswordSubAdmin(payload);
+  //     if (response.successCode === 200) {
+  //       // toast.success("Password reset successfully!");
+  //       closeModal();
+  //     }
+  //   } catch (error) {
+  //     console.error("Error resetting password:", error);
+  //     // alert(error.errMessage);
+  //   }
+  // };
 
-    try {
-      const response = await resetPasswordSubAdmin(payload);
-      if (response.successCode === 200) {
-        // toast.success("Password reset successfully!");
-        closeModal();
-      }
-    } catch (error) {
-      console.error("Error resetting password:", error);
-      // alert(error.errMessage);
-    }
+
+
+const handleResetPassword = async () => {
+  const { adminPassword, password, confirmPassword } = formValues;
+
+  if (!adminPassword) {
+    toast.error("Admin Password is required!");
+    return;
+  }
+  if (!password) {
+    toast.error("New Password is required!");
+    return;
+  }
+  if (!confirmPassword) {
+    toast.error("Confirm Password is required!");
+    return;
+  }
+  if (password !== confirmPassword) {
+    toast.error("New Password and Confirm Password do not match!");
+    return;
+  }
+
+  const payload = {
+    userName: userName,
+    adminPassword,
+    password,
   };
 
-  const handleDelete = async (id) => {
-    try {
-      const response = await deleteSubAdmin({ requestId: id }, true);
-      toast.success("Sub Admin Delete successfully!");
-    } catch (error) {
-      console.error("Error resetting password:", error);
+  try {
+    const response = await resetPasswordSubAdmin(payload);
+    if (response.successCode === 200) {
+      toast.success("Password reset successfully!");
+      closeModal();
     }
-  };
+  } catch (error) {
+    console.error("Error resetting password:", error);
+    toast.error(error?.errMessage || "Failed to reset password!");
+  }
+};
+
+  
+  
+const handleDelete = async (id) => {
+  try {
+    const response = await deleteSubAdmin({ requestId: id }, true);
+  } catch (error) {
+    toast.error(customErrorHandler(error))
+  }
+};
 
   return (
     <div className="main_content_iner mt-5 p-5">
@@ -297,39 +339,19 @@ const SubAdminView = () => {
                                   </span>
                                   <span className="mx-1">
                                     <button
-                                      className={`btn border border-2 rounded  ${["suspended"].includes(store?.admin?.status)
-                                        ? "disabled"
-                                        : store?.admin?.roles[0].permission.some(
-                                          (role) => role === strings.deleteAdmin
-                                        )
-                                          ? ""
-                                          : permissionObj.allAdmin.includes(
-                                            store?.admin?.roles[0].role
-                                          )
-                                            ? ""
-                                            : "disabled"
-                                        }`}
+                                       className={`btn border border-2 rounded  ${["Suspended", "Lock"].includes(user.status)
+                                        && "disabled"}`}
                                       style={{ background: "lightgreen" }}
-                                      title="Delete"
+                                      title="Reset Password"
                                       onClick={() => openModal(user.userName)}
                                     >
                                       <i className="bi bi-shield-lock"></i>
                                     </button>
                                   </span>
-                                  <span className="mx-1">
+                            {}      <span className="mx-1">
                                     <button
-                                      className={`btn border border-2 rounded  ${["suspended"].includes(store?.admin?.status)
-                                        ? "disabled"
-                                        : store?.admin?.roles[0].permission.some(
-                                          (role) => role === strings.deleteAdmin
-                                        )
-                                          ? ""
-                                          : permissionObj.allAdmin.includes(
-                                            store?.admin?.roles[0].role
-                                          )
-                                            ? ""
-                                            : "disabled"
-                                        }`}
+                                   className={`btn border border-2 rounded  ${["Suspended", "Lock"].includes(user.status)
+                                    && "disabled"}`}
                                       style={{ background: "#ED5E68" }}
                                       title="Delete"
                                       onClick={(e) => {
