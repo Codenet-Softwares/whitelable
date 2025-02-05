@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import Alert from "react-bootstrap/Alert";
@@ -7,10 +7,13 @@ import {
   transferAmount,
   updateCreditRef,
   updatePartnership,
+  viewBalance,
 } from "../Utils/service/apiService";
 import { useAppContext } from "../contextApi/context";
 import { toast } from "react-toastify";
+import "./customTransactionModal.css";
 const CustomTransactionModal = (props) => {
+  console.log("====>> line 16", props.balance);
   const { setIsLoading } = props;
   const [formData, setFormData] = useState({
     amount: null,
@@ -18,7 +21,21 @@ const CustomTransactionModal = (props) => {
     remarks: "",
   });
   const { store, showLoader, hideLoader } = useAppContext();
+  const [balance, setBalance] = useState(0);
   console.log("=====>>> line 21", store);
+
+  async function view_Balance() {
+    const response = await viewBalance({
+      _id: store?.admin?.id,
+    });
+
+    if (response) {
+      setBalance(response.data.balance);
+    }
+  }
+  useEffect(() => {
+    view_Balance();
+  }, []); // Calls view_Balance() when component mounts
 
   // Setting Modal Title
   let modalTitle = "";
@@ -29,13 +46,15 @@ const CustomTransactionModal = (props) => {
   } else if (props.differentiate === "walletAmountProvider") {
     modalTitle = (
       <>
-        Provide Transfer Amount
-        <span className="text-info fw-bold ms-2">
-          | Balance {store.admin.adminName}:{" "}
-          <span className="bg-success text-dark px-2 py-0.5 rounded">
-            {store.admin.AdminWallet}
+        <div className="balance-container">
+          Provide Transfer Amount
+          <span className="balance-info">
+            | Balance {store.admin.adminName}:
+            <span className="balance-pill" title={`Full Amount: ${balance}`}>
+              <span className="balance-text">{balance}</span>
+            </span>
           </span>
-        </span>
+        </div>
       </>
     );
   } else if (props.differentiate === "addCashProvider") {
@@ -249,14 +268,50 @@ const CustomTransactionModal = (props) => {
                   display: "inline-block",
                 }}
               >
-                {props?.adminName}
+                {props?.adminName}{" "}
+                {props.differentiate === "walletAmountProvider" && (
+            <div 
+            style={{
+              position: "absolute",
+              top: "10px",
+              right: "10px",
+              background: "#3b6e91",
+              color: "#fff",
+              padding: "8px 16px",
+              borderRadius: "30px",
+              fontWeight: "bold",
+              display: "flex",
+              alignItems: "center",
+              fontSize: "14px",
+              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+              textAlign: "center",
+              minWidth: "150px",
+              justifyContent: "center",
+            }}
+            >
+              
+              <span style={{ fontWeight: "bold", color:"white" }}>
+                Client Balance:
+              </span>
+              <span
+                style={{
+                  fontWeight: "bold",
+                  color: "white",
+                  marginLeft: "5px",
+                }}
+              >
+                ₹{props.balance}
+              </span>
+            </div>
+          )}
               </span>
             </React.Fragment>
           ) : (
             <React.Fragment>
               <Alert variant="primary">
-                Transaction By — {store.admin.adminName}
+                  Transaction By — {store?.admin?.adminName}
               </Alert>
+           
             </React.Fragment>
           )}
         </div>
@@ -278,6 +333,7 @@ const CustomTransactionModal = (props) => {
             />
           </div>
           {props.differentiate === "walletAmountProvider" ? (
+            
             <input
               type="text"
               className="form-control mb-2"

@@ -41,10 +41,12 @@ const Card = ({
   const [differentiate, setDifferentiate] = useState("");
   const [adminIdForStatus, setAdminIdForStatus] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [clientBalance, setClientBalance] = useState(null)
 
-  const handelOpenTransactionModal = (boolParam, differentiateParam) => {
+  const handelOpenTransactionModal = (boolParam, differentiateParam,balance) => {
     setTransactionModalShow(boolParam);
     setDifferentiate(differentiateParam);
+    setClientBalance(balance)
   };
 
   const handleClose = (adminId) => setShowModal(false);
@@ -302,7 +304,7 @@ const Card = ({
                 <span
                   className="mx-1"
                   onClick={() =>
-                    handelOpenTransactionModal(true, "walletAmountProvider")
+                    handelOpenTransactionModal(true, "walletAmountProvider",balance)
                   }
                 >
                   <button
@@ -416,6 +418,7 @@ const Card = ({
         role={role}
         setRefresh={setRefresh}
         setIsLoading={setIsLoading}
+        balance={clientBalance}
       />
       {adminId != undefined && (
         <ViewPartnershipAndCreditRefModal

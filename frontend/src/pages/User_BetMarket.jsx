@@ -340,7 +340,6 @@ const User_BetMarket = () => {
                 <div className="card mt-3">
                   <h4
                     className="card-header text-white fw-bold rounded-top "
-
                     style={{ background: "#1E2761" }}
                   >
                     Score Card
@@ -360,7 +359,9 @@ const User_BetMarket = () => {
                     className="rounded-top"
                     style={{ background: "#1E2761" }}
                   >
-                    <h4 className="card-header text-white fw-bold text-uppercase">Book</h4>
+                    <h4 className="card-header text-white fw-bold text-uppercase">
+                      Book
+                    </h4>
                   </div>
                   <div className="card-body d-flex justify-content-center align-items-center">
                     <button
@@ -764,7 +765,13 @@ const User_BetMarket = () => {
                   {betBookData?.length > 0 ? (
                     betBookData.map((master, index) => {
                       return (
-                        <tr key={index}>
+                        <tr
+                          key={index}
+                          style={{
+                            maxHeight: "300px", // Set the height of the scrollable area
+                            overflowY: "auto", // Enable vertical scroll when content exceeds
+                          }}
+                        >
                           {permissionObj.allAdmin.includes(master?.roles) ? (
                             <td
                               style={{

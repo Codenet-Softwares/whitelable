@@ -196,6 +196,8 @@ const Market_Analysis = () => {
 
           {/* Pagination */}
           {/* Uncomment and use the Pagination component if needed */}
+
+          {liveGmes.data.length > 0  && 
           <Pagination
             currentPage={liveGmes.currentPage}
             totalPages={liveGmes.totalPages}
@@ -203,7 +205,7 @@ const Market_Analysis = () => {
             startIndex={startIndex}
             endIndex={endIndex}
             totalData={liveGmes.totalData}
-          />
+          /> }
         </div>
       </div>
     </div>
