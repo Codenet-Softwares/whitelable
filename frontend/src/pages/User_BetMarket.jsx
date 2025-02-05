@@ -20,6 +20,7 @@ import Picture from "../Assets/Picture.webp";
 import "./DemoMarket_Analysis.css";
 import ReusableModal from "../components/common/ReusableModal";
 import HierarchyModal from "./HierarchyModal";
+import ViewMoreHierarchyModal from "./ViewMoreHierarchyModal";
 
 const User_BetMarket = () => {
   const { dispatch, store } = useAppContext();
@@ -39,6 +40,7 @@ const User_BetMarket = () => {
   const [liveToggle, setLiveToggle] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isHirerchyModalOpen, setHirerchyModalOpen] = useState(false);
+  const [isViewHirerchyModalOpen, setIsIiewHirerchyModalOpen] = useState(false);
 
   // useEffect(()=>{fetch_BetBookData()},[bodyData])
   const handleUsernameClick = (userName) => {
@@ -46,11 +48,15 @@ const User_BetMarket = () => {
     setSelectedUser(userName);
     setHirerchyModalOpen(true); // Open the modal when a username is clicked
   };
-
+  const handleViewMoreClick = (userName) => {
+    setSelectedUser(userName);
+    setIsIiewHirerchyModalOpen(true);
+  };
   const handleHirerchyCloseModal = () => {
     setHirerchyModalOpen(false);
-    setSelectedUser(null); // Reset user selection when closing the modal
+    setSelectedUser(null);
   };
+
   const handleLiveToggle = () => {
     setLiveToggle(!liveToggle);
   };
@@ -292,24 +298,22 @@ const User_BetMarket = () => {
                             </h4>
                             <span className="number">
                               <i
-                                className={`fa fa-arrow-right fw-bold ${
-                                  runnerData?.runnerName?.bal <= 0
-                                    ? "green_icon"
-                                    : "red_icon"
-                                }`}
+                                className={`fa fa-arrow-right fw-bold ${runnerData?.runnerName?.bal <= 0
+                                  ? "green_icon"
+                                  : "red_icon"
+                                  }`}
                                 aria-hidden="true"
                               ></i>
                               <span
-                                className={`px-2 fw-bold ${
-                                  runnerData?.runnerName?.bal <= 0
-                                    ? "green_icon"
-                                    : "red_icon"
-                                }`}
+                                className={`px-2 fw-bold ${runnerData?.runnerName?.bal <= 0
+                                  ? "green_icon"
+                                  : "red_icon"
+                                  }`}
                               >
                                 {runnerData?.runnerName?.bal <= 0
                                   ? `+${Math.abs(
-                                      runnerData?.runnerName?.bal || 0
-                                    )}`
+                                    runnerData?.runnerName?.bal || 0
+                                  )}`
                                   : `-${runnerData?.runnerName?.bal}`}
                               </span>
                             </span>
@@ -412,144 +416,31 @@ const User_BetMarket = () => {
                         style={{ transform: "scale(1.5)" }}
                       />
                     </div>
-                    {/* View More Section */}
-                    <h4 className="card-header text-white fw-bold py-3 mb-0 bg-transparent ms-auto text-uppercase">
-                      View More...
-                    </h4>
-                  </div>
-                  {/* <div className="card-body ">
-                    <h5
-                      style={{
-                        fontSize: "20px",
-                        fontWeight: "bold",
-                        color: "gray",
-                      }}
-                    >
-                        <h2 className="text-uppercase">Market Details</h2>
-                      <div>
-                        <div
-                          style={{
-                            border: "1px solid #ddd",
-                            borderRadius: "4px",
-                            margin: "5px",
-                            padding: "10px",
-                            backgroundColor: "#e6f2ff",
-                          }}
-                        >
-                          
-                          {liveToggle ? (
-                            user_LiveBet.map((data) => {
-                              return (
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    alignItems: "center",
-                                    marginTop: "5px",
-                                  }}
-                                >
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                    }}
-                                  >
-                                    {data.type === "back" ? (
-                                      <button
-                                        style={{
-                                          backgroundColor: "#007bff",
-                                          color: "#fff",
-                                          border: "none",
-                                          padding: "5px 10px",
-                                          borderRadius: "3px",
-                                          marginRight: "10px",
-                                          fontSize: "14px",
-                                        }}
-                                      >
-                                        {data.type}
-                                      </button>
-                                    ) : (
-                                      <button
-                                        style={{
-                                          backgroundColor: "#FFB6C1",
-                                          color: "#fff",
-                                          border: "none",
-                                          padding: "5px 10px",
-                                          borderRadius: "3px",
-                                          marginRight: "10px",
-                                          fontSize: "14px",
-                                        }}
-                                      >
-                                        {data.type}
-                                      </button>
-                                    )}
-
-                                    <div>
-                                      <div
-                                        style={{
-                                          fontWeight: "bold",
-                                          fontSize: "14px",
-                                        }}
-                                      >
-                                        {data.runnerName}
-                                      </div>
-                                      <div
-                                        style={{
-                                          fontSize: "12px",
-                                          color: "#555",
-                                        }}
-                                      >
-                                        Match Odds
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div style={{ display: "flex", gap: "30px" }}>
-                                    <div style={{ fontWeight: "bold" }}>
-                                      {data.rate}
-                                    </div>
-                                    <div style={{ fontWeight: "bold" }}>
-                                      {data.value}
-                                    </div>
-                                    {data.type === "back" ? (
-                                      <div
-                                        style={{
-                                          fontWeight: "bold",
-                                          color: "#007bff",
-                                        }}
-                                      >
-                                        {data.userName}
-                                      </div>
-                                    ) : (
-                                      <div
-                                        style={{
-                                          fontWeight: "bold",
-                                          color: "#FFB6C1",
-                                        }}
-                                      >
-                                        {data.userName}
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            })
-                          ) : (
-                            <div className="card-body text-center">
-                              <h5
-                                style={{
-                                  fontSize: "20px",
-                                  fontWeight: "bold",
-                                  color: "gray",
-                                }}
-                              >
-                                There are no any bet.
-                              </h5>
-                            </div>
-                          )}
+                    <div>
+      {user_LiveBet.length > 0 ? (
+                        <div>
+                          {user_LiveBet.map((data) => (
+                            <h4
+                              key={data.userName}
+                              className="card-header text-white fw-bold py-3 mb-0 bg-transparent ms-auto text-uppercase"
+                              onClick={() => handleViewMoreClick(data.userName)}
+                              style={{ cursor: "pointer" }}
+                            >
+                              View More...
+                            </h4>
+                          ))}
                         </div>
-                      </div>
-                    </h5>
-                  </div> */}
+                      ) : (
+                        <div className="text-center p-3">
+                          <h5 className="card-header text-white fw-bold bg-transparent text-uppercase">
+                                                          There are no any bet.
+
+                          </h5>
+                        </div>
+                      )}
+                    </div>
+                
+                  </div>
 
                   <div className="card-body">
                     <h5
@@ -934,6 +825,12 @@ const User_BetMarket = () => {
         isOpen={isHirerchyModalOpen}
         onRequestClose={handleHirerchyCloseModal}
       />
+      <ViewMoreHierarchyModal
+        selectedUser={selectedUser}
+        isOpen={isViewHirerchyModalOpen}
+        onRequestClose={handleHirerchyCloseModal}
+      />
+
     </div>
   );
 };
