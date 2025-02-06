@@ -49,7 +49,7 @@ const CustomTransactionModal = (props) => {
         <div className="balance-container">
           Provide Transfer Amount
           <span className="balance-info">
-            | Balance {store.admin.adminName}:
+            | Balance Admin:
             <span className="balance-pill" title={`Full Amount: ${balance}`}>
               <span className="balance-text">{balance}</span>
             </span>
