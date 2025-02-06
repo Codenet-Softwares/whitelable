@@ -368,7 +368,7 @@ export const userAccountStatement = async (req, res) => {
 export const getUserBetList = async (req, res) => {
   try {
     const { userName, runnerId } = req.params;
-    const { page = 1, pageSize = 10, search = "" } = req.query;
+    const { page = 1, pageSize = 10 } = req.query;
     const params = { userName, runnerId };
 
     const baseUrl = process.env.COLOR_GAME_URL;
@@ -392,12 +392,6 @@ export const getUserBetList = async (req, res) => {
     }
 
     let { data } = response.data;
-
-    if (search) {
-      data = data.filter((item) =>
-        item.marketName.toLowerCase().includes(search.toLowerCase())
-      );
-    }
 
     const offset = (page - 1) * pageSize;
     const totalItems = data.length;
