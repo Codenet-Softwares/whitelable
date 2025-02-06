@@ -368,32 +368,55 @@ export const userAccountStatement = async (req, res) => {
 export const getUserBetList = async (req, res) => {
   try {
     const { userName, runnerId } = req.params;
-
-    const params = {
-      userName,
-      runnerId
-    };
+    const { page = 1, pageSize = 10 } = req.query;
+    const params = { userName, runnerId };
 
     const baseUrl = process.env.COLOR_GAME_URL;
 
-    const response = await axios.get(`${baseUrl}/api/user-external-betList/${userName}/${runnerId}`, { params });
+    const response = await axios.get(
+      `${baseUrl}/api/user-external-betList/${userName}/${runnerId}`,
+      { params }
+    );
 
     if (!response.data.success) {
       return res
         .status(statusCode.badRequest)
-        .send(apiResponseErr(null, false, statusCode.badRequest, 'Failed to fetch data'));
+        .send(
+          apiResponseErr(
+            null,
+            false,
+            statusCode.badRequest,
+            "Failed to fetch data"
+          )
+        );
     }
 
+    const offset = (page - 1) * pageSize;
     const { data } = response.data;
+    const totalItems = data.length;
+    const getallData = data.slice(offset, offset + pageSize);
+    const totalPages = Math.ceil(totalItems / pageSize);
 
-    res.status(statusCode.success).send(apiResponseSuccess(
-      data,
-      true,
-      statusCode.success,
-      'Success',
-    ));
+    const paginationData = {
+      page : parseInt(page),
+      pageSize: parseInt(pageSize),
+      totalPages,
+      totalItems,
+    };
+
+    res
+      .status(statusCode.success)
+      .send(
+        apiResponseSuccess(
+          getallData,
+          true,
+          statusCode.success,
+          "Success",
+          paginationData
+        )
+      );
   } catch (error) {
-    console.error("Error from API:", error.response ? error.response.data : error.message);
+
 
     res
       .status(statusCode.internalServerError)
@@ -402,11 +425,11 @@ export const getUserBetList = async (req, res) => {
           null,
           false,
           statusCode.internalServerError,
-          error.message,
-        ),
+          error.message
+        )
       );
   }
-}
+};
 
 export const userLastLogin = async (req, res) => {
   try {
