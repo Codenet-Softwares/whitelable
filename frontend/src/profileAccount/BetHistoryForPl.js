@@ -2,22 +2,38 @@ import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getBetList } from "../Utils/service/apiService";
 import { formatDateForUi } from "../Utils/helper";
+import Pagination from "../components/common/Pagination";
 
 const BetHistoryForPl = () => {
   const [betList, SetBetList] = useState([]);
   const { userName, runnerId } = useParams();
+  const [page, setPage] = useState(1)
+  const [totalData, setTotalData] = useState(0);
+  const [totalPage, setTotalPage] = useState(0);
+  const pageLimit=10
 
   const fetchBetList = async () => {
     const response = await getBetList({
       userName: userName,
       runnerId: runnerId,
+      page:page,
+      limit:pageLimit
     });
     SetBetList(response?.data);
+    setTotalData(response?.pagination?.totalItems)
+    setTotalPage(response?.pagination?.totalPages)
   };
 
   useEffect(() => {
     fetchBetList();
   }, []);
+
+  const startIndex = Math.min((page - 1) * pageLimit + 1);
+  const endIndex = Math.min(page * pageLimit, totalData);
+
+  const selectPageHandler = (selectedPage) => {
+    setPage(selectedPage);
+  };
 
   return (
     <div className="m-4">
@@ -135,20 +151,20 @@ const BetHistoryForPl = () => {
               </div>
             </div>
           </li>
-          {/* <li className="list-group-item">
-      
-          {data?.data?.length > 0 && (
+          {/* <li className="list-group-item"> */}
+
+          {betList?.length > 0 && (
             <Pagination
-              currentPage={data.currentPage}
-              totalPages={data.totalPages}
-              handlePageChange={data.handlePageChange}
+              currentPage={page}
+              totalPages={totalPage}
+              handlePageChange={selectPageHandler}
               startIndex={startIndex}
               endIndex={endIndex}
-              totalData={data.totalData}
+              totalData={totalData}
             />
           )}
-         
-        </li> */}
+
+          {/* </li> */}
         </ul>
       </div>
     </div>
