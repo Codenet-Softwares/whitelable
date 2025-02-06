@@ -22,7 +22,7 @@ const BetHistory = ({
   dropdownOpen,
 }) => {
 
-  
+
 
   const handelGameId = (event) => {
     setData((prevState) => ({
@@ -139,6 +139,8 @@ const BetHistory = ({
                 <DatePicker
                   selected={startDate}
                   onChange={(date) => setStartDate(date)}
+                  readonly // Prevent manual typing 
+                  onKeyDown={(e) => e.preventDefault()} // Block manual input from keyboard
                 />
               </div>
               <div class="col-sm">
@@ -146,6 +148,8 @@ const BetHistory = ({
                 <DatePicker
                   selected={endDate}
                   onChange={(date) => setEndDate(date)}
+                  readonly // Prevent manual typing 
+                  onKeyDown={(e) => e.preventDefault()} // Block manual input from keyboard
                 />
               </div>
             </div>
@@ -181,14 +185,14 @@ const BetHistory = ({
                         style={{
                           backgroundColor: "#e6e9ed",
                           color: "#5562a3",
-                          textAlign:"center"
+                          textAlign: "center"
                         }}
                       >
                         <th scope="col" style={{ width: "10%" }}>
-                          <b>User <br/> Name</b>
+                          <b>User <br /> Name</b>
                         </th>
                         <th scope="col" style={{ width: "10%" }}>
-                          <b>Sport<br/> Name</b>
+                          <b>Sport<br /> Name</b>
                         </th>
                         <th scope="col" style={{ width: "15%" }}>
                           <b>Event</b>
@@ -203,16 +207,16 @@ const BetHistory = ({
                           <b>Sem</b>
                         </th>
                         <th scope="col" style={{ width: "10%" }}>
-                          <b>Ticket <br/> Price</b>
+                          <b>Ticket <br /> Price</b>
                         </th>
                         <th scope="col" style={{ width: "10%" }}>
                           <b>Amount</b>
                         </th>
                         <th scope="col" style={{ width: "10%" }}>
-                          <b>Place <br/> Time</b>
+                          <b>Place <br /> Time</b>
                         </th>
                         <th scope="col" style={{ width: "15%" }}>
-                          <b>Settle <br/> Time</b>
+                          <b>Settle <br /> Time</b>
                         </th>
                       </tr>
                       {/* Show a message if no Sport is selected */}
@@ -236,63 +240,63 @@ const BetHistory = ({
                             <td>{history?.gameName}</td>
                             <td>{history?.marketName}</td>
                             <td>{"WINNER"}</td>
-                            <td> 
-                              <div className="dropdown" style={{ position: "relative", display: "inline-block"  }}>
-                              <button
-                                className="btn btn-link dropdown-toggle"
-                                type="button"
-                                onClick={() => toggleDropdown(index)}
-                              >
-                                View Tickets
-                              </button>
-                              <div
-                                className="custom-dropdown-content"
-                                style={{
-                                  height: dropdownOpen === index ? "200px" : "0",
-                                  overflow: dropdownOpen === index ? "auto" : "hidden",
-                                  transition: "height 0.3s ease",
-                                  background: "white",
-                                  border: "1px solid #ccc",
-                                  borderRadius: "4px",
-                                  boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
-                                }}
-                              >
-                                {dropdownOpen === index && (
-                                  <div
-                                    style={{
-                                      maxHeight: "200px", // Sets the maximum height
-                                      // overflowY: "auto", // Enables scrolling if necessary
-                                      padding: "10px", // Optional: Space inside the dropdown
-                                    }}
-                                  >
-                                    <span style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>
-                                      Ticket Numbers:
-                                    </span>
-                                    <hr style={{ margin: "5px 0", borderColor: "#ddd" }} />
-                                    {history?.tickets?.length > 0 ? (
-                                      history?.tickets?.map((number, i) => (
-                                        <span
-                                          key={i}
-                                          style={{
-                                            display: "block",
-                                            padding: "5px 10px",
-                                            borderBottom: "1px solid #eee",
-                                            color: "#333",
-                                          }}
-                                        >
-                                          {number}
-                                        </span>
-                                      ))
-                                    ) : (
-                                      <span style={{ color: "#999", fontStyle: "italic" }}>
-                                        No ticket numbers available
+                            <td>
+                              <div className="dropdown" style={{ position: "relative", display: "inline-block" }}>
+                                <button
+                                  className="btn btn-link dropdown-toggle"
+                                  type="button"
+                                  onClick={() => toggleDropdown(index)}
+                                >
+                                  View Tickets
+                                </button>
+                                <div
+                                  className="custom-dropdown-content"
+                                  style={{
+                                    height: dropdownOpen === index ? "200px" : "0",
+                                    overflow: dropdownOpen === index ? "auto" : "hidden",
+                                    transition: "height 0.3s ease",
+                                    background: "white",
+                                    border: "1px solid #ccc",
+                                    borderRadius: "4px",
+                                    boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
+                                  }}
+                                >
+                                  {dropdownOpen === index && (
+                                    <div
+                                      style={{
+                                        maxHeight: "200px", // Sets the maximum height
+                                        // overflowY: "auto", // Enables scrolling if necessary
+                                        padding: "10px", // Optional: Space inside the dropdown
+                                      }}
+                                    >
+                                      <span style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>
+                                        Ticket Numbers:
                                       </span>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
+                                      <hr style={{ margin: "5px 0", borderColor: "#ddd" }} />
+                                      {history?.tickets?.length > 0 ? (
+                                        history?.tickets?.map((number, i) => (
+                                          <span
+                                            key={i}
+                                            style={{
+                                              display: "block",
+                                              padding: "5px 10px",
+                                              borderBottom: "1px solid #eee",
+                                              color: "#333",
+                                            }}
+                                          >
+                                            {number}
+                                          </span>
+                                        ))
+                                      ) : (
+                                        <span style={{ color: "#999", fontStyle: "italic" }}>
+                                          No ticket numbers available
+                                        </span>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
 
-                            </div>
+                              </div>
                             </td>
                             <td>{history?.sem}</td>
                             <td>{history?.ticketPrice}</td>
