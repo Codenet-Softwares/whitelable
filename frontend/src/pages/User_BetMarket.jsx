@@ -767,10 +767,6 @@ const User_BetMarket = () => {
                       return (
                         <tr
                           key={index}
-                          style={{
-                            maxHeight: "300px", // Set the height of the scrollable area
-                            overflowY: "auto", // Enable vertical scroll when content exceeds
-                          }}
                         >
                           {permissionObj.allAdmin.includes(master?.roles) ? (
                             <td
@@ -784,6 +780,7 @@ const User_BetMarket = () => {
                                   master?.roles
                                 )
                               }
+                              className="text-primary"
                             >
                               {master?.userName}
                             </td>
