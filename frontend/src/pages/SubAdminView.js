@@ -347,7 +347,7 @@ const SubAdminView = () => {
                                   </span>
                                   <span className="mx-1">
                                     <button
-                                      className={`btn border border-2 rounded  ${["Suspended", "Lock"].includes(user.status)
+                                       className={`btn border border-2 rounded  ${["Suspended", "Locked"].includes(user.status)
                                         && "disabled"}`}
                                       style={{ background: "lightgreen" }}
                                       title="Reset Password"
@@ -358,8 +358,8 @@ const SubAdminView = () => {
                                   </span>
                                   { }      <span className="mx-1">
                                     <button
-                                      className={`btn border border-2 rounded  ${["Suspended", "Lock"].includes(user.status)
-                                        && "disabled"}`}
+                                   className={`btn border border-2 rounded  ${["Suspended", "Locked"].includes(user.status)
+                                    && "disabled"}`}
                                       style={{ background: "#ED5E68" }}
                                       title="Delete"
                                       onClick={(e) => {
