@@ -25,7 +25,11 @@ const SubAdminView = () => {
     password: "",
     confirmPassword: "",
   });
-
+  const [errors, setErrors] = useState({
+    password: "",
+    confirmPassword: "",
+    adminPassword: "",
+  });
   const handleResetPasswordChange = (e) => {
     const { id, value } = e.target;
     setFormValues((prevValues) => ({
@@ -33,6 +37,23 @@ const SubAdminView = () => {
       [id]: value,
     }));
   };
+  const validateForm = () => {
+    let formErrors = {};
+    if (!formValues.password) {
+      formErrors.password = "Password is required.";
+    }
+    if (!formValues.confirmPassword) {
+      formErrors.confirmPassword = "Confirm Password is required.";
+    } else if (formValues.confirmPassword !== formValues.password) {
+      formErrors.confirmPassword = "Passwords do not match.";
+    }
+    if (!formValues.adminPassword) {
+      formErrors.adminPassword = "Admin Password is required.";
+    }
+
+  setErrors(formErrors);
+  return Object.keys(formErrors).length === 0; // Returns true if no errors
+};
 
   const { store, dispatch } = useAppContext();
   const handleChange = (name, value) => {
@@ -139,30 +160,36 @@ const SubAdminView = () => {
 
   const handleResetPassword = async () => {
     const { adminPassword, password, confirmPassword } = formValues;
-
+        let formErrors = {
+      password: "",
+      confirmPassword: "",
+      adminPassword: "",
+    };
+  
     if (!adminPassword) {
-      toast.error("Admin Password is required!");
-      return;
+      formErrors.adminPassword = "Admin Password is required!";
     }
     if (!password) {
-      toast.error("New Password is required!");
-      return;
+      formErrors.password = "New Password is required!";
     }
     if (!confirmPassword) {
-      toast.error("Confirm Password is required!");
+      formErrors.confirmPassword = "Confirm Password is required!";
+    }
+    if (password && confirmPassword && password !== confirmPassword) {
+      formErrors.confirmPassword = "New Password and Confirm Password do not match!";
+    }
+  
+    if (formErrors.password || formErrors.confirmPassword || formErrors.adminPassword) {
+      setErrors(formErrors);
       return;
     }
-    if (password !== confirmPassword) {
-      toast.error("New Password and Confirm Password do not match!");
-      return;
-    }
-
+  
     const payload = {
       userName: userName,
       adminPassword,
       password,
     };
-
+  
     try {
       const response = await resetPasswordSubAdmin(payload);
       if (response.successCode === 200) {
@@ -174,7 +201,7 @@ const SubAdminView = () => {
       toast.error(error?.errMessage || "Failed to reset password!");
     }
   };
-
+  
 
 
   const handleDelete = async (id) => {
@@ -414,63 +441,65 @@ const SubAdminView = () => {
         />
         {/* Modal */}
         {isModalOpen && (
-          <div className="modal" style={{ display: "block" }}>
-            <div className="modal-dialog">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title">Reset Password</h5>
-                  <button type="button" className="close" onClick={closeModal}>
-                    &times;
-                  </button>
-                </div>
-                <div className="modal-body">
-                  <div className="form-group">
-                    <label htmlFor="password">New Password</label>
-                    <input
-                      type="password"
-                      id="password"
-                      className="form-control"
-                      value={formValues.password}
-                      onChange={handleResetPasswordChange}
-                      required
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="confirmPassword">Confirm Password</label>
-                    <input
-                      type="password"
-                      id="confirmPassword"
-                      className="form-control"
-                      value={formValues.confirmPassword}
-                      onChange={handleResetPasswordChange}
-                      required
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="adminPassword">Admin Password</label>
-                    <input
-                      type="password"
-                      id="adminPassword"
-                      className="form-control"
-                      value={formValues.adminPassword}
-                      onChange={handleResetPasswordChange}
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="modal-footer">
-                  <button type="button" className="btn btn-secondary" onClick={closeModal}>
-                    Close
-                  </button>
-                  <button type="button" className="btn btn-primary" onClick={handleResetPassword}>
-                    Reset Password
-                  </button>
-                </div>
-              </div>
-            </div>
+    <div className="modal" style={{ display: "block" }}>
+    <div className="modal-dialog">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h5 className="modal-title">Reset Password</h5>
+          <button type="button" className="close" onClick={closeModal}>
+            &times;
+          </button>
+        </div>
+        <div className="modal-body">
+          <div className="form-group">
+            <label htmlFor="password">New Password</label>
+            <input
+              type="password"
+              id="password"
+              className="form-control"
+              value={formValues.password}
+              onChange={handleResetPasswordChange}
+              required
+            />
+            {errors.password && <small className="text-danger">{errors.password}</small>}
           </div>
+          <div className="form-group">
+            <label htmlFor="confirmPassword">Confirm Password</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              className="form-control"
+              value={formValues.confirmPassword}
+              onChange={handleResetPasswordChange}
+              required
+            />
+            {errors.confirmPassword && <small className="text-danger">{errors.confirmPassword}</small>}
+          </div>
+          <div className="form-group">
+            <label htmlFor="adminPassword">Admin Password</label>
+            <input
+              type="password"
+              id="adminPassword"
+              className="form-control"
+              value={formValues.adminPassword}
+              onChange={handleResetPasswordChange}
+              required
+            />
+            {errors.adminPassword && <small className="text-danger">{errors.adminPassword}</small>}
+          </div>
+        </div>
+        <div className="modal-footer">
+          <button type="button" className="btn btn-secondary" onClick={closeModal}>
+            Close
+          </button>
+          <button type="button" className="btn btn-primary" onClick={handleResetPassword}>
+            Reset Password
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
         )}
-        {/*                */}
       </div>
     </div>
   );
