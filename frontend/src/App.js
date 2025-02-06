@@ -25,6 +25,7 @@ import ResetPassword from "./components/ResetPassword/ResetPassword";
 import DemoNavside from "./Layout/DemoNavside";
 import LotteryMarketAnalysis from "./pages/LotteryMarketAnalysis";
 import DemoMarket_Analysis from "./pages/DemoMarket_Analysis";
+import PrivateRoute from "./components/common/PrivateRoute";
 // import WelcomePage from "./screen/WelcomePage";
 
 function App() {
@@ -45,14 +46,10 @@ function App() {
       <AppProvider>
         <BrowserRouter>
           <Routes>
-          <Route path = "/reset-password" element={<ResetPassword/>} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route index path="/" element={<Navigate to="/login" />} />
-            <Route path = "/login" element={<Login/>} />
-            <Route
-                path="/demonavside"
-                element={<DemoNavside/>}
-              />
-            <Route path="/" element={<AdminLayout />}>
+            <Route path="/login" element={<Login />} />
+            <Route path="/" element={<PrivateRoute><AdminLayout /></PrivateRoute>}>
               <Route path="welcome" element={<WelcomePage />} />
               <Route path="allAdminCreate" element={<AllAdminCreate />} />
               <Route
@@ -91,20 +88,18 @@ function App() {
               />
               <Route
                 path="betHistLotteryForPL/:userName/:id"
-                element={<BetHistoryLotteryForPl/>}
+                element={<BetHistoryLotteryForPl />}
               />
 
-<Route
+              <Route
                 path="/Lottery_Market_Analysis/:marketId"
-                element={<LotteryMarketAnalysis/>}
+                element={<LotteryMarketAnalysis />}
               />
- 
-
             </Route>
 
 
-            
-            
+
+
           </Routes>
         </BrowserRouter>
       </AppProvider>
