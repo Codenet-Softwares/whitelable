@@ -898,10 +898,12 @@ export const buildRootPath = async (req, res) => {
             refProfitLoss: refProfitLoss,
             partnership: partnership,
             status: createdUser.isActive
-              ? "Active"
-              : createdUser.locked
-                ? "Locked"
-                : "Suspended",
+            ? 'Active'
+            : !createdUser.locked
+              ? 'Locked'
+              : !createdUser.isActive
+                ? 'Suspended'
+                : '',
             exposure: loadTotalExposure,
           };
         })
