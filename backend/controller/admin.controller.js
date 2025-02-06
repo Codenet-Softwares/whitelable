@@ -170,6 +170,11 @@ export const createSubAdmin = async (req, res) => {
       return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, messages.adminExists));
     }
 
+    const existingTrashAdmin = await trash.findOne({ where: { userName } });
+    if (existingTrashAdmin) {
+      return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, "Admin is exist in trash. Please restore or delete it."));
+    }
+
     let subRole = '';
     for (let i = 0; i < user.roles.length; i++) {
       if (user.roles[i].role.includes(string.superAdmin)) {
@@ -898,10 +903,12 @@ export const buildRootPath = async (req, res) => {
             refProfitLoss: refProfitLoss,
             partnership: partnership,
             status: createdUser.isActive
-              ? "Active"
-              : createdUser.locked
-                ? "Locked"
-                : "Suspended",
+            ? 'Active'
+            : !createdUser.locked
+              ? 'Locked'
+              : !createdUser.isActive
+                ? 'Suspended'
+                : '',
             exposure: loadTotalExposure,
           };
         })

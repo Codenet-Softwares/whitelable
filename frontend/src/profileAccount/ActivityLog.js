@@ -1,30 +1,33 @@
 import React, { useState, useEffect } from "react";
-// import { useAuth } from "../../Utils/Auth";
-// import MyAccountServices from "../../Services/AccountServices";
 
 const ActivityLog = ({ props }) => {
   const isLocalhost = window.location.hostname === "localhost";
   const lastLoginTimeUTC = props.lastLoginTime;
   const lastLoginTimeLocal = new Date(lastLoginTimeUTC).toLocaleString();
+
   const [activityLog, setActivityLog] = useState({
     iP: "Loading..",
     region: "Loading..",
     country: "Loading..",
-  }); // Set initial state to null
+    loginStatus: "Loading..",
+    isp: "Loading..",
+  });
 
   useEffect(() => {
-    // Fetch props after 3 seconds (simulating asynchronous data fetching)
     const fetchData = async () => {
       await new Promise((resolve) => setTimeout(resolve, 3000));
-      setActivityLog(props.ip);
+
+      setActivityLog({
+        iP: props.ip?.iP || "N/A",
+        region: props.ip?.region || "N/A",
+        country: props.ip?.country || "N/A",
+        loginStatus: props.loginStatus || "N/A",
+        isp: props.ip?.isp || "N/A",
+      });
     };
 
     fetchData();
   }, [props]);
-  // Render null if activityLog is still null
-  if (activityLog === null) {
-    return null;
-  }
 
   return (
     <div className="col-sm-8 mt-3">
@@ -37,7 +40,7 @@ const ActivityLog = ({ props }) => {
         </div>
         <ul className="list-group list-group-flush">
           <li className="list-group-item p-3">
-            <table className="table table-bordered table-responsive-sm table-responsive-md table-responsive-lg table-responsive-xl">
+            <table className="table table-bordered table-responsive-sm">
               <thead style={{ background: "#E6E9ED" }}>
                 <tr className="table-active">
                   <th scope="col"> Date & Time</th>
@@ -49,18 +52,11 @@ const ActivityLog = ({ props }) => {
               </thead>
               <tbody>
                 <tr>
-                  <td scope="row">{lastLoginTimeLocal}</td>
-
-                  <td>
-                    {isLocalhost
-                      ? "No Data From Serverside"
-                      : activityLog.loginStatus}
-                  </td>
-
+                  <td>{lastLoginTimeLocal}</td>
+                  <td>{activityLog.loginStatus}</td>
                   <td>{activityLog.iP}</td>
-
                   <td>
-                    {isLocalhost ? "No Data From Serverside" : activityLog.isp}
+                    {isLocalhost ? "NDA" : activityLog.isp}
                   </td>
                   <td>
                     {activityLog.region} / {activityLog.country}

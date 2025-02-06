@@ -108,7 +108,7 @@ const SubAdminView = () => {
       confirmPassword: ""
     });
   };
-// needs to be cross checked
+  // needs to be cross checked
   // const handleResetPassword = async () => {
   //   const { adminPassword, password, confirmPassword } = formValues;
 
@@ -137,53 +137,61 @@ const SubAdminView = () => {
 
 
 
-const handleResetPassword = async () => {
-  const { adminPassword, password, confirmPassword } = formValues;
+  const handleResetPassword = async () => {
+    const { adminPassword, password, confirmPassword } = formValues;
 
-  if (!adminPassword) {
-    toast.error("Admin Password is required!");
-    return;
-  }
-  if (!password) {
-    toast.error("New Password is required!");
-    return;
-  }
-  if (!confirmPassword) {
-    toast.error("Confirm Password is required!");
-    return;
-  }
-  if (password !== confirmPassword) {
-    toast.error("New Password and Confirm Password do not match!");
-    return;
-  }
+    if (!adminPassword) {
+      toast.error("Admin Password is required!");
+      return;
+    }
+    if (!password) {
+      toast.error("New Password is required!");
+      return;
+    }
+    if (!confirmPassword) {
+      toast.error("Confirm Password is required!");
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast.error("New Password and Confirm Password do not match!");
+      return;
+    }
 
-  const payload = {
-    userName: userName,
-    adminPassword,
-    password,
+    const payload = {
+      userName: userName,
+      adminPassword,
+      password,
+    };
+
+    try {
+      const response = await resetPasswordSubAdmin(payload);
+      if (response.successCode === 200) {
+        toast.success("Password reset successfully!");
+        closeModal();
+      }
+    } catch (error) {
+      console.error("Error resetting password:", error);
+      toast.error(error?.errMessage || "Failed to reset password!");
+    }
   };
 
-  try {
-    const response = await resetPasswordSubAdmin(payload);
-    if (response.successCode === 200) {
-      toast.success("Password reset successfully!");
-      closeModal();
-    }
-  } catch (error) {
-    console.error("Error resetting password:", error);
-    toast.error(error?.errMessage || "Failed to reset password!");
-  }
-};
 
-  
-  
-const handleDelete = async (id) => {
-  try {
-    const response = await deleteSubAdmin({ requestId: id }, true);
-  } catch (error) {
-    toast.error(customErrorHandler(error))
-  }
-};
+
+  const handleDelete = async (id) => {
+    const isConfirmed = window.confirm("Are you sure you want to delete this sub-admin?");
+
+    if (!isConfirmed) {
+      return;
+    }
+
+    try {
+      const response = await deleteSubAdmin({ requestId: id }, true);
+      if (response.success===200) { setRefresh(response); }
+    } catch (error) {
+      toast.error(customErrorHandler(error));
+    }
+  };
+
 
   return (
     <div className="main_content_iner mt-5 p-5">
@@ -339,7 +347,7 @@ const handleDelete = async (id) => {
                                   </span>
                                   <span className="mx-1">
                                     <button
-                                       className={`btn border border-2 rounded  ${["Suspended", "Lock"].includes(user.status)
+                                       className={`btn border border-2 rounded  ${["Suspended", "Locked"].includes(user.status)
                                         && "disabled"}`}
                                       style={{ background: "lightgreen" }}
                                       title="Reset Password"
@@ -348,9 +356,9 @@ const handleDelete = async (id) => {
                                       <i className="bi bi-shield-lock"></i>
                                     </button>
                                   </span>
-                            {}      <span className="mx-1">
+                                  { }      <span className="mx-1">
                                     <button
-                                   className={`btn border border-2 rounded  ${["Suspended", "Lock"].includes(user.status)
+                                   className={`btn border border-2 rounded  ${["Suspended", "Locked"].includes(user.status)
                                     && "disabled"}`}
                                       style={{ background: "#ED5E68" }}
                                       title="Delete"
@@ -384,17 +392,17 @@ const handleDelete = async (id) => {
             </div>
           </div>
         </div>
-        {subAdminData?.userList.length > 0  && (
-        <Pagination
-          currentPage={subAdminData.currentPage}
-          totalPages={subAdminData.totalPages}
-          handlePageChange={handlePageChange}
-          startIndex={startIndex}
-          endIndex={endIndex}
-          totalData={subAdminData.totalData}
-        />
+        {subAdminData?.userList.length > 0 && (
+          <Pagination
+            currentPage={subAdminData.currentPage}
+            totalPages={subAdminData.totalPages}
+            handlePageChange={handlePageChange}
+            startIndex={startIndex}
+            endIndex={endIndex}
+            totalData={subAdminData.totalData}
+          />
         )
-}
+        }
         <StatusModal
           show={showModal}
           handleClose={handleClose}

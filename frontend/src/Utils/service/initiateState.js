@@ -3,11 +3,12 @@ export function getAdminInitialState(body = {}) {
     accessToken: body?.accessToken ?? "",
     status: body?.status ?? "",
     adminName: body?.userName ?? "",
+    isLogin: body.isLogin ?? false,
     id: body?.adminId ?? "",
     roles: body?.roles ?? [],
     createdById: body?.createdById ?? null,
     createdByUser: body?.createdByUser ?? null,
-    AdminWallet: body?.balance?? null
+    AdminWallet: body?.balance ?? null
   };
 }
 
@@ -110,9 +111,9 @@ export function accountStatementInitialState(body = {}) {
     totalData: 0,
     startDate: '',
     totalEntries: 10,
-    dataSource:'live',
+    dataSource: 'live',
     backupStartDate: null,
-    backupEndDate : null,
+    backupEndDate: null,
   };
 }
 
@@ -137,9 +138,9 @@ export function adminAccountStatementInitialState() {
     totalData: 0,
     endDate: '',
     startDate: '',
-    dataSource : 'live'
+    dataSource: 'live'
   };
- 
+
 }
 export function view_AddCashHistory_InitialState() {
   return {
@@ -158,7 +159,7 @@ export function get_liveGames(body = {}) {
     totalEntries: 10,
     search: "",
     totalData: "",
-    type:""
+    type: ""
   };
 }
 
@@ -192,10 +193,10 @@ export function getMarketWithRunnerDataInitialState(body = {}) {
 
 export const getAdminResetPasswordInitialState = (body = {}) => {
   return {
-    userName: body.userName || "", 
-    oldPassword: body.oldPassword || "", 
-    newPassword: body.newPassword || "", 
-    confirmPassword: body.confirmPassword || "", 
+    userName: body.userName || "",
+    oldPassword: body.oldPassword || "",
+    newPassword: body.newPassword || "",
+    confirmPassword: body.confirmPassword || "",
   };
 };
 
