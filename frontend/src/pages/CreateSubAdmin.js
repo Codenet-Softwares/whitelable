@@ -8,7 +8,7 @@ import { createSubAdmin } from "../Utils/service/apiService";
 import FullScreenLoader from "../components/FullScreenLoader";
 
 const CreateSubAdmin = () => {
-  const { store, dispatch, showLoader, hideLoader  } = useAppContext();
+  const { store, dispatch, showLoader, hideLoader } = useAppContext();
   const [createSubAdminState] = useState(getCreateSubAdmin);
   const [isLoading, setIsLoading] = useState(false)
 
@@ -61,7 +61,7 @@ const CreateSubAdmin = () => {
     },
     enableReinitialize: true,
   });
-  
+
   const handleCheckboxChange = (event) => {
     const { name, checked } = event.target;
     const updatedPermissions = checked
@@ -77,7 +77,7 @@ const CreateSubAdmin = () => {
   }
 
   return (
-    <div className="container" style={{marginTop:"100px"}}>
+    <div className="container" style={{ marginTop: "100px" }}>
       <FullScreenLoader show={isLoading} />
       <div className="row justify-content-center">
         <div className="col-lg-8">

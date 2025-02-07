@@ -71,4 +71,27 @@ export const getTicketStyle = (sem) => {
         };
     }
   };
+  export const validatePasswords = (passwords) => {
+    let errors = {};
+  
+    if (!passwords.adminPassword.trim()) {
+      errors.adminPassword = "Admin password is required.";
+    }
+  
+    if (!passwords.newPassword.trim()) {
+      errors.newPassword = "New password is required.";
+    } else if (passwords.newPassword.length < 8) {
+      errors.newPassword = "Password must be at least 8 characters.";
+    }
+  
+    if (!passwords.confirmPassword.trim()) {
+      errors.confirmPassword = "Confirm password is required.";
+    } else if (passwords.newPassword !== passwords.confirmPassword) {
+      errors.confirmPassword = "Passwords do not match.";
+    }
+  
+    return errors;
+  };
+
+  
   

@@ -266,6 +266,20 @@ const AccountLandingModal = () => {
     }));
   };
 
+  const handleBetHistoryPageChange = (page) => {
+    SetBetHistoryData((prevState) => ({
+      ...prevState,
+      currentPage: page,
+    }));
+  };
+
+  const handleProfitLossPageChange = (page) => {
+    SetProfitLossData((prevState) => ({
+      ...prevState,
+      currentPage: page,
+    }));
+  };
+
   const handleGetStatement = (startDate, endDate) => {
     setState((prevState) => ({
       ...prevState,
@@ -397,7 +411,7 @@ const AccountLandingModal = () => {
         totalData={betHistoryData.totalData}
         currentPage={betHistoryData.currentPage}
         totalPages={betHistoryData.totalPages}
-        handlePageChange={handlePageChange}
+        handlePageChange={handleBetHistoryPageChange}
         SetBetHistoryData={SetBetHistoryData}
         formatDateForUi={formatDateForUi}
         dataType={betHistoryData.dataType}
@@ -427,7 +441,7 @@ const AccountLandingModal = () => {
         currentPage={profitLossData.currentPage}
         totalData={profitLossData.totalData}
         totalPages={profitLossData.totalPages}
-        handlePageChange={handlePageChange}
+        handlePageChange={handleProfitLossPageChange}
         SetProfitLossData={SetProfitLossData}
         handleDateForProfitLoss={handleDateForProfitLoss}
       />

@@ -455,7 +455,7 @@ export async function getBetList(body = {}, isToast = false) {
   try {
     const callParams = await getAuthCallParams(strings.GET, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.betList}/${body.userName}/${body.runnerId}`, ///&limit=${body.limit}&search=${body.searchName} ((by search sending blank server is not giving data))
+      `${UrlConstant.betList}/${body.userName}/${body.runnerId}?page=${body.page}&pageSize=${body.limit}`, ///&limit=${body.limit}&search=${body.searchName} ((by search sending blank server is not giving data))
       callParams,
       isToast
     );

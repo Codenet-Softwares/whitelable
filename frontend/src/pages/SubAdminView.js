@@ -2,7 +2,11 @@ import React, { useState, useEffect } from "react";
 import Pagination from "../components/common/Pagination";
 import { Link } from "react-router-dom";
 import { useAppContext } from "../contextApi/context";
-import { deleteSubAdmin, getAllSubAdminCreate, resetPasswordSubAdmin } from "../Utils/service/apiService";
+import {
+  deleteSubAdmin,
+  getAllSubAdminCreate,
+  resetPasswordSubAdmin,
+} from "../Utils/service/apiService";
 import { permissionObj } from "../Utils/constant/permission";
 import { getAllSubAdminCreateState } from "../Utils/service/initiateState";
 import strings from "../Utils/constant/stringConstant";
@@ -25,13 +29,34 @@ const SubAdminView = () => {
     password: "",
     confirmPassword: "",
   });
-
+  const [errors, setErrors] = useState({
+    password: "",
+    confirmPassword: "",
+    adminPassword: "",
+  });
   const handleResetPasswordChange = (e) => {
     const { id, value } = e.target;
     setFormValues((prevValues) => ({
       ...prevValues,
       [id]: value,
     }));
+  };
+  const validateForm = () => {
+    let formErrors = {};
+    if (!formValues.password) {
+      formErrors.password = "Password is required.";
+    }
+    if (!formValues.confirmPassword) {
+      formErrors.confirmPassword = "Confirm Password is required.";
+    } else if (formValues.confirmPassword !== formValues.password) {
+      formErrors.confirmPassword = "Passwords do not match.";
+    }
+    if (!formValues.adminPassword) {
+      formErrors.adminPassword = "Admin Password is required.";
+    }
+
+    setErrors(formErrors);
+    return Object.keys(formErrors).length === 0;
   };
 
   const { store, dispatch } = useAppContext();
@@ -89,14 +114,14 @@ const SubAdminView = () => {
 
   let startIndex = Math.min(
     (Number(subAdminData.currentPage) - 1) * Number(subAdminData.totalEntries) +
-    1
+      1
   );
   let endIndex = Math.min(
     Number(subAdminData.currentPage) * Number(subAdminData.totalEntries),
     Number(subAdminData.totalData)
   );
   const openModal = (userName) => {
-    setUserName(userName)
+    setUserName(userName);
     setIsModalOpen(true);
   };
 
@@ -105,7 +130,12 @@ const SubAdminView = () => {
     setFormValues({
       adminPassword: "",
       password: "",
-      confirmPassword: ""
+      confirmPassword: "",
+    });
+    setErrors({
+      password: "",
+      confirmPassword: "",
+      adminPassword: "",
     });
   };
   // needs to be cross checked
@@ -135,25 +165,34 @@ const SubAdminView = () => {
   //   }
   // };
 
-
-
   const handleResetPassword = async () => {
     const { adminPassword, password, confirmPassword } = formValues;
+    let formErrors = {
+      password: "",
+      confirmPassword: "",
+      adminPassword: "",
+    };
 
     if (!adminPassword) {
-      toast.error("Admin Password is required!");
-      return;
+      formErrors.adminPassword = "Admin Password is required!";
     }
     if (!password) {
-      toast.error("New Password is required!");
-      return;
+      formErrors.password = "New Password is required!";
     }
     if (!confirmPassword) {
-      toast.error("Confirm Password is required!");
-      return;
+      formErrors.confirmPassword = "Confirm Password is required!";
     }
-    if (password !== confirmPassword) {
-      toast.error("New Password and Confirm Password do not match!");
+    if (password && confirmPassword && password !== confirmPassword) {
+      formErrors.confirmPassword =
+        "New Password and Confirm Password do not match!";
+    }
+
+    if (
+      formErrors.password ||
+      formErrors.confirmPassword ||
+      formErrors.adminPassword
+    ) {
+      setErrors(formErrors);
       return;
     }
 
@@ -175,10 +214,10 @@ const SubAdminView = () => {
     }
   };
 
-
-
   const handleDelete = async (id) => {
-    const isConfirmed = window.confirm("Are you sure you want to delete this sub-admin?");
+    const isConfirmed = window.confirm(
+      "Are you sure you want to delete this sub-admin?"
+    );
 
     if (!isConfirmed) {
       return;
@@ -186,12 +225,13 @@ const SubAdminView = () => {
 
     try {
       const response = await deleteSubAdmin({ requestId: id }, true);
-      if (response.success===200) { setRefresh(response); }
+      if (response.success === 200) {
+        setRefresh(response);
+      }
     } catch (error) {
       toast.error(customErrorHandler(error));
     }
   };
-
 
   return (
     <div className="main_content_iner mt-5 p-5">
@@ -200,7 +240,12 @@ const SubAdminView = () => {
           <div className="col-lg-12">
             <div className="white_card card_height_100 mb_30">
               <div className="white_card_header">
-                <h3 className="m-0 text-center text-uppercase fw-bolder" style={{ color: "#1E2761", textDecoration: "underline" }}>List of User Roles</h3>
+                <h3
+                  className="m-0 text-center text-uppercase fw-bolder"
+                  style={{ color: "#1E2761", textDecoration: "underline" }}
+                >
+                  List of User Roles
+                </h3>
                 <div className="box_header m-0"></div>
               </div>
               <div className="white_card_body mt-4">
@@ -317,20 +362,21 @@ const SubAdminView = () => {
                                 <td>
                                   <span className="mx-1">
                                     <button
-                                      className={`btn border border-2 rounded ${["Suspended"].includes(
-                                        store?.admin?.Status
-                                      )
-                                        ? "disabled"
-                                        : store?.admin?.roles[0].permission.some(
-                                          (role) => role === strings.status
+                                      className={`btn border border-2 rounded ${
+                                        ["Suspended"].includes(
+                                          store?.admin?.Status
                                         )
+                                          ? "disabled"
+                                          : store?.admin?.roles[0].permission.some(
+                                              (role) => role === strings.status
+                                            )
                                           ? ""
                                           : permissionObj.allAdmin.includes(
-                                            store?.admin?.roles[0].role
-                                          )
-                                            ? ""
-                                            : "disabled"
-                                        }`}
+                                              store?.admin?.roles[0].role
+                                            )
+                                          ? ""
+                                          : "disabled"
+                                      }`}
                                       title="Setting"
                                       type="button"
                                       onClick={() =>
@@ -347,8 +393,11 @@ const SubAdminView = () => {
                                   </span>
                                   <span className="mx-1">
                                     <button
-                                       className={`btn border border-2 rounded  ${["Suspended", "Locked"].includes(user.status)
-                                        && "disabled"}`}
+                                      className={`btn border border-2 rounded  ${
+                                        ["Suspended", "Locked"].includes(
+                                          user.status
+                                        ) && "disabled"
+                                      }`}
                                       style={{ background: "lightgreen" }}
                                       title="Reset Password"
                                       onClick={() => openModal(user.userName)}
@@ -356,10 +405,14 @@ const SubAdminView = () => {
                                       <i className="bi bi-shield-lock"></i>
                                     </button>
                                   </span>
-                                  { }      <span className="mx-1">
+                                  {}{" "}
+                                  <span className="mx-1">
                                     <button
-                                   className={`btn border border-2 rounded  ${["Suspended", "Locked"].includes(user.status)
-                                    && "disabled"}`}
+                                      className={`btn border border-2 rounded  ${
+                                        ["Suspended", "Locked"].includes(
+                                          user.status
+                                        ) && "disabled"
+                                      }`}
                                       style={{ background: "#ED5E68" }}
                                       title="Delete"
                                       onClick={(e) => {
@@ -379,9 +432,15 @@ const SubAdminView = () => {
                       <div
                         className="alert text-dark p-4"
                         role="alert"
-                        style={{ background: "#1E2761", border: "2px solid #84B9DF" }}
+                        style={{
+                          background: "#1E2761",
+                          border: "2px solid #84B9DF",
+                        }}
                       >
-                        <div className="alert-text d-flex justify-content-center text-light" style={{}}>
+                        <div
+                          className="alert-text d-flex justify-content-center text-light"
+                          style={{}}
+                        >
                           <b> &#128680; No Data Found !! </b>
                         </div>
                       </div>
@@ -401,8 +460,7 @@ const SubAdminView = () => {
             endIndex={endIndex}
             totalData={subAdminData.totalData}
           />
-        )
-        }
+        )}
         <StatusModal
           show={showModal}
           handleClose={handleClose}
@@ -434,6 +492,11 @@ const SubAdminView = () => {
                       onChange={handleResetPasswordChange}
                       required
                     />
+                    {errors.password && (
+                      <small className="text-danger fw-bold">
+                        {errors.password}
+                      </small>
+                    )}
                   </div>
                   <div className="form-group">
                     <label htmlFor="confirmPassword">Confirm Password</label>
@@ -445,6 +508,11 @@ const SubAdminView = () => {
                       onChange={handleResetPasswordChange}
                       required
                     />
+                    {errors.confirmPassword && (
+                      <small className="text-danger fw-bold">
+                        {errors.confirmPassword}
+                      </small>
+                    )}
                   </div>
                   <div className="form-group">
                     <label htmlFor="adminPassword">Admin Password</label>
@@ -456,13 +524,26 @@ const SubAdminView = () => {
                       onChange={handleResetPasswordChange}
                       required
                     />
+                    {errors.adminPassword && (
+                      <small className="text-danger fw-bold">
+                        {errors.adminPassword}
+                      </small>
+                    )}
                   </div>
                 </div>
                 <div className="modal-footer">
-                  <button type="button" className="btn btn-secondary" onClick={closeModal}>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={closeModal}
+                  >
                     Close
                   </button>
-                  <button type="button" className="btn btn-primary" onClick={handleResetPassword}>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleResetPassword}
+                  >
                     Reset Password
                   </button>
                 </div>
@@ -470,7 +551,6 @@ const SubAdminView = () => {
             </div>
           </div>
         )}
-        {/*                */}
       </div>
     </div>
   );
