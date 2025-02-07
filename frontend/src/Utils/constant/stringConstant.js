@@ -57,15 +57,13 @@ export class StringConstants {
     { role: 'partnership-Edit', name: 'Partnership Edit' },
     { role: 'partnership-view', name: 'Partnership view' },
     { role: 'user-profile-view', name: 'User Profile View' },
-    { role: 'create-Admin', name: 'Create Admin' },
-    // { role: 'create-user', name: 'Create User' },
+    { role: 'profile-view', name: 'Profile View' },
     { role: 'accountStatement', name: 'Account Statement' },
     { role: 'activityLog', name: 'Activity Log' },
     { role: 'delete-admin', name: 'Delete Admin' },
     { role: 'restore-admin', name: 'Restore Admin' },
     { role: 'move-to-trash', name: 'Move To Trash' },
     { role: 'trash-view', name: 'Trash View' },
-    { role: 'view-balance', name: 'View Balance' },
   ];
   // roles = [
   //   'transferBalance',
