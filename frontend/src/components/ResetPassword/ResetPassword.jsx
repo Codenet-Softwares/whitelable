@@ -62,9 +62,9 @@ const ResetPassword = () => {
     <div className="card shadow-lg p-4 rounded-4" style={{ maxWidth: "500px", width: "100%" }}>
       <div className="text-center mb-4">
         <i className="bi bi-person-circle text-primary" style={{ fontSize: "4rem" }}></i>
-        <h2 className="mt-3 text-primary">Reset Password</h2>
+        <h2 className="mt-3 text-primary text-uppercase">Reset Password</h2>
         <p
-          className="text-uppercase fw-bold text-glow mt-3"
+          className=" fw-bold text-glow mt-3"
           style={{
             color: "#4682B4",
             fontSize: "1.5rem",
