@@ -384,11 +384,8 @@ const SubAdminView = () => {
                                   </span>
                                   <span className="mx-1">
                                     <button
-                                      className={`btn border border-2 rounded  ${
-                                        ["Suspended", "Locked"].includes(
-                                          user.status
-                                        ) && "disabled"
-                                      }`}
+                                       className={`btn border border-2 rounded  ${["Suspended", "Locked"].includes(user.status)
+                                        && "disabled"}`}
                                       style={{ background: "lightgreen" }}
                                       title="Reset Password"
                                       onClick={() => openModal(user.userName)}
@@ -399,11 +396,8 @@ const SubAdminView = () => {
                                   {}{" "}
                                   <span className="mx-1">
                                     <button
-                                      className={`btn border border-2 rounded  ${
-                                        ["Suspended", "Locked"].includes(
-                                          user.status
-                                        ) && "disabled"
-                                      }`}
+                                   className={`btn border border-2 rounded  ${["Suspended", "Locked"].includes(user.status)
+                                    && "disabled"}`}
                                       style={{ background: "#ED5E68" }}
                                       title="Delete"
                                       onClick={(e) => {
