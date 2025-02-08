@@ -10,6 +10,7 @@ const Authform = ({ purpose, authFormApi }) => {
   const [authForm] = useState(getAuthForm);
   const { dispatch, store, showLoader, hideLoader } = useAppContext();
   // const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
 
@@ -193,7 +194,7 @@ const Authform = ({ purpose, authFormApi }) => {
                     <div className="">
                       <input
                         type="text"
-                        className="form-control "
+                        className={`form-control ${errors.userName && touched.userName ? "border-danger" : ""}`}
                         placeholder="Enter Username"
                         name="userName"
                         // style={{ border: '1px solid black' }}
@@ -208,16 +209,24 @@ const Authform = ({ purpose, authFormApi }) => {
                         ) : null}
                       </p>
                     </div>
-                    <div className="">
+                    <div className="position-relative">
                       <input
-                        type="password"
-                        className="form-control "
+                        type={showPassword ? "text" : "password"}
+                        className={`form-control ${errors.password && touched.password ? "border-danger" : ""}`}
                         placeholder="Enter Password"
                         name="password"
                         // style={{ border: '1px solid black' }}
                         value={values.password}
                         onChange={handleChange}
                       />
+                          {!errors.password || !touched.password ? (
+                      <i
+                        className={`bi ${
+                          showPassword ? "bi-eye-slash" : "bi-eye"
+                        } position-absolute top-50 end-0 translate-middle-y me-3`}
+                        style={{ cursor: "pointer" }}
+                        onClick={() => setShowPassword(!showPassword)}
+                      ></i>    ) : null}
                       <span>
                         {errors.password && touched.password ? (
                           <p className="text-center fw-bold text-danger">
