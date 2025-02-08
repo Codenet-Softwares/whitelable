@@ -765,9 +765,7 @@ const User_BetMarket = () => {
                   {betBookData?.length > 0 ? (
                     betBookData.map((master, index) => {
                       return (
-                        <tr
-                          key={index}
-                        >
+                        <tr key={index}>
                           {permissionObj.allAdmin.includes(master?.roles) ? (
                             <td
                               style={{
@@ -858,14 +856,11 @@ const User_BetMarket = () => {
                     <th style={{ border: "1px solid #ddd", padding: "8px" }}>
                       Role
                     </th>
-                    <th style={{ border: "1px solid #ddd", padding: "8px" }}>
-                      {betBookData?.length > 0 &&
-                        betBookData[0].runnerBalance?.[0]?.runnerName}
-                    </th>
-                    <th style={{ border: "1px solid #ddd", padding: "8px" }}>
-                      {betBookData?.length > 0 &&
-                        betBookData[0].runnerBalance?.[1]?.runnerName}
-                    </th>
+                    {betBookData[0]?.runnerBalance?.map((balance) => (
+                      <th style={{ border: "1px solid #ddd", padding: "8px" }}>
+                        {balance?.runnerName}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
@@ -873,46 +868,58 @@ const User_BetMarket = () => {
                     betBookData.map((master, index) => {
                       return (
                         <tr key={index}>
-                          <td
-                            style={{
-                              border: "1px solid #ddd",
-                              padding: "8px",
-                            }}
-                          >
-                            {master?.userName}
-                          </td>
+                          {permissionObj.allAdmin.includes(master?.roles) ? (
+                            <td
+                              style={{
+                                border: "1px solid #ddd",
+                                padding: "8px",
+                              }}
+                              onClick={() =>
+                                handleClick_To_InnerHierarcy(
+                                  master?.adminId,
+                                  master?.roles
+                                )
+                              }
+                              className="text-primary"
+                            >
+                              {master?.userName}
+                            </td>
+                          ) : (
+                            <td
+                              style={{
+                                border: "1px solid #ddd",
+                                padding: "8px",
+                              }}
+                            >
+                              {master?.userName}
+                            </td>
+                          )}
 
                           <td
                             style={{ border: "1px solid #ddd", padding: "8px" }}
                           >
-                            User
+                            {master?.roles}
                           </td>
-                          <td
-                            style={{ border: "1px solid #ddd", padding: "8px" }}
-                          >
-                            {master?.runnerBalance?.[0]?.bal >= 0 ? (
-                              <span className="text-success">
-                                {master?.runnerBalance?.[0]?.bal}
-                              </span>
-                            ) : (
-                              <span className="text-danger">
-                                {master?.runnerBalance?.[0]?.bal}
-                              </span>
-                            )}
-                          </td>
-                          <td
-                            style={{ border: "1px solid #ddd", padding: "8px" }}
-                          >
-                            {master?.runnerBalance?.[1]?.bal >= 0 ? (
-                              <span className="text-success">
-                                {master?.runnerBalance?.[1]?.bal}
-                              </span>
-                            ) : (
-                              <span className="text-danger">
-                                {master?.runnerBalance?.[1]?.bal}
-                              </span>
-                            )}
-                          </td>
+                          {master?.runnerBalance?.map((data) => {
+                            return (
+                              <td
+                                style={{
+                                  border: "1px solid #ddd",
+                                  padding: "8px",
+                                }}
+                              >
+                                {data?.bal >= 0 ? (
+                                  <span className="text-success">
+                                    {data?.bal}
+                                  </span>
+                                ) : (
+                                  <span className="text-danger">
+                                    {data?.bal}
+                                  </span>
+                                )}
+                              </td>
+                            );
+                          })}
                         </tr>
                       );
                     })
