@@ -61,12 +61,21 @@ const AgentDelete = () => {
   //   }
   // }
   async function handleDeleteAgent(id) {
-    showLoader(); 
+    showLoader(); // Show loader before starting the async operation
     try {
       const response = await deleteTrash_api({ trashId: id });
       if (response) {
         toast.info(response.message);
-        setReload(!reload);
+  
+        // Reload the data first
+        const updatedData = viewAgentDelete.filter((item) => item.trashId !== id);
+        setViewAgentDelete(updatedData);
+  
+        if (updatedData.length === 0 && page > 1) {
+          setPage(1);
+        } else {
+          setReload(!reload); 
+        }
       }
     } catch (error) {
       toast.error("An error occurred while deleting. Please try again.");
@@ -74,15 +83,21 @@ const AgentDelete = () => {
       hideLoader(); 
     }
   }
-
+  
   async function handleRestore(adminId) {
     const data = { adminId: adminId };
-    showLoader();
+    showLoader(); 
     try {
       const response = await restoreTrash_api(data);
       if (response) {
         toast.info(response.message);
-        setReload(!reload);
+          const updatedData = viewAgentDelete.filter((item) => item.adminId !== adminId);
+        setViewAgentDelete(updatedData);
+          if (updatedData.length === 0 && page > 1) {
+          setPage(1);
+        } else {
+          setReload(!reload);
+        }
       }
     } catch (error) {
       toast.error("An error occurred while restoring. Please try again.");
@@ -90,13 +105,13 @@ const AgentDelete = () => {
       hideLoader(); 
     }
   }
+  
 
   return (
     <>
-      <div className="container-fluid d-flex justify-content-center mt-5 rounded-5">
-        
-        <div className="px-4">
-          <div>
+      <div className="container-fluid d-flex justify-content-center mt-5 rounded-5 px-5">       
+    <div className="card "> 
+        <div className="px-3 mt-3">
             <h3
               className="text-center text-uppercase fw-bold"
               style={{ color: "#1E2761", textDecoration: "underline" }}
@@ -116,7 +131,7 @@ const AgentDelete = () => {
                   <option value="100">100 Entries</option>
                 </select>
               </div>
-              ;
+              
               <div
                 className="serach_field_2 ms-auto"
                 style={{ marginLeft: "-10px" }}
@@ -222,9 +237,9 @@ const AgentDelete = () => {
                 totalData={totalData}
               />
             )}
-          </div>
         </div>
       </div>
+    </div>
     </>
   );
 };

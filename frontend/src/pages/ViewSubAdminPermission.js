@@ -79,8 +79,8 @@ const ViewSubAdminPermission = () => {
 
   const viewSingleSubAdmin = () => {
     return (
+        <div className="container-fluid mt-5 px-5">
       <div className="main_content_iner ">
-        <div className="container-fluid p-0">
           <div className="row justify-content-center">
             <div className="col-lg-12">
               <div className="white_card card_height_100 mb_30">
