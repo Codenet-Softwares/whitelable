@@ -33,7 +33,6 @@ const Card = ({
   setIsLoading,
   exposure,
 }) => {
-
   const navigate = useNavigate();
   const { dispatch, store } = useAppContext();
   const [transactionModalShow, setTransactionModalShow] = useState(false);
@@ -41,12 +40,16 @@ const Card = ({
   const [differentiate, setDifferentiate] = useState("");
   const [adminIdForStatus, setAdminIdForStatus] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [clientBalance, setClientBalance] = useState(null)
+  const [clientBalance, setClientBalance] = useState(null);
 
-  const handelOpenTransactionModal = (boolParam, differentiateParam,balance) => {
+  const handelOpenTransactionModal = (
+    boolParam,
+    differentiateParam,
+    balance
+  ) => {
     setTransactionModalShow(boolParam);
     setDifferentiate(differentiateParam);
-    setClientBalance(balance)
+    setClientBalance(balance);
   };
 
   const handleClose = (adminId) => setShowModal(false);
@@ -56,8 +59,7 @@ const Card = ({
     setAdminIdForStatus(adminId);
   };
 
-  const handleStatusChange = (status) => {
-  };
+  const handleStatusChange = (status) => {};
 
   async function handleDelete() {
     const userConfirmed = window.confirm(
@@ -118,41 +120,24 @@ const Card = ({
               className="border border-1 text-center rounded-pill fw-bold p-1"
               // data-bs-toggle="modal"
               // data-bs-target={`#hierarchyview-${userId}`}
-              style={{ cursor: "auto", background:"#F5C93A", width:"90px"}}
+              style={{ cursor: "auto", background: "#F5C93A", width: "90px" }}
             >
               {role}
             </button>
 
-            <p className="fw-bold text-dark"
+            <p
+              className="fw-bold text-dark"
               onClick={() => {
                 takeMeToHierarchy(userName);
               }}
-              style={{ cursor: "pointer"}}
+              style={{ cursor: "pointer" }}
             >
               <b>{userName}</b>
             </p>
           </th>
 
           <td scope="row" className="fs-6 text-center">
-            {creditRefLength > 0 ? (
-              //Need to hit Txn Modal
-              <span
-                onClick={() =>
-                  handelOpenTransactionModal(true, "creditRefProvider")
-                }
-              >
-                {creditRef}
-              </span>
-            ) : (
-              //Need to hit Txn Modal
-              <span
-                onClick={() =>
-                  handelOpenTransactionModal(true, "creditRefProvider")
-                }
-              >
-                0
-              </span>
-            )}
+            {creditRefLength > 0 ? <span>{creditRef}</span> : <span>0</span>}
             {callingParent === "Wallet" ? (
               <span className="">
                 <button
@@ -203,17 +188,9 @@ const Card = ({
 
           <td scope="row" className="fs-6 text-center">
             {partnershipLength > 0 ? (
-              <span
-              //Need to hit Txn Modal
-              >
-                {partnership}
-              </span>
+              <span>{partnership}</span>
             ) : (
-              <span
-              //Need to hit Txn Modal
-              >
-                0
-              </span>
+              <span>0</span>
             )}
 
             {callingParent === "Wallet" ? (
@@ -270,7 +247,11 @@ const Card = ({
             {loadBalance}
           </td>
           <td scope="row" className="fs-6 text-center text-danger">
-          ({Number(exposure) % 1 === 0 ? Number(exposure) : Number(exposure).toFixed(2)})
+            (
+            {Number(exposure) % 1 === 0
+              ? Number(exposure)
+              : Number(exposure).toFixed(2)}
+            )
           </td>
           <td scope="row" className="fs-6 text-center">
             {balance}
@@ -278,11 +259,12 @@ const Card = ({
           <td
             scope="row"
             className={`fs-6 text-center ${
-              loadBalance-creditRef < 0 ? "text-danger" : "text-dark"
+              loadBalance - creditRef < 0 ? "text-danger" : "text-dark"
             }`}
           >
-            {isNaN(creditRef-loadBalance) ? loadBalance : loadBalance-creditRef}
-       
+            {isNaN(creditRef - loadBalance)
+              ? loadBalance
+              : loadBalance - creditRef}
           </td>
           <td scope="row" className="fs-6 text-center">
             <p
@@ -304,23 +286,28 @@ const Card = ({
                 <span
                   className="mx-1"
                   onClick={() =>
-                    handelOpenTransactionModal(true, "walletAmountProvider",balance)
+                    handelOpenTransactionModal(
+                      true,
+                      "walletAmountProvider",
+                      balance
+                    )
                   }
                 >
                   <button
-                    className={`btn border border-1 rounded ${["suspended"].includes(store?.admin?.status)
-                      ? "disabled"
-                      : store?.admin?.roles[0].permission.some(
-                        (role) => role === strings.transferBalance
-                      )
+                    className={`btn border border-1 rounded ${
+                      ["suspended"].includes(store?.admin?.status)
+                        ? "disabled"
+                        : store?.admin?.roles[0].permission.some(
+                            (role) => role === strings.transferBalance
+                          )
                         ? ""
                         : permissionObj.allAdmin.includes(
-                          store?.admin?.roles[0].role
-                        )
-                          ? ""
-                          : "disabled"
-                      }`}
-                      style={{background:"#84B9DF"}}
+                            store?.admin?.roles[0].role
+                          )
+                        ? ""
+                        : "disabled"
+                    }`}
+                    style={{ background: "#84B9DF" }}
                     title="Addmoney"
                   >
                     <i class="fa-solid fa-circle-dollar-to-slot"></i>
@@ -336,12 +323,12 @@ const Card = ({
                           )
                         ? ""
                         : permissionObj.allAdmin.includes(
-                          store?.admin?.roles[0].role
-                        )
-                          ? ""
-                          : "disabled"
-                      }`}
-                      style={{background:"#25F1F7"}}
+                            store?.admin?.roles[0].role
+                          )
+                        ? ""
+                        : "disabled"
+                    }`}
+                    style={{ background: "#25F1F7" }}
                     title="Setting"
                     type="button"
                     onClick={() => handleStatusModalShow(adminId)}
@@ -364,8 +351,8 @@ const Card = ({
                       )
                     ? ""
                     : "disabled"
-                  }`}
-                  style={{background:"#F5C93A"}}
+                }`}
+                style={{ background: "#F5C93A" }}
                 title="Profile"
                 onClick={() => {
                   takeMeToAccount(userName);
@@ -377,19 +364,20 @@ const Card = ({
             {callingParent === "Wallet" ? (
               <span className="mx-1">
                 <button
-                  className={`btn border border-2 rounded  ${["suspended"].includes(store?.admin?.status)
-                    ? "disabled"
-                    : store?.admin?.roles[0].permission.some(
-                      (role) => role === strings.deleteAdmin
-                    )
+                  className={`btn border border-2 rounded  ${
+                    ["suspended"].includes(store?.admin?.status)
+                      ? "disabled"
+                      : store?.admin?.roles[0].permission.some(
+                          (role) => role === strings.deleteAdmin
+                        )
                       ? ""
                       : permissionObj.allAdmin.includes(
-                        store?.admin?.roles[0].role
-                      )
-                        ? ""
-                        : "disabled"
-                    }`}
-                    style={{background:"#ED5E68"}}
+                          store?.admin?.roles[0].role
+                        )
+                      ? ""
+                      : "disabled"
+                  }`}
+                  style={{ background: "#ED5E68" }}
                   title="Delete"
                   onClick={(e) => {
                     handleDelete();

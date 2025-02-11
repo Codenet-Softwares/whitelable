@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Pagination from "../components/common/Pagination";
 import { Link } from "react-router-dom";
 import { useAppContext } from "../contextApi/context";
@@ -15,6 +15,7 @@ import { toast } from "react-toastify";
 import { customErrorHandler } from "../Utils/helper";
 
 const SubAdminView = () => {
+  const searchTimeout = useRef(null); // Reference to store the timeout ID
   const [subAdminData, setSubAdminData] = useState(getAllSubAdminCreateState());
   const [refresh, setRefresh] = useState({});
   const [showModal, setShowModal] = useState(false);
@@ -34,6 +35,10 @@ const SubAdminView = () => {
     confirmPassword: "",
     adminPassword: "",
   });
+
+  const [showPassword, setShowPassword] = useState(false); // for reset modal
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // for reset modal
+  const [showAdminPassword, setShowAdminPassword] = useState(false); // for reset modal
   const handleResetPasswordChange = (e) => {
     const { id, value } = e.target;
     setFormValues((prevValues) => ({
@@ -41,32 +46,25 @@ const SubAdminView = () => {
       [id]: value,
     }));
   };
-  const validateForm = () => {
-    let formErrors = {};
-    if (!formValues.password) {
-      formErrors.password = "Password is required.";
-    }
-    if (!formValues.confirmPassword) {
-      formErrors.confirmPassword = "Confirm Password is required.";
-    } else if (formValues.confirmPassword !== formValues.password) {
-      formErrors.confirmPassword = "Passwords do not match.";
-    }
-    if (!formValues.adminPassword) {
-      formErrors.adminPassword = "Admin Password is required.";
-    }
-
-    setErrors(formErrors);
-    return Object.keys(formErrors).length === 0;
-  };
 
   const { store, dispatch } = useAppContext();
   const handleChange = (name, value) => {
     setSubAdminData((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]: value,  // Updating the search term
     }));
+  
+    // Clear previous timeout
+    if (searchTimeout.current) {
+      clearTimeout(searchTimeout.current);
+    }
+  
+    // Set a new timeout to delay the API call
+    searchTimeout.current = setTimeout(() => {
+      getAll_SubAdmin_Create(value); // Pass the updated value
+    }, 500); // 500ms debounce time
   };
-
+  
   const handleStatusModalShow = (adminId, status, userName, role) => {
     setShowModal(true);
     setAdminIdForStatus(adminId);
@@ -78,24 +76,17 @@ const SubAdminView = () => {
   const handleClose = (adminId) => setShowModal(false);
 
   useEffect(() => {
-    if (store?.admin) {
-      permissionObj.allAdmin.includes(store?.admin?.roles[0].role) &&
-        getAll_SubAdmin_Create();
+    if (store?.admin && permissionObj.allAdmin.includes(store?.admin?.roles[0].role)) {
+      getAll_SubAdmin_Create(subAdminData.name);
     }
-  }, [
-    store?.admin,
-    subAdminData.currentPage,
-    subAdminData.name,
-    subAdminData.totalEntries,
-    refresh,
-  ]);
+  }, [store?.admin, subAdminData.currentPage, subAdminData.totalEntries, refresh]);
 
-  async function getAll_SubAdmin_Create() {
+  async function getAll_SubAdmin_Create(name = subAdminData.name) {
     const response = await getAllSubAdminCreate({
       _id: store?.admin?.id,
       pageNumber: subAdminData.currentPage,
       dataLimit: subAdminData.totalEntries,
-      name: subAdminData.name,
+      name: name,
     });
 
     if (response) {
@@ -393,11 +384,8 @@ const SubAdminView = () => {
                                   </span>
                                   <span className="mx-1">
                                     <button
-                                      className={`btn border border-2 rounded  ${
-                                        ["Suspended", "Locked"].includes(
-                                          user.status
-                                        ) && "disabled"
-                                      }`}
+                                       className={`btn border border-2 rounded  ${["Suspended", "Locked"].includes(user.status)
+                                        && "disabled"}`}
                                       style={{ background: "lightgreen" }}
                                       title="Reset Password"
                                       onClick={() => openModal(user.userName)}
@@ -408,11 +396,8 @@ const SubAdminView = () => {
                                   {}{" "}
                                   <span className="mx-1">
                                     <button
-                                      className={`btn border border-2 rounded  ${
-                                        ["Suspended", "Locked"].includes(
-                                          user.status
-                                        ) && "disabled"
-                                      }`}
+                                   className={`btn border border-2 rounded  ${["Suspended", "Locked"].includes(user.status)
+                                    && "disabled"}`}
                                       style={{ background: "#ED5E68" }}
                                       title="Delete"
                                       onClick={(e) => {
@@ -482,48 +467,79 @@ const SubAdminView = () => {
                   </button>
                 </div>
                 <div className="modal-body">
-                  <div className="form-group">
+                  <div className="form-group position-relative">
                     <label htmlFor="password">New Password</label>
                     <input
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       id="password"
                       className="form-control"
                       value={formValues.password}
                       onChange={handleResetPasswordChange}
                       required
+                      style={{ paddingRight: "2.5rem" }}
                     />
+
+                    <i
+                      className={`bi ${
+                        showPassword ? "bi-eye-slash" : "bi-eye"
+                      } position-absolute top-50 end-0 translate-middle-y me-3`}
+                      style={{ cursor: "pointer" }}
+                      onClick={() => setShowPassword(!showPassword)}
+                    ></i>
+
                     {errors.password && (
                       <small className="text-danger fw-bold">
                         {errors.password}
                       </small>
                     )}
                   </div>
-                  <div className="form-group">
+                  <div className="form-group position-relative mt-3">
                     <label htmlFor="confirmPassword">Confirm Password</label>
                     <input
-                      type="password"
+                      type={showConfirmPassword ? "text" : "password"}
                       id="confirmPassword"
                       className="form-control"
                       value={formValues.confirmPassword}
                       onChange={handleResetPasswordChange}
                       required
                     />
+
+                    <i
+                      className={`bi ${
+                        showConfirmPassword ? "bi-eye-slash" : "bi-eye"
+                      } position-absolute top-50 end-0 translate-middle-y me-3`}
+                      style={{ cursor: "pointer" }}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                    ></i>
+
                     {errors.confirmPassword && (
                       <small className="text-danger fw-bold">
                         {errors.confirmPassword}
                       </small>
                     )}
                   </div>
-                  <div className="form-group">
+                  <div className="form-group position-relative mt-3">
                     <label htmlFor="adminPassword">Admin Password</label>
                     <input
-                      type="password"
+                      type={showAdminPassword ? "text" : "password"}
                       id="adminPassword"
                       className="form-control"
                       value={formValues.adminPassword}
                       onChange={handleResetPasswordChange}
                       required
+                      style={{ paddingRight: "2.5rem" }}
                     />
+
+                    <i
+                      className={`bi ${
+                        showAdminPassword ? "bi-eye-slash" : "bi-eye"
+                      } position-absolute top-50 end-0 translate-middle-y me-3`}
+                      style={{ cursor: "pointer" }}
+                      onClick={() => setShowAdminPassword(!showAdminPassword)}
+                    ></i>
+
                     {errors.adminPassword && (
                       <small className="text-danger fw-bold">
                         {errors.adminPassword}
