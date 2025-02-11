@@ -511,7 +511,7 @@ export async function getLotteryBetHistory(body = {}, isToast = false) {
   try {
     const callParams = await getAuthCallParams(strings.POST, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.getLotteryBetHistory}/${body.userName}?page=${body.page}&limit=${body.limit}&startDate=${body.fromDate}&endDate=${body.toDate}&dataType=${body.dataSource}`,
+      `${UrlConstant.getLotteryBetHistory}/${body.userName}?page=${body.page}&limit=${body.limit}&startDate=${body.fromDate}&endDate=${body.toDate}&dataType=${body.dataSource}&type=${body.dataType}`,
       callParams,
       isToast
     );
