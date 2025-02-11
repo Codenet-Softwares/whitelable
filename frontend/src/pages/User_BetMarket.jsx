@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
 import SingleCard from "../components/common/singleCard";
+import { Modal, Button } from "react-bootstrap";
+import Pagination from "../components/common/Pagination";
+
 import {
   get_betBook,
   getMarketWithRunnerDataInitialState,
@@ -39,7 +42,9 @@ const User_BetMarket = () => {
   const [liveToggle, setLiveToggle] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isHirerchyModalOpen, setHirerchyModalOpen] = useState(false);
-
+  const [showModal, setShowModal] = useState(false);
+  const handleShow = () => setShowModal(true);
+  const handleClose = () => setShowModal(false);
   // useEffect(()=>{fetch_BetBookData()},[bodyData])
   const handleUsernameClick = (userName) => {
     console.log("onclick", userName);
@@ -116,19 +121,48 @@ const User_BetMarket = () => {
       getView_LiveBet();
     }
   }, [liveToggle]);
-
-  async function getView_LiveBet() {
+  async function getView_LiveBet(pageNumber = 1, totalEntries = 10, search = "") {
     try {
       const response = await getMarket_LiveBet({
         marketId: marketId,
         adminId: store?.admin?.id,
-        role: store?.admin?.roles[0]?.role,
+        role: store?.admin?.roles?.[0]?.role,
+        pageNumber,
+        totalEntries,
+        search,
       });
-      setUser_LiveBet(response.data);
+  
+      if (response?.data) {
+        setUser_LiveBet(response.data);
+      } else {
+        setUser_LiveBet({ currentPage: pageNumber, totalEntries, totalData: 0, data: [] });
+      }
     } catch (error) {
       toast.error(customErrorHandler(error));
     }
   }
+  
+
+  let startIndex = Math.min(
+    (Number(user_LiveBet.currentPage) - 1) * Number(user_LiveBet.totalEntries) + 1
+  );
+  let endIndex = Math.min(
+    Number(user_LiveBet.currentPage) * Number(user_LiveBet.totalEntries),
+    Number(user_LiveBet.totalData)
+  );
+
+
+  const handlePageChange = (page) => {
+    setUser_LiveBet((prev) => ({
+      ...prev,
+      currentPage: page,
+    }));
+    
+    // Pass `page` to `getView_LiveBet` to fetch correct data
+    getView_LiveBet(page, user_LiveBet.totalEntries, "");
+  };
+  
+
 
   async function getView_User_BetMarket() {
     try {
@@ -339,7 +373,7 @@ const User_BetMarket = () => {
                 {/* Additional Cards */}
                 <div className="card mt-3">
                   <h4
-                    className="card-header text-white fw-bold rounded-top "
+                    className="card-header text-white fw-bold rounded-top text-uppercase"
                     style={{ background: "#1E2761" }}
                   >
                     Score Card
@@ -382,175 +416,296 @@ const User_BetMarket = () => {
                   </div>
                 </div>
                 <div className="card mt-4">
-                  <div
-                    className="d-flex align-items-center rounded-top"
-                    style={{ background: "#1E2761" }}
-                  >
-                    {/* Live Bet Section */}
-                    <h4 className="card-header text-white fw-bold py-3 mb-0 bg-transparent me-3 text-uppercase">
-                      Live Bet
-                    </h4>
-                    <div className="form-check form-switch mt-1 me-3">
-                      <input
-                        className="form-check-input"
-                        value={liveToggle}
-                        type="checkbox"
-                        id="liveBetToggle1"
-                        style={{ transform: "scale(1.5)" }}
-                        onClick={handleLiveToggle}
-                      />
-                    </div>
+                    <div className="container-fluid">
+                      <div
+                        className="row align-items-center rounded-top"
+                        style={{ background: "#1E2761" }}
+                      >
+                        <div className="col-auto d-flex align-items-center">
+                          <h4 className="card-header text-white fw-bold py-3 mb-0 bg-transparent me-2 text-uppercase">
+                            Live Bet
+                          </h4>
+                          <div className="form-check form-switch mt-1">
+                            <input
+                              className="form-check-input"
+                              value={liveToggle}
+                              type="checkbox"
+                              id="liveBetToggle1"
+                              style={{ transform: "scale(1.5)" }}
+                              onClick={handleLiveToggle}
+                            />
+                          </div>
+                        </div>
 
-                    {/* Partnership Book Section */}
-                    <h4 className="card-header text-white fw-bold py-3 mb-0 bg-transparent me-3 text-uppercase">
-                      Partnership Book
-                    </h4>
-                    <div className="form-check form-switch mt-1 me-3">
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        id="liveBetToggle2"
-                        style={{ transform: "scale(1.5)" }}
-                      />
-                    </div>
-                    {/* View More Section */}
-                    <h4 className="card-header text-white fw-bold py-3 mb-0 bg-transparent ms-auto text-uppercase">
-                      View More...
-                    </h4>
-                  </div>
-                  {/* <div className="card-body ">
-                    <h5
-                      style={{
-                        fontSize: "20px",
-                        fontWeight: "bold",
-                        color: "gray",
-                      }}
-                    >
-                        <h2 className="text-uppercase">Market Details</h2>
-                      <div>
-                        <div
-                          style={{
-                            border: "1px solid #ddd",
-                            borderRadius: "4px",
-                            margin: "5px",
-                            padding: "10px",
-                            backgroundColor: "#e6f2ff",
-                          }}
-                        >
-                          
-                          {liveToggle ? (
-                            user_LiveBet.map((data) => {
-                              return (
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    alignItems: "center",
-                                    marginTop: "5px",
-                                  }}
-                                >
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                    }}
-                                  >
-                                    {data.type === "back" ? (
-                                      <button
-                                        style={{
-                                          backgroundColor: "#007bff",
-                                          color: "#fff",
-                                          border: "none",
-                                          padding: "5px 10px",
-                                          borderRadius: "3px",
-                                          marginRight: "10px",
-                                          fontSize: "14px",
-                                        }}
-                                      >
-                                        {data.type}
-                                      </button>
-                                    ) : (
-                                      <button
-                                        style={{
-                                          backgroundColor: "#FFB6C1",
-                                          color: "#fff",
-                                          border: "none",
-                                          padding: "5px 10px",
-                                          borderRadius: "3px",
-                                          marginRight: "10px",
-                                          fontSize: "14px",
-                                        }}
-                                      >
-                                        {data.type}
-                                      </button>
-                                    )}
+                        <div className="col-auto d-flex align-items-center">
+                          <h4 className="card-header text-white fw-bold py-3 mb-0 bg-transparent me-2 text-uppercase">
+                            Partnership Book
+                          </h4>
+                          <div className="form-check form-switch mt-1">
+                            <input
+                              className="form-check-input"
+                              type="checkbox"
+                              id="liveBetToggle2"
+                              style={{ transform: "scale(1.5)" }}
+                            />
+                          </div>
+                        </div>
 
-                                    <div>
-                                      <div
-                                        style={{
-                                          fontWeight: "bold",
-                                          fontSize: "14px",
-                                        }}
-                                      >
-                                        {data.runnerName}
-                                      </div>
-                                      <div
-                                        style={{
-                                          fontSize: "12px",
-                                          color: "#555",
-                                        }}
-                                      >
-                                        Match Odds
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div style={{ display: "flex", gap: "30px" }}>
-                                    <div style={{ fontWeight: "bold" }}>
-                                      {data.rate}
-                                    </div>
-                                    <div style={{ fontWeight: "bold" }}>
-                                      {data.value}
-                                    </div>
-                                    {data.type === "back" ? (
-                                      <div
-                                        style={{
-                                          fontWeight: "bold",
-                                          color: "#007bff",
-                                        }}
-                                      >
-                                        {data.userName}
-                                      </div>
-                                    ) : (
-                                      <div
-                                        style={{
-                                          fontWeight: "bold",
-                                          color: "#FFB6C1",
-                                        }}
-                                      >
-                                        {data.userName}
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            })
-                          ) : (
-                            <div className="card-body text-center">
-                              <h5
-                                style={{
-                                  fontSize: "20px",
-                                  fontWeight: "bold",
-                                  color: "gray",
-                                }}
-                              >
-                                There are no any bet.
-                              </h5>
-                            </div>
-                          )}
+                        <div className="col-auto ms-auto">
+                          <h4
+                            className={`card-header text-white fw-bold py-3 mb-0 bg-transparent text-uppercase ${
+                              !liveToggle ? "disabled" : ""
+                            }`}
+                            style={{
+                              cursor: liveToggle ? "pointer" : "not-allowed",
+                              opacity: liveToggle ? 1 : 0.5,
+                            }}
+                            onClick={liveToggle ? handleShow : null}
+                          >
+                            View More...
+                          </h4>
                         </div>
                       </div>
-                    </h5>
-                  </div> */}
+                    </div>
+
+                    <div>
+                      <Modal
+                        show={showModal}
+                        onHide={handleClose}
+                        centered
+                        size="xl"
+                      >
+                        <Modal.Header closeButton>
+                          <Modal.Title className="fw-bold">
+                            VIEW ALL LIVE DATA
+                          </Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                          <div>
+                            <div className="white_box_tittle list_header">
+                              <div className="col-2 text-center">
+                                <select
+                                  className="form-select form-select-sm"
+                                  aria-label=".form-select-sm example"
+                                >
+                                  <option value="10">Show 10 Entries</option>
+                                  <option value="25">25 Entries</option>
+                                  <option value="50">50 Entries</option>
+                                  <option value="100">100 Entries</option>
+                                </select>
+                              </div>
+
+                              <div
+                                className="serach_field_2 ms-auto"
+                                style={{ marginLeft: "-10px" }}
+                              >
+                                <div className="search_inner">
+                                  <form Active="#">
+                                    <div className="search_field">
+                                      <input
+                                        // value={subAdminData.name}
+                                        // onChange={(e) => {
+                                        //   handleChange("name", e.target.value);
+                                        // }}
+                                        type="text"
+                                        placeholder="Search content here..."
+                                      />
+                                    </div>
+                                    <button type="submit">
+                                      {" "}
+                                      <i className="ti-search"></i>{" "}
+                                    </button>
+                                  </form>
+                                </div>
+                              </div>
+                            </div>
+                            {liveToggle ? (
+                              <>
+                                {/* Table Headers */}
+                                <div className="col-12">
+                                  <div className="row text-center">
+                                    <div className="col-2">
+                                      <p className="fw-bold text-dark">
+                                        Market Name
+                                      </p>
+                                    </div>
+                                    <div className="col-2">
+                                      <p className="fw-bold text-dark">
+                                        Runner Name
+                                      </p>
+                                    </div>
+                                    <div className="col-2">
+                                      <p className="fw-bold text-dark">Odds</p>
+                                    </div>
+                                    <div className="col-2">
+                                      <p className="fw-bold text-dark">Stake</p>
+                                    </div>
+                                    <div className="col-2">
+                                      <p className="fw-bold text-dark">Type</p>
+                                    </div>
+                                    <div className="col-2">
+                                      <p className="fw-bold text-dark">
+                                        Username
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Table Data */}
+                                <div
+                                  style={{
+                                    border: "1px solid #ddd",
+                                    borderRadius: "4px",
+                                    // padding: "7px",
+                                    backgroundColor: "#BEDCF4",
+                                  }}
+                                >
+                                  {user_LiveBet.length > 0 ? (
+                                    <div>
+                                      {user_LiveBet.map((data) => (
+                                        <div
+                                          className="row text-center align-items-center"
+                                          style={{
+                                            borderBottom: "1px solid #ddd",
+                                            padding: "8px 0",
+                                          }}
+                                          key={data.id}
+                                        >
+                                          {/* Market Name & Type */}
+                                          <div className="col-2 d-flex align-items-center justify-content-center">
+                                            <button
+                                              style={{
+                                                backgroundColor:
+                                                  data.type === "back"
+                                                    ? "#7DBCE8"
+                                                    : "#FFB6C1",
+                                                border: "none",
+                                                borderRadius: "3px",
+                                                marginRight: "10px",
+                                                fontSize: "12px",
+                                                textTransform: "uppercase",
+                                                width: "40px",
+                                              }}
+                                            >
+                                              {data.type}
+                                            </button>
+                                            <div>
+                                              <div style={{ fontSize: "12px" }}>
+                                                {data.runnerName}
+                                              </div>
+                                              <div
+                                                style={{
+                                                  fontSize: "12px",
+                                                  color: "#555",
+                                                }}
+                                              >
+                                                Match Odds
+                                              </div>
+                                            </div>
+                                          </div>
+
+                                          {/* Odds */}
+                                          <div
+                                            className="col-2 fw-bold"
+                                            style={{ fontSize: "14px" }}
+                                          >
+                                            {data.runnerName}
+                                          </div>
+                                          <div
+                                            className="col-2 fw-bold"
+                                            style={{ fontSize: "14px" }}
+                                          >
+                                            {data.rate}
+                                          </div>
+
+                                          {/* Stake */}
+                                          <div
+                                            className="col-2 fw-bold"
+                                            style={{ fontSize: "14px" }}
+                                          >
+                                            {data.value}
+                                          </div>
+                                          <div
+                                            className="col-2 fw-bold"
+                                            style={{
+                                              fontSize: "14px",
+                                              textTransform:"uppercase",
+                                              color:
+                                                data.type === "back"
+                                                  ? "#50A0E2"
+                                                  : "#E5798B",
+                                            }}
+                                          >
+                                            {data.type}
+                                          </div>
+
+                                          {/* Username */}
+                                          <div
+                                            className="col-2 fw-bold"
+                                            style={{
+                                              fontSize: "15px",
+                                              color:
+                                                data.type === "back"
+                                                  ? "#007bff"
+                                                  : "#FFB6C1",
+                                            }}
+                                            // onClick={() =>
+                                            //   handleUsernameClick(data.userName)
+                                            // }
+                                          >
+                                            {data.userName}
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <div className="text-center p-3">
+                                      <h5
+                                        style={{
+                                          fontSize: "18px",
+                                          fontWeight: "bold",
+                                          color: "gray",
+                                        }}
+                                      >
+                                        There are no any bet.
+                                      </h5>
+                                    </div>
+                                  )}
+                                </div>
+                              </>
+                            ) : (
+                              <div className="card-body text-center">
+                                <h5
+                                  style={{
+                                    fontSize: "20px",
+                                    fontWeight: "bold",
+                                    color: "gray",
+                                  }}
+                                >
+                                  There are no any bet.
+                                </h5>
+                              </div>
+                            )}
+                            {user_LiveBet?.length > 0 && (
+                                <Pagination
+                                  currentPage={user_LiveBet.currentPage}
+                                  totalPages={user_LiveBet.totalPages}
+                                  handlePageChange={handlePageChange}
+                                  startIndex={startIndex}
+                                  endIndex={endIndex}
+                                  totalData={user_LiveBet.totalData}
+                                />
+                            )}
+                          </div>
+                        </Modal.Body>
+                        <Modal.Footer>
+                          <Button variant="secondary" onClick={handleClose}>
+                            Close
+                          </Button>
+                        </Modal.Footer>
+                      </Modal>
+                    </div>
+                 
 
                   <div className="card-body">
                     <h5
@@ -593,13 +748,8 @@ const User_BetMarket = () => {
                               }}
                             >
                               {user_LiveBet.length > 0 ? (
-                                <div
-                                  style={{
-                                    maxHeight: "300px", // Set the height of the scrollable area
-                                    overflowY: "auto", // Enable vertical scroll when content exceeds
-                                  }}
-                                >
-                                  {user_LiveBet.map((data) => (
+                                <div>
+                                  {user_LiveBet.slice(0, 5).map((data) => (
                                     <div
                                       className="row text-center align-items-center"
                                       style={{
