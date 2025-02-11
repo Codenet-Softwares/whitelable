@@ -533,6 +533,7 @@ const checkSubAdminForUsers = async (subAdminId, userDetails) => {
 export const userLiveBet = async (req, res) => {
   try {
     const { marketId } = req.body;
+    const { page = 1, pageSize = 10, search = '' } = req.query;
 
     const admin = req.user;
     const adminId = admin.adminId;
@@ -549,7 +550,7 @@ export const userLiveBet = async (req, res) => {
       {
         headers: {
           Authorization: `Bearer ${token}`,
-        },
+        }
       }
     );
 
@@ -575,7 +576,7 @@ export const userLiveBet = async (req, res) => {
       );
     }
 
-    const users = data
+    let users = data
       .filter((bet) => connectedUsers.includes(bet.userName))
       .map((bet) => ({
         userName: bet.userName,
@@ -589,13 +590,31 @@ export const userLiveBet = async (req, res) => {
         type: bet.type,
       }));
 
+      if (search) {
+        users = users.filter((user) =>
+          user.userName.toLowerCase().includes(search.toLowerCase())
+        );
+      }
+
       if (users.length === 0) {
         return res
           .status(statusCode.success)
           .send(apiResponseSuccess([], true, statusCode.success, "No bets found"));
       }
 
-    return res.status(statusCode.success).send(apiResponseSuccess(users, true, statusCode.success, "Success"));
+      const offset = (page - 1) * pageSize;
+      const getData = users.slice(offset, offset + pageSize);
+      const totalItems = users.length;
+      const totalPages = Math.ceil(totalItems / pageSize);
+  
+      const paginationData = {
+        page : parseInt(page),
+        pageSize : parseInt(pageSize),
+        totalPages,
+        totalItems,
+      };
+
+    return res.status(statusCode.success).send(apiResponseSuccess(getData, true, statusCode.success, "Success", paginationData));
 
   } catch (error) {
     console.error("Error:", error);
