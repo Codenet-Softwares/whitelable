@@ -79,16 +79,24 @@ const AccountLandingModal = () => {
 
   useEffect(() => {
     getAll_userProfileStatement();
-    getGameForBetHistory();
-  }, [userName]);
+    if (state.toggle === 4) {
+      getGameForBetHistory();
+    }
+  }, [userName, state.toggle]);
 
   useEffect(() => {
-    getAll_transactionView();
-    getActivityLog();
-    if (betHistoryData.SelectedGameId === "lottery") {
-      getHistoryForLotteryBetHistory();
-    } else {
-      getHistoryForBetHistory();
+    if (state.toggle === 1) {
+      getAll_transactionView();
+    }
+    if (state.toggle === 2) {
+      getActivityLog();
+    }
+    if (state.toggle === 4) {
+      if (betHistoryData.SelectedGameId === "lottery") {
+        getHistoryForLotteryBetHistory();
+      } else {
+        getHistoryForBetHistory();
+      }
     }
   }, [
     userName,
@@ -104,10 +112,13 @@ const AccountLandingModal = () => {
     state.dataSource,
     betHistoryData.dataSource,
     betHistoryData.dataType,
+    state.toggle
   ]);
 
   useEffect(() => {
-    getProfitLossGameWise();
+    if (state.toggle === 5) {
+      getProfitLossGameWise();
+    }
   }, [
     profitLossData.startDate,
     profitLossData.endDate,
@@ -115,14 +126,17 @@ const AccountLandingModal = () => {
     profitLossData.itemPerPage,
     // profitLossData.searchItem,
     profitLossData.dataSource,
+    state.toggle
   ]);
 
   // Debounce for search
   useEffect(() => {
-    let timer = setTimeout(() => {
-      getProfitLossGameWise();
-    }, 300);
-    return () => clearTimeout(timer);
+    if (state.toggle === 5) {
+      let timer = setTimeout(() => {
+        getProfitLossGameWise();
+      }, 300);
+      return () => clearTimeout(timer);
+    }
   }, [profitLossData.searchItem]);
 
   async function getAll_userProfileStatement() {
@@ -169,10 +183,10 @@ const AccountLandingModal = () => {
   async function getGameForBetHistory() {
     try {
       const response = await getGameNames();
-  
+
       // Validate response and fallback if data is null
       const gameList = response?.data || []; // Fallback to an empty array if data is null
-  
+
       // Update state with validated data
       SetBetHistoryData((betHistoryData) => ({
         ...betHistoryData,
@@ -180,7 +194,7 @@ const AccountLandingModal = () => {
       }));
     } catch (error) {
       console.error("Error fetching game names:", error);
-  
+
       // Handle the error by setting a default value
       SetBetHistoryData((betHistoryData) => ({
         ...betHistoryData,
@@ -188,7 +202,7 @@ const AccountLandingModal = () => {
       }));
     }
   }
-  
+
   // For Bet History Data to show
   async function getHistoryForBetHistory() {
     const response = await getBetHistory({

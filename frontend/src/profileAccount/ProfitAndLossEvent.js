@@ -10,9 +10,14 @@ const ProfitAndLossEvent = ({
   currentPage,
   SetToggle,
   totalItems,
+  handlePageChange,
+  gameId,
+  getProfitLossEventWise,
+  profitLossEventData
 }) => {
   const startIndex = Math.min((data.currentPage - 1) * 10 + 1);
   const endIndex = Math.min(data.currentPage * 10, data.totalData);
+  const [renderApi, setRenderApi] = useState(null);
 
   const handelGotoRunnerWiseProfitLoss = (marketId, componentName) => {
     SetComponent(componentName);
@@ -33,6 +38,27 @@ const ProfitAndLossEvent = ({
       searchItem: e.target.value,
     }));
   };
+
+  useEffect(() => {
+    let timer = setTimeout(() => {
+      getProfitLossEventWise(gameId, "ProfitAndLossEvent", profitLossEventData.searchItem);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [profitLossEventData.searchItem]);
+
+  const handlePageChangeProfitAndLossLEvent = async (page) => {
+    handlePageChange(page);
+    let flag = Math.random()
+    setRenderApi(flag);
+  }
+
+
+  useEffect(() => {
+    if (renderApi !== null) {
+      getProfitLossEventWise(gameId, "ProfitAndLossEvent");
+    }
+  }, [renderApi]);
+
 
   return (
     <>
@@ -133,20 +159,18 @@ const ProfitAndLossEvent = ({
                               </td>
                               <td>{data?.commission || "NDS"}</td>
                               <td
-                                className={`fw-bold ${
-                                  data?.totalProfitLoss > 0
-                                    ? "text-success"
-                                    : "text-danger"
-                                }`}
+                                className={`fw-bold ${data?.totalProfitLoss > 0
+                                  ? "text-success"
+                                  : "text-danger"
+                                  }`}
                               >
                                 {data?.totalProfitLoss || "NDS"}
                               </td>
                               <td
-                                className={`fw-bold ${
-                                  data?.totalProfitLoss > 0
-                                    ? "text-success"
-                                    : "text-danger"
-                                }`}
+                                className={`fw-bold ${data?.totalProfitLoss > 0
+                                  ? "text-success"
+                                  : "text-danger"
+                                  }`}
                               >
                                 {data?.totalProfitLoss}
                               </td>
@@ -177,7 +201,9 @@ const ProfitAndLossEvent = ({
               <Pagination
                 currentPage={data.currentPage}
                 totalPages={data.totalPages}
-                handlePageChange={data.handlePageChange}
+                handlePageChange={(page) => {
+                  handlePageChangeProfitAndLossLEvent(page);
+                }}
                 startIndex={startIndex}
                 endIndex={endIndex}
                 totalData={data.totalData}
