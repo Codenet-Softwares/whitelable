@@ -5745,7 +5745,7 @@ font-size: large;
   -moz-border-radius: 15px;
   border-radius: 15px;
   text-align: center;
-  border: 2px solid #1E2761;
+  /* border: 2px solid #1E2761; */
   border-radius: 10px;
 }
 
