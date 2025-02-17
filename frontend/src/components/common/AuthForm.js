@@ -191,49 +191,44 @@ const Authform = ({ purpose, authFormApi }) => {
                 </div>
                 <div className="modal-body">
                   <form>
-                    <div className="">
+                    <div className="mb-3">
                       <input
                         type="text"
                         className={`form-control ${errors.userName && touched.userName ? "border-danger" : ""}`}
                         placeholder="Enter Username"
                         name="userName"
-                        // style={{ border: '1px solid black' }}
                         value={values.userName}
                         onChange={handleChange}
                       />
-                      <p>
-                        {errors.userName && touched.userName ? (
-                          <span className="text-center fw-bold text-danger">
-                            {errors.userName}
-                          </span>
-                        ) : null}
+                      <p className="text-danger text-center fw-bold mb-0" style={{ minHeight: "20px" }}>
+                        {errors.userName && touched.userName ? errors.userName : "\u00A0"}
                       </p>
                     </div>
-                    <div className="position-relative">
+                    <div className="mb-3 position-relative">
                       <input
                         type={showPassword ? "text" : "password"}
                         className={`form-control ${errors.password && touched.password ? "border-danger" : ""}`}
                         placeholder="Enter Password"
                         name="password"
-                        // style={{ border: '1px solid black' }}
                         value={values.password}
                         onChange={handleChange}
+                        style={{ paddingRight: "2.5rem" }}
                       />
-                          {!errors.password || !touched.password ? (
                       <i
-                        className={`bi ${
-                          showPassword ? "bi-eye-slash" : "bi-eye"
-                        } position-absolute top-50 end-0 translate-middle-y me-3`}
-                        style={{ cursor: "pointer" }}
+                        className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"} position-absolute`}
+                        style={{
+                          right: "10px",
+                          top: "25px",
+                          transform: "translateY(-50%)",
+                          cursor: "pointer",
+                          fontSize: "1.2rem",
+
+                        }}
                         onClick={() => setShowPassword(!showPassword)}
-                      ></i>    ) : null}
-                      <span>
-                        {errors.password && touched.password ? (
-                          <p className="text-center fw-bold text-danger">
-                            {errors.password}
-                          </p>
-                        ) : null}
-                      </span>
+                      ></i>
+                      <p className="text-danger text-center fw-bold mb-0" style={{ minHeight: "20px" }}>
+                        {errors.password && touched.password ? errors.password : "\u00A0"}
+                      </p>
                     </div>
                     {purpose === "create" && (
                       <div className="">
