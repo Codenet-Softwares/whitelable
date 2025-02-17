@@ -58,6 +58,7 @@ const ProfitAndLoss = ({
   const [toggle, SetToggle] = useState(true);
   const [component, SetComponent] = useState(null);
   const [marketId, SetMarketId] = useState(null);
+  const [gameId, SetGameId] = useState(null);
 
   async function getProfitLossRunnerWise() {
     SetToggle(false);
@@ -84,22 +85,17 @@ const ProfitAndLoss = ({
     profitLossRunnerData.searchItem,
   ]);
 
-  useEffect(() => {
-    if (profitLossLotteryEventData.currentPage > 1) {
-      getLotteryProfitLossEventWise()
-      SetComponent("ProfitAndLossLotteryEvent")
-    }
-  }, [profitLossLotteryEventData.currentPage]);
-
-  async function getProfitLossEventWise(gameId, componentName) {
+  async function getProfitLossEventWise(gameId, componentName, searchName) {
     // if useEffcet  added give condition toggle must be false for end point to hit
     SetToggle(false);
     SetComponent(componentName);
+    SetGameId(gameId)
     const response = await getProfitLossEvent({
       userName: UserName,
       gameId: gameId,
-      // limit: profitLossEventData.itemPerPage,  //Work pending by serverSide
-      searchName: profitLossEventData.searchItem,
+      pageNumber: profitLossEventData.currentPage,
+      dataLimit: profitLossEventData.itemPerPage,
+      searchName: searchName,
     });
     SetProfitLossEventData((prevState) => ({
       ...prevState,
@@ -109,16 +105,16 @@ const ProfitAndLoss = ({
     }));
   }
 
-  async function getLotteryProfitLossEventWise(gameId, componentName) {
-    // if useEffcet  added give condition toggle must be false for end point to hit
+  async function getLotteryProfitLossEventWise(gameId, componentName, searchName) {
     SetToggle(false);
     SetComponent(componentName);
+    SetGameId(gameId)
     const response = await getlotteryProfitLossEvent({
       userName: UserName,
       // gameId: gameId,
       pageNumber: profitLossLotteryEventData.currentPage,
       dataLimit: profitLossLotteryEventData.itemPerPage,
-      searchName: profitLossLotteryEventData.searchItem,
+      searchName: searchName,
     });
     SetProfitLossLotteryEventData((prevState) => ({
       ...prevState,
@@ -136,6 +132,13 @@ const ProfitAndLoss = ({
     }));
   };
 
+  const handelProfitLossEventDataPage = (page) => {
+    SetProfitLossEventData((prevState) => ({
+      ...prevState,
+      currentPage: page,
+    }));
+  };
+
   let componentToRender;
   if (component === "ProfitAndLossEvent") {
     componentToRender = (
@@ -147,6 +150,10 @@ const ProfitAndLoss = ({
         currentPage={profitLossEventData.currentPage}
         SetToggle={SetToggle}
         totalItems={profitLossEventData.totalData}
+        handlePageChange={(page) => handelProfitLossEventDataPage(page)}
+        gameId={gameId}
+        getProfitLossEventWise={getProfitLossEventWise}
+        profitLossEventData={profitLossEventData}
       />
     );
   } else if (component === "ProfitAndLossRunner") {
@@ -172,6 +179,9 @@ const ProfitAndLoss = ({
         totalItems={profitLossLotteryEventData.totalData}
         UserName={UserName}
         handlePageChange={(page) => handelProfitLossLotteryEventDataPage(page)}
+        gameId={gameId}
+        getLotteryProfitLossEventWise={getLotteryProfitLossEventWise}
+        profitLossLotteryEventData={profitLossLotteryEventData}
       />
     )
   } else {
