@@ -227,6 +227,8 @@ const SubAdminView = () => {
   return (
     <div className="main_content_iner mt-5 p-5">
       <div className="container-fluid p-0">
+        <div className="card">
+
         <div className="row justify-content-center">
           <div className="col-lg-12">
             <div className="white_card card_height_100 mb_30">
@@ -289,7 +291,7 @@ const SubAdminView = () => {
                           <thead
                             style={{
                               height: "10px",
-                              backgroundColor: "#006699",
+                              backgroundColor: "#1E2761",
                               color: "white",
                               fontWeight: "bold",
                             }}
@@ -436,6 +438,7 @@ const SubAdminView = () => {
             </div>
           </div>
         </div>
+        </div>
         {subAdminData?.userList.length > 0 && (
           <Pagination
             currentPage={subAdminData.currentPage}
@@ -461,7 +464,7 @@ const SubAdminView = () => {
             <div className="modal-dialog">
               <div className="modal-content">
                 <div className="modal-header">
-                  <h5 className="modal-title">Reset Password</h5>
+                  <h5 className="modal-title fw-bold text-uppercase text-dark">Reset Password</h5>
                   <button type="button" className="close" onClick={closeModal}>
                     &times;
                   </button>
