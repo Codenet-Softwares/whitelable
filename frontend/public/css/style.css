@@ -1162,7 +1162,7 @@ table.dataTable tbody td {
   font-size: 13px;
   width: 100%;
   display: block;
-  margin-bottom: 21px;
+  /* margin-bottom: 21px; */
   font-weight: 300;
   border-radius: 3px;
 }
@@ -1827,7 +1827,7 @@ th:focus {
 .cs_modal .modal-body p {
   font-size: 16px;
   font-weight: 500;
-  margin-top: 25px;
+  /* margin-top: 25px; */
   color: #707070;
   text-align: center;
 }
@@ -5745,7 +5745,7 @@ font-size: large;
   -moz-border-radius: 15px;
   border-radius: 15px;
   text-align: center;
-  border: 2px solid #1E2761;
+  /* border: 2px solid #1E2761; */
   border-radius: 10px;
 }
 
