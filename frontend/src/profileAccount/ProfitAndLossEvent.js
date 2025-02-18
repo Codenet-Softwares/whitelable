@@ -23,13 +23,13 @@ const ProfitAndLossEvent = ({
     SetComponent(componentName);
     SetMarketId(marketId);
   };
-  const handelItemPerPage = (event) => {
+  const handleItemPerPage = (event) => {
+    console.log("profitLossEventData", profitLossEventData.itemPerPage)
     SetProfitLossEventData((prevState) => ({
       ...prevState,
       itemPerPage: Number(event.target.value),
-      currentPage: Number(currentPage),
+      currentPage: Number(prevState.currentPage),
     }));
-    toast.error("Work Pending From ServerSide");
   };
 
   const handleSearch = (e) => {
@@ -59,6 +59,10 @@ const ProfitAndLossEvent = ({
     }
   }, [renderApi]);
 
+  useEffect(() => {
+    getProfitLossEventWise(gameId, "ProfitAndLossEvent");
+  }, [profitLossEventData.itemPerPage]);
+
 
   return (
     <>
@@ -83,11 +87,10 @@ const ProfitAndLossEvent = ({
         <div className="m-1 d-flex justify-content-between align-items-center">
           <select
             className="form-select w-auto m-1"
-            onChange={handelItemPerPage}
+            onChange={(e) => handleItemPerPage(e)}
+            defaultValue="10"
           >
-            <option value="10" selected>
-              10 Entries
-            </option>
+            <option value="10">10 Entries</option>
             <option value="25">25 Entries</option>
             <option value="50">50 Entries</option>
             <option value="100">100 Entries</option>
