@@ -11,12 +11,15 @@ import { resetPasswordSuperAdmin } from "../Utils/service/apiService";
 
 const NavTop = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formValues, setFormValues] = useState({
     oldPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
-  const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -26,7 +29,7 @@ const NavTop = () => {
     }));
     setErrors((prevErrors) => ({
       ...prevErrors,
-      [id]: "", 
+      [id]: "",
     }));
   };
 
@@ -70,61 +73,37 @@ const NavTop = () => {
     setIsModalOpen(true);
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setFormValues({ oldPassword: "", newPassword: "", confirmPassword: "" });
-    setErrors({}); 
-  };
-  
-
-  // const handleResetPassword = async () => {
-  //   const { oldPassword, newPassword, confirmPassword } = formValues;
-
-  //   if (newPassword !== confirmPassword) {
-  //     alert("New Password and Confirm Password do not match!");
-  //     return;
-  //   }
-
-  //   if (oldPassword === newPassword) {
-  //     alert("New Password cannot be the same as the Old Password!");
-  //     return;
-  //   }
-
-  //   const payload = {
-  //     userName: store?.admin?.adminName,
-  //     oldPassword,
-  //     newPassword,
-  //   };
-
-  //   try {
-  //     const response = await resetPasswordSuperAdmin(payload);
-  //     if (response.successCode === 200) {
-  //       closeModal();
-  //     }
-  //   } catch (error) {
-  //     console.error("Error resetting password:", error);
-  //   }
-  // };
-  const handleResetPassword = async () => {
-    const { oldPassword, newPassword, confirmPassword } = formValues;
+ 
+  // For Reset Password Validation start
+  const validateForm = () => {
     let validationErrors = {};
+    const { oldPassword, newPassword, confirmPassword } = formValues;
 
-    if (!oldPassword) validationErrors.oldPassword = "Old Password Is Required";
-    if (!newPassword) validationErrors.newPassword = "New Password is required";
-    if (!confirmPassword)
-      validationErrors.confirmPassword = "Confirm Password is required";
-    if (newPassword !== confirmPassword)
-      validationErrors.confirmPassword = "Passwords do not match";
-    if (oldPassword === newPassword)
+    if (!oldPassword) validationErrors.oldPassword = "Old password is required";
+
+    if (!newPassword) {
+      validationErrors.newPassword = "New password is required";
+    } else if (newPassword.length < 6) {
+      validationErrors.newPassword = "Password must be at least 6 characters";
+    } else if (newPassword === oldPassword) {
       validationErrors.newPassword =
-        "New Password cannot be the same as Old Password";
-
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
+        "New password cannot be the same as old password";
     }
 
-    setErrors({});
+    if (!confirmPassword) {
+      validationErrors.confirmPassword = "Confirm password is required";
+    } else if (confirmPassword !== newPassword) {
+      validationErrors.confirmPassword = "Passwords do not match";
+    }
+
+    setErrors(validationErrors);
+    return Object.keys(validationErrors).length === 0;
+  };
+  // For Reset Password Validation End
+
+  const handleResetPassword = async () => {
+    const { oldPassword, newPassword } = formValues;
+    if (!validateForm()) return;
 
     const payload = {
       userName: store?.admin?.adminName,
@@ -135,12 +114,18 @@ const NavTop = () => {
     try {
       const response = await resetPasswordSuperAdmin(payload);
       if (response.successCode === 200) {
-        toast.success("Password reset successfully!");
+        // alert("Password reset successfully!");
         closeModal();
       }
     } catch (error) {
-      toast.error("Failed to reset password. Please try again.");
+      console.error("Error resetting password:", error);
+      // alert("Failed to reset password. Please try again.");
     }
+  };
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setErrors({});
+    setFormValues({ oldPassword: "", newPassword: "", confirmPassword: "" });
   };
 
   return (
@@ -222,7 +207,7 @@ const NavTop = () => {
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
-                <h4 className="modal-title fw-bold">Reset Password</h4>
+                <h4 className="modal-title fw-bold text-uppercase">Reset Password</h4>
                 <button type="button" className="close" onClick={closeModal}>
                   &times;
                 </button>
@@ -231,41 +216,81 @@ const NavTop = () => {
                 <div className="form-group">
                   <label htmlFor="oldPassword">Old Password</label>
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     id="oldPassword"
-                    className="form-control"
+                    className={`form-control ${errors.oldPassword ? "border-danger" : ""}`}
                     value={formValues.oldPassword}
                     onChange={handleChange}
+                    required
                   />
-                  <p className="text-danger fw-bold ">
+                  <i
+                    className={`bi ${
+                      showPassword ? "bi-eye" : "bi-eye-slash"
+                    } position-absolute`}
+                    style={{
+                      right: "30px",
+                      top: "55px",
+                      transform: "translateY(-50%)",
+                      cursor: "pointer",
+                      fontSize: "1.2rem",
+                    }}
+                    onClick={() => setShowPassword(!showPassword)}
+                  ></i>
+                  <p className="text-danger mb-0 fw-bold">
                     {errors.oldPassword || "\u00A0"}
                   </p>
                 </div>
-
-                <div className="form-group">
-                  <label htmlFor="newPassword ">New Password</label>
+                <div className="form-group position-relative">
+                  <label htmlFor="newPassword">New Password</label>
                   <input
-                    type="password"
+                    type={showNewPassword ? "text" : "password"}
                     id="newPassword"
-                    className="form-control"
+                    className={`form-control ${errors.newPassword ? "border-danger" : ""}`}
                     value={formValues.newPassword}
                     onChange={handleChange}
+                    required
                   />
-                  <p className="text-danger fw-bold ">
+                  <i
+                    className={`bi ${
+                      showNewPassword ? "bi-eye" : "bi-eye-slash"
+                    } position-absolute`}
+                    style={{
+                      right: "15px",
+                      top: "40px",
+                      transform: "translateY(-50%)",
+                      cursor: "pointer",
+                      fontSize: "1.2rem",
+                    }}
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                  ></i>
+                  <p className="text-danger mb-0 fw-bold">
                     {errors.newPassword || "\u00A0"}
                   </p>
                 </div>
-
-                <div className="form-group">
+                <div className="form-group position-relative">
                   <label htmlFor="confirmPassword">Confirm Password</label>
                   <input
-                    type="password"
+                    type={showConfirmPassword ? "text" : "password"}
                     id="confirmPassword"
-                    className="form-control"
+                    className={`form-control ${errors.confirmPassword ? "border-danger" : ""}`}
                     value={formValues.confirmPassword}
                     onChange={handleChange}
+                    required
                   />
-                  <p className="text-danger fw-bold ">
+                  <i
+                    className={`bi ${
+                      showConfirmPassword ? "bi-eye" : "bi-eye-slash"
+                    } position-absolute`}
+                    style={{
+                      right: "15px",
+                      top: "40px",
+                      transform: "translateY(-50%)",
+                      cursor: "pointer",
+                      fontSize: "1.2rem",
+                    }}
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  ></i>
+                  <p className="text-danger mb-0 fw-bold">
                     {errors.confirmPassword || "\u00A0"}
                   </p>
                 </div>
