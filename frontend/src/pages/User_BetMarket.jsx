@@ -23,6 +23,7 @@ import Picture from "../Assets/Picture.webp";
 import "./DemoMarket_Analysis.css";
 import ReusableModal from "../components/common/ReusableModal";
 import HierarchyModal from "./HierarchyModal";
+import LiveBetModal from "../modal/LiveBetModal";
 
 const User_BetMarket = () => {
   const { dispatch, store } = useAppContext();
@@ -32,19 +33,32 @@ const User_BetMarket = () => {
 
   const [user_LiveBet, setUser_LiveBet] = useState([]);
 
-  const { marketId, userName } = useParams();
+  const { marketId } = useParams();
+  console.log("marketId from params line 39", marketId);
   const [isModalOpen, setModalOpen] = useState(false);
   const [nestedModalOpen, setNestedModalOpen] = useState(false);
   const [hierarchyData, setHierarchyData] = useState([]);
   const [userBookModalOpen, setUserBookModalOpen] = useState(false);
   const [betBookData, setBetBookData] = useState([]);
   const [bodyData, setBodyData] = useState(get_betBook());
-  const [liveToggle, setLiveToggle] = useState(false);
+
   const [selectedUser, setSelectedUser] = useState(null);
   const [isHirerchyModalOpen, setHirerchyModalOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [liveToggle, setLiveToggle] = useState(false);
+  const [paginationData, setPaginationData] = useState({
+   currentPage: 1,
+    totalPages: 1,
+    totalData: 0,
+    totalEntries: 10, // Number of entries per page
+  });
+  console.log("line55", user_LiveBet);
+
+  const [search, setSearch] = useState("");
   const handleShow = () => setShowModal(true);
   const handleClose = () => setShowModal(false);
+
+
   // useEffect(()=>{fetch_BetBookData()},[bodyData])
   const handleUsernameClick = (userName) => {
     console.log("onclick", userName);
@@ -121,48 +135,52 @@ const User_BetMarket = () => {
       getView_LiveBet();
     }
   }, [liveToggle]);
-  async function getView_LiveBet(pageNumber = 1, totalEntries = 10, search = "") {
-    try {
-      const response = await getMarket_LiveBet({
-        marketId: marketId,
-        adminId: store?.admin?.id,
-        role: store?.admin?.roles?.[0]?.role,
-        pageNumber,
-        totalEntries,
-        search,
-      });
+  async function getView_LiveBet() {
+    const response = await getMarket_LiveBet(
+ 
+      { 
+        marketId,
+    
+      }, 
+   
+    );
   
-      if (response?.data) {
-        setUser_LiveBet(response.data);
-      } else {
-        setUser_LiveBet({ currentPage: pageNumber, totalEntries, totalData: 0, data: [] });
-      }
-    } catch (error) {
-      toast.error(customErrorHandler(error));
+    if (response?.data) {
+      setUser_LiveBet(response.data|| []); // Ensure data is always an array
+  
+      // Update pagination state based on API response
+      setPaginationData(prev => ({
+        currentPage: response.data.pagination?.page || 1,
+        pageSize: response.data.pagination?.pageSize || 10,
+        totalPages: response.data.pagination?.totalPages || 1,
+        totalItems: response.data.pagination?.totalItems || 0,
+      }));
+    } else {
+      // Default fallback if no pagination data
+      setPaginationData(prev => ({
+        ...prev,
+        currentPage: 1,
+        totalPages: 1,
+        totalItems: 0,
+      }));
     }
   }
-  
 
   let startIndex = Math.min(
-    (Number(user_LiveBet.currentPage) - 1) * Number(user_LiveBet.totalEntries) + 1
+    (Number(user_LiveBet.currentPage) - 1) * Number(user_LiveBet.totalEntries) +
+      1
   );
   let endIndex = Math.min(
     Number(user_LiveBet.currentPage) * Number(user_LiveBet.totalEntries),
     Number(user_LiveBet.totalData)
   );
 
-
   const handlePageChange = (page) => {
-    setUser_LiveBet((prev) => ({
-      ...prev,
-      currentPage: page,
-    }));
-    
-    // Pass `page` to `getView_LiveBet` to fetch correct data
-    getView_LiveBet(page, user_LiveBet.totalEntries, "");
-  };
-  
+ 
 
+
+
+  };
 
   async function getView_User_BetMarket() {
     try {
@@ -416,59 +434,62 @@ const User_BetMarket = () => {
                   </div>
                 </div>
                 <div className="card mt-4">
-                    <div className="container-fluid">
-                      <div
-                        className="row align-items-center rounded-top"
-                        style={{ background: "#1E2761" }}
-                      >
-                        <div className="col-auto d-flex align-items-center">
-                          <h4 className="card-header text-white fw-bold py-3 mb-0 bg-transparent me-2 text-uppercase">
-                            Live Bet
-                          </h4>
-                          <div className="form-check form-switch mt-1">
-                            <input
-                              className="form-check-input"
-                              value={liveToggle}
-                              type="checkbox"
-                              id="liveBetToggle1"
-                              style={{ transform: "scale(1.5)" }}
-                              onClick={handleLiveToggle}
-                            />
-                          </div>
+                  <div className="container-fluid">
+                    <div
+                      className="row align-items-center rounded-top"
+                      style={{ background: "#1E2761" }}
+                    >
+                      <div className="col-auto d-flex align-items-center">
+                        <h4 className="card-header text-white fw-bold py-3 mb-0 bg-transparent me-2 text-uppercase">
+                          Live Bet
+                        </h4>
+                        <div className="form-check form-switch mt-1">
+                          <input
+                            className="form-check-input"
+                            value={liveToggle}
+                            type="checkbox"
+                            id="liveBetToggle1"
+                            style={{ transform: "scale(1.5)" }}
+                            onClick={handleLiveToggle}
+                          />
                         </div>
+                      </div>
 
-                        <div className="col-auto d-flex align-items-center">
-                          <h4 className="card-header text-white fw-bold py-3 mb-0 bg-transparent me-2 text-uppercase">
-                            Partnership Book
-                          </h4>
-                          <div className="form-check form-switch mt-1">
-                            <input
-                              className="form-check-input"
-                              type="checkbox"
-                              id="liveBetToggle2"
-                              style={{ transform: "scale(1.5)" }}
-                            />
-                          </div>
+                      <div className="col-auto d-flex align-items-center">
+                        <h4 className="card-header text-white fw-bold py-3 mb-0 bg-transparent me-2 text-uppercase">
+                          Partnership Book
+                        </h4>
+                        <div className="form-check form-switch mt-1">
+                          <input
+                            className="form-check-input"
+                            type="checkbox"
+                            id="liveBetToggle2"
+                            style={{ transform: "scale(1.5)" }}
+                          />
                         </div>
+                      </div>
 
-                        <div className="col-auto ms-auto">
+                      <div className="col-auto ms-auto">
+                       
+                        {user_LiveBet.length > 5 && (
                           <h4
-                            className={`card-header text-white fw-bold py-3 mb-0 bg-transparent text-uppercase ${
-                              !liveToggle ? "disabled" : ""
-                            }`}
-                            style={{
-                              cursor: liveToggle ? "pointer" : "not-allowed",
-                              opacity: liveToggle ? 1 : 0.5,
-                            }}
-                            onClick={liveToggle ? handleShow : null}
+                            className="card-header text-white fw-bold py-3 mb-0 bg-transparent text-uppercase"
+                            style={{ cursor: "pointer" }}
+                            onClick={() => setShowModal(true)}
                           >
                             View More...
                           </h4>
-                        </div>
+                        )}
                       </div>
+                      <LiveBetModal
+                        show={showModal}
+                        handleClose={() => setShowModal(false)}
+                        user_LiveBet={user_LiveBet}
+                      />
                     </div>
+                  </div>
 
-                    <div>
+                  {/* <div>
                       <Modal
                         show={showModal}
                         onHide={handleClose}
@@ -503,10 +524,7 @@ const User_BetMarket = () => {
                                   <form Active="#">
                                     <div className="search_field">
                                       <input
-                                        // value={subAdminData.name}
-                                        // onChange={(e) => {
-                                        //   handleChange("name", e.target.value);
-                                        // }}
+                                    
                                         type="text"
                                         placeholder="Search content here..."
                                       />
@@ -521,7 +539,7 @@ const User_BetMarket = () => {
                             </div>
                             {liveToggle ? (
                               <>
-                                {/* Table Headers */}
+                            
                                 <div className="col-12">
                                   <div className="row text-center">
                                     <div className="col-2">
@@ -551,7 +569,6 @@ const User_BetMarket = () => {
                                   </div>
                                 </div>
 
-                                {/* Table Data */}
                                 <div
                                   style={{
                                     border: "1px solid #ddd",
@@ -571,7 +588,7 @@ const User_BetMarket = () => {
                                           }}
                                           key={data.id}
                                         >
-                                          {/* Market Name & Type */}
+                                    
                                           <div className="col-2 d-flex align-items-center justify-content-center">
                                             <button
                                               style={{
@@ -604,7 +621,7 @@ const User_BetMarket = () => {
                                             </div>
                                           </div>
 
-                                          {/* Odds */}
+                                        
                                           <div
                                             className="col-2 fw-bold"
                                             style={{ fontSize: "14px" }}
@@ -618,7 +635,7 @@ const User_BetMarket = () => {
                                             {data.rate}
                                           </div>
 
-                                          {/* Stake */}
+                                      
                                           <div
                                             className="col-2 fw-bold"
                                             style={{ fontSize: "14px" }}
@@ -639,7 +656,7 @@ const User_BetMarket = () => {
                                             {data.type}
                                           </div>
 
-                                          {/* Username */}
+                                        
                                           <div
                                             className="col-2 fw-bold"
                                             style={{
@@ -649,9 +666,7 @@ const User_BetMarket = () => {
                                                   ? "#007bff"
                                                   : "#FFB6C1",
                                             }}
-                                            // onClick={() =>
-                                            //   handleUsernameClick(data.userName)
-                                            // }
+                                          
                                           >
                                             {data.userName}
                                           </div>
@@ -704,8 +719,7 @@ const User_BetMarket = () => {
                           </Button>
                         </Modal.Footer>
                       </Modal>
-                    </div>
-                 
+                    </div> */}
 
                   <div className="card-body">
                     <h5
