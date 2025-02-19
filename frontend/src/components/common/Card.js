@@ -33,7 +33,6 @@ const Card = ({
   setIsLoading,
   exposure,
 }) => {
-
   const navigate = useNavigate();
   const { dispatch, store } = useAppContext();
   const [transactionModalShow, setTransactionModalShow] = useState(false);
@@ -41,12 +40,16 @@ const Card = ({
   const [differentiate, setDifferentiate] = useState("");
   const [adminIdForStatus, setAdminIdForStatus] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [clientBalance, setClientBalance] = useState(null)
+  const [clientBalance, setClientBalance] = useState(null);
 
-  const handelOpenTransactionModal = (boolParam, differentiateParam,balance) => {
+  const handelOpenTransactionModal = (
+    boolParam,
+    differentiateParam,
+    balance
+  ) => {
     setTransactionModalShow(boolParam);
     setDifferentiate(differentiateParam);
-    setClientBalance(balance)
+    setClientBalance(balance);
   };
 
   const handleClose = (adminId) => setShowModal(false);
@@ -56,8 +59,7 @@ const Card = ({
     setAdminIdForStatus(adminId);
   };
 
-  const handleStatusChange = (status) => {
-  };
+  const handleStatusChange = (status) => { };
 
   async function handleDelete() {
     const userConfirmed = window.confirm(
@@ -118,57 +120,39 @@ const Card = ({
               className="border border-1 text-center rounded-pill fw-bold p-1"
               // data-bs-toggle="modal"
               // data-bs-target={`#hierarchyview-${userId}`}
-              style={{ cursor: "auto", background:"#F5C93A", width:"90px"}}
+              style={{ cursor: "auto", background: "#F5C93A", width: "90px" }}
             >
               {role}
             </button>
 
-            <p className="fw-bold text-dark"
+            <p
+              className="fw-bold text-dark"
               onClick={() => {
                 takeMeToHierarchy(userName);
               }}
-              style={{ cursor: "pointer"}}
+              style={{ cursor: "pointer" }}
             >
               <b>{userName}</b>
             </p>
           </th>
 
           <td scope="row" className="fs-6 text-center">
-            {creditRefLength > 0 ? (
-              //Need to hit Txn Modal
-              <span
-                onClick={() =>
-                  handelOpenTransactionModal(true, "creditRefProvider")
-                }
-              >
-                {creditRef}
-              </span>
-            ) : (
-              //Need to hit Txn Modal
-              <span
-                onClick={() =>
-                  handelOpenTransactionModal(true, "creditRefProvider")
-                }
-              >
-                0
-              </span>
-            )}
+            {creditRefLength > 0 ? <span>{creditRef}</span> : <span>0</span>}
             {callingParent === "Wallet" ? (
               <span className="">
                 <button
-                  className={`border border-0 bg-white btn ${
-                    ["suspended"].includes(store?.admin?.status)
+                  className={`border border-0 bg-white btn ${["suspended"].includes(store?.admin?.status)
                       ? "disabled"
                       : store?.admin?.roles[0].permission.some(
-                          (role) => role === strings.creditRefEdit
-                        )
-                      ? ""
-                      : permissionObj.allAdmin.includes(
+                        (role) => role === strings.creditRefEdit
+                      )
+                        ? ""
+                        : permissionObj.allAdmin.includes(
                           store?.admin?.roles[0].role
                         )
-                      ? ""
-                      : "disabled"
-                  }`}
+                          ? ""
+                          : "disabled"
+                    }`}
                   aria-label="Close"
                   onClick={() =>
                     handelOpenTransactionModal(true, "creditRefProvider")
@@ -181,19 +165,18 @@ const Card = ({
 
             <span>
               <button
-                className={`border border-0 bg-white btn ${
-                  ["suspended"].includes(store?.admin?.status)
+                className={`border border-0 bg-white btn ${["suspended"].includes(store?.admin?.status)
                     ? "disabled"
                     : store?.admin?.roles[0].permission.some(
-                        (role) => role === strings.creditRefView
-                      )
-                    ? ""
-                    : permissionObj.allAdmin.includes(
+                      (role) => role === strings.creditRefView
+                    )
+                      ? ""
+                      : permissionObj.allAdmin.includes(
                         store?.admin?.roles[0].role
                       )
-                    ? ""
-                    : "disabled"
-                }`}
+                        ? ""
+                        : "disabled"
+                  }`}
                 onClick={() => handelOpenViewModal(true, "creditRefViewer")}
               >
                 <i class="fa-regular fa-eye" aria-label="Close"></i>
@@ -203,35 +186,26 @@ const Card = ({
 
           <td scope="row" className="fs-6 text-center">
             {partnershipLength > 0 ? (
-              <span
-              //Need to hit Txn Modal
-              >
-                {partnership}
-              </span>
+              <span>{partnership}</span>
             ) : (
-              <span
-              //Need to hit Txn Modal
-              >
-                0
-              </span>
+              <span>0</span>
             )}
 
             {callingParent === "Wallet" ? (
               <span className="">
                 <button
-                  className={`border border-0 bg-white btn ${
-                    ["suspended"].includes(store?.admin?.status)
+                  className={`border border-0 bg-white btn ${["suspended"].includes(store?.admin?.status)
                       ? "disabled"
                       : store?.admin?.roles[0].permission.some(
-                          (role) => role === strings.partnershipEdit
-                        )
-                      ? ""
-                      : permissionObj.allAdmin.includes(
+                        (role) => role === strings.partnershipEdit
+                      )
+                        ? ""
+                        : permissionObj.allAdmin.includes(
                           store?.admin?.roles[0].role
                         )
-                      ? ""
-                      : "disabled"
-                  }`}
+                          ? ""
+                          : "disabled"
+                    }`}
                 >
                   <i
                     className="fa-solid fa-pen-to-square"
@@ -246,19 +220,18 @@ const Card = ({
 
             <span>
               <button
-                className={`border border-0 bg-white btn ${
-                  ["suspended"].includes(store?.admin?.status)
+                className={`border border-0 bg-white btn ${["suspended"].includes(store?.admin?.status)
                     ? "disabled"
                     : store?.admin?.roles[0].permission.some(
-                        (role) => role === strings.partnershipEdit
-                      )
-                    ? ""
-                    : permissionObj.allAdmin.includes(
+                      (role) => role === strings.partnershipEdit
+                    )
+                      ? ""
+                      : permissionObj.allAdmin.includes(
                         store?.admin?.roles[0].role
                       )
-                    ? ""
-                    : "disabled"
-                }`}
+                        ? ""
+                        : "disabled"
+                  }`}
                 onClick={() => handelOpenViewModal(true, "partnershipViewer")}
               >
                 <i className="fa-regular fa-eye"></i>
@@ -270,29 +243,32 @@ const Card = ({
             {loadBalance}
           </td>
           <td scope="row" className="fs-6 text-center text-danger">
-          ({Number(exposure) % 1 === 0 ? Number(exposure) : Number(exposure).toFixed(2)})
+            (
+            {Number(exposure) % 1 === 0
+              ? Number(exposure)
+              : Number(exposure).toFixed(2)}
+            )
           </td>
           <td scope="row" className="fs-6 text-center">
             {balance}
           </td>
           <td
             scope="row"
-            className={`fs-6 text-center ${
-              loadBalance-creditRef < 0 ? "text-danger" : "text-dark"
-            }`}
+            className={`fs-6 text-center ${loadBalance - creditRef < 0 ? "text-danger" : "text-dark"
+              }`}
           >
-            {isNaN(creditRef-loadBalance) ? loadBalance : loadBalance-creditRef}
-       
+            {isNaN(creditRef - loadBalance)
+              ? loadBalance
+              : loadBalance - creditRef}
           </td>
           <td scope="row" className="fs-6 text-center">
             <p
-              className={`border border-1 w-75 text-center rounded-pill ${
-                Status === "Active"
+              className={`border border-1 w-75 text-center rounded-pill ${Status === "Active"
                   ? "bg-success"
                   : Status === "Suspended"
-                  ? "bg-danger"
-                  : "bg-secondary"
-              }`}
+                    ? "bg-danger"
+                    : "bg-secondary"
+                }`}
             >
               {Status}
             </p>
@@ -304,23 +280,27 @@ const Card = ({
                 <span
                   className="mx-1"
                   onClick={() =>
-                    handelOpenTransactionModal(true, "walletAmountProvider",balance)
+                    handelOpenTransactionModal(
+                      true,
+                      "walletAmountProvider",
+                      balance
+                    )
                   }
                 >
                   <button
                     className={`btn border border-1 rounded ${["suspended"].includes(store?.admin?.status)
-                      ? "disabled"
-                      : store?.admin?.roles[0].permission.some(
-                        (role) => role === strings.transferBalance
-                      )
-                        ? ""
-                        : permissionObj.allAdmin.includes(
-                          store?.admin?.roles[0].role
+                        ? "disabled"
+                        : store?.admin?.roles[0].permission.some(
+                          (role) => role === strings.transferBalance
                         )
                           ? ""
-                          : "disabled"
+                          : permissionObj.allAdmin.includes(
+                            store?.admin?.roles[0].role
+                          )
+                            ? ""
+                            : "disabled"
                       }`}
-                      style={{background:"#84B9DF"}}
+                    style={{ background: "#84B9DF" }}
                     title="Addmoney"
                   >
                     <i class="fa-solid fa-circle-dollar-to-slot"></i>
@@ -328,20 +308,19 @@ const Card = ({
                 </span>
                 <span className="mx-1">
                   <button
-                    className={`btn border border-2 rounded ${
-                      ["suspended"].includes(store?.admin?.status)
+                    className={`btn border border-2 rounded ${["suspended"].includes(store?.admin?.status)
                         ? "disabled"
                         : store?.admin?.roles[0].permission.some(
-                            (role) => role === strings.status
-                          )
-                        ? ""
-                        : permissionObj.allAdmin.includes(
-                          store?.admin?.roles[0].role
+                          (role) => role === strings.status
                         )
                           ? ""
-                          : "disabled"
+                          : permissionObj.allAdmin.includes(
+                            store?.admin?.roles[0].role
+                          )
+                            ? ""
+                            : "disabled"
                       }`}
-                      style={{background:"#25F1F7"}}
+                    style={{ background: "#25F1F7" }}
                     title="Setting"
                     type="button"
                     onClick={() => handleStatusModalShow(adminId)}
@@ -354,18 +333,17 @@ const Card = ({
 
             <span className="mx-1">
               <button
-                className={`btn border border-2 rounded ${
-                  store?.admin?.roles[0].permission.some(
-                    (role) => role === strings.profileView
-                  )
+                className={`btn border border-2 rounded ${store?.admin?.roles[0].permission.some(
+                  (role) => role === strings.profileView
+                )
                     ? ""
                     : permissionObj.allAdmin.includes(
-                        store?.admin?.roles[0].role
-                      )
-                    ? ""
-                    : "disabled"
+                      store?.admin?.roles[0].role
+                    )
+                      ? ""
+                      : "disabled"
                   }`}
-                  style={{background:"#F5C93A"}}
+                style={{ background: "#F5C93A" }}
                 title="Profile"
                 onClick={() => {
                   takeMeToAccount(userName);
@@ -378,18 +356,18 @@ const Card = ({
               <span className="mx-1">
                 <button
                   className={`btn border border-2 rounded  ${["suspended"].includes(store?.admin?.status)
-                    ? "disabled"
-                    : store?.admin?.roles[0].permission.some(
-                      (role) => role === strings.deleteAdmin
-                    )
-                      ? ""
-                      : permissionObj.allAdmin.includes(
-                        store?.admin?.roles[0].role
+                      ? "disabled"
+                      : store?.admin?.roles[0].permission.some(
+                        (role) => role === strings.deleteAdmin
                       )
                         ? ""
-                        : "disabled"
+                        : permissionObj.allAdmin.includes(
+                          store?.admin?.roles[0].role
+                        )
+                          ? ""
+                          : "disabled"
                     }`}
-                    style={{background:"#ED5E68"}}
+                  style={{ background: "#ED5E68" }}
                   title="Delete"
                   onClick={(e) => {
                     handleDelete();
@@ -420,7 +398,7 @@ const Card = ({
         setIsLoading={setIsLoading}
         balance={clientBalance}
       />
-      {adminId != undefined && (
+      {adminId != undefined && viewModalShow && (
         <ViewPartnershipAndCreditRefModal
           show={viewModalShow}
           onHide={() => setViewModalShow(false)}

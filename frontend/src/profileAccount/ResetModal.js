@@ -13,12 +13,17 @@ const ResetModal = ({ show, handleClose, userName }) => {
   };
 
   const [passwords, setPasswords] = useState(initialState);
-  const [errors, setErrors] = useState({}); // State to track validation errors
+  const [errors, setErrors] = useState({});
+  const [visibility, setVisibility] = useState({
+    adminPassword: false,
+    newPassword: false,
+    confirmPassword: false,
+  });
 
   useEffect(() => {
     if (show) {
       setPasswords(initialState);
-      setErrors({}); // Clear errors when modal opens
+      setErrors({});
     }
   }, [show]);
 
@@ -30,16 +35,21 @@ const ResetModal = ({ show, handleClose, userName }) => {
     }));
   };
 
+  const toggleVisibility = (field) => {
+    setVisibility((prev) => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
+  };
+
   async function resetPassword() {
-    const validationErrors = validatePasswords(passwords); // Ensure validationErrors is declared first
+    const validationErrors = validatePasswords(passwords);
     setErrors(validationErrors);
 
-    if (Object.keys(validationErrors).length > 0) {
-      return; // Stop execution if there are validation errors
-    }
+    if (Object.keys(validationErrors).length > 0) return;
 
     const data = {
-      userName: userName,
+      userName,
       adminPassword: passwords.adminPassword,
       password: passwords.newPassword,
     };
@@ -59,46 +69,35 @@ const ResetModal = ({ show, handleClose, userName }) => {
         <Modal.Title>CHANGE PASSWORD</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <div>
-          <div className="mb-3">
-            <label className="form-label">Admin Password</label>
-            <input
-              type="password"
-              className="form-control"
-              placeholder="Type here..."
-              name="adminPassword"
-              value={passwords.adminPassword}
-              onChange={handleChange}
-            />
-            {errors.adminPassword && <p className="text-danger">{errors.adminPassword}</p>}
+        {["adminPassword", "newPassword", "confirmPassword"].map((field, index) => (
+          <div className="mb-3" key={index}>
+            <label className="form-label">
+              {field === "adminPassword"
+                ? "Admin Password"
+                : field === "newPassword"
+                ? "New Password"
+                : "Confirm Password"}
+            </label>
+            <div className="input-group">
+              <input
+                type={visibility[field] ? "text" : "password"}
+                className="form-control"
+                placeholder="Type here..."
+                name={field}
+                value={passwords[field]}
+                onChange={handleChange}
+              />
+              <button
+                type="button"
+                className="btn btn-outline-secondary"
+                onClick={() => toggleVisibility(field)}
+              >
+                <i className={visibility[field] ? "bi bi-eye-slash" : "bi bi-eye"}></i>
+              </button>
+            </div>
+            {errors[field] && <p className="text-danger">{errors[field]}</p>}
           </div>
-
-          <div className="mb-3">
-            <label className="form-label">New Password</label>
-            <input
-              type="password"
-              className="form-control"
-              placeholder="Type here..."
-              name="newPassword"
-              value={passwords.newPassword}
-              onChange={handleChange}
-            />
-            {errors.newPassword && <p className="text-danger">{errors.newPassword}</p>}
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label">Confirm Password</label>
-            <input
-              type="password"
-              className="form-control"
-              placeholder="Type here..."
-              name="confirmPassword"
-              value={passwords.confirmPassword}
-              onChange={handleChange}
-            />
-            {errors.confirmPassword && <p className="text-danger">{errors.confirmPassword}</p>}
-          </div>
-        </div>
+        ))}
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={handleClose}>

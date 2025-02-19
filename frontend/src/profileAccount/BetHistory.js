@@ -163,7 +163,7 @@ const BetHistory = ({
           class="card-heade text-white p-2 text-center text-uppercase"
           style={{ backgroundColor: "#1E2761" }}
         >
-          <b>&nbsp;&nbsp;Bet History</b>
+               <b>&nbsp;&nbsp;{dataType === "void" ? "Void Game" : "Bet History"}</b>
         </div>
         <select className="w-25 m-1" onChange={handelItemPerPage}>
           <option value="10" selected>
