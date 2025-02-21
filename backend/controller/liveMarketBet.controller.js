@@ -653,29 +653,26 @@ export const userLiveBet = async (req, res) => {
         type: bet.type,
       }));
 
-      if (search) {
-        users = users.filter((user) =>
-          user.userName.toLowerCase().includes(search.toLowerCase())
-        );
-      }
+    if (search) {
+      users = users.filter((user) =>
+        user.userName.toLowerCase().includes(search.toLowerCase())
+      );
+    }
 
-      if (users.length === 0) {
-        return res
-          .status(statusCode.success)
-          .send(apiResponseSuccess([], true, statusCode.success, "No bets found"));
-      }
+    const totalItems = users.length;
+    const totalPages = Math.max(Math.ceil(totalItems / pageSize), 1);
 
-      const offset = (page - 1) * pageSize;
-      const getData = users.slice(offset, offset + pageSize);
-      const totalItems = users.length;
-      const totalPages = Math.ceil(totalItems / pageSize);
-  
-      const paginationData = {
-        page : parseInt(page),
-        pageSize : parseInt(pageSize),
-        totalPages,
-        totalItems,
-      };
+    const currentPage = Math.min(Math.max(parseInt(page), 1), totalPages);
+    const offset = (currentPage - 1) * pageSize;
+
+    const getData = users.slice(offset, offset + parseInt(pageSize));
+
+    const paginationData = {
+      page: currentPage,
+      pageSize: parseInt(pageSize),
+      totalPages,
+      totalItems,
+    };
 
     return res.status(statusCode.success).send(apiResponseSuccess(getData, true, statusCode.success, "Success", paginationData));
 
@@ -686,6 +683,8 @@ export const userLiveBet = async (req, res) => {
       .send(apiResponseErr(null, false, statusCode.internalServerError, error.message));
   }
 };
+
+
 
 
 const getAllConnectedUsers = async (adminId) => {
