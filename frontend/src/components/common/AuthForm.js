@@ -191,7 +191,7 @@ const Authform = ({ purpose, authFormApi }) => {
                 </div>
                 <div className="modal-body">
                   <form>
-                    <div className="mb-3">
+                    <div className="">
                       <input
                         type="text"
                         className={`form-control ${errors.userName && touched.userName ? "border-danger" : ""}`}
@@ -204,7 +204,7 @@ const Authform = ({ purpose, authFormApi }) => {
                         {errors.userName && touched.userName ? errors.userName : "\u00A0"}
                       </p>
                     </div>
-                    <div className="mb-3 position-relative">
+                    <div className="position-relative">
                       <input
                         type={showPassword ? "text" : "password"}
                         className={`form-control ${errors.password && touched.password ? "border-danger" : ""}`}
