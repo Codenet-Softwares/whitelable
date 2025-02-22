@@ -122,34 +122,59 @@ export const moveAdminToTrash = async (req, res) => {
 export const viewTrash = async (req, res) => {
   try {
     const adminId = req.params.createdById;
-    const { page = 1, limit = 10, search = "" } = req.query;
-    const offset = parseInt(page - 1) * limit;
+    let { page = 1, limit = 10, search = "" } = req.query;
+
+    page = Math.max(parseInt(page, 10), 1);
+    limit = Math.max(parseInt(limit, 10), 1);
+
+    let offset = (page - 1) * limit;
+
     const searched = {
       createdById: adminId,
       ...(search && { userName: { [Op.like]: `%${search}%` } }), 
     };
+
     const { count, rows: trashEntries } = await trash.findAndCountAll({
       where: searched,
-      offset: parseInt(offset),
-      limit: parseInt(limit),
-    });
-    if (trashEntries.length === 0) {
-      return res.status(statusCode.success).json(apiResponseSuccess([], true, statusCode.success, 'No entries found in Trash'));
-    }
-    const paginatedData = {
-      page: parseInt(page),
+      offset,
       limit,
-      totalPages: Math.ceil(count / limit),
+    });
+
+    const totalPages = Math.ceil(count / limit);
+
+    if (page > totalPages && totalPages > 0) {
+      page = totalPages;
+      offset = (page - 1) * limit;
+
+      const { rows: adjustedEntries } = await trash.findAndCountAll({
+        where: searched,
+        offset,
+        limit,
+      });
+      return res.status(statusCode.success).json(apiResponseSuccess(adjustedEntries, true, statusCode.success, 'Successfully retrieved', {
+        page,
+        limit,
+        totalPages,
+        totalItems: count,
+      }));
+    }
+
+    return res.status(statusCode.success).json(apiResponseSuccess(trashEntries, true, statusCode.success, 'Successfully retrieved', {
+      page,
+      limit,
+      totalPages,
       totalItems: count,
-    };
-    
-    return res.status(statusCode.success).json(apiResponseSuccess(trashEntries, true, statusCode.success, 'successfully', paginatedData ));
+    }));
+
   } catch (error) {
-    res
+    return res
       .status(statusCode.internalServerError)
       .send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
   }
 };
+
+
+
 
 export const deleteTrashData = async (req, res) => {
   try {

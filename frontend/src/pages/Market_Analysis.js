@@ -160,7 +160,7 @@ const Market_Analysis = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {liveGmes.data.length > 0 ? (
+                  {liveGmes && liveGmes?.data.length > 0 ? (
                     liveGmes.data.map((data, i) => (
                       <tr className="fw-bold" key={data.marketId}>
                         <td>{i + 1}</td>
