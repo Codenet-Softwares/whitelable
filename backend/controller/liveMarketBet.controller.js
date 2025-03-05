@@ -492,7 +492,7 @@ export const getUserMasterBook = async (req, res) => {
         where: {
           createdById: adminId,
         },
-        attributes: ["userName", "createdById", "createdByUser"],
+        attributes: ["userName", "createdById", "createdByUser","roles"],
       });
 
       users = data.usersDetails
@@ -502,6 +502,7 @@ export const getUserMasterBook = async (req, res) => {
         .map((user) => ({
           userName: user.userName,
           userId: user.userId,
+          roles: string.user,
           marketId: user.marketId,
           runnerBalance: user.runnerBalance,
         }));
