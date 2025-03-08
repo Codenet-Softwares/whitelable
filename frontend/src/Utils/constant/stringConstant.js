@@ -65,24 +65,6 @@ export class StringConstants {
     { role: 'move-to-trash', name: 'Move To Trash' },
     { role: 'trash-view', name: 'Trash View' },
   ];
-  // roles = [
-  //   'transferBalance',
-  //   'status',
-  //   'creditRef-Edit',
-  //   'partnership-Edit',
-  //   'creditRef-View',
-  //   'partnership-view',
-  //   'user-profile-view',
-  //   'profile-view',
-  //   'create-Admin',
-  //   'create-user',
-  //   'accountStatement',
-  //   'activityLog',
-  //   'delete-admin',
-  //   'restore-admin',
-  //   'move-to-trash',
-  //   'trash-view',
-  // ];
 }
 
 let strings = new StringConstants();
