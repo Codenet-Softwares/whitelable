@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import admins from "../models/admin.model.js";
 import { string } from "../constructor/string.js";
-import { Op } from "sequelize";
+import { Op, Sequelize } from "sequelize";
 dotenv.config();
 
 export const getUserBetMarket = async (req, res) => {
@@ -80,12 +80,12 @@ export const getLiveBetGames = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const { search, type } = req.query;
     const offset = (page - 1) * limit;
+
     const token = jwt.sign(
       { roles: req.user.roles },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );
-
 
     const baseUrl = process.env.COLOR_GAME_URL;
     const response = await axios.get(
@@ -107,6 +107,7 @@ export const getLiveBetGames = async (req, res) => {
         )
       );
     }
+
     const baseUrlLottery = process.env.LOTTERY_URL;
     const lotteryResponse = await axios.get(
       `${baseUrlLottery}/api/get-live-markets`
@@ -114,37 +115,99 @@ export const getLiveBetGames = async (req, res) => {
 
     const lotteryData = lotteryResponse.data?.data || [];
     const liveGames = response.data.data || [];
-    const combinedData = [
-      ...lotteryData.map((lottery) => ({
-        marketId: lottery.marketId,
-        marketName: lottery.marketName,
-        gameName: lottery.gameName,
-        source: "lottery",
-      })),
-      ...liveGames.map(game => ({
-        ...game,
-        source: "colorgame",
-      })),
-    ];
 
-    let filteredData = combinedData;
+    const userNames = [
+      ...lotteryData.map((lottery) => lottery.userName),
+      ...liveGames.map((game) => game.userName),
+    ].filter(Boolean); 
+
+    // const adminsData = await admins.findAll({
+    //   where: {
+    //     userName: userNames, 
+    //   },
+    //   attributes: ["createdById", "createdByUser", "roles", "userName"],
+    // });
+
+
+    const isSuperAdmin =
+      Array.isArray(req.user.roles) &&
+      req.user.roles.some((roleObj) => roleObj.role === "superAdmin");
+
+    let combinedData = [];
+
+    if (isSuperAdmin) {
+      combinedData = [
+        ...lotteryData.map((lottery) => ({
+          marketId: lottery.marketId,
+          marketName: lottery.marketName,
+          gameName: lottery.gameName,
+          source: "lottery",
+        })),
+        ...liveGames.map((game) => ({
+          ...game,
+          source: "colorgame",
+        })),
+      ];
+    } else {
+      const getAllowedUserNames = async (userName) => {
+        const users = await admins.findAll({
+          where: {
+            createdByUser: userName,
+          },
+          attributes: ["userName"],
+        });
+
+        let allowedUserNames = [userName]; 
+        for (const user of users) {
+          const nestedUsers = await getAllowedUserNames(user.userName); 
+          allowedUserNames = [...allowedUserNames, ...nestedUsers];
+        }
+        return allowedUserNames;
+      };
+
+      const allowedUserNames = await getAllowedUserNames(req.user.userName);
+
+
+      const filteredLotteryData = lotteryData.filter((lottery) =>
+        allowedUserNames.includes(lottery.userName)
+      );
+
+      const filteredLiveGames = liveGames.filter((game) =>
+        allowedUserNames.includes(game.userName)
+      );
+
+
+      combinedData = [
+        ...filteredLotteryData.map((lottery) => ({
+          marketId: lottery.marketId,
+          marketName: lottery.marketName,
+          gameName: lottery.gameName,
+          source: "lottery",
+        })),
+        ...filteredLiveGames.map((game) => ({
+          ...game,
+          source: "colorgame",
+        })),
+      ];
+    }
 
     if (type) {
-      filteredData = filteredData.filter(item => item.source === type);
+      combinedData = combinedData.filter((item) => item.source === type);
     }
 
     if (search) {
-      filteredData = filteredData.filter(item =>
-        item.marketName?.toLowerCase().includes(search.toLowerCase()) ||
-        (item.source === "colorgame" &&
-          item.gameName?.toLowerCase().includes(search.toLowerCase()))
+      combinedData = combinedData.filter(
+        (item) =>
+          item.marketName?.toLowerCase().includes(search.toLowerCase()) ||
+          (item.source === "colorgame" &&
+            item.gameName?.toLowerCase().includes(search.toLowerCase()))
       );
     }
 
     const uniqueData = Array.from(
-      new Set(filteredData.map(item => item.marketId))
-    ).map(uniqueMarketId =>
-      filteredData.find(item => item.marketId === uniqueMarketId)
+      new Set(combinedData.map((item) => item.marketId))
+    ).map((uniqueMarketId) =>
+      combinedData.find((item) => item.marketId === uniqueMarketId)
     );
 
     const paginatedData = uniqueData.slice(offset, offset + limit);
@@ -429,7 +492,7 @@ export const getUserMasterBook = async (req, res) => {
         where: {
           createdById: adminId,
         },
-        attributes: ["userName", "createdById", "createdByUser"],
+        attributes: ["userName", "createdById", "createdByUser","roles"],
       });
 
       users = data.usersDetails
@@ -439,6 +502,7 @@ export const getUserMasterBook = async (req, res) => {
         .map((user) => ({
           userName: user.userName,
           userId: user.userId,
+          roles: string.user,
           marketId: user.marketId,
           runnerBalance: user.runnerBalance,
         }));
@@ -590,29 +654,26 @@ export const userLiveBet = async (req, res) => {
         type: bet.type,
       }));
 
-      if (search) {
-        users = users.filter((user) =>
-          user.userName.toLowerCase().includes(search.toLowerCase())
-        );
-      }
+    if (search) {
+      users = users.filter((user) =>
+        user.userName.toLowerCase().includes(search.toLowerCase())
+      );
+    }
 
-      if (users.length === 0) {
-        return res
-          .status(statusCode.success)
-          .send(apiResponseSuccess([], true, statusCode.success, "No bets found"));
-      }
+    const totalItems = users.length;
+    const totalPages = Math.max(Math.ceil(totalItems / pageSize), 1);
 
-      const offset = (page - 1) * pageSize;
-      const getData = users.slice(offset, offset + pageSize);
-      const totalItems = users.length;
-      const totalPages = Math.ceil(totalItems / pageSize);
-  
-      const paginationData = {
-        page : parseInt(page),
-        pageSize : parseInt(pageSize),
-        totalPages,
-        totalItems,
-      };
+    const currentPage = Math.min(Math.max(parseInt(page), 1), totalPages);
+    const offset = (currentPage - 1) * pageSize;
+
+    const getData = users.slice(offset, offset + parseInt(pageSize));
+
+    const paginationData = {
+      page: currentPage,
+      pageSize: parseInt(pageSize),
+      totalPages,
+      totalItems,
+    };
 
     return res.status(statusCode.success).send(apiResponseSuccess(getData, true, statusCode.success, "Success", paginationData));
 
@@ -623,6 +684,8 @@ export const userLiveBet = async (req, res) => {
       .send(apiResponseErr(null, false, statusCode.internalServerError, error.message));
   }
 };
+
+
 
 
 const getAllConnectedUsers = async (adminId) => {

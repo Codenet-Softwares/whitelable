@@ -129,8 +129,8 @@ const BetHistory = ({
                   }}
                 >
                   <option selected>Select</option>
-                  {/* <option value="settle">Settle</option> */}
-                  {/* <option value="unsettle">UnSettle</option> */}
+                  <option value="settle">Settle</option>
+                  <option value="unsettle">UnSettle</option>
                   <option value="void">void</option>
                 </select>
               </div>
