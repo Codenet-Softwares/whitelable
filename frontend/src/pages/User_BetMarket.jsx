@@ -139,8 +139,8 @@ const User_BetMarket = () => {
         marketId: marketId,
         adminId: store?.admin?.id,
         role: store?.admin?.roles[0]?.role,
-        pageNumber: page, // Ensure the page number is correctly passed
-        totalEntries: entries, // Pass correct number of entries per page
+        pageNumber: page, 
+        totalEntries: entries,
         search: user_LiveBet.search || "",
       });
 
@@ -393,7 +393,7 @@ const User_BetMarket = () => {
                 {/* Additional Cards */}
                 <div className="card mt-3">
                   <h4
-                    className="card-header text-white fw-bold rounded-top "
+                    className="card-header text-white fw-bold rounded-top text-uppercase"
                     style={{ background: "#1E2761" }}
                   >
                     Score Card
@@ -486,9 +486,17 @@ const User_BetMarket = () => {
                   <ReusableModal
                     isOpen={viewMoreModalOpen}
                     onClose={handleCloseViewMoreModal}
-                    title="All Live Data Data"
+                    title={
+                      <span className="h2 fw-bold">
+                        All Live Data
+                      </span>
+                    }
                     bodyContent={
-                      <div>
+                      <div style={{
+                        maxHeight: "870px",
+                        // overflowY: "auto",
+                        minHeight: "870px",
+                      }}>
                         <div className="white_box_tittle list_header">
                           <div className="col-2 text-center">
                             <select

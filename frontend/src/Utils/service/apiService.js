@@ -583,7 +583,7 @@ export async function getMarket_LiveBet(body = {}, isToast = false) {
   try {
     const callParams = await getAuthCallParams(strings.POST, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.liveBet}`,
+      `${UrlConstant.liveBet}?page=${body.pageNumber}&pageSize=${body.totalEntries}&search=${body.search}`,
       callParams,
       isToast
     );
