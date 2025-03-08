@@ -209,3 +209,119 @@ export function get_betBook(body = {}) {
   };
 }
 
+
+export function accountInitialState(body = {}) {
+  return {
+    statementView: {
+      data: [],
+      currentPage: 1,
+      totalPages: 0,
+      endDate: '',
+      totalData: 0,
+      startDate: '',
+      totalEntries: 10,
+      dataSource: 'live',
+    },
+    activityLogView: {
+      data: []
+    },
+    profileView: {
+      roles: [
+        {
+          role: null,
+        },
+      ],
+    },
+    betHistoryView: {
+      ColorGame: {
+        data: [],
+        currentPage: 1,
+        totalPages: 0,
+        endDate: '',
+        totalData: 0,
+        startDate: '',
+        totalEntries: 10,
+      },
+      lottery: {
+        data: [],
+        currentPage: 1,
+        totalPages: 0,
+        endDate: '',
+        totalData: 0,
+        startDate: '',
+        totalEntries: 10,
+      },
+      sportName: [],
+      endDate: '',
+      startDate: '',
+      selectDataType: "",
+      selectSportName: ""
+    },
+    profitLossView: {
+      data: [],
+      currentPage: 1,
+      totalPages: 0,
+      endDate: '',
+      totalData: 0,
+      startDate: '',
+      totalEntries: 10,
+      endDate: '',
+      startDate: '',
+      dataSource: 'live',
+      search: "",
+      colorgameProfitLossEventData: {
+        data: [],
+        currentPage: 1,
+        totalPages: 0,
+        endDate: '',
+        totalData: 0,
+        startDate: '',
+        totalEntries: 10,
+        search: "",
+      },
+      colorgameProfitLossRunnerData: {
+        data: [],
+        currentPage: 1,
+        totalPages: 0,
+        endDate: '',
+        totalData: 0,
+        startDate: '',
+        totalEntries: 10,
+        search: "",
+      },
+      colorgameUserBetHistory: {
+        data: [],
+        currentPage: 1,
+        totalPages: 0,
+        endDate: '',
+        totalData: 0,
+        startDate: '',
+        totalEntries: 10,
+        search: "",
+      },
+      lotteryProfitLossEventData: {
+        data: [],
+        currentPage: 1,
+        totalPages: 0,
+        endDate: '',
+        totalData: 0,
+        startDate: '',
+        totalEntries: 10,
+        search: "",
+      },
+      lotteryUserBetHistory: {
+        data: [],
+        currentPage: 1,
+        totalPages: 0,
+        endDate: '',
+        totalData: 0,
+        startDate: '',
+        totalEntries: 10,
+        search: "",
+      },
+    },
+    toggle: 1,
+    activeItem: "statement",
+  };
+}
+
