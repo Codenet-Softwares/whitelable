@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import ActivityLog from "./ActivityLog";
 
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import AccountStatement from "./AccountStatement";
 import AccountProfile from "./AccountProfile";
@@ -24,6 +24,7 @@ import strings from "../Utils/constant/stringConstant";
 
 const AccountLandingModal = () => {
   const { userName } = useParams();
+  const navigate = useNavigate();
   const [state, setState] = useState(accountStatementInitialState());
   const [backupDate, setbackupDate] = useState({
     endDate: null,
@@ -45,7 +46,7 @@ const AccountLandingModal = () => {
     })(),
     dataSource: "live",
     dataType: "",
-    dropdownOpen: null
+    dropdownOpen: null,
   });
 
   const [profitLossData, SetProfitLossData] = useState({
@@ -112,7 +113,7 @@ const AccountLandingModal = () => {
     state.dataSource,
     betHistoryData.dataSource,
     betHistoryData.dataType,
-    state.toggle
+    state.toggle,
   ]);
 
   useEffect(() => {
@@ -126,7 +127,7 @@ const AccountLandingModal = () => {
     profitLossData.itemPerPage,
     // profitLossData.searchItem,
     profitLossData.dataSource,
-    state.toggle
+    state.toggle,
   ]);
 
   // Debounce for search
@@ -466,13 +467,21 @@ const AccountLandingModal = () => {
       <div className="row row-no-gutters">
         {/* First Section */}
         <div className="col-sm-4">
+        <button
+              className="btn btn-secondary mt-1"
+              onClick={() => navigate("/wallet")}
+            >
+              Back
+            </button>
           <div className="card mt-3" style={{ width: "18rem" }}>
             <ul className="list-group list-group-flush">
+           
               <li
                 className="list-group-item text-white h6 text-uppercase text-center"
                 style={{ backgroundColor: "#1E2761" }}
               >
                 My Account
+                
               </li>
               <li
                 className="list-group-item"
