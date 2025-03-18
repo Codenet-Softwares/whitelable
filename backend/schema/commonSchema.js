@@ -41,6 +41,7 @@ export const createSubAdminSchema = [
         string.moveToTrash,
         string.trashView,
         string.viewSubAdmin,
+        string.marketAnalysis
       ];
       for (let i = 0; i < value.length; i++) {
         if (!value[i].permission || !Array.isArray(value[i].permission) || value[i].permission.length === 0) {
