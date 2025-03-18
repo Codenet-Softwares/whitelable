@@ -13,6 +13,7 @@ export const lotteryGameModule = (app) => {
           string.hyperAgent,
           string.superAgent,
           string.masterAgent,
+          string.marketAnalysis
         ]), lotteryMarketAnalysis);
 
     app.get('/api/lottery-profit-loss/:userName', validateGetExternalLotteryP_L, customErrorHandler, getLotteryP_L);

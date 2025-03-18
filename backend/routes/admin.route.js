@@ -81,7 +81,8 @@ export const adminRoute = (app) => {
       string.subHyperAgent,
       string.subSuperAgent,
       string.subMasterAgent,
-      string.createSubAdmin
+      string.createSubAdmin,
+      string.marketAnalysis
     ]),
     createSubAdmin,
   );
