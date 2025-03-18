@@ -68,7 +68,9 @@ const AgentDelete = () => {
         toast.info(response.message);
 
         // Reload the data first
-        const updatedData = viewAgentDelete.filter((item) => item.trashId !== id);
+        const updatedData = viewAgentDelete.filter(
+          (item) => item.trashId !== id
+        );
         setViewAgentDelete(updatedData);
 
         if (updatedData.length === 0 && page > 1) {
@@ -91,7 +93,9 @@ const AgentDelete = () => {
       const response = await restoreTrash_api(data);
       if (response) {
         toast.info(response.message);
-        const updatedData = viewAgentDelete.filter((item) => item.adminId !== adminId);
+        const updatedData = viewAgentDelete.filter(
+          (item) => item.adminId !== adminId
+        );
         setViewAgentDelete(updatedData);
         if (updatedData.length === 0 && page > 1) {
           setPage((prev) => prev - 1);
@@ -105,7 +109,6 @@ const AgentDelete = () => {
       hideLoader();
     }
   }
-
 
   return (
     <>
@@ -190,6 +193,9 @@ const AgentDelete = () => {
                             className="btn text-dark fw-bold mx-2"
                             style={{ background: "#ED5E68" }}
                             onClick={() => handleDeleteAgent(data.trashId)}
+                            disabled={["suspended"].includes(
+                              store?.admin?.status
+                            )}
                           >
                             Delete{" "}
                             <i className="fa-solid fa-trash text-dark"></i>
@@ -198,6 +204,9 @@ const AgentDelete = () => {
                             className="btn text-dark rounded fw-bold"
                             style={{ background: "#F5C93A" }}
                             onClick={() => handleRestore(data.adminId)}
+                            disabled={["suspended"].includes(
+                              store?.admin?.status
+                            )}
                           >
                             Restore{" "}
                             <i className="fa-solid fa-arrow-rotate-left"></i>
