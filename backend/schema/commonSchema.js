@@ -41,6 +41,7 @@ export const createSubAdminSchema = [
         string.moveToTrash,
         string.trashView,
         string.viewSubAdmin,
+        string.marketAnalysis
       ];
       for (let i = 0; i < value.length; i++) {
         if (!value[i].permission || !Array.isArray(value[i].permission) || value[i].permission.length === 0) {
@@ -174,7 +175,7 @@ export const subAdminPermissionSchema = [
       'creditRef-Edit', 'partnership-Edit', 'creditRef-View', 'partnership-view',
       'user-profile-view', 'profile-view', 'view-admin-data', 'create-user',
       'accountStatement', 'activityLog', 'delete-admin', 'restore-admin',
-      'move-to-trash', 'trash-view', 'view-subAdmin', 'view-balance'
+      'move-to-trash', 'trash-view', 'view-subAdmin', 'view-balance','market-analysis'
     ];
     for (let i = 0; i < value.length; i++) {
       if (!allowedPermissions.includes(value[i])) {

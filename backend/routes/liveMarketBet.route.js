@@ -20,6 +20,7 @@ export const liveMarketBetRoute = (app) => {
       string.hyperAgent,
       string.superAgent,
       string.masterAgent,
+      string.marketAnalysis
     ]),
     getUserBetMarket
   );
@@ -32,6 +33,7 @@ export const liveMarketBetRoute = (app) => {
       string.hyperAgent,
       string.superAgent,
       string.masterAgent,
+      string.marketAnalysis
     ]),
     getLiveBetGames
   );
@@ -46,6 +48,7 @@ export const liveMarketBetRoute = (app) => {
       string.hyperAgent,
       string.superAgent,
       string.masterAgent,
+      string.marketAnalysis
     ]),
     getLiveUserBet
   );
@@ -72,6 +75,7 @@ export const liveMarketBetRoute = (app) => {
       string.hyperAgent,
       string.superAgent,
       string.masterAgent,
+      string.marketAnalysis
     ]),
     getUserMasterBook
   );
@@ -84,6 +88,7 @@ export const liveMarketBetRoute = (app) => {
       string.hyperAgent,
       string.superAgent,
       string.masterAgent,
+      string.marketAnalysis
     ]),
     userLiveBet
   );
