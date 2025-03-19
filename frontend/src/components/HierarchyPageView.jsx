@@ -209,25 +209,25 @@ const HierarchyPageView = () => {
                             </tr>
                           </thead>
                           {hierarchyData.map((data, i) => {
-                            // const creditRefLength = data.creditRef.length;
-                            // const partnershipLength = data.partnership.length;
+                            const creditRefLength = data.creditRef.length;
+                            const partnershipLength = data.partnership.length;
                             return (
                               <Card
                                 userName={data.userName}
                                 role={data.roles[0].role}
                                 key={data.id}
                                 exposure={data.exposure}
-                                // creditRef={data.creditRef[creditRefLength - 1]?.value}
+                                creditRef={data.creditRef[creditRefLength - 1]?.value}
                                 balance={data.balance}
                                 loadBalance={data.loadBalance}
                                 refProfitLoss={data.refProfitLoss}
                                 adminId={data.id}
-                                // partnership={
-                                //     data.partnership[partnershipLength - 1]?.value
-                                // }
+                                partnership={
+                                    data.partnership[partnershipLength - 1]?.value
+                                }
                                 Status={data.status}
-                                // creditRefLength={creditRefLength}
-                                // partnershipLength={partnershipLength}
+                                creditRefLength={creditRefLength}
+                                partnershipLength={partnershipLength}
                                 callingParent="HierarchyPageView"
                               />
                             );

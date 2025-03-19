@@ -8,9 +8,9 @@ import { createSubAdmin } from "../Utils/service/apiService";
 import FullScreenLoader from "../components/FullScreenLoader";
 
 const CreateSubAdmin = () => {
-  const { store, dispatch, showLoader, hideLoader } = useAppContext();
+  const {   store, dispatch, showLoader, hideLoader } = useAppContext();
   const [createSubAdminState] = useState(getCreateSubAdmin);
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
 
   // const {
   //   values,
@@ -71,9 +71,9 @@ const CreateSubAdmin = () => {
     setFieldValue("roles[0].permission", updatedPermissions);
   };
   async function create_SubAdmin(values) {
-    setIsLoading(true)
+    setIsLoading(true);
     const response = await createSubAdmin(values, true);
-    setIsLoading(false)
+    setIsLoading(false);
   }
 
   return (
@@ -81,7 +81,7 @@ const CreateSubAdmin = () => {
       <FullScreenLoader show={isLoading} />
       <div className="row justify-content-center">
         <div className="col-lg-8">
-          <div className="card" >
+          <div className="card">
             <div
               className="card-header text-white p-3"
               style={{ backgroundColor: "#1E2761", textAlign: "center" }}
@@ -179,6 +179,7 @@ const CreateSubAdmin = () => {
                     className="btn btn-primary"
                     type="button"
                     onClick={handleSubmit}
+                    disabled={["suspended"].includes(store?.admin?.status)}
                   >
                     Add User Role
                   </button>

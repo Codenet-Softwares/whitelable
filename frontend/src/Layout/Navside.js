@@ -148,7 +148,6 @@ const Navside = () => {
               </ul>
             </li>
           )}
-
           {permissionObj.allAdmin.includes(store.admin.roles[0].role) && (
             <li className="" onClick={takeMeToAdminAccount}>
               <a className="" href="#" aria-expanded="false">
@@ -164,7 +163,6 @@ const Navside = () => {
               </a>
             </li>
           )}
-
           {store.admin.roles[0].permission.includes(
             strings.accountStatement
           ) && (
@@ -182,7 +180,6 @@ const Navside = () => {
               </a>
             </li>
           )}
-
           {store.admin.roles[0].permission.includes(strings.deleteAdmin) && (
             <>
               {isRequest ? (
@@ -220,7 +217,6 @@ const Navside = () => {
               )}
             </>
           )}
-
           {permissionObj.allAdmin.includes(store?.admin?.roles[0]?.role) && (
             <>
               {isRequest ? (
@@ -269,7 +265,6 @@ const Navside = () => {
               )}
             </>
           )}
-
           {permissionObj.allAdmin.includes(store.admin.roles[0].role) && (
             <>
               {userRole ? (
@@ -300,22 +295,24 @@ const Navside = () => {
                     </div>
                   </a>
                   <ul className="d-flex flex-column ml-0">
-                    <li>
-                      <Link to="/CreateSubAdmin">
-                        <span>
-                          {" "}
-                          <i
-                            class="fa-solid fa-plus"
-                            style={{
-                              color: "black",
-                              fontSize: "20px",
-                              marginLeft: "50px",
-                            }}
-                          ></i>
-                          Create New
-                        </span>
-                      </Link>
-                    </li>
+                    {!["suspended"].includes(store?.admin?.status) && (
+                      <li>
+                        <Link to="/CreateSubAdmin">
+                          <span>
+                            {" "}
+                            <i
+                              class="fa-solid fa-plus"
+                              style={{
+                                color: "black",
+                                fontSize: "20px",
+                                marginLeft: "50px",
+                              }}
+                            ></i>
+                            Create New
+                          </span>
+                        </Link>
+                      </li>
+                    )}
 
                     <li>
                       <Link to="/ViewAllSubAdmin">
@@ -337,7 +334,6 @@ const Navside = () => {
               )}
             </>
           )}
-
           {store.admin.roles[0].permission.includes(strings.createAdmin) && (
             <>
               {userRole ? (
@@ -362,14 +358,16 @@ const Navside = () => {
                     </div>
                   </a>
                   <ul className="d-flex flex-column ml-0">
-                    <li>
-                      <Link to="/CreateSubAdmin">
-                        <span>
-                          {" "}
-                          <i class="fa-solid fa-circle"></i>Create New
-                        </span>
-                      </Link>
-                    </li>
+                    {!["suspended"].includes(store?.admin?.status) && (
+                      <li>
+                        <Link to="/CreateSubAdmin">
+                          <span>
+                            {" "}
+                            <i class="fa-solid fa-circle"></i>Create New
+                          </span>
+                        </Link>
+                      </li>
+                    )}
 
                     <li>
                       <Link to="/ViewAllSubAdmin">
@@ -383,21 +381,41 @@ const Navside = () => {
               )}
             </>
           )}
-          <li>
-            <Link to="/Market_analysis" aria-expanded="false">
-              <div className="nav_icon_small">
-                <i
-                  class="fa-solid fa-chart-line"
-                  style={{ color: "black", fontSize: "20px" }}
-                >
-                  {" "}
-                </i>
-              </div>
-              <div className="nav_title">
-                <span>Market Analysis</span>
-              </div>
-            </Link>
-          </li>
+
+          {permissionObj.allAdmin.includes(store.admin.roles[0].role) && (
+            <li>
+              <Link to="/Market_analysis" aria-expanded="false">
+                <div className="nav_icon_small">
+                  <i
+                    class="fa-solid fa-chart-line"
+                    style={{ color: "black", fontSize: "20px" }}
+                  >
+                    {" "}
+                  </i>
+                </div>
+                <div className="nav_title">
+                  <span>Market Analysis</span>
+                </div>
+              </Link>
+            </li>
+          )}
+          {store.admin.roles[0].permission.includes(strings.marketAnalysis) && (
+            <li>
+              <Link to="/Market_analysis" aria-expanded="false">
+                <div className="nav_icon_small">
+                  <i
+                    class="fa-solid fa-chart-line"
+                    style={{ color: "black", fontSize: "20px" }}
+                  >
+                    {" "}
+                  </i>
+                </div>
+                <div className="nav_title">
+                  <span>Market Analysis</span>
+                </div>
+              </Link>
+            </li>
+          )}
         </ul>
       </div>
     </nav>

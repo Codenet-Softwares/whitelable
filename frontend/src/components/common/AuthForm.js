@@ -194,20 +194,33 @@ const Authform = ({ purpose, authFormApi }) => {
                     <div className="">
                       <input
                         type="text"
-                        className={`form-control ${errors.userName && touched.userName ? "border-danger" : ""}`}
+                        className={`form-control ${
+                          errors.userName && touched.userName
+                            ? "border-danger"
+                            : ""
+                        }`}
                         placeholder="Enter Username"
                         name="userName"
                         value={values.userName}
                         onChange={handleChange}
                       />
-                      <p className="text-danger text-center fw-bold mb-0" style={{ minHeight: "20px" }}>
-                        {errors.userName && touched.userName ? errors.userName : "\u00A0"}
+                      <p
+                        className="text-danger text-center fw-bold mb-0"
+                        style={{ minHeight: "20px" }}
+                      >
+                        {errors.userName && touched.userName
+                          ? errors.userName
+                          : "\u00A0"}
                       </p>
                     </div>
                     <div className="position-relative">
                       <input
                         type={showPassword ? "text" : "password"}
-                        className={`form-control ${errors.password && touched.password ? "border-danger" : ""}`}
+                        className={`form-control ${
+                          errors.password && touched.password
+                            ? "border-danger"
+                            : ""
+                        }`}
                         placeholder="Enter Password"
                         name="password"
                         value={values.password}
@@ -215,19 +228,25 @@ const Authform = ({ purpose, authFormApi }) => {
                         style={{ paddingRight: "2.5rem" }}
                       />
                       <i
-                        className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"} position-absolute`}
+                        className={`bi ${
+                          showPassword ? "bi-eye-slash" : "bi-eye"
+                        } position-absolute`}
                         style={{
                           right: "10px",
                           top: "25px",
                           transform: "translateY(-50%)",
                           cursor: "pointer",
                           fontSize: "1.2rem",
-
                         }}
                         onClick={() => setShowPassword(!showPassword)}
                       ></i>
-                      <p className="text-danger text-center fw-bold mb-0" style={{ minHeight: "20px" }}>
-                        {errors.password && touched.password ? errors.password : "\u00A0"}
+                      <p
+                        className="text-danger text-center fw-bold mb-0"
+                        style={{ minHeight: "20px" }}
+                      >
+                        {errors.password && touched.password
+                          ? errors.password
+                          : "\u00A0"}
                       </p>
                     </div>
                     {purpose === "create" && (
@@ -245,8 +264,9 @@ const Authform = ({ purpose, authFormApi }) => {
                     )}
 
                     {purpose === "create" && values.roles.length > 0 && (
-                      <a
-                        className="btn_1 full_width text-center"
+                      <button
+                        className={`btn_1 full_width text-center`}
+                        disabled={["suspended"].includes(store?.admin?.status)}
                         style={{
                           cursor: values.roles ? "pointer" : "not-allowed",
                         }}
@@ -254,7 +274,7 @@ const Authform = ({ purpose, authFormApi }) => {
                       >
                         {purpose === "create" && "Create"}
                         {purpose === "login" && "Log In"}
-                      </a>
+                      </button>
                     )}
                     {purpose === "login" && (
                       <a
