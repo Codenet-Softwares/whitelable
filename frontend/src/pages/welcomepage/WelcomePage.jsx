@@ -8,36 +8,24 @@ const WelcomePage = () => {
   return (
     <div>
       <div className="WelcomePage">
-        <header className="App-header">
-          <h1 className="animated-header1">
-            Welcome To WhiteLabel Application
-          </h1>
-          <h1 className="animated-header2">
+        <header className="App-header">        
+          <h1 className="animated-header2 fw-bold">
             Welcome To WhiteLabel Application
           </h1>
         </header>
         {/* <p className="text-dark">
             Manage your transactions efficiently and effectively.
           </p> */}
-        <div id="BrushCursor">
+        <div>
           <div class="container">
-            <div class="p p1">
-              {" "}
+            <h2 className="fw-bold text-white">
               Manage Your Transactions Efficiently And Effectively.
-            </div>
-            <div class="p p2">
-              {" "}
-              Manage Your Transactions Efficiently And Effectively.
-            </div>
-            <div class="p p3">
-              Manage Your Transactions Efficiently And Effectively.
-              <div class="cursor"></div>
-            </div>
+            </h2>          
           </div>
         </div>
-        <section className="welcome-message mt-5">
-          <h5 className="text-white mb-5">We're Glad To Have You Back. Here’s What You Can Do Today:</h5>
-          <h2 className="mb-5 welcome_msg">Welcome,<span className="mt-1"> [{store.admin.adminName}!]</span></h2>
+          <h5 className="text-white fw-bold">We're Glad To Have You Back. Here’s What You Can Do Today:</h5>
+        <section className="welcome-message ">
+          <h2 className="welcome_msg text-white fw-bold">Welcome,<span className=""> [{store.admin.adminName}!]</span></h2>
         </section>
         <section className="features ">
           <h2 className="text-uppercase mt-5 fw-bold" style={{color:"#1E2761", textDecoration:"underline"}}>Key Features</h2>

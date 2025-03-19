@@ -148,9 +148,9 @@ const ViewSubAdminPermission = () => {
                 className="white_box_tittle list_header text-end"
                 style={{ display: 'flex', flexDirection: 'column', fontWeight: 'bold', color: 'white' }}
               >
-                <span>Username: {subAdminPermissionData?.userName}</span>
+                <span className='mt-5'>Username: {subAdminPermissionData?.userName}</span>
                 <br />
-                <span>Role:{subAdminPermissionData?.roles[0]?.role}</span>
+                <span className='mb-0'>Role:{subAdminPermissionData?.roles[0]?.role}</span>
               </div>
             </div>
             <div className="card-body">
