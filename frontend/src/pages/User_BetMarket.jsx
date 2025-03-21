@@ -21,8 +21,11 @@ import "./DemoMarket_Analysis.css";
 import ReusableModal from "../components/common/ReusableModal";
 import HierarchyModal from "./HierarchyModal";
 import Pagination from "../components/common/Pagination";
+import { useNavigate } from "react-router-dom";
 
 const User_BetMarket = () => {
+  const navigate = useNavigate();
+
   const { dispatch, store } = useAppContext();
   const [user_marketWithRunnerData, setUser_marketWithRunnerData] = useState(
     getMarketWithRunnerDataInitialState()
@@ -47,12 +50,13 @@ const User_BetMarket = () => {
   const [liveToggle, setLiveToggle] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isHirerchyModalOpen, setHirerchyModalOpen] = useState(false);
-
+  const [searchTerm, setSearchTerm] = useState("");
   // useEffect(()=>{fetch_BetBookData()},[bodyData])
   const handleUsernameClick = (userName) => {
     console.log("onclick", userName);
     setSelectedUser(userName);
     setHirerchyModalOpen(true); // Open the modal when a username is clicked
+    handleCloseViewMoreModal();
   };
 
   const handleHirerchyCloseModal = () => {
@@ -73,7 +77,9 @@ const User_BetMarket = () => {
       type: "master-book",
     });
   };
-
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
   // Function to close the modal
   const handleCloseModal = () => setModalOpen(false);
 
@@ -125,37 +131,43 @@ const User_BetMarket = () => {
   }, [marketId]);
 
   useEffect(() => {
-    if (liveToggle) {
-      getView_LiveBet();
-    }
-  }, [liveToggle]);
+    console.log("API Called");
+    getView_LiveBet(
+      user_LiveBet.currentPage,
+      user_LiveBet.totalEntries,
+      searchTerm
+    );
+  }, [searchTerm, liveToggle]);
 
   async function getView_LiveBet(
     page = 1,
-    entries = user_LiveBet.totalEntries
+    entries = user_LiveBet.totalEntries,
+    search = ""
   ) {
     try {
       const response = await getMarket_LiveBet({
         marketId: marketId,
         adminId: store?.admin?.id,
         role: store?.admin?.roles[0]?.role,
-        pageNumber: page, 
+        pageNumber: page,
         totalEntries: entries,
-        search: user_LiveBet.search || "",
+        search,
       });
 
-      setUser_LiveBet({
+      setUser_LiveBet((prevState) => ({
+        ...prevState,
         data: response?.data || [],
         currentPage: response?.pagination?.page || page,
         totalEntries: response?.pagination?.pageSize || entries,
         totalPages: response?.pagination?.totalPages || 0,
         totalData: response?.pagination?.totalItems || 0,
-      });
+      }));
     } catch (error) {
       console.error("API Error:", error);
       toast.error(customErrorHandler(error));
     }
   }
+
   const currentPage = user_LiveBet.currentPage || 1;
   const totalEntries = user_LiveBet.totalEntries || 10;
   const startIndex = (currentPage - 1) * totalEntries + 1;
@@ -260,16 +272,23 @@ const User_BetMarket = () => {
     <div className="container-fluid my-5">
       <div className="card shadow-sm">
         <div
-          className="card-header"
+          className="card-header d-flex align-items-center"
           style={{
             backgroundColor: "#1E2761",
             color: "#FFFFFF",
           }}
         >
-          <h3 className="mb-0 fw-bold fs-5 text-center text-white p-2 text-uppercase">
+          <i
+            className="fa fa-arrow-left text-white px-2"
+            aria-hidden="true"
+            style={{ cursor: "pointer", fontSize: "1.3rem" }}
+            onClick={() => navigate("/Market_analysis")}
+          ></i>
+          <h3 className="mb-0 fw-bold fs-5 text-center flex-grow-1 text-white p-2 text-uppercase">
             User Bet Market
           </h3>
         </div>
+
         <div className="card-body">
           <SingleCard className="mb-5">
             <div className="card-group">
@@ -486,17 +505,9 @@ const User_BetMarket = () => {
                   <ReusableModal
                     isOpen={viewMoreModalOpen}
                     onClose={handleCloseViewMoreModal}
-                    title={
-                      <span className="h2 fw-bold">
-                        All Live Data
-                      </span>
-                    }
+                    title={<span className="h2 fw-bold">All Live Data</span>}
                     bodyContent={
-                      <div style={{
-                        maxHeight: "870px",
-                        // overflowY: "auto",
-                        minHeight: "870px",
-                      }}>
+                      <div style={{}}>
                         <div className="white_box_tittle list_header">
                           <div className="col-2 text-center">
                             <select
@@ -518,12 +529,10 @@ const User_BetMarket = () => {
                               <form Active="#">
                                 <div className="search_field">
                                   <input
-                                    // value={subAdminData.name}
-                                    // onChange={(e) => {
-                                    //   handleChange("name", e.target.value);
-                                    // }}
                                     type="text"
                                     placeholder="Search content here..."
+                                    value={searchTerm}
+                                    onChange={handleSearchChange}
                                   />
                                 </div>
                                 <button type="submit">
@@ -662,9 +671,9 @@ const User_BetMarket = () => {
                                               ? "#007bff"
                                               : "#FFB6C1",
                                         }}
-                                        // onClick={() =>
-                                        //   handleUsernameClick(data.userName)
-                                        // }
+                                        onClick={() =>
+                                          handleUsernameClick(data.userName)
+                                        }
                                       >
                                         {data.userName}
                                       </div>

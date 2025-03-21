@@ -8,9 +8,10 @@ import { createSubAdmin } from "../Utils/service/apiService";
 import FullScreenLoader from "../components/FullScreenLoader";
 
 const CreateSubAdmin = () => {
-  const {   store, dispatch, showLoader, hideLoader } = useAppContext();
+  const { store, dispatch, showLoader, hideLoader } = useAppContext();
   const [createSubAdminState] = useState(getCreateSubAdmin);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // const {
   //   values,
@@ -94,15 +95,15 @@ const CreateSubAdmin = () => {
                 <div className="mb-3">
                   <label
                     htmlFor="userName"
-                    className="form-label"
-                    style={{ fontWeight: "bold" }}
+                    className="form-label text-uppercase fw-bold"
+                    // style={{ fontWeight: "bold" }}
                   >
                     UserName
                   </label>
                   <input
                     type="text"
                     className="form-control "
-                    placeholder="Enter UserName"
+                    placeholder="Enter Username"
                     name="userName"
                     // style={{ border: '1px solid black' }}
                     value={values.userName}
@@ -117,20 +118,35 @@ const CreateSubAdmin = () => {
                 <div className="mb-3">
                   <label
                     htmlFor="password"
-                    className="form-label"
-                    style={{ fontWeight: "bold" }}
+                    className="form-label text-uppercase fw-bold"
+                    // style={{ fontWeight: "bold" }}
                   >
                     Password
                   </label>
-                  <input
-                    type="text"
-                    className="form-control "
-                    placeholder="Enter Password"
-                    name="password"
-                    // style={{ border: '1px solid black' }}
-                    value={values.password}
-                    onChange={handleChange}
-                  />
+                  <div className="position-relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      className="form-control "
+                      placeholder="Enter Password"
+                      name="password"
+                      // style={{ border: '1px solid black' }}
+                      value={values.password}
+                      onChange={handleChange}
+                    />
+                    <i
+                      className={`bi ${
+                        showPassword ? "bi-eye" : "bi-eye-slash"
+                      } position-absolute`}
+                      style={{
+                        right: "10px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        cursor: "pointer",
+                        fontSize: "1.2rem",
+                      }}
+                      onClick={() => setShowPassword(!showPassword)}
+                    ></i>
+                  </div>
                   <span>
                     {errors.password && touched.password ? (
                       <p className="text-danger fw-bold">{errors.password}</p>
@@ -147,7 +163,7 @@ const CreateSubAdmin = () => {
                       PERMISSIONS :
                     </h5>
 
-                    <div className="card-body">
+                    <div className="card-body ">
                       {strings.roles.map((permission) => (
                         <div
                           key={permission}
@@ -174,9 +190,9 @@ const CreateSubAdmin = () => {
                   </div>
                 </div>
 
-                <div className=" gap-2">
+                <div className=" gap-2  ">
                   <button
-                    className="btn btn-primary"
+                    className="btn btn-primary "
                     type="button"
                     onClick={handleSubmit}
                     disabled={["suspended"].includes(store?.admin?.status)}
