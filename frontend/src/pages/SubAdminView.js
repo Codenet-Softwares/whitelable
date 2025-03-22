@@ -79,7 +79,7 @@ const SubAdminView = () => {
     if (store?.admin && permissionObj.allAdmin.includes(store?.admin?.roles[0].role)) {
       getAll_SubAdmin_Create(subAdminData.name);
     }
-  }, [store?.admin, subAdminData.currentPage, subAdminData.totalEntries, refresh]);
+  }, [store?.admin, subAdminData.currentPage, subAdminData.totalEntries, subAdminData.name, refresh]);
 
   async function getAll_SubAdmin_Create(name = subAdminData.name) {
     const response = await getAllSubAdminCreate({
@@ -100,9 +100,11 @@ const SubAdminView = () => {
   }
 
   const handlePageChange = (page) => {
-    handleChange("currentPage", page);
+    setSubAdminData((prevState) => ({
+      ...prevState,
+      currentPage: page,
+    }));
   };
-
   let startIndex = Math.min(
     (Number(subAdminData.currentPage) - 1) * Number(subAdminData.totalEntries) +
       1

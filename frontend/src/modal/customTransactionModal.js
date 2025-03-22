@@ -23,6 +23,7 @@ const CustomTransactionModal = (props) => {
   const { store, showLoader, hideLoader } = useAppContext();
   const [balance, setBalance] = useState(0);
   console.log("=====>>> line 21", store);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function view_Balance() {
     const response = await viewBalance({
@@ -270,48 +271,46 @@ const CustomTransactionModal = (props) => {
               >
                 {props?.adminName}{" "}
                 {props.differentiate === "walletAmountProvider" && (
-            <div 
-            style={{
-              position: "absolute",
-              top: "10px",
-              right: "10px",
-              background: "#3b6e91",
-              color: "#fff",
-              padding: "8px 16px",
-              borderRadius: "30px",
-              fontWeight: "bold",
-              display: "flex",
-              alignItems: "center",
-              fontSize: "14px",
-              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
-              textAlign: "center",
-              minWidth: "150px",
-              justifyContent: "center",
-            }}
-            >
-              
-              <span style={{ fontWeight: "bold", color:"white" }}>
-                Client Balance:
-              </span>
-              <span
-                style={{
-                  fontWeight: "bold",
-                  color: "white",
-                  marginLeft: "5px",
-                }}
-              >
-                ₹{props.balance}
-              </span>
-            </div>
-          )}
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "10px",
+                      right: "10px",
+                      background: "#3b6e91",
+                      color: "#fff",
+                      padding: "8px 16px",
+                      borderRadius: "30px",
+                      fontWeight: "bold",
+                      display: "flex",
+                      alignItems: "center",
+                      fontSize: "14px",
+                      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+                      textAlign: "center",
+                      minWidth: "150px",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <span style={{ fontWeight: "bold", color: "white" }}>
+                      Client Balance:
+                    </span>
+                    <span
+                      style={{
+                        fontWeight: "bold",
+                        color: "white",
+                        marginLeft: "5px",
+                      }}
+                    >
+                      ₹{props.balance}
+                    </span>
+                  </div>
+                )}
               </span>
             </React.Fragment>
           ) : (
             <React.Fragment>
               <Alert variant="primary">
-                  Transaction By — {store?.admin?.adminName}
+                Transaction By — {store?.admin?.adminName}
               </Alert>
-           
             </React.Fragment>
           )}
         </div>
@@ -333,9 +332,8 @@ const CustomTransactionModal = (props) => {
             />
           </div>
           {props.differentiate === "walletAmountProvider" ? (
-            
             <input
-              type="text"
+              type={showPassword ? "text" : "password"}
               className="form-control mb-2"
               placeholder="Remarks"
               onChange={(e) =>
@@ -347,17 +345,30 @@ const CustomTransactionModal = (props) => {
             />
           ) : null}
           {props?.differentiate !== "addCashProvider" ? (
-            <input
-              type="password"
-              className="form-control"
-              placeholder="Password *"
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  password: e.target.value,
-                })
-              }
-            />
+            <div className="input-group">
+              <input
+                type={showPassword ? "text" : "password"}
+                className="form-control"
+                placeholder="Password *"
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    password: e.target.value,
+                  })
+                }
+              />
+              <div className="input-group-append">
+                <span
+                  className="input-group-text"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  <i
+                    className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"}`}
+                  ></i>
+                </span>
+              </div>
+            </div>
           ) : null}
         </form>
       </Modal.Body>
