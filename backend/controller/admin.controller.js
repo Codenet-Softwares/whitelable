@@ -1173,3 +1173,67 @@ export const fetchUserHierarchy = async (req, res) => {
     .json(apiResponseErr(null, false, statusCode.internalServerError, error.message));
   }
 };
+
+export const getHierarchyWiseUsers = async (req, res) => {
+  try {
+    const { userName } = req.params;
+
+    const getAllowedUserNames = async (userName) => {
+      const users = await admins.findAll({
+        where: {
+          createdByUser: userName,
+        },
+        attributes: ["adminId", "userName", "createdByUser", "roles"],
+      });
+
+      let allowedUserNames = [];
+      for (const user of users) {
+        const nestedUsers = await getAllowedUserNames(user.userName);
+        allowedUserNames.push({
+          userId: user.adminId, 
+          userName: user.userName,
+          roles: user.roles,
+        });
+        allowedUserNames = allowedUserNames.concat(nestedUsers);
+      }
+      return allowedUserNames;
+    };
+
+    const hierarchyWiseUsers = await getAllowedUserNames(userName);
+
+    const filteredUsers = hierarchyWiseUsers.filter((user) => {
+      return (
+        user.roles &&
+        Array.isArray(user.roles) &&
+        user.roles.some((roleObj) => roleObj.role === "user") 
+      );
+    });
+
+
+    const formattedData = {
+      users: filteredUsers.map((user) => ({
+        userId: user.userId,
+        userName: user.userName,
+      })),
+    };
+
+    return res.status(statusCode.success).send(
+      apiResponseSuccess(
+        formattedData,
+        true,
+        statusCode.success,
+        "Hierarchy-wise users fetched successfully"
+      )
+    );
+  } catch (error) {
+    res.status(statusCode.internalServerError).send(
+      apiResponseErr(
+        null,
+        false,
+        statusCode.internalServerError,
+        error.message
+      )
+    );
+  }
+};
+
