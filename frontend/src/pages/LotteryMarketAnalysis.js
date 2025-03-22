@@ -180,7 +180,7 @@ const LotteryMarketAnalysis = () => {
                   </span>
                 </h3>
                 <div className="row justify-content-center text-center mb-4 align-items-center ">
-                  <span className="live-bet-text ">Live Bets</span>
+                
   
                   <div className="col-md-3">
                     <div className="card border-0 shadow-sm p-3" style={{ backgroundColor: "#e6f7ff" }}>
