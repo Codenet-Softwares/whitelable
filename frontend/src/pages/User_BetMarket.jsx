@@ -50,19 +50,25 @@ const User_BetMarket = () => {
   const [liveToggle, setLiveToggle] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isHirerchyModalOpen, setHirerchyModalOpen] = useState(false);
+  const [isInsideViewMoreModal, setIsInsideViewMoreModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   // useEffect(()=>{fetch_BetBookData()},[bodyData])
-  const handleUsernameClick = (userName) => {
+  const handleUsernameClick = (userName , fromViewMore = false) => {
     console.log("onclick", userName);
     setSelectedUser(userName);
     setHirerchyModalOpen(true); // Open the modal when a username is clicked
-    handleCloseViewMoreModal();
+    handleCloseViewMoreModal();// #####
+    setIsInsideViewMoreModal(fromViewMore); // Track if the click was from View More modal
   };
-
   const handleHirerchyCloseModal = () => {
     setHirerchyModalOpen(false);
-    setSelectedUser(null); // Reset user selection when closing the modal
-  };
+    setSelectedUser(null); // Reset user selection
+     // Only reopen "View More" modal if it was opened from inside it
+     if (isInsideViewMoreModal) {
+      setViewMoreModalOpen(true);
+  }
+};
+
   const handleLiveToggle = () => {
     setLiveToggle(!liveToggle);
   };
@@ -672,7 +678,7 @@ const User_BetMarket = () => {
                                               : "#FFB6C1",
                                         }}
                                         onClick={() =>
-                                          handleUsernameClick(data.userName)
+                                          handleUsernameClick(data.userName,  true)
                                         }
                                       >
                                         {data.userName}
@@ -721,140 +727,7 @@ const User_BetMarket = () => {
                       </div>
                     }
                   />
-                  {/* <div className="card-body ">
-                    <h5
-                      style={{
-                        fontSize: "20px",
-                        fontWeight: "bold",
-                        color: "gray",
-                      }}
-                    >
-                        <h2 className="text-uppercase">Market Details</h2>
-                      <div>
-                        <div
-                          style={{
-                            border: "1px solid #ddd",
-                            borderRadius: "4px",
-                            margin: "5px",
-                            padding: "10px",
-                            backgroundColor: "#e6f2ff",
-                          }}
-                        >
-                          
-                          {liveToggle ? (
-                            user_LiveBet.map((data) => {
-                              return (
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    alignItems: "center",
-                                    marginTop: "5px",
-                                  }}
-                                >
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                    }}
-                                  >
-                                    {data.type === "back" ? (
-                                      <button
-                                        style={{
-                                          backgroundColor: "#007bff",
-                                          color: "#fff",
-                                          border: "none",
-                                          padding: "5px 10px",
-                                          borderRadius: "3px",
-                                          marginRight: "10px",
-                                          fontSize: "14px",
-                                        }}
-                                      >
-                                        {data.type}
-                                      </button>
-                                    ) : (
-                                      <button
-                                        style={{
-                                          backgroundColor: "#FFB6C1",
-                                          color: "#fff",
-                                          border: "none",
-                                          padding: "5px 10px",
-                                          borderRadius: "3px",
-                                          marginRight: "10px",
-                                          fontSize: "14px",
-                                        }}
-                                      >
-                                        {data.type}
-                                      </button>
-                                    )}
-
-                                    <div>
-                                      <div
-                                        style={{
-                                          fontWeight: "bold",
-                                          fontSize: "14px",
-                                        }}
-                                      >
-                                        {data.runnerName}
-                                      </div>
-                                      <div
-                                        style={{
-                                          fontSize: "12px",
-                                          color: "#555",
-                                        }}
-                                      >
-                                        Match Odds
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div style={{ display: "flex", gap: "30px" }}>
-                                    <div style={{ fontWeight: "bold" }}>
-                                      {data.rate}
-                                    </div>
-                                    <div style={{ fontWeight: "bold" }}>
-                                      {data.value}
-                                    </div>
-                                    {data.type === "back" ? (
-                                      <div
-                                        style={{
-                                          fontWeight: "bold",
-                                          color: "#007bff",
-                                        }}
-                                      >
-                                        {data.userName}
-                                      </div>
-                                    ) : (
-                                      <div
-                                        style={{
-                                          fontWeight: "bold",
-                                          color: "#FFB6C1",
-                                        }}
-                                      >
-                                        {data.userName}
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            })
-                          ) : (
-                            <div className="card-body text-center">
-                              <h5
-                                style={{
-                                  fontSize: "20px",
-                                  fontWeight: "bold",
-                                  color: "gray",
-                                }}
-                              >
-                                There are no any bet.
-                              </h5>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </h5>
-                  </div> */}
-
+               
                   <div className="card-body">
                     <h5
                       style={{
@@ -966,7 +839,7 @@ const User_BetMarket = () => {
                                               : "#FFB6C1",
                                         }}
                                         onClick={() =>
-                                          handleUsernameClick(data.userName)
+                                          handleUsernameClick(data.userName,  false)
                                         }
                                       >
                                         {data.userName}
