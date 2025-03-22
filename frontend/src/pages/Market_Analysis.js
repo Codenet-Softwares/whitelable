@@ -99,7 +99,7 @@ const Market_Analysis = () => {
                 value={liveGmes.type}
                 onChange={handleChange}
               >
-                <option value="10">All</option>
+                <option value="">All</option>
                 <option value="colorgame">Colorgame</option>
                 <option value="lottery">Lottery</option>
               </select>
