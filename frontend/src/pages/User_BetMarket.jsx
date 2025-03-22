@@ -179,6 +179,7 @@ const User_BetMarket = () => {
   async function getView_User_BetMarket() {
     try {
       const response = await getUserGetMarket({
+        userName: store.admin.adminName,
         marketId: marketId,
       });
       setUser_marketWithRunnerData(response.data);
