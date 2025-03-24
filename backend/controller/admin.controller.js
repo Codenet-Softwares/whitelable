@@ -269,15 +269,14 @@ export const calculateLoadBalance = async (adminId) => {
   const hierarchyBalance = await balance_hierarchy(admin.adminId)
 
   let exposure
-
   if (admin.roles[0].role === string.user) {
     const baseUrl = process.env.COLOR_GAME_URL;
     const user_Exposure = await axios.get(`${baseUrl}/api/external/get-exposure/${admin.adminId}`)
     const { data } = user_Exposure
     exposure = data.exposure
   }
-  if (exposure === 0) {
-    totalBalance = adminBalance;
+  
+    totalBalance = adminBalance + (exposure ?? 0);
 
     const children = await admins.findAll({
       where: { createdById: adminId },
@@ -291,27 +290,8 @@ export const calculateLoadBalance = async (adminId) => {
     if (loadBalance !== totalBalance) {
       loadBalance = totalBalance
     }
-  }
-
-  else {
-    totalBalance = hierarchyBalance;
-
-    const children = await admins.findAll({
-      where: { createdById: adminId },
-    });
-
-    for (const child of children) {
-      const childBalance = await calculateLoadBalance(child.adminId);
-      totalBalance += childBalance;
-    }
-
-    if (loadBalance !== totalBalance) {
-      loadBalance = totalBalance
-    }
-  }
-
-
   return totalBalance;
+  
 };
 
 export const calculateExposure = async (adminId) => {
@@ -328,7 +308,7 @@ export const calculateExposure = async (adminId) => {
     try {
       const user_Exposure = await axios.get(`${baseUrl}/api/external/get-exposure/${admin.adminId}`);
       const { data } = user_Exposure;
-      exposure = Number(data.exposure) || 0;
+      exposure = parseFloat(data.exposure) || 0;
     } catch (error) {
       console.error("Error fetching exposure:", error.message);
       exposure = 0;
@@ -344,7 +324,7 @@ export const calculateExposure = async (adminId) => {
   for (const child of children) {
     let childExposure = await calculateExposure(child.adminId);
 
-    childExposure = Number(childExposure) || 0;
+    childExposure = parseFloat(childExposure) || 0;
     totalExposure += childExposure;
 
   }
