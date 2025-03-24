@@ -70,9 +70,7 @@ export const getUserBetMarket = async (req, res) => {
 
 export const getLiveBetGames = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const { search, type } = req.query;
+    const { page = 1 , limit = 10, search, type } = req.query;
     const offset = (page - 1) * limit;
 
     const token = jwt.sign(
@@ -189,28 +187,38 @@ export const getLiveBetGames = async (req, res) => {
       combinedData = combinedData.filter((item) => item.source === type);
     }
 
-    if (search) {
-      combinedData = combinedData.filter(
-        (item) =>
-          item.marketName?.toLowerCase().includes(search.toLowerCase()) ||
-          (item.source === "colorgame" &&
-            item.gameName?.toLowerCase().includes(search.toLowerCase()))
-      );
-    }
 
     const uniqueData = Array.from(
       new Set(combinedData.map((item) => item.marketId))
     ).map((uniqueMarketId) =>
       combinedData.find((item) => item.marketId === uniqueMarketId)
     );
-
-    const paginatedData = uniqueData.slice(offset, offset + limit);
+    
+    let filterData = uniqueData;
+    
+    if (search) {
+      filterData = uniqueData.filter(
+        (item) =>
+          item.marketName?.toLowerCase().includes(search.toLowerCase()) ||
+          (item.source === "colorgame" &&
+            item.gameName?.toLowerCase().includes(search.toLowerCase()))
+      );
+    }
+    
+    const totalItems = filterData.length;
+    const totalPages = Math.ceil(totalItems / limit);
+    
+    // Optional: handle page overflow
+    const validPage = page > totalPages ? 1 : page;
+    const validOffset = (validPage - 1) * limit;
+    
+    const paginatedData = filterData.slice(validOffset, validOffset + limit);
 
     const pagination = {
       Page: page,
       limit: limit,
-      totalItems: uniqueData.length,
-      totalPages: Math.ceil(uniqueData.length / limit),
+      totalItems,
+      totalPages,
     };
 
     return res.status(statusCode.success).send(
