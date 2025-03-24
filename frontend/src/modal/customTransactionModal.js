@@ -333,7 +333,7 @@ const CustomTransactionModal = (props) => {
           </div>
           {props.differentiate === "walletAmountProvider" ? (
             <input
-              type={showPassword ? "text" : "password"}
+              type="text"
               className="form-control mb-2"
               placeholder="Remarks"
               onChange={(e) =>
