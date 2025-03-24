@@ -580,7 +580,7 @@ export const admin_Balance = async (adminId) => {
       const { data } = user_balance
       balance = data.balance
     }
-
+    console.log('Final balance with ext.',adminId, balance);
     return balance;
   } catch (error) {
     throw new Error(`Error calculating balance: ${error.message}`);
@@ -663,6 +663,7 @@ export const balance_hierarchy = async (adminId) => {
         }
       }
     }
+     // console.log("balance.............................",balance)
 
     return balance;
   } catch (error) {
