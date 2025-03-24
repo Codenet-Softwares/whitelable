@@ -477,10 +477,9 @@ export const viewAllCreates = async (req, res) => {
 export const viewAllSubAdminCreates = async (req, res) => {
   try {
     const createdById = req.params.createdById;
-    const page = parseInt(req.query.page, 10) || 1;
-    const pageSize = parseInt(req.query.pageSize, 10) || 5;
 
-    const searchQuery = req.query.userName ? { userName: { [Op.like]: `%${req.query.userName}%` } } : {};
+    const { page = 1, pageSize = 10, searchQuery = ""  } = req.query;
+    const offset = (page - 1) * pageSize;
 
     const allowedRoles = [
       string.subAdmin,
@@ -490,27 +489,28 @@ export const viewAllSubAdminCreates = async (req, res) => {
       string.subSuperAgent
     ];
 
+    const whereCondition = { createdById, [Op.or]: allowedRoles.map(role => fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))) }
+
+    if(searchQuery)
+    {
+      whereCondition.userName = { [Op.like]: `%${searchQuery}%` }
+    }
+
     const totalRecords = await admins.count({
-      where: {
-        createdById,
-        ...searchQuery,
-        [Op.or]: allowedRoles.map(role => fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))),
-      },
+      where: whereCondition,
+      limit: parseInt(pageSize),
+      offset,
+      order: [['createdAt', 'DESC']],
     });
 
     if (totalRecords === 0) {
       return res.status(statusCode.success).json(apiResponseSuccess([], true, statusCode.success, messages.noRecordsFound));
     }
 
-    const offset = (page - 1) * pageSize;
     const adminsData = await admins.findAll({
-      where: {
-        createdById,
-        ...searchQuery,
-        [Op.or]: allowedRoles.map(role => fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))),
-      },
+      where: whereCondition,
+      limit: parseInt(pageSize),
       offset,
-      limit: pageSize,
       order: [['createdAt', 'DESC']],
     });
 
@@ -560,7 +560,7 @@ export const viewAllSubAdminCreates = async (req, res) => {
         {
           totalRecords,
           totalPages,
-          currentPage: page,
+          currentPage: parseInt(page),
           pageSize,
         }
       ),
