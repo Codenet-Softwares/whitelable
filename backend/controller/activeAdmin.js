@@ -2,8 +2,10 @@ import { Op, Sequelize } from "sequelize";
 import { string } from "../constructor/string.js";
 import admins from "../models/admin.model.js";
 import CustomError from "../helper/extendError.js";
+import axios from "axios";
 
-export const activateAdmin = async (adminId, isActive, locked) => {
+export const activateAdmin = 
+async (adminId, isActive, locked) => {
   try {
 
     const admin = await admins.findOne({ where: { adminId } });
@@ -442,7 +444,7 @@ export const activateAdmin = async (adminId, isActive, locked) => {
         activateAdmin(data.adminId, data.isActive, data.locked);
       });
 
-      user.forEach((data) => {
+      user.forEach(async (data) => {
         if (
           data.isActive === false &&
           data.locked === false &&
@@ -474,7 +476,18 @@ export const activateAdmin = async (adminId, isActive, locked) => {
           data.userActive = false;
           data.checkActive = false;
         } //checked
-        activateAdmin(data.adminId, data.isActive, data.locked);
+
+        try {
+          const baseUrl = process.env.COLOR_GAME_URL;
+          const res = await axios.put(`${baseUrl}/api/user/active-inactive/${data.adminId}`, {
+            isActive: data.isActive,
+            locked: data.locked,
+          });
+          console.log(`Update success for ${data.adminId}:`, res.data);
+        } catch (err) {
+          console.error(`Error updating ${data.adminId}:`, err.message);
+        }
+        await activateAdmin(data.adminId, data.isActive, data.locked);
       });
 
       await admin.save();
@@ -960,7 +973,7 @@ export const activateAdmin = async (adminId, isActive, locked) => {
           activateAdmin(data.adminId, data.isActive, data.locked);
         });
 
-        user.forEach((data) => {
+        user.forEach( async(data) => {
           if (
             data.isActive === true &&
             data.locked === true &&
@@ -1008,7 +1021,19 @@ export const activateAdmin = async (adminId, isActive, locked) => {
             data.userActive = false;
             data.checkActive === false;
           }
-          activateAdmin(data.adminId, data.isActive, data.locked);
+
+          try {
+            const baseUrl = process.env.COLOR_GAME_URL;
+            const res = await axios.put(`${baseUrl}/api/user/active-inactive/${data.adminId}`, {
+              isActive: data.isActive,
+              locked: data.locked,
+            });
+            console.log(`Update success for ${data.adminId}:`, res.data);
+          } catch (err) {
+            console.error(`Error updating ${data.adminId}:`, err.message);
+          }
+
+          await activateAdmin(data.adminId, data.isActive, data.locked);
         });
 
         await admin.save();
@@ -1290,7 +1315,7 @@ export const activateAdmin = async (adminId, isActive, locked) => {
           activateAdmin(data.adminId, data.isActive, data.locked);
         });
 
-        user.forEach((data) => {
+        user.forEach( async(data) => {
           if (
             data.isActive === true &&
             data.locked === true &&
@@ -1316,7 +1341,18 @@ export const activateAdmin = async (adminId, isActive, locked) => {
           ) {
             data.locked = true;
           }
-          activateAdmin(data.adminId, data.isActive, data.locked);
+
+          try {
+            const baseUrl = process.env.COLOR_GAME_URL;
+            const res = await axios.put(`${baseUrl}/api/user/active-inactive/${data.adminId}`, {
+              isActive: data.isActive,
+              locked: data.locked,
+            });
+            console.log(`Update success for ${data.adminId}:`, res.data);
+          } catch (err) {
+            console.error(`Error updating ${data.adminId}:`, err.message);
+          }
+          await activateAdmin(data.adminId, data.isActive, data.locked);
         });
 
         await admin.save();
