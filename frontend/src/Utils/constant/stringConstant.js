@@ -66,6 +66,7 @@ export class StringConstants {
     { role: "move-to-trash", name: "Move To Trash" },
     { role: "trash-view", name: "Trash View" },
     { role: "market-analysis", name: "Market Analysis" },
+    { role: "create-Admin", name: "Create Admin" },
   ];
   // roles = [
   //   'transferBalance',

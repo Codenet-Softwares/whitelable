@@ -334,7 +334,7 @@ const Navside = () => {
               )}
             </>
           )}
-          {store.admin.roles[0].permission.includes(strings.createAdmin) && (
+          {/* {store.admin.roles[0].permission.includes(strings.createAdmin) && (
             <>
               {userRole ? (
                 <li className="" onClick={handleUserRoleToggle}>
@@ -380,7 +380,7 @@ const Navside = () => {
                 </li>
               )}
             </>
-          )}
+          )} */}
 
           {permissionObj.allAdmin.includes(store.admin.roles[0].role) && (
             <li>
