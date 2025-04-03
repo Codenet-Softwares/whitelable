@@ -289,6 +289,8 @@ export const transactionView = async (req, res) => {
     }
 
     const transactionData = await transaction.findAll(transactionQuery);
+    console.log("transactionData", transactionData);
+    
     if (transactionData.length === 0) {
       return res.status(statusCode.success).send(apiResponseSuccess([], true, statusCode.success, "No Data Found"));
     }
@@ -410,12 +412,19 @@ export const accountStatement = async (req, res) => {
         [Sequelize.Op.or]: [
           { adminId },
           { transferToUserAccount: adminUserName },
+          { transferFromUserAccount: adminUserName },
         ],
       },
       order: [["date", "DESC"]],
     };
 
+   
+    
+
     const transferAmount = await transaction.findAll(transactionQuery);
+
+    console.log("transferAmount", transferAmount);
+
     let allData = JSON.parse(JSON.stringify(transferAmount));
 
     allData
