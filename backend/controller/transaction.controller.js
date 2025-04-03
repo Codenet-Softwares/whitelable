@@ -218,6 +218,8 @@ export const transactionView = async (req, res) => {
     const pageSize = parseInt(req.query.pageSize) || 10;
     const dataType = req.query.dataType;
 
+    let balances = 0;
+
     let startDate, endDate;
 
     if (dataType === 'live') {
@@ -258,6 +260,8 @@ export const transactionView = async (req, res) => {
 
     const admin = await admins.findOne({ where: { userName } });
 
+    const adminId = admin.adminId
+
     if (!admin) {
       return res.status(statusCode.badRequest).send(apiResponseErr([], false, statusCode.badRequest, messages.adminNotFound));
     }
@@ -267,6 +271,7 @@ export const transactionView = async (req, res) => {
     let transactionQuery = {
       where: {
         [Sequelize.Op.or]: [
+          { adminId },
           { transferFromUserAccount: adminUserName },
           { transferToUserAccount: adminUserName },
         ],
@@ -289,7 +294,6 @@ export const transactionView = async (req, res) => {
     }
 
     const transactionData = await transaction.findAll(transactionQuery);
-    console.log("transactionData", transactionData);
     
     if (transactionData.length === 0) {
       return res.status(statusCode.success).send(apiResponseSuccess([], true, statusCode.success, "No Data Found"));
@@ -297,20 +301,46 @@ export const transactionView = async (req, res) => {
     const totalItems = transactionData.length;
     let allData = JSON.parse(JSON.stringify(transactionData));
 
-    const reversedData = [...allData].reverse();
+    // const reversedData = [...allData].reverse();
 
-    let runningBalance = 0;
+    // let runningBalance = 0;
 
-    reversedData.forEach((data) => {
-      if (data.transferFromUserAccount === adminUserName) {
-        runningBalance = data.currentBalance;
-      } else if (data.transferToUserAccount === adminUserName) {
-        runningBalance = data.currentBalance;
-      }
-      data.balance = runningBalance;
-    });
+    // reversedData.forEach((data) => {
+    //   if (data.transferFromUserAccount === adminUserName) {
+    //     runningBalance = data.currentBalance;
+    //   } else if (data.transferToUserAccount === adminUserName) {
+    //     runningBalance = data.currentBalance;
+    //   }
+    //   data.balance = runningBalance;
+    // });
 
-    allData = reversedData.reverse();
+    allData.slice().reverse().map((data) => {
+        if (data.receiver_adminId === adminId) {
+          if (data.transactionType === "credit") {
+            balances += parseFloat(data.amount);
+            data.balance = balances;
+          }
+          if (data.transactionType === "withdrawal") {
+            balances -= parseFloat(data.amount);
+            data.balance = balances;
+          }
+        } else {
+          if (data.transactionType === "credit") {
+            balances -= parseFloat(data.amount);
+            data.balance = balances;
+          }
+          if (data.transactionType === "withdrawal") {
+            balances += parseFloat(data.amount);
+            data.balance = balances;
+          }
+          if (data.transactionType === "self_credit") {
+            balances += parseFloat(data.amount);
+            data.balance = balances;
+          }
+        }
+      });
+
+    // allData = reversedData.reverse();
 
     const totalPages = Math.ceil(totalItems / pageSize);
 
