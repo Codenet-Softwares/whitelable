@@ -134,8 +134,18 @@ const HierarchyPageView = () => {
               <div class="white_card_body">
                 <div class="QA_section">
                   <div class="white_box_tittle list_header">
-                    <h4 className='fw-bolder text-uppercase' style={{color:"#1E2761"}}>User List </h4>
-                    <div class="box_right d-flex lms_block gap-5">
+                  <div className="d-flex align-items-center">
+                      <span className="me-3" onClick={() => navigate(-1)}>
+                        <button className="btn btn-secondary">&#8592;</button>
+                      </span>
+                      <h4
+                        className="fw-bolder text-uppercase"
+                        style={{ color: "#1E2761"}}
+                      >
+                        User List
+                      </h4>
+                    </div>                
+                      <div class="box_right d-flex lms_block gap-5">
                       <select
                         class="form-select form-select-sm w-25"
                         aria-label=".form-select-sm example"
