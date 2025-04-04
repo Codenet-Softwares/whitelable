@@ -654,6 +654,21 @@ export async function getUserHirerchy(body = {}, isToast = false) {
   } catch (error) {
     throw error;
   }
+}
+
+
+export async function getAdminDownline(body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.GET, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.adminDownline}/${body.userName}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
 
 
 }

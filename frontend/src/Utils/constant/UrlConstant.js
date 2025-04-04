@@ -57,6 +57,7 @@ class UrlConstant {
   resetSubAdmin = `${this.url_dev}/${this.admin}/reset-password`
   deleteSubAdmin = `${this.url_dev}/${this.admin}/move-to-trash-user`
   userHirerchy = `${this.url_dev}/${this.user}-hierarchy`
+  adminDownline=``
 }
 
 

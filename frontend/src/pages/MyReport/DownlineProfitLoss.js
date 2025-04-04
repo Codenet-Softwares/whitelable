@@ -1,15 +1,36 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReusableTable from '../../Reusables/ReusableTable';
+import { getAdminDownline } from '../../Utils/service/apiService';
 
 const DownlineProfitLoss = () => {
   const navigate = useNavigate();
   const [dataType, setDataType] = useState('live');
   const [userName, setUserName] = useState("white_hyper_user_3_apr")
+
   const [dateRange, setDateRange] = useState({
     from: new Date().toISOString().split('T')[0],
     to: new Date().toISOString().split('T')[0]
   });
+
+
+  // async function getAll_AdminDownline() {
+  //   const response = await getAdminDownline({
+  //     userName,
+  //     pageNumber: state.currentPage,
+  //     fromDate: dateRange.startDate,
+  //     toDate: dateRange.endDate,
+  //     limit: state.totalEntries,
+  //     dataSource: dataType,
+  //   });
+  //   setState((prevState) => ({
+  //     ...prevState,
+  //     statementView: response.data,
+  //     totalPages: response?.pagination?.totalPages,
+  //     totalData: response?.pagination?.totalItems,
+  //   }));
+  // }
+
 
   // Sample data with all required fields
   const sampleData = [
@@ -35,6 +56,12 @@ const DownlineProfitLoss = () => {
       commission: 400
     },
   ];
+
+
+  // Handle back navigation
+  const handleBack = () => {
+
+  };
 
   // Calculate totals
   const totals = sampleData.reduce((acc, item) => {
@@ -116,8 +143,14 @@ const DownlineProfitLoss = () => {
       <div className="row justify-content-center">
         <div className="col-md-12">
           <div className="card shadow-sm">
-            <div className="card-header bg-primary text-white">
+            <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
               <h4 className="mb-0 text-white">Downline Profit/Loss Report</h4>
+              <button
+                className="btn btn-light btn-sm"
+                onClick={handleBack}
+              >
+                <i className="fas fa-arrow-left mr-2"></i> Back
+              </button>
             </div>
 
             {/* Filter Controls */}
