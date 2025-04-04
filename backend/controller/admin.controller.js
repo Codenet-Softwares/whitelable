@@ -1220,52 +1220,88 @@ export const getHierarchyWiseUsers = async (req, res) => {
 };
 
 
-export const getTotalProfitLoss = async(req,res) => {
+export const getTotalProfitLoss = async (req, res) => {
   try {
+    const { page = 1, pageSize = 10, search = "", dataType, startDate, endDate} = req.query;
+    const offset = (page - 1) * pageSize;
     const adminId = req.user?.adminId;
-
     const userName = await getAllConnectedUsers(adminId);
-
     const token = jwt.sign(
       { role: req.user.roles },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );
-
     const headers = {
       Authorization: `Bearer ${token}`,
     };
-
-    console.log("userName", userName)
-
     const baseURL = process.env.COLOR_GAME_URL;
     const response = await axios.post(
       `${baseURL}/api/external-profit_loss`,
       {
         userName,
       },
-      { headers }
+      {
+        headers,
+        params: {
+          dataType,
+          startDate,
+          endDate
+        },
+      }
     );
+    
+    let data = Array.isArray(response.data)
+    ? response.data
+    : response.data?.data || [];
 
-    const data = response.data;
+    if (search) {
+      const searchLower = search.toLowerCase();
+      data = data.filter((item) =>
+        item.gameName?.toLowerCase().includes(searchLower)
+      );
+    }
 
-    return res.status(statusCode.success).send(
-      apiResponseSuccess(
-        data,
-        true,
-        statusCode.success,
-        "Hierarchy-wise users fetched successfully"
-      )
-    );
+    if (data.length == 0) {
+      return res
+        .status(statusCode.success)
+        .send(
+          apiResponseSuccess([], true, statusCode.success, "Data not found!")
+        );
+    }
+
+    const totalItems = data.length;
+    const totalPages = Math.ceil(totalItems / pageSize);
+    const paginatedData = data.slice(offset, offset + parseInt(pageSize));
+
+    const Pagination = {
+      page: parseInt(page),
+      pageSize: parseInt(pageSize),
+      totalPages,
+      totalItems,
+    };
+
+    return res
+      .status(statusCode.success)
+      .send(
+        apiResponseSuccess(
+          paginatedData,
+          true,
+          statusCode.success,
+          "Hierarchy-wise porfit/loss fetched successfully",
+          Pagination
+        )
+      );
   } catch (error) {
-    return res.status(statusCode.internalServerError).send(
-      apiResponseErr(
-        null,
-        false,
-        statusCode.internalServerError,
-        error.message
-      )
-    );
+    return res
+      .status(statusCode.internalServerError)
+      .send(
+        apiResponseErr(
+          null,
+          false,
+          statusCode.internalServerError,
+          error.message
+        )
+      );
   }
 };
 
