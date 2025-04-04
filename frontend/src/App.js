@@ -87,6 +87,8 @@ function App() {
                 element={<View_AddCash_history />}
               />
               <Route path="Market_analysis" element={<Market_Analysis />} />
+              {/* 
+              /*last page table to render for colorgame*/}
               <Route
                 path="betHistForPL/:userName/:runnerId"
                 element={<BetHistoryForPl />}
@@ -95,6 +97,9 @@ function App() {
                 path="/User_BetMarket/:marketId"
                 element={<User_BetMarket />}
               />
+
+                {/* 
+              /*last page table to render for lottery*/}
               <Route
                 path="betHistLotteryForPL/:userName/:id"
                 element={<BetHistoryLotteryForPl />}
