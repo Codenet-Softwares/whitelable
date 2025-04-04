@@ -5,6 +5,7 @@ import ReusableTable from '../../Reusables/ReusableTable';
 const DownlineProfitLoss = () => {
   const navigate = useNavigate();
   const [dataType, setDataType] = useState('live');
+  const [userName, setUserName] = useState("white_hyper_user_3_apr")
   const [dateRange, setDateRange] = useState({
     from: new Date().toISOString().split('T')[0],
     to: new Date().toISOString().split('T')[0]
@@ -12,26 +13,26 @@ const DownlineProfitLoss = () => {
 
   // Sample data with all required fields
   const sampleData = [
-    { 
-      id: 1, 
-      username: 'user1', 
-      profitLoss: 1500, 
-      downlineProfitLoss: 800, 
-      commission: 300 
+    {
+      id: 1,
+      username: 'user1',
+      profitLoss: 1500,
+      downlineProfitLoss: 800,
+      commission: 300
     },
-    { 
-      id: 2, 
-      username: 'user2', 
-      profitLoss: 2500, 
-      downlineProfitLoss: 1200, 
-      commission: 500 
+    {
+      id: 2,
+      username: 'user2',
+      profitLoss: 2500,
+      downlineProfitLoss: 1200,
+      commission: 500
     },
-    { 
-      id: 3, 
-      username: 'user3', 
-      profitLoss: 1800, 
-      downlineProfitLoss: 900, 
-      commission: 400 
+    {
+      id: 3,
+      username: 'user3',
+      profitLoss: 1800,
+      downlineProfitLoss: 900,
+      commission: 400
     },
   ];
 
@@ -61,16 +62,16 @@ const DownlineProfitLoss = () => {
       render: (item) => item.isTotalRow ? (
         <strong>{item.username}</strong>
       ) : (
-        <button 
-          className="btn btn-link p-0" 
-          onClick={() => navigate(`/downline-details/${item.id}`)}
+        <button
+          className="btn btn-link p-0"
+          onClick={() => navigate(`/account-landing/${userName}/activity`)}
         >
           {item.username}
         </button>
       )
     },
-    { 
-      key: 'profitLoss', 
+    {
+      key: 'profitLoss',
       label: 'Profit/Loss',
       render: (item) => item.isTotalRow ? (
         <strong>{item.profitLoss.toLocaleString()}</strong>
@@ -78,8 +79,8 @@ const DownlineProfitLoss = () => {
         item.profitLoss.toLocaleString()
       )
     },
-    { 
-      key: 'downlineProfitLoss', 
+    {
+      key: 'downlineProfitLoss',
       label: 'Downline P/L',
       render: (item) => item.isTotalRow ? (
         <strong>{item.downlineProfitLoss.toLocaleString()}</strong>
@@ -87,8 +88,8 @@ const DownlineProfitLoss = () => {
         item.downlineProfitLoss.toLocaleString()
       )
     },
-    { 
-      key: 'commission', 
+    {
+      key: 'commission',
       label: 'Commission',
       render: (item) => item.isTotalRow ? (
         <strong>{item.commission.toLocaleString()}</strong>
@@ -118,13 +119,13 @@ const DownlineProfitLoss = () => {
             <div className="card-header bg-primary text-white">
               <h4 className="mb-0 text-white">Downline Profit/Loss Report</h4>
             </div>
-            
+
             {/* Filter Controls */}
             <div className="card-body border-bottom">
               <div className="row align-items-center">
                 <div className="col-md-3 mb-2">
-                  <select 
-                    className="form-control"
+                  <select
+                    className="form-control "
                     value={dataType}
                     onChange={(e) => setDataType(e.target.value)}
                   >
@@ -139,14 +140,14 @@ const DownlineProfitLoss = () => {
                       type="date"
                       className="form-control"
                       value={dateRange.from}
-                      onChange={(e) => setDateRange({...dateRange, from: e.target.value})}
+                      onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
                     />
                     <span className="input-group-text">to</span>
                     <input
                       type="date"
                       className="form-control"
                       value={dateRange.to}
-                      onChange={(e) => setDateRange({...dateRange, to: e.target.value})}
+                      onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
                     />
                   </div>
                 </div>
