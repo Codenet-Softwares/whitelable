@@ -17,7 +17,7 @@ import { useAppContext } from "../contextApi/context";
 import { permissionObj } from "../Utils/constant/permission";
 import { useParams } from "react-router-dom";
 import Picture from "../Assets/Picture.webp";
-import "./DemoMarket_Analysis.css";
+
 import ReusableModal from "../components/common/ReusableModal";
 import HierarchyModal from "./HierarchyModal";
 import Pagination from "../components/common/Pagination";
