@@ -11,7 +11,14 @@ const Navside = () => {
   const [isUser, setIsUser] = useState(true);
   const [isRequest, setIsRequest] = useState(true);
   const [userRole, setUserRole] = useState(true);
+  const [isReport, setIsReport] = useState(true); // New state for  My Report Section
   const navigate = useNavigate();
+
+  // Added toggle function for  My Report Section
+  const handleReportToggle = () => {
+    setIsReport(!isReport);
+  };
+
   const handleUserToggle = () => {
     setIsUser(!isUser);
   };
@@ -414,6 +421,68 @@ const Navside = () => {
                   <span>Market Analysis</span>
                 </div>
               </Link>
+            </li>
+          )}
+          {/* Added this new section for My Report */}
+          {isReport ? (
+            <li className="" onClick={handleReportToggle}>
+              <a className="has-arrow" href="#" aria-expanded="false">
+                <div className="nav_icon_small">
+                  <i
+                    class="fa-solid fa-chart-pie"
+                    style={{ color: "black", fontSize: "20px" }}
+                  ></i>
+                </div>
+                <div className="nav_title">
+                  <span>My Report</span>
+                </div>
+              </a>
+            </li>
+          ) : (
+            <li className="" onClick={handleReportToggle}>
+              <a className="has-arrow" href="#" aria-expanded="false">
+                <div className="nav_icon_small">
+                  <i
+                    class="fa-solid fa-chart-pie"
+                    style={{ color: "black", fontSize: "20px" }}
+                  ></i>
+                </div>
+                <div className="nav_title">
+                  <span>My Report</span>
+                </div>
+              </a>
+              <ul>
+                <li>
+                  <Link to="event-profit-loss">
+                    <span>
+                      <i
+                        class="fa-solid fa-chart-column"
+                        style={{
+                          color: "black",
+                          fontSize: "20px",
+                          marginLeft: "50px",
+                        }}
+                      ></i>
+                      Event Profit/Loss
+                    </span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="downline-profit-loss">
+                    <span>
+                      <i
+                        class="fa-solid fa-chart-line"
+                        style={{
+                          color: "black",
+                          fontSize: "20px",
+                          marginLeft: "50px",
+                        }}
+                      ></i>
+                      Downline Profit/Loss
+                    </span>
+                  </Link>
+                </li>
+              </ul>
             </li>
           )}
         </ul>
