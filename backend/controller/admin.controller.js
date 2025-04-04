@@ -12,6 +12,8 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import { admin_Balance, balance_hierarchy } from './transaction.controller.js';
 import { findCreatorHierarchy } from '../helper/createHierarchy.js';
+import { getAllConnectedUsers } from '../controller/lotteryGame.controller.js'
+
 dotenv.config();
 
 /**
@@ -1207,6 +1209,56 @@ export const getHierarchyWiseUsers = async (req, res) => {
     );
   } catch (error) {
     res.status(statusCode.internalServerError).send(
+      apiResponseErr(
+        null,
+        false,
+        statusCode.internalServerError,
+        error.message
+      )
+    );
+  }
+};
+
+
+export const getTotalProfitLoss = async(req,res) => {
+  try {
+    const adminId = req.user?.adminId;
+
+    const userName = await getAllConnectedUsers(adminId);
+
+    const token = jwt.sign(
+      { role: req.user.roles },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: "1h" }
+    );
+
+    const headers = {
+      Authorization: `Bearer ${token}`,
+    };
+
+    console.log("userName", userName)
+
+    const baseURL = process.env.COLOR_GAME_URL;
+    const response = await axios.post(
+      `${baseURL}/api/external-profit_loss`,
+      {
+        userName,
+      },
+      { headers }
+    );
+
+    const data = response.data;
+
+    return res.status(statusCode.success).send(
+      apiResponseSuccess(
+        data,
+        true,
+        statusCode.success,
+        "Hierarchy-wise users fetched successfully"
+      )
+    );
+  } catch (error) {
+    return res.status(statusCode.internalServerError).send(
       apiResponseErr(
         null,
         false,

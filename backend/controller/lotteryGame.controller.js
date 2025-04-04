@@ -63,7 +63,7 @@ export const getLotteryBetHistory = async (req, res) => {
   }
 }
 
-const getAllConnectedUsers = async (adminId) => {
+export const getAllConnectedUsers = async (adminId) => {
   let allUsers = [adminId];
   let queue = [adminId];
 
