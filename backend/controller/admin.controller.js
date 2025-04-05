@@ -1217,3 +1217,95 @@ export const getHierarchyWiseUsers = async (req, res) => {
   }
 };
 
+export const downLineUsers = async (req, res) => {
+  try {
+    const createdById = req.params.createdById;
+    const searchTerm = req.query.searchTerm || '';
+
+    const page = parseInt(req.query.page, 10) || 1;
+    const pageSize = parseInt(req.query.pageSize, 10) || 10;
+
+    const allowedRoles = [
+      string.superAdmin,
+      string.whiteLabel,
+      string.hyperAgent,
+      string.superAgent,
+      string.masterAgent,
+      string.user,
+    ];
+
+    const baseWhere = {
+      createdById,
+      [Op.or]: allowedRoles.map((role) =>
+        fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))
+      ),
+    };
+
+    if (searchTerm) {
+      baseWhere.userName = {
+        [Op.like]: `%${searchTerm}%`
+      };
+    }
+
+    const totalRecords = await admins.count({
+      where: baseWhere
+    });
+
+    if (totalRecords === 0) {
+      return res.status(statusCode.success).json({
+        data: [],
+        success: true,
+        successCode: statusCode.success,
+        message: messages.noRecordsFound,
+        pagination: {
+          totalRecords: 0,
+          totalPages: 0,
+          currentPage: page,
+          pageSize
+        }
+      });
+    }
+
+    const offset = (page - 1) * pageSize;
+    const adminsData = await admins.findAll({
+      where: baseWhere,
+      offset,
+      limit: pageSize,
+      order: [['createdAt', 'DESC']],
+      raw: true
+    });
+
+    const users = adminsData.map((admin) => {
+      return {
+        adminId: admin.adminId,
+        userName: admin.userName,
+        roles: admin.roles,
+        createdById: admin.createdById,
+        createdByUser: admin.createdByUser,
+      };
+    });
+
+    const totalPages = Math.ceil(totalRecords / pageSize);
+
+    return res.status(statusCode.success).json({
+      data: users,
+      success: true,
+      successCode: statusCode.success,
+      message: messages.success,
+      pagination: {
+        totalRecords,
+        totalPages,
+        currentPage: page,
+        pageSize,
+      }
+    });
+  } catch (error) {
+    return res.status(statusCode.internalServerError).json({
+      data: null,
+      success: false,
+      successCode: statusCode.internalServerError,
+      message: error.message
+    });
+  }
+};
+
