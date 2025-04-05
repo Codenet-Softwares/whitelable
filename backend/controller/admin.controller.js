@@ -1224,6 +1224,24 @@ export const downLineUsers = async (req, res) => {
 
     const page = parseInt(req.query.page, 10) || 1;
     const pageSize = parseInt(req.query.pageSize, 10) || 10;
+    const baseURL = process.env.COLOR_GAME_URL;
+
+    // Fetch profit/loss data from external API
+    let profitLossResponse = { data: [] };
+    try {
+      const response = await axios.get(`${baseURL}/api/user-profit-loss`);
+      if (response.data.success) {
+        profitLossResponse = response.data;
+      }
+    } catch (error) {
+      console.error("Error fetching profit/loss data:", error.message);
+    }
+
+    // Create a mapping of userId to profitLoss from the external API
+    const profitLossMap = {};
+    profitLossResponse.data.forEach(user => {
+      profitLossMap[user.userId] = user.profitLoss;
+    });
 
     const allowedRoles = [
       string.superAdmin,
@@ -1275,6 +1293,7 @@ export const downLineUsers = async (req, res) => {
       raw: true
     });
 
+    // Map admin data with corresponding profitLoss from the external API
     const users = adminsData.map((admin) => {
       return {
         adminId: admin.adminId,
@@ -1282,6 +1301,7 @@ export const downLineUsers = async (req, res) => {
         roles: admin.roles,
         createdById: admin.createdById,
         createdByUser: admin.createdByUser,
+        profitLoss: profitLossMap[admin.adminId] || '0.00' // Get profitLoss from the map, default to '0.00' if not found
       };
     });
 
@@ -1300,6 +1320,7 @@ export const downLineUsers = async (req, res) => {
       }
     });
   } catch (error) {
+    console.error("Error in downLineUsers:", error);
     return res.status(statusCode.internalServerError).json({
       data: null,
       success: false,
