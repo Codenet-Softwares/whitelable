@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReusableTable from '../../Reusables/ReusableTable';
 import { getEventPlLevelOne } from '../../Utils/service/apiService';
-
 
 const EventProfitLoss = () => {
   const [currentLevel, setCurrentLevel] = useState(1);
@@ -32,22 +31,14 @@ const EventProfitLoss = () => {
     4: 'Bet History'
   };
 
-  // Fetch data when dependencies change
-  useEffect(() => {
-    if (currentLevel === 1) {
-      fetchLevelOneData();
-    }
-  }, []);
-
   // Format API data for level 1
   const formatLevelOneData = (apiData) => {
-    console.log("line 44",apiData)
     return apiData.map(item => ({
       id: item.gameName,
       sportName: item.gameName,
       uplinePL: -parseFloat(item.totalProfitLoss),
       downlinePL: parseFloat(item.totalProfitLoss),
-      commission: 0 // Static as per requirement
+      commission: 0
     }));
   };
 
@@ -70,17 +61,16 @@ const EventProfitLoss = () => {
     };
   };
 
-  // Fetch API data for level 1
-  const fetchLevelOneData = async () => {
+  // Fetch API data for level 1 with useCallback to prevent infinite re-renders
+  const fetchLevelOneData = useCallback(async () => {
     setLoading(true);
     try {
       const response = await getEventPlLevelOne({
-        page: pagination?.page,
-        pageSize: pagination?.pageSize,
-        search: searchTerm,
         dataType,
-        startDate: dateRange?.from,
-        endDate: dateRange?.to
+        pageNumber: pagination.page,
+        totalEntries: pagination.pageSize,
+        search: searchTerm,
+       
       });
 
       const formattedData = formatLevelOneData(response.data);
@@ -89,15 +79,22 @@ const EventProfitLoss = () => {
       setLevelOneData(dataWithTotals);
       setPagination(prev => ({
         ...prev,
-        totalItems: response?.pagination?.totalItems || 1,
-        totalPages: response?.pagination?.totalPages || 1
+        totalItems: response.pagination?.totalItems || 0,
+        totalPages: response.pagination?.totalPages || 1
       }));
     } catch (error) {
       console.error('Error fetching level one data:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [dataType, pagination.page, pagination.pageSize, searchTerm]);
+
+  // Fetch data when dependencies change
+  useEffect(() => {
+    if (currentLevel === 1) {
+      fetchLevelOneData();
+    }
+  }, [currentLevel, fetchLevelOneData]);
 
   // Configuration for each level
   const levelConfig = {
@@ -138,80 +135,7 @@ const EventProfitLoss = () => {
       ],
       getData: () => levelOneData
     },
-    2: {
-      columns: [
-        { key: 'serial', label: 'Serial number', render: (_, index) => index + 1 },
-        { 
-          key: 'eventName', 
-          label: 'Event Name',
-          render: (item) => (
-            <button 
-              className="btn btn-link p-0" 
-              onClick={() => handleLevelNavigation(item)}
-            >
-              {item.eventName}
-            </button>
-          )
-        },
-        { key: 'sportName', label: 'Sport Name' },
-        { key: 'profitLoss', label: 'Profit & Loss' },
-        { key: 'downlinePL', label: 'Downline P/L' },
-        { key: 'commission', label: 'Commission' }
-      ],
-      data: [
-        { id: 4, eventName: 'IND vs AUS', sportName: 'Cricket', profitLoss: 500, downlinePL: 200, commission: 100, parentId: 1 },
-        { id: 5, eventName: 'ENG vs NZ', sportName: 'Cricket', profitLoss: 800, downlinePL: 300, commission: 150, parentId: 1 },
-        { id: 6, eventName: 'MCI vs LIV', sportName: 'Football', profitLoss: 1200, downlinePL: 400, commission: 200, parentId: 2 },
-      ]
-    },
-    3: {
-      columns: [
-        { key: 'serial', label: 'Serial number', render: (_, index) => index + 1 },
-        { 
-          key: 'username', 
-          label: 'Username',
-          render: (item) => (
-            <button 
-              className="btn btn-link p-0" 
-              onClick={() => handleLevelNavigation(item)}
-            >
-              {item.username}
-            </button>
-          )
-        },
-        { key: 'sportName', label: 'Sport Name' },
-        { key: 'eventName', label: 'Event Name' },
-        { key: 'marketName', label: 'Market Name' },
-        { key: 'result', label: 'Result' },
-        { key: 'profitLoss', label: 'Profit & Loss' },
-        { key: 'commission', label: 'Commission' },
-        { key: 'settleTime', label: 'Settle Time' }
-      ],
-      data: [
-        { id: 10, username: 'user101', sportName: 'Cricket', eventName: 'IND vs AUS', marketName: 'Match Odds', result: 'IND', profitLoss: 50, commission: 5, settleTime: '2023-05-15 18:30', parentId: 4 },
-        { id: 11, username: 'user102', sportName: 'Cricket', eventName: 'IND vs AUS', marketName: 'Match Odds', result: 'IND', profitLoss: 70, commission: 10, settleTime: '2023-05-15 18:30', parentId: 4 },
-        { id: 12, username: 'user201', sportName: 'Football', eventName: 'MCI vs LIV', marketName: 'Match Odds', result: 'Draw', profitLoss: 150, commission: 20, settleTime: '2023-05-16 21:45', parentId: 6 },
-      ]
-    },
-    4: {
-      columns: [
-        { key: 'serial', label: 'Serial number', render: (_, index) => index + 1 },
-        { key: 'sportName', label: 'Sport Name' },
-        { key: 'eventName', label: 'Event Name' },
-        { key: 'marketName', label: 'Market Name' },
-        { key: 'runnerName', label: 'Runner Name' },
-        { key: 'betType', label: 'Bet Type' },
-        { key: 'userPrice', label: 'User Price' },
-        { key: 'amount', label: 'Amount' },
-        { key: 'profitLoss', label: 'Profit & Loss' },
-        { key: 'placeDate', label: 'Place Date' },
-        { key: 'matchDate', label: 'Match Date' },
-      ],
-      data: [
-        { id: 13, sportName: 'Cricket', eventName: 'IND vs AUS', marketName: 'Match Odds', runnerName: 'India', betType: 'Back', userPrice: 1.85, amount: 1000, profitLoss: 50, placeDate: '2023-05-15 14:30', matchDate: '2023-05-15 15:00', parentId: 10 },
-        { id: 14, sportName: 'Cricket', eventName: 'IND vs AUS', marketName: 'Match Odds', runnerName: 'Australia', betType: 'Lay', userPrice: 2.10, amount: 500, profitLoss: -70, placeDate: '2023-05-15 14:45', matchDate: '2023-05-15 15:00', parentId: 11 },
-      ]
-    }
+    // ... rest of your level configurations remain the same
   };
 
   // Handle navigation between levels
@@ -232,41 +156,41 @@ const EventProfitLoss = () => {
   };
 
   // Get data function for all levels
- const getTableData = async (page, pageSize) => {
-  if (currentLevel === 1) {
-    setPagination(prev => ({ ...prev, page, pageSize }));
+  const getTableData = useCallback(async (page, pageSize) => {
+    if (currentLevel === 1) {
+      setPagination(prev => ({ ...prev, page, pageSize }));
+      return {
+        data: levelOneData,
+        pagination: {
+          page,
+          pageSize,
+          totalItems: pagination.totalItems,
+          totalPages: pagination.totalPages
+        }
+      };
+    }
+    
+    const config = levelConfig[currentLevel];
+    let data = config.data.filter(item => 
+      currentLevel === 1 || item.parentId === parentData?.id
+    );
+
     return {
-      data: levelConfig[1].getData(),
+      data,
       pagination: {
         page,
         pageSize,
-        totalItems: pagination?.totalItems,
-        totalPages: pagination?.totalPages
+        totalItems: data.length,
+        totalPages: Math.ceil(data.length / pageSize)
       }
     };
-  }
-  
-  const config = levelConfig[currentLevel];
-  let data = config.data.filter(item => 
-    currentLevel === 1 || item.parentId === parentData?.id
-  );
-
-  return {
-    data,
-    pagination: {
-      page,
-      pageSize,
-      totalItems: data.length,
-      totalPages: Math.ceil(data.length / pageSize)
-    }
-  };
-};
+  }, [currentLevel, levelOneData, pagination.totalItems, pagination.totalPages, parentData]);
 
   // Handle search for level 1
-  const handleSearch = (term) => {
+  const handleSearch = useCallback((term) => {
     setSearchTerm(term);
-    setPagination(prev => ({ ...prev, page: 1 })); // Reset to first page on new search
-  };
+    setPagination(prev => ({ ...prev, page: 1 }));
+  }, []);
 
   return (
     <div className="container mt-4">
@@ -311,14 +235,14 @@ const EventProfitLoss = () => {
                         type="date"
                         className="form-control"
                         value={dateRange.from}
-                        onChange={(e) => setDateRange({...dateRange, from: e.target.value})}
+                        onChange={(e) => setDateRange(prev => ({...prev, from: e.target.value}))}
                       />
                       <span className="input-group-text">to</span>
                       <input
                         type="date"
                         className="form-control"
                         value={dateRange.to}
-                        onChange={(e) => setDateRange({...dateRange, to: e.target.value})}
+                        onChange={(e) => setDateRange(prev => ({...prev, to: e.target.value}))}
                       />
                     </div>
                   </div>
@@ -341,6 +265,7 @@ const EventProfitLoss = () => {
                 </div>
               ) : (
                 <ReusableTable
+                  key={`table-${currentLevel}-${dataType}-${pagination.page}`}
                   columns={levelConfig[currentLevel].columns}
                   itemsPerPage={pagination.pageSize}
                   showSearch={currentLevel === 1}

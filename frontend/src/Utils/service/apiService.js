@@ -651,25 +651,13 @@ export async function getUserHirerchy(body = {}, isToast = false) {
 export async function getEventPlLevelOne(body = {}, isToast = false) {
   try {
     const callParams = await getAuthCallParams(strings.GET, body, isToast);
-    
-    const queryParams = new URLSearchParams({
-      dataType: body.dataType || 'live',
-      pageSize: body.pageSize || 10,
-      page: body.page || 1,
-      search: body.search || '',
-      startDate: body.startDate,
-      endDate: body.endDate,
-    });
-
     const response = await makeCall(
-      `${UrlConstant.PlLevelOne}?${queryParams.toString()}`,
+      `${UrlConstant.PlLevelOne}?dataType=${body.dataType}&pageSize=${body.totalEntries}&page=${body.pageNumber}&search=${body.search}`,
       callParams,
       isToast
     );
-
     return response;
   } catch (error) {
     throw error;
   }
 }
-
