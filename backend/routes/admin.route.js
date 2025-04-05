@@ -317,7 +317,13 @@ export const adminRoute = (app) => {
   app.get("/api/user-hierarchy/:userName", fetchUserHierarchy);
 
   app.get("/api/users-hierarchy/:userName", getHierarchyWiseUsers );
-  app.get("/api/downLineUsers/:createdById", downLineUsers );
+  app.get("/api/downLineUsers/:createdById", Authorize([
+    string.superAdmin,
+    string.whiteLabel,
+    string.hyperAgent,
+    string.superAgent,
+    string.masterAgent,
+  ]), downLineUsers );
 
   
 };
