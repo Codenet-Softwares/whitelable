@@ -661,7 +661,7 @@ export async function getAdminDownline(body = {}, isToast = false) {
   try {
     const callParams = await getAuthCallParams(strings.GET, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.adminDownline}/${body.userName}`,
+      `${UrlConstant.adminDownline}/${body.userId}?pageSize=${body.totalEntries}&page=${body.pageNumber}&search=${body.search}`,
       callParams,
       isToast
     );

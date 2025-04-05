@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Pagination from "../components/common/Pagination";
 
-
 const ReusableTable = ({
   columns,
   itemsPerPage,
@@ -16,15 +15,18 @@ const ReusableTable = ({
   const [totalData, setTotalData] = useState(0);
   const [loading, setLoading] = useState(false);
 
+  console.log("Data", data);
+
   // Fetch data when the component mounts or when the page changes
   useEffect(() => {
     const fetchDataForTable = async () => {
       setLoading(true);
       try {
         const response = await fetchData(currentPage, itemsPerPage);
+        console.log("data", response);
         setData(response.data || []);
         setTotalPages(response.pagination?.totalPages || 1);
-        setTotalData(response.pagination?.totalItems || 0);
+        setTotalData(response.pagination?.totalRecords || 0);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -38,10 +40,14 @@ const ReusableTable = ({
   // Filter data based on search term
   const filteredData = data.filter((item) =>
     columns.some((column) =>
-      item[column.key]?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      item[column.key]
+        ?.toString()
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
     )
   );
 
+  console.log("data",filteredData)
   // Handle page change
   const onPageChange = (pageNumber) => {
     setCurrentPage(pageNumber);

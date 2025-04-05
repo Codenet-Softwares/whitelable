@@ -1,141 +1,116 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import ReusableTable from '../../Reusables/ReusableTable';
-import { getAdminDownline } from '../../Utils/service/apiService';
+import React, { useEffect, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import ReusableTable from "../../Reusables/ReusableTable";
+import { getAdminDownline } from "../../Utils/service/apiService";
+import { customErrorHandler } from "../../Utils/helper";
+import { toast } from "react-toastify";
+import { useAppContext } from "../../contextApi/context";
 
 const DownlineProfitLoss = () => {
+  const { store } = useAppContext();
   const navigate = useNavigate();
-  const [dataType, setDataType] = useState('live');
-  const [userName, setUserName] = useState("white_hyper_user_3_apr")
 
+  const [navigationBar, setNavigationBar] = useState([
+    { adminName: store?.admin?.adminName, adminId: store?.admin?.id },
+  ]);
+  const [dataType, setDataType] = useState("live");
+  const [userName, setUserName] = useState("");
+  const [userId, setUserId] = useState(store?.admin?.id);
   const [dateRange, setDateRange] = useState({
-    from: new Date().toISOString().split('T')[0],
-    to: new Date().toISOString().split('T')[0]
+    from: new Date().toISOString().split("T")[0],
+    to: new Date().toISOString().split("T")[0],
   });
-
-
-  // async function getAll_AdminDownline() {
-  //   const response = await getAdminDownline({
-  //     userName,
-  //     pageNumber: state.currentPage,
-  //     fromDate: dateRange.startDate,
-  //     toDate: dateRange.endDate,
-  //     limit: state.totalEntries,
-  //     dataSource: dataType,
-  //   });
-  //   setState((prevState) => ({
-  //     ...prevState,
-  //     statementView: response.data,
-  //     totalPages: response?.pagination?.totalPages,
-  //     totalData: response?.pagination?.totalItems,
-  //   }));
-  // }
-
-
-  // Sample data with all required fields
-  const sampleData = [
-    {
-      id: 1,
-      username: 'user1',
-      profitLoss: 1500,
-      downlineProfitLoss: 800,
-      commission: 300
-    },
-    {
-      id: 2,
-      username: 'user2',
-      profitLoss: 2500,
-      downlineProfitLoss: 1200,
-      commission: 500
-    },
-    {
-      id: 3,
-      username: 'user3',
-      profitLoss: 1800,
-      downlineProfitLoss: 900,
-      commission: 400
-    },
-  ];
-
-
-  // Handle back navigation
-  const handleBack = () => {
-
+  console.log("navigationBar", navigationBar);
+  const handleUserNavigateToProfitLoss = (userName) => {
+    navigate(`/account-landing/${userName}/profit_loss`);
   };
 
-  // Calculate totals
-  const totals = sampleData.reduce((acc, item) => {
-    acc.profitLoss += item.profitLoss;
-    acc.downlineProfitLoss += item.downlineProfitLoss;
-    acc.commission += item.commission;
-    return acc;
-  }, { profitLoss: 0, downlineProfitLoss: 0, commission: 0 });
+  const handleAdminNavigateToChild = (adminId, adminName) => {
+    setUserId(adminId);
+    setNavigationBar((prev) => [...prev, { adminId, adminName }]);
+  };
 
-  // Add totals row to the data
-  const tableData = [...sampleData, {
-    id: 'total',
-    username: 'Total',
-    profitLoss: totals.profitLoss,
-    downlineProfitLoss: totals.downlineProfitLoss,
-    commission: totals.commission,
-    isTotalRow: true
-  }];
+  const handleBreadcrumbClick = (clickedAdminId) => {
+    const index = navigationBar.findIndex(
+      (entry) => entry.adminId === clickedAdminId
+    );
+    if (index !== -1) {
+      const trimmed = navigationBar.slice(0, index + 1);
+      setNavigationBar(trimmed);
+      setUserId(clickedAdminId); 
+    }
+  };
 
   // Columns configuration
   const columns = [
     {
-      key: 'username',
-      label: 'Username',
-      render: (item) => item.isTotalRow ? (
-        <strong>{item.username}</strong>
-      ) : (
-        <button
-          className="btn btn-link p-0"
-          onClick={() => navigate(`/account-landing/${userName}/activity`)}
-        >
-          {item.username}
-        </button>
-      )
+      key: "userName",
+      label: "UserName",
+      render: (item) =>
+        item.isTotalRow ? (
+          <strong>{item.userName}</strong>
+        ) : (
+          <button
+            className="btn btn-link p-0 text-decoration-none"
+            style={{ color: "black" }}
+            onClick={() =>
+              item?.roles[0]?.role === "user"
+                ? handleUserNavigateToProfitLoss(item.userName)
+                : handleAdminNavigateToChild(item.adminId, item.userName)
+            }
+          >
+            {item.userName}
+          </button>
+        ),
     },
     {
-      key: 'profitLoss',
-      label: 'Profit/Loss',
-      render: (item) => item.isTotalRow ? (
-        <strong>{item.profitLoss.toLocaleString()}</strong>
-      ) : (
-        item.profitLoss.toLocaleString()
-      )
+      key: "profitLoss",
+      label: "Profit/Loss",
+      render: (item) =>
+        item.isTotalRow ? (
+          <strong>{item.profitLoss?.toLocaleString()}</strong>
+        ) : (
+          item.profitLoss?.toLocaleString()
+        ),
     },
     {
-      key: 'downlineProfitLoss',
-      label: 'Downline P/L',
-      render: (item) => item.isTotalRow ? (
-        <strong>{item.downlineProfitLoss.toLocaleString()}</strong>
-      ) : (
-        item.downlineProfitLoss.toLocaleString()
-      )
+      key: "downlineProfitLoss",
+      label: "Downline P/L",
+      render: (item) =>
+        item.isTotalRow ? (
+          <strong>{item.downlineProfitLoss?.toLocaleString()}</strong>
+        ) : (
+          item.downlineProfitLoss?.toLocaleString()
+        ),
     },
     {
-      key: 'commission',
-      label: 'Commission',
-      render: (item) => item.isTotalRow ? (
-        <strong>{item.commission.toLocaleString()}</strong>
-      ) : (
-        item.commission.toLocaleString()
-      )
-    }
+      key: "commission",
+      label: "Commission",
+      render: (item) =>
+        item.isTotalRow ? (
+          <strong>{item.commission?.toLocaleString()}</strong>
+        ) : (
+          item.commission?.toLocaleString()
+        ),
+    },
   ];
 
   // Function to fetch data (mock implementation)
   const fetchData = async (page, pageSize) => {
-    // In a real app, you would make an API call here with dataType and dateRange
-    return {
-      data: tableData,
-      pagination: {
-        totalItems: tableData.length,
-        totalPages: Math.ceil(tableData.length / pageSize)
-      }
-    };
+    try {
+      const response = await getAdminDownline({
+        userId: userId,
+        pageNumber: page,
+        fromDate: dateRange.startDate,
+        toDate: dateRange.endDate,
+        pageSize: pageSize,
+        dataSource: dataType,
+      });
+      return response; // Return the API response
+    } catch (error) {
+      toast.error(customErrorHandler(error));
+      return { data: [], pagination: { totalPages: 1, totalItems: 0 } }; // Return empty data on error
+    }
   };
 
   return (
@@ -143,14 +118,24 @@ const DownlineProfitLoss = () => {
       <div className="row justify-content-center">
         <div className="col-md-12">
           <div className="card shadow-sm">
-            <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <div className="card-header bg-primary text-white">
               <h4 className="mb-0 text-white">Downline Profit/Loss Report</h4>
-              <button
-                className="btn btn-light btn-sm"
-                onClick={handleBack}
-              >
-                <i className="fas fa-arrow-left mr-2"></i> Back
-              </button>
+              <div className="d-flex align-items-center flex-wrap gap-2 my-2">
+                {navigationBar.map((item, index) => (
+                  <React.Fragment key={item.adminId}>
+                    <span
+                      role="button"
+                      className="text-black text-decoration-none"
+                      onClick={() => handleBreadcrumbClick(item.adminId)}
+                    >
+                      {item.adminName}
+                    </span>
+                    {index < navigationBar.length - 1 && (
+                      <span className="text-muted">/</span>
+                    )}
+                  </React.Fragment>
+                ))}
+              </div>
             </div>
 
             {/* Filter Controls */}
@@ -173,14 +158,18 @@ const DownlineProfitLoss = () => {
                       type="date"
                       className="form-control"
                       value={dateRange.from}
-                      onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
+                      onChange={(e) =>
+                        setDateRange({ ...dateRange, from: e.target.value })
+                      }
                     />
                     <span className="input-group-text">to</span>
                     <input
                       type="date"
                       className="form-control"
                       value={dateRange.to}
-                      onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
+                      onChange={(e) =>
+                        setDateRange({ ...dateRange, to: e.target.value })
+                      }
                     />
                   </div>
                 </div>
