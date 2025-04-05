@@ -18,6 +18,7 @@ import {
   subAdminPermissionSchema,
   userStatusSchema,
   exUpdateBalanceSchema,
+  validateProfitLossInput,
 } from '../schema/commonSchema.js';
 
 import {
@@ -39,7 +40,8 @@ import {
   userStatus,
   syncWithUserBackend,
   fetchUserHierarchy,
-  getHierarchyWiseUsers
+  getHierarchyWiseUsers,
+  getTotalProfitLoss
 } from '../controller/admin.controller.js';
 import { string } from '../constructor/string.js';
 
@@ -316,6 +318,14 @@ export const adminRoute = (app) => {
   app.get("/api/user-hierarchy/:userName", fetchUserHierarchy);
 
   app.get("/api/users-hierarchy/:userName", getHierarchyWiseUsers );
+
+  app.get("/api/total-profitloss-hierarchy", validateProfitLossInput, customErrorHandler, Authorize([
+    string.superAdmin,
+    string.whiteLabel,
+    string.hyperAgent,
+    string.superAgent,
+    string.masterAgent,
+  ]), getTotalProfitLoss)
 
   
 };
