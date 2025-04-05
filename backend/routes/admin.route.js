@@ -19,6 +19,7 @@ import {
   userStatusSchema,
   exUpdateBalanceSchema,
   validateProfitLossInput,
+  validateProfitLossMarket,
 } from '../schema/commonSchema.js';
 
 import {
@@ -41,7 +42,8 @@ import {
   syncWithUserBackend,
   fetchUserHierarchy,
   getHierarchyWiseUsers,
-  getTotalProfitLoss
+  getTotalProfitLoss,
+  getMarketWiseProfitLoss
 } from '../controller/admin.controller.js';
 import { string } from '../constructor/string.js';
 
@@ -325,7 +327,15 @@ export const adminRoute = (app) => {
     string.hyperAgent,
     string.superAgent,
     string.masterAgent,
-  ]), getTotalProfitLoss)
+  ]), getTotalProfitLoss);
+
+  app.get("/api/market-wise-profit-loss",validateProfitLossMarket,customErrorHandler, Authorize([
+    string.superAdmin,
+    string.whiteLabel,
+    string.hyperAgent,
+    string.superAgent,
+    string.masterAgent,
+  ]), getMarketWiseProfitLoss)
 
   
 };

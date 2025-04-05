@@ -1227,7 +1227,7 @@ export const getTotalProfitLoss = async (req, res) => {
     const adminId = req.user?.adminId;
     const userName = await getAllConnectedUsers(adminId);
     const token = jwt.sign(
-      { role: req.user.roles },
+      { roles: req.user.roles },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );
@@ -1303,5 +1303,94 @@ export const getTotalProfitLoss = async (req, res) => {
         )
       );
   }
+};
+
+export const getMarketWiseProfitLoss = async(req,res) => {
+  try {
+    const { page = 1, pageSize = 10, search = "", type , dataType, startDate, endDate } = req.query;
+    const offset = (parseInt(page) - 1) * parseInt(pageSize);
+
+    const adminId = req.user?.adminId;
+    const userName = await getAllConnectedUsers(adminId);
+
+    const token = jwt.sign(
+      { roles: req.user.roles },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: "1h" }
+    );
+    const headers = {
+      Authorization: `Bearer ${token}`,
+    };
+
+    const baseURL = process.env.COLOR_GAME_URL;
+    const response = await axios.post(
+      `${baseURL}/api/external/market-wise-profit-loss`,
+      {
+        userName,
+      },
+      {
+        headers,
+        params: {
+          type,
+          dataType,
+          startDate,
+          endDate
+        },
+      }
+    );
+
+    let data = Array.isArray(response.data)
+    ? response.data
+    : response.data?.data || [];
+
+    if (search) {
+      const searchLower = search.toLowerCase();
+      data = data.filter((item) =>
+        item.marketName?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    if (data.length == 0) {
+      return res
+        .status(statusCode.success)
+        .send(
+          apiResponseSuccess([], true, statusCode.success, "Data not found!")
+        );
+    };
+
+    const totalItems = data.length;
+    const totalPages = Math.ceil(totalItems / parseInt(pageSize));
+    const paginatedData = data.slice(offset, offset + parseInt(pageSize));
+
+    const Pagination = {
+      page: parseInt(page),
+      pageSize: parseInt(pageSize),
+      totalPages,
+      totalItems,
+    };
+
+    return res
+    .status(statusCode.success)
+    .send(
+      apiResponseSuccess(
+        paginatedData,
+        true,
+        statusCode.success,
+        "Market-wise porfit/loss fetched successfully",
+        Pagination
+      )
+    );
+  } catch (error) {
+    return res
+    .status(statusCode.internalServerError)
+    .send(
+      apiResponseErr(
+        null,
+        false,
+        statusCode.internalServerError,
+        error.message
+      )
+    );
+}
 };
 
