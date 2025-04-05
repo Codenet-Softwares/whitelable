@@ -52,11 +52,12 @@ class UrlConstant {
   getBetBook = `${this.url_dev}/${this.get}-user-master-book`;
   resetPassword = `${this.url_dev}/login-reset-password`; // api needs to be changed
   betLotteryMarketAnalysis = `${this.url_dev}/${this.get}-lottery-marketAnalysis`;
-  liveBet = `${this.url_dev}/${this.get}-${this.user}-live-bet`
-  resetSuperAdmin = `${this.url_dev}/superAdmin-reset-password`
-  resetSubAdmin = `${this.url_dev}/${this.admin}/reset-password`
-  deleteSubAdmin = `${this.url_dev}/${this.admin}/move-to-trash-user`
-  userHirerchy = `${this.url_dev}/${this.user}-hierarchy`
+  liveBet = `${this.url_dev}/${this.get}-${this.user}-live-bet`;
+  resetSuperAdmin = `${this.url_dev}/superAdmin-reset-password`;
+  resetSubAdmin = `${this.url_dev}/${this.admin}/reset-password`;
+  deleteSubAdmin = `${this.url_dev}/${this.admin}/move-to-trash-user`;
+  userHirerchy = `${this.url_dev}/${this.user}-hierarchy`;
+  PlLevelOne = `${this.url_dev}/total-profitloss-hierarchy`
 }
 
 

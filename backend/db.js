@@ -7,6 +7,12 @@ const sequelize = new Sequelize(process.env.DB_DBNAME, process.env.DB_USER, proc
   host: process.env.DB_HOST,
   dialect: 'mysql',
   logging: false,
+  pool: {
+    max: 60,
+    min: 2,
+    acquire: 30000,
+    idle: 10000,
+  }
 });
 
 sequelize.authenticate()
