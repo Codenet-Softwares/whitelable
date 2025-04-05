@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReusableTable from '../../Reusables/ReusableTable';
+import { getEventPlLevelOne } from '../../Utils/service/apiService';
+
 
 const EventProfitLoss = () => {
   const [currentLevel, setCurrentLevel] = useState(1);
@@ -11,16 +13,91 @@ const EventProfitLoss = () => {
     from: new Date().toISOString().split('T')[0],
     to: new Date().toISOString().split('T')[0]
   });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [levelOneData, setLevelOneData] = useState([]);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    pageSize: 10,
+    totalItems: 0,
+    totalPages: 1
+  });
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-    // Table headings for each level
-    const levelHeadings = {
-        1: 'Profit Loss',
-        2: 'Profit & Loss Events',
-        3: 'Profit & Loss Markets',
-        4: 'Profit Loss User',
-        5: 'Bet History'
-      };
+  // Table headings for each level
+  const levelHeadings = {
+    1: 'Profit Loss',
+    2: 'Profit & Loss Events',
+    3: 'Profit Loss User',
+    4: 'Bet History'
+  };
+
+  // Fetch data when dependencies change
+  useEffect(() => {
+    if (currentLevel === 1) {
+      fetchLevelOneData();
+    }
+  }, []);
+
+  // Format API data for level 1
+  const formatLevelOneData = (apiData) => {
+    console.log("line 44",apiData)
+    return apiData.map(item => ({
+      id: item.gameName,
+      sportName: item.gameName,
+      uplinePL: -parseFloat(item.totalProfitLoss),
+      downlinePL: parseFloat(item.totalProfitLoss),
+      commission: 0 // Static as per requirement
+    }));
+  };
+
+  // Calculate totals for level 1
+  const calculateTotals = (data) => {
+    const totals = data.reduce((acc, item) => {
+      acc.uplinePL += item.uplinePL || 0;
+      acc.downlinePL += item.downlinePL || 0;
+      acc.commission += item.commission || 0;
+      return acc;
+    }, { uplinePL: 0, downlinePL: 0, commission: 0 });
+
+    return {
+      id: 'total',
+      sportName: 'Total',
+      uplinePL: totals.uplinePL,
+      downlinePL: totals.downlinePL,
+      commission: totals.commission,
+      isTotalRow: true
+    };
+  };
+
+  // Fetch API data for level 1
+  const fetchLevelOneData = async () => {
+    setLoading(true);
+    try {
+      const response = await getEventPlLevelOne({
+        page: pagination?.page,
+        pageSize: pagination?.pageSize,
+        search: searchTerm,
+        dataType,
+        startDate: dateRange?.from,
+        endDate: dateRange?.to
+      });
+
+      const formattedData = formatLevelOneData(response.data);
+      const dataWithTotals = [...formattedData, calculateTotals(formattedData)];
+
+      setLevelOneData(dataWithTotals);
+      setPagination(prev => ({
+        ...prev,
+        totalItems: response?.pagination?.totalItems || 1,
+        totalPages: response?.pagination?.totalPages || 1
+      }));
+    } catch (error) {
+      console.error('Error fetching level one data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Configuration for each level
   const levelConfig = {
@@ -39,15 +116,27 @@ const EventProfitLoss = () => {
             </button>
           )
         },
-        { key: 'uplinePL', label: 'Upline P/L' },
-        { key: 'downlinePL', label: 'Downline P/L' },
+        { 
+          key: 'uplinePL', 
+          label: 'Upline P/L',
+          render: (item) => (
+            <span style={{ color: item.uplinePL >= 0 ? 'green' : 'red' }}>
+              {item.uplinePL >= 0 ? `+${item.uplinePL.toFixed(2)}` : item.uplinePL.toFixed(2)}
+            </span>
+          )
+        },
+        { 
+          key: 'downlinePL', 
+          label: 'Downline P/L',
+          render: (item) => (
+            <span style={{ color: item.downlinePL >= 0 ? 'green' : 'red' }}>
+              {item.downlinePL >= 0 ? `+${item.downlinePL.toFixed(2)}` : item.downlinePL.toFixed(2)}
+            </span>
+          )
+        },
         { key: 'commission', label: 'Commission' }
       ],
-      data: [
-        { id: 1, sportName: 'Cricket', uplinePL: 1500, downlinePL: 800, commission: 300 },
-        { id: 2, sportName: 'Football', uplinePL: 2500, downlinePL: 1200, commission: 500 },
-        { id: 3, sportName: 'Tennis', uplinePL: 1800, downlinePL: 900, commission: 400 },
-      ]
+      getData: () => levelOneData
     },
     2: {
       columns: [
@@ -78,34 +167,6 @@ const EventProfitLoss = () => {
     3: {
       columns: [
         { key: 'serial', label: 'Serial number', render: (_, index) => index + 1 },
-        { key: 'sportName', label: 'Sport Name' },
-        { key: 'eventName', label: 'Event Name' },
-        { 
-          key: 'marketName', 
-          label: 'Market Name',
-          render: (item) => (
-            <button 
-              className="btn btn-link p-0" 
-              onClick={() => handleLevelNavigation(item)}
-            >
-              {item.marketName}
-            </button>
-          )
-        },
-        { key: 'result', label: 'Result' },
-        { key: 'profitLoss', label: 'Profit & Loss' },
-        { key: 'commission', label: 'Commission' },
-        { key: 'settleTime', label: 'Settle Time' }
-      ],
-      data: [
-        { id: 7, sportName: 'Cricket', eventName: 'IND vs AUS', marketName: 'Match Odds', result: 'IND', profitLoss: 200, commission: 30, settleTime: '2023-05-15 18:30', parentId: 4 },
-        { id: 8, sportName: 'Cricket', eventName: 'IND vs AUS', marketName: 'Top Batsman', result: 'Kohli', profitLoss: 150, commission: 20, settleTime: '2023-05-15 22:15', parentId: 4 },
-        { id: 9, sportName: 'Football', eventName: 'MCI vs LIV', marketName: 'Match Odds', result: 'Draw', profitLoss: 400, commission: 50, settleTime: '2023-05-16 21:45', parentId: 6 },
-      ]
-    },
-    4: {
-      columns: [
-        { key: 'serial', label: 'Serial number', render: (_, index) => index + 1 },
         { 
           key: 'username', 
           label: 'Username',
@@ -127,12 +188,12 @@ const EventProfitLoss = () => {
         { key: 'settleTime', label: 'Settle Time' }
       ],
       data: [
-        { id: 10, username: 'user101', sportName: 'Cricket', eventName: 'IND vs AUS', marketName: 'Match Odds', result: 'IND', profitLoss: 50, commission: 5, settleTime: '2023-05-15 18:30', parentId: 7 },
-        { id: 11, username: 'user102', sportName: 'Cricket', eventName: 'IND vs AUS', marketName: 'Match Odds', result: 'IND', profitLoss: 70, commission: 10, settleTime: '2023-05-15 18:30', parentId: 7 },
-        { id: 12, username: 'user201', sportName: 'Football', eventName: 'MCI vs LIV', marketName: 'Match Odds', result: 'Draw', profitLoss: 150, commission: 20, settleTime: '2023-05-16 21:45', parentId: 9 },
+        { id: 10, username: 'user101', sportName: 'Cricket', eventName: 'IND vs AUS', marketName: 'Match Odds', result: 'IND', profitLoss: 50, commission: 5, settleTime: '2023-05-15 18:30', parentId: 4 },
+        { id: 11, username: 'user102', sportName: 'Cricket', eventName: 'IND vs AUS', marketName: 'Match Odds', result: 'IND', profitLoss: 70, commission: 10, settleTime: '2023-05-15 18:30', parentId: 4 },
+        { id: 12, username: 'user201', sportName: 'Football', eventName: 'MCI vs LIV', marketName: 'Match Odds', result: 'Draw', profitLoss: 150, commission: 20, settleTime: '2023-05-16 21:45', parentId: 6 },
       ]
     },
-    5: {
+    4: {
       columns: [
         { key: 'serial', label: 'Serial number', render: (_, index) => index + 1 },
         { key: 'sportName', label: 'Sport Name' },
@@ -145,7 +206,6 @@ const EventProfitLoss = () => {
         { key: 'profitLoss', label: 'Profit & Loss' },
         { key: 'placeDate', label: 'Place Date' },
         { key: 'matchDate', label: 'Match Date' },
-       
       ],
       data: [
         { id: 13, sportName: 'Cricket', eventName: 'IND vs AUS', marketName: 'Match Odds', runnerName: 'India', betType: 'Back', userPrice: 1.85, amount: 1000, profitLoss: 50, placeDate: '2023-05-15 14:30', matchDate: '2023-05-15 15:00', parentId: 10 },
@@ -171,46 +231,41 @@ const EventProfitLoss = () => {
     }
   };
 
-  // Get data for current level with totals
-  const getTableData = () => {
-    const config = levelConfig[currentLevel];
-    let data = config.data.filter(item => 
-      currentLevel === 1 || item.parentId === parentData?.id
-    );
-
-    // Add totals row for level 1
-    if (currentLevel === 1) {
-      const totals = data.reduce((acc, item) => {
-        acc.uplinePL += item.uplinePL || 0;
-        acc.downlinePL += item.downlinePL || 0;
-        acc.commission += item.commission || 0;
-        return acc;
-      }, { uplinePL: 0, downlinePL: 0, commission: 0 });
-
-      data = [...data, {
-        id: 'total',
-        sportName: 'Total',
-        uplinePL: totals.uplinePL,
-        downlinePL: totals.downlinePL,
-        commission: totals.commission,
-        isTotalRow: true
-      }];
-    }
-
-    return data;
-  };
-
-  // Function to fetch data for the current level
-  const fetchData = async (page, pageSize) => {
-    const data = getTableData();
-    
+  // Get data function for all levels
+ const getTableData = async (page, pageSize) => {
+  if (currentLevel === 1) {
+    setPagination(prev => ({ ...prev, page, pageSize }));
     return {
-      data: data,
+      data: levelConfig[1].getData(),
       pagination: {
-        totalItems: data.length,
-        totalPages: Math.ceil(data.length / pageSize)
+        page,
+        pageSize,
+        totalItems: pagination?.totalItems,
+        totalPages: pagination?.totalPages
       }
     };
+  }
+  
+  const config = levelConfig[currentLevel];
+  let data = config.data.filter(item => 
+    currentLevel === 1 || item.parentId === parentData?.id
+  );
+
+  return {
+    data,
+    pagination: {
+      page,
+      pageSize,
+      totalItems: data.length,
+      totalPages: Math.ceil(data.length / pageSize)
+    }
+  };
+};
+
+  // Handle search for level 1
+  const handleSearch = (term) => {
+    setSearchTerm(term);
+    setPagination(prev => ({ ...prev, page: 1 })); // Reset to first page on new search
   };
 
   return (
@@ -220,7 +275,7 @@ const EventProfitLoss = () => {
           <div className="card shadow-sm">
             <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
               <h4 className="mb-0 text-white">
-              {levelHeadings[currentLevel]} - Level {currentLevel}
+                {levelHeadings[currentLevel]} - Level {currentLevel}
                 {parentData && (
                   <small className="ml-2">({parentData.sportName || parentData.eventName || parentData.username})</small>
                 )}
@@ -247,7 +302,7 @@ const EventProfitLoss = () => {
                     >
                       <option value="live">Live Data</option>
                       <option value="backup">Backup Data</option>
-                      <option value="old">Old Data</option>
+                      <option value="olddata">Old Data</option>
                     </select>
                   </div>
                   <div className="col-md-4 mb-2">
@@ -268,7 +323,7 @@ const EventProfitLoss = () => {
                     </div>
                   </div>
                   <div className="col-md-3 mb-2">
-                    <button className="btn btn-primary w-100">
+                    <button className="btn btn-primary w-100" onClick={fetchLevelOneData}>
                       <i className="fas fa-calculator mr-2"></i> Calculate P/L
                     </button>
                   </div>
@@ -278,13 +333,23 @@ const EventProfitLoss = () => {
 
             {/* Main Table */}
             <div className="card-body">
-              <ReusableTable
-                columns={levelConfig[currentLevel].columns}
-                itemsPerPage={10}
-                showSearch={true}
-                paginationVisible={true}
-                fetchData={fetchData}
-              />
+              {loading && currentLevel === 1 ? (
+                <div className="text-center py-5">
+                  <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </div>
+                </div>
+              ) : (
+                <ReusableTable
+                  columns={levelConfig[currentLevel].columns}
+                  itemsPerPage={pagination.pageSize}
+                  showSearch={currentLevel === 1}
+                  paginationVisible={true}
+                  fetchData={getTableData}
+                  onSearch={currentLevel === 1 ? handleSearch : undefined}
+                  currentPage={pagination.page}
+                />
+              )}
             </div>
 
             <div className="card-footer text-muted">

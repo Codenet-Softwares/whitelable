@@ -575,8 +575,6 @@ export async function getLotteryMarketAnalysis(body = {}, isToast = false) {
   } catch (error) {
     throw error;
   }
-
-
 }
 
 export async function getMarket_LiveBet(body = {}, isToast = false) {
@@ -605,8 +603,6 @@ export async function resetPasswordSuperAdmin(body = {}, isToast = true) {
   } catch (error) {
     throw error;
   }
-
-
 }
 
 export async function resetPasswordSubAdmin(body = {}, isToast = true) {
@@ -621,8 +617,6 @@ export async function resetPasswordSubAdmin(body = {}, isToast = true) {
   } catch (error) {
     throw error;
   }
-
-
 }
 
 export async function deleteSubAdmin(body = {}, isToast = true) {
@@ -637,10 +631,7 @@ export async function deleteSubAdmin(body = {}, isToast = true) {
   } catch (error) {
     throw error;
   }
-
-
 }
-
 
 export async function getUserHirerchy(body = {}, isToast = false) {
   try {
@@ -654,6 +645,31 @@ export async function getUserHirerchy(body = {}, isToast = false) {
   } catch (error) {
     throw error;
   }
-
-
 }
+
+//Event P/L  level-1 table Api
+export async function getEventPlLevelOne(body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.GET, body, isToast);
+    
+    const queryParams = new URLSearchParams({
+      dataType: body.dataType || 'live',
+      pageSize: body.pageSize || 10,
+      page: body.page || 1,
+      search: body.search || '',
+      startDate: body.startDate,
+      endDate: body.endDate,
+    });
+
+    const response = await makeCall(
+      `${UrlConstant.PlLevelOne}?${queryParams.toString()}`,
+      callParams,
+      isToast
+    );
+
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
