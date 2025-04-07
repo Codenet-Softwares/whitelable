@@ -20,6 +20,7 @@ const DownlineProfitLoss = () => {
     from: new Date().toISOString().split("T")[0],
     to: new Date().toISOString().split("T")[0],
   });
+  const [tempDate, setTempDate] = useState({ from: "", to: "" });
   console.log("navigationBar", navigationBar);
   const handleUserNavigateToProfitLoss = (userName) => {
     navigate(`/account-landing/${userName}/profit_loss`);
@@ -40,6 +41,28 @@ const DownlineProfitLoss = () => {
       setUserId(clickedAdminId); 
     }
   };
+
+  // Handle data type change
+  const handleDataTypeChange = (value) => {
+    setDataType(value);
+
+    if (value === "live") {
+      const today = new Date().toISOString().split("T")[0];
+      setDateRange({ from: today, to: today });
+      setTempDate({ from: "", to: "" });
+    } else {
+      setDateRange({ from: "", to: "" });
+      setTempDate({ from: "", to: "" });
+    }
+  };
+
+  // Handle Calculate P/L
+  const handleCalculatePL = () => {
+    if (dataType !== "live" && tempDate.from && tempDate.to) {
+      setDateRange({ ...tempDate }); 
+    }
+  };
+
 
   // Columns configuration
   const columns = [
@@ -101,8 +124,9 @@ const DownlineProfitLoss = () => {
       const response = await getAdminDownline({
         userId: userId,
         pageNumber: page,
-        fromDate: dateRange.startDate,
-        toDate: dateRange.endDate,
+        totalEntries: pageSize,
+        fromDate: dateRange.from,
+        toDate: dateRange.to,
         pageSize: pageSize,
         dataSource: dataType,
       });
@@ -143,43 +167,61 @@ const DownlineProfitLoss = () => {
               <div className="row align-items-center">
                 <div className="col-md-3 mb-2">
                   <select
-                    className="form-control "
+                    className="form-control"
                     value={dataType}
-                    onChange={(e) => setDataType(e.target.value)}
+                    onChange={(e) => handleDataTypeChange(e.target.value)}
                   >
                     <option value="live">Live Data</option>
                     <option value="backup">Backup Data</option>
                     <option value="old">Old Data</option>
                   </select>
                 </div>
+
                 <div className="col-md-4 mb-2">
                   <div className="input-group">
                     <input
                       type="date"
                       className="form-control"
-                      value={dateRange.from}
+                      value={
+                        dataType === "live" ? dateRange.from : tempDate.from || ""
+                      }
+                      disabled={dataType === "live"}
                       onChange={(e) =>
-                        setDateRange({ ...dateRange, from: e.target.value })
+                        setTempDate({ ...tempDate, from: e.target.value })
                       }
                     />
                     <span className="input-group-text">to</span>
                     <input
                       type="date"
                       className="form-control"
-                      value={dateRange.to}
+                      value={
+                        dataType === "live" ? dateRange.to : tempDate.to || ""
+                      }
+                      disabled={dataType === "live"}
                       onChange={(e) =>
-                        setDateRange({ ...dateRange, to: e.target.value })
+                        setTempDate({ ...tempDate, to: e.target.value })
                       }
                     />
                   </div>
                 </div>
+
                 <div className="col-md-3 mb-2">
-                  <button className="btn btn-primary w-100">
+                  <button
+                    className="btn btn-primary w-100"
+                    disabled={
+                      dataType === "live" ||
+                      tempDate.from === "" ||
+                      tempDate.to === ""
+                    }
+                    onClick={handleCalculatePL}
+                  >
                     <i className="fas fa-calculator mr-2"></i> Calculate P/L
                   </button>
                 </div>
               </div>
             </div>
+
+
 
             {/* Main Table */}
             <div className="card-body">
@@ -193,8 +235,13 @@ const DownlineProfitLoss = () => {
             </div>
 
             <div className="card-footer text-muted">
-              Showing {dataType} data from {dateRange.from} to {dateRange.to}
+              {dateRange.from && dateRange.to ? (
+                <>Showing {dataType} data from {dateRange.from} to {dateRange.to}</>
+              ) : (
+                <>Please select date range and calculate P/L</>
+              )}
             </div>
+
           </div>
         </div>
       </div>
