@@ -450,7 +450,7 @@ const AccountLandingModal = () => {
         <div className="col-sm-4">
           <button
             className="btn btn-secondary mt-1"
-            onClick={() => navigate("/wallet")}
+            onClick={() => navigate(-1)}
           >
             Back
           </button>

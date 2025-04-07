@@ -15,8 +15,6 @@ const ReusableTable = ({
   const [totalData, setTotalData] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  console.log("Data", data);
-
   // Fetch data when the component mounts or when the page changes
   useEffect(() => {
     const fetchDataForTable = async () => {
@@ -47,7 +45,7 @@ const ReusableTable = ({
     )
   );
 
-  console.log("data",filteredData)
+  console.log("data", filteredData)
   // Handle page change
   const onPageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -97,8 +95,8 @@ const ReusableTable = ({
                     {column.key === "serialNumber"
                       ? calculateSerialNumber(index) // Dynamically calculate serial number
                       : column.render
-                      ? column.render(row)
-                      : row[column.key]}
+                        ? column.render(row)
+                        : row[column.key]}
                   </td>
                 ))}
               </tr>
@@ -114,7 +112,7 @@ const ReusableTable = ({
       </table>
 
       {/* Pagination */}
-      {paginationVisible && totalPages > 0 && (
+      {data.length > 0 && totalPages > 0 && (
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

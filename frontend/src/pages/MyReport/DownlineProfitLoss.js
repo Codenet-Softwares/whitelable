@@ -14,14 +14,14 @@ const DownlineProfitLoss = () => {
     { adminName: store?.admin?.adminName, adminId: store?.admin?.id },
   ]);
   const [dataType, setDataType] = useState("live");
-  const [userName, setUserName] = useState("");
   const [userId, setUserId] = useState(store?.admin?.id);
   const [dateRange, setDateRange] = useState({
     from: new Date().toISOString().split("T")[0],
     to: new Date().toISOString().split("T")[0],
   });
   const [tempDate, setTempDate] = useState({ from: "", to: "" });
-  console.log("navigationBar", navigationBar);
+  const [triggerFetch, setTriggerFetch] = useState(0);
+
   const handleUserNavigateToProfitLoss = (userName) => {
     navigate(`/account-landing/${userName}/profit_loss`);
   };
@@ -38,7 +38,7 @@ const DownlineProfitLoss = () => {
     if (index !== -1) {
       const trimmed = navigationBar.slice(0, index + 1);
       setNavigationBar(trimmed);
-      setUserId(clickedAdminId); 
+      setUserId(clickedAdminId);
     }
   };
 
@@ -50,7 +50,9 @@ const DownlineProfitLoss = () => {
       const today = new Date().toISOString().split("T")[0];
       setDateRange({ from: today, to: today });
       setTempDate({ from: "", to: "" });
-    } else {
+      setTriggerFetch(prev => prev + 1);
+    }
+    else {
       setDateRange({ from: "", to: "" });
       setTempDate({ from: "", to: "" });
     }
@@ -59,7 +61,8 @@ const DownlineProfitLoss = () => {
   // Handle Calculate P/L
   const handleCalculatePL = () => {
     if (dataType !== "live" && tempDate.from && tempDate.to) {
-      setDateRange({ ...tempDate }); 
+      setDateRange({ ...tempDate });
+      setTriggerFetch(prev => prev + 1);
     }
   };
 
@@ -119,21 +122,21 @@ const DownlineProfitLoss = () => {
   ];
 
   // Function to fetch data (mock implementation)
-  const fetchData = async (page, pageSize) => {
+  const fetchData = async (page, pageSize, trigger) => {
     try {
       const response = await getAdminDownline({
-        userId: userId,
+        userId,
         pageNumber: page,
         totalEntries: pageSize,
         fromDate: dateRange.from,
         toDate: dateRange.to,
-        pageSize: pageSize,
+        pageSize,
         dataSource: dataType,
       });
-      return response; // Return the API response
+      return response;
     } catch (error) {
       toast.error(customErrorHandler(error));
-      return { data: [], pagination: { totalPages: 1, totalItems: 0 } }; // Return empty data on error
+      return { data: [], pagination: { totalPages: 1, totalItems: 0 } };
     }
   };
 
@@ -163,7 +166,7 @@ const DownlineProfitLoss = () => {
             </div>
 
             {/* Filter Controls */}
-            <div className="card-body border-bottom">
+            {navigationBar.length == 1 && <div className="card-body border-bottom">
               <div className="row align-items-center">
                 <div className="col-md-3 mb-2">
                   <select
@@ -219,8 +222,7 @@ const DownlineProfitLoss = () => {
                   </button>
                 </div>
               </div>
-            </div>
-
+            </div>}
 
 
             {/* Main Table */}
@@ -230,7 +232,7 @@ const DownlineProfitLoss = () => {
                 itemsPerPage={10}
                 showSearch={true}
                 paginationVisible={true}
-                fetchData={fetchData}
+                fetchData={(page, pageSize) => fetchData(page, pageSize, triggerFetch)}
               />
             </div>
 
