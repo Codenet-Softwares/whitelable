@@ -39,7 +39,7 @@ const Authform = ({ purpose, authFormApi }) => {
               value={option}
               style={{ textTransform: "uppercase" }}
             >
-              {option}
+              {option.toUpperCase()}
             </option>
           ))}
         </>

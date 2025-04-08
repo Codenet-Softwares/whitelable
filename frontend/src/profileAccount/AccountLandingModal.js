@@ -467,21 +467,16 @@ const AccountLandingModal = () => {
       <div className="row row-no-gutters">
         {/* First Section */}
         <div className="col-sm-4">
-        <button
-              className="btn btn-secondary mt-1"
-              onClick={() => navigate("/wallet")}
-            >
-              Back
-            </button>
+          <span className="me-3" onClick={() => navigate(-1)}>
+            <button className="btn btn-secondary">&#8592;</button>
+          </span>
           <div className="card mt-3" style={{ width: "18rem" }}>
             <ul className="list-group list-group-flush">
-           
               <li
                 className="list-group-item text-white h6 text-uppercase text-center"
                 style={{ backgroundColor: "#1E2761" }}
               >
                 My Account
-                
               </li>
               <li
                 className="list-group-item"

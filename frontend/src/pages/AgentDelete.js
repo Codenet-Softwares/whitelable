@@ -114,14 +114,13 @@ const AgentDelete = () => {
     <>
       <div className="container-fluid d-flex justify-content-center mt-5 rounded-5 px-5">
         <div className="card ">
-          <div className="px-3 mt-3">
-            <h3
-              className="text-center text-uppercase fw-bold"
-              style={{ color: "#1E2761", textDecoration: "underline" }}
+          <div className="">
+            <h4
+              className="text-center text-uppercase fw-bold text-white bg-dark p-3"              
             >
               Deleted Agents
-            </h3>
-            <div className="white_box_tittle list_header">
+            </h4>
+            <div className="white_box_tittle list_header px-3">
               <div className="col-2 text-center">
                 <select
                   className="form-select form-select-sm"
@@ -158,11 +157,12 @@ const AgentDelete = () => {
             </div>
 
             <div className="main_data">
-              <table className="table m-2 mt-4">
+              <table className="table mt-4">
                 <thead
+                className="P-3"
                   style={{
                     height: "10px",
-                    backgroundColor: "#1E2761",
+                    backgroundColor: "#84B9DF",
                     color: "white",
                     fontWeight: "bold",
                   }}
@@ -218,10 +218,8 @@ const AgentDelete = () => {
                     <tr>
                       <td colSpan="3" align="center">
                         <div
-                          className="alert mt-3 p-3 text-center"
+                          className="alert mt-3 p-3 text-center text-danger fw-bold"
                           style={{
-                            background: "#1E2761",
-                            color: "white",
                             borderRadius: "10px",
                             fontSize: "18px",
                           }}
