@@ -46,9 +46,7 @@ import {
   syncWithUserBackend,
   fetchUserHierarchy,
   getHierarchyWiseUsers,
-
-  downLineUsers
-
+  downLineUsers,
   getTotalProfitLoss,
   getMarketWiseProfitLoss,
   getAllUserProfitLoss

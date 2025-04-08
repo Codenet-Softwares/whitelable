@@ -328,6 +328,20 @@ export const validateResetPassword = [
 
 
 export const validateDownLineProfitLoss= [
+  query("dataType")
+    .exists()
+    .withMessage("dataType is required.")
+    .isIn(["live", "olddata", "backup"])
+    .withMessage("Valid values are 'live', 'olddata', or 'backup'."),
+  query("page")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("Page must be a positive integer."),
+  query("limit")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("Limit must be a positive integer."),
+];
 
 export const validateProfitLossInput = [
 
