@@ -1292,16 +1292,23 @@ export const getTotalProfitLoss = async (req, res) => {
         )
       );
   } catch (error) {
-    return res
-      .status(statusCode.internalServerError)
-      .send(
-        apiResponseErr(
-          null,
-          false,
-          statusCode.internalServerError,
-          error.message
-        )
+    if (error.response) {
+      return apiResponseErr(
+        null,
+        false,
+        error.response.status,
+        error.response.data.message || error.response.data.errMessage,
+        res
       );
+    } else {
+      return apiResponseErr(
+        null,
+        false,
+        statusCode.internalServerError,
+        error.message,
+        res
+      );
+    }
   }
 };
 
@@ -1378,16 +1385,23 @@ export const getMarketWiseProfitLoss = async(req,res) => {
       )
     );
   } catch (error) {
-    return res
-    .status(statusCode.internalServerError)
-    .send(
-      apiResponseErr(
+    if (error.response) {
+      return apiResponseErr(
+        null,
+        false,
+        error.response.status,
+        error.response.data.message || error.response.data.errMessage,
+        res
+      );
+    } else {
+      return apiResponseErr(
         null,
         false,
         statusCode.internalServerError,
-        error.message
-      )
-    );
+        error.message,
+        res
+      );
+    }
 }
 };
 
@@ -1461,17 +1475,23 @@ export const getAllUserProfitLoss = async(req,res) => {
       )
     );
   } catch (error) {
-    return res
-    .status(statusCode.internalServerError)
-    .send(
-      apiResponseErr(
+    if (error.response) {
+      return apiResponseErr(
+        null,
+        false,
+        error.response.status,
+        error.response.data.message || error.response.data.errMessage,
+        res
+      );
+    } else {
+      return apiResponseErr(
         null,
         false,
         statusCode.internalServerError,
-        error.message
-      )
-    );
-    
+        error.message,
+        res
+      );
+    }
   }
 }
 

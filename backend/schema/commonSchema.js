@@ -344,11 +344,6 @@ export const validateProfitLossInput = [
 ];
 
 export const validateProfitLossMarket = [
-  query("dataType")
-    .exists()
-    .withMessage("dataType is required.")
-    .isIn(["live", "olddata", "backup"])
-    .withMessage("Valid values are 'live', 'olddata', or 'backup'."),
     query("type")
     .exists()
     .withMessage("type is required."),
