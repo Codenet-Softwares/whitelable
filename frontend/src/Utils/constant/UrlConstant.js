@@ -57,7 +57,11 @@ class UrlConstant {
   resetSubAdmin = `${this.url_dev}/${this.admin}/reset-password`;
   deleteSubAdmin = `${this.url_dev}/${this.admin}/move-to-trash-user`;
   userHirerchy = `${this.url_dev}/${this.user}-hierarchy`;
-  PlLevelOne = `${this.url_dev}/total-profitloss-hierarchy`
+  PlLevelOne = `${this.url_dev}/total-profitloss-hierarchy`;
+MarketWiseLevelTwo =`${this.url_dev}/market-wise-profit-loss`;
+AllUserMarketwiseLevelThree = `${this.url_dev}/market-allUser-profit-loss`;
+UsertwiseBetHistoryLevelFour = `${this.url_dev}/lottery-betHistory-profitLoss`;
+UsertwisecolorGameLevelFour = `${this.url_dev}/${this.get}-colorGame-user-betList`;
 }
 
 

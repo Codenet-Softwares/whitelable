@@ -91,7 +91,7 @@ const ReusableTable = ({
                     {column.key === "serialNumber"
                       ? calculateSerialNumber(index) // Dynamically calculate serial number
                       : column.render
-                      ? column.render(row)
+                      ? column.render(row,index)
                       : row[column.key]}
                   </td>
                 ))}
@@ -108,7 +108,7 @@ const ReusableTable = ({
       </table>
 
       {/* Pagination */}
-      {paginationVisible && totalPages > 0 && (
+      {paginationVisible && totalPages > 0 && filteredData.length > 0&& (
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

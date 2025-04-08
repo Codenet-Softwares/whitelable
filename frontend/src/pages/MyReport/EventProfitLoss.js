@@ -1,63 +1,74 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import ReusableTable from '../../Reusables/ReusableTable';
-import { getEventPlLevelOne } from '../../Utils/service/apiService';
+import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import ReusableTable from "../../Reusables/ReusableTable";
+import {
+  getEventPlLevelOne,
+  getMarketWiseAllUserPlLevelThree,
+  getMarketWisePlLevelTwo,
+  getUserWiseBetHistoryColorGameLevelFour,
+  getUserWiseBetHistoryLotteryLevelFour,
+} from "../../Utils/service/apiService";
 
 const EventProfitLoss = () => {
   const [currentLevel, setCurrentLevel] = useState(1);
   const [parentData, setParentData] = useState(null);
   const [navigationStack, setNavigationStack] = useState([]);
-  const [dataType, setDataType] = useState('live');
+  const [dataType, setDataType] = useState("live");
   const [dateRange, setDateRange] = useState({
-    from: new Date().toISOString().split('T')[0],
-    to: new Date().toISOString().split('T')[0]
+    from: new Date().toISOString().split("T")[0],
+    to: new Date().toISOString().split("T")[0],
   });
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [levelOneData, setLevelOneData] = useState([]);
   const [pagination, setPagination] = useState({
     page: 1,
     pageSize: 10,
     totalItems: 0,
-    totalPages: 1
+    totalPages: 1,
   });
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
+  const navigate = useNavigate();
+  console.log("parentData", parentData);
   // Table headings for each level
   const levelHeadings = {
-    1: 'Profit Loss',
-    2: 'Profit & Loss Events',
-    3: 'Profit Loss User',
-    4: 'Bet History'
+    1: "Profit Loss",
+    2: "Profit & Loss Events",
+    3: "Profit Loss User",
+    4: "Bet History",
   };
 
   // Format API data for level 1
   const formatLevelOneData = (apiData) => {
-    return apiData.map(item => ({
+    return apiData.map((item) => ({
       id: item.gameName,
       sportName: item.gameName,
       uplinePL: -parseFloat(item.totalProfitLoss),
       downlinePL: parseFloat(item.totalProfitLoss),
-      commission: 0
+      commission: 0,
+      isTotalRow: false, // Add flag for regular rows
     }));
   };
 
   // Calculate totals for level 1
   const calculateTotals = (data) => {
-    const totals = data.reduce((acc, item) => {
-      acc.uplinePL += item.uplinePL || 0;
-      acc.downlinePL += item.downlinePL || 0;
-      acc.commission += item.commission || 0;
-      return acc;
-    }, { uplinePL: 0, downlinePL: 0, commission: 0 });
+    const totals = data.reduce(
+      (acc, item) => {
+        acc.uplinePL += item.uplinePL || 0;
+        acc.downlinePL += item.downlinePL || 0;
+        acc.commission += item.commission || 0;
+        return acc;
+      },
+      { uplinePL: 0, downlinePL: 0, commission: 0 }
+    );
 
     return {
-      id: 'total',
-      sportName: 'Total',
+      id: "total",
+      sportName: "Total",
       uplinePL: totals.uplinePL,
       downlinePL: totals.downlinePL,
       commission: totals.commission,
-      isTotalRow: true
+      isTotalRow: true,
     };
   };
 
@@ -70,20 +81,19 @@ const EventProfitLoss = () => {
         pageNumber: pagination.page,
         totalEntries: pagination.pageSize,
         search: searchTerm,
-       
       });
 
       const formattedData = formatLevelOneData(response.data);
       const dataWithTotals = [...formattedData, calculateTotals(formattedData)];
 
       setLevelOneData(dataWithTotals);
-      setPagination(prev => ({
+      setPagination((prev) => ({
         ...prev,
         totalItems: response.pagination?.totalItems || 0,
-        totalPages: response.pagination?.totalPages || 1
+        totalPages: response.pagination?.totalPages || 1,
       }));
     } catch (error) {
-      console.error('Error fetching level one data:', error);
+      console.error("Error fetching level one data:", error);
     } finally {
       setLoading(false);
     }
@@ -96,53 +106,352 @@ const EventProfitLoss = () => {
     }
   }, [currentLevel, fetchLevelOneData]);
 
+  // Format API data for level 2
+  const formatLevelTwoData = (apiData) => {
+    return apiData.map((item) => ({
+      id: item.marketId, // Use marketId as the unique identifier
+      sportName: item.gameName,
+      eventName: item.marketName,
+      marketId: item.marketId,
+      totalPL: parseFloat(item.totalProfitLoss),
+      date: new Date(item.date).toLocaleString(), // Format date properly
+      uplinePL: -parseFloat(item.totalProfitLoss),
+      downlinePL: parseFloat(item.totalProfitLoss),
+      commission: 0,
+    }));
+  };
+
+  // Format API data for level 3
+  const formatLevelThreeData = (apiData) => {
+    return apiData.map((item) => ({
+      id: item.userId,
+      username: item.userName,
+      runnerId:item.runnerId,
+      eventName: item.marketName,
+      sportName: item.gameName,
+      marketId: item.marketId, // Ensure marketId is included
+      totalPL: parseFloat(item.totalProfitLoss),
+      date: new Date(item.date).toLocaleString(),
+      uplinePL: -parseFloat(item.totalProfitLoss),
+      downlinePL: parseFloat(item.totalProfitLoss),
+      commission: 0,
+    }));
+  };
+
   // Configuration for each level
   const levelConfig = {
     1: {
       columns: [
-        { key: 'serial', label: 'Serial number', render: (_, index) => index + 1 },
-        { 
-          key: 'sportName', 
-          label: 'Sport Name',
+        {
+          key: "serial",
+          label: "Serial number",
+          render: (item, index) => (item.isTotalRow ? "" : index + 1),
+        },
+        {
+          key: "sportName",
+          label: "Sport Name",
+          render: (item) =>
+            item.isTotalRow ? (
+              item.sportName // Just show the text for total row
+            ) : (
+              <button
+                className="btn btn-link p-0"
+                onClick={() => handleLevelNavigation(item)}
+              >
+                {item.sportName}
+              </button>
+            ),
+        },
+        {
+          key: "uplinePL",
+          label: "Upline P/L",
           render: (item) => (
-            <button 
-              className="btn btn-link p-0" 
+            <span style={{ color: item.uplinePL >= 0 ? "green" : "red" }}>
+              {item.uplinePL >= 0
+                ? `+${item.uplinePL.toFixed(2)}`
+                : item.uplinePL.toFixed(2)}
+            </span>
+          ),
+        },
+        {
+          key: "downlinePL",
+          label: "Downline P/L",
+          render: (item) => (
+            <span style={{ color: item.downlinePL >= 0 ? "green" : "red" }}>
+              {item.downlinePL >= 0
+                ? `+${item.downlinePL.toFixed(2)}`
+                : item.downlinePL.toFixed(2)}
+            </span>
+          ),
+        },
+        { key: "commission", label: "Commission" },
+      ],
+      getData: () => levelOneData,
+    },
+    2: {
+      columns: [
+        {
+          key: "serial",
+          label: "Serial number",
+          render: (_, index) => index + 1,
+        },
+        {
+          key: "sportName",
+          label: "Sport Name",
+          render: (item) => item.sportName, // Display only, no navigation
+        },
+        {
+          key: "eventName",
+          label: "Event Name",
+          render: (item) => (
+            <button
+              className="btn btn-link p-0"
               onClick={() => handleLevelNavigation(item)}
             >
-              {item.sportName}
+              {item.eventName}
             </button>
-          )
+          ),
         },
-        { 
-          key: 'uplinePL', 
-          label: 'Upline P/L',
+        {
+          key: "totalPL",
+          label: "Total P/L",
           render: (item) => (
-            <span style={{ color: item.uplinePL >= 0 ? 'green' : 'red' }}>
-              {item.uplinePL >= 0 ? `+${item.uplinePL.toFixed(2)}` : item.uplinePL.toFixed(2)}
+            <span style={{ color: item.totalPL >= 0 ? "green" : "red" }}>
+              {item.totalPL >= 0
+                ? `+${item.totalPL.toFixed(2)}`
+                : item.totalPL.toFixed(2)}
             </span>
-          )
+          ),
         },
-        { 
-          key: 'downlinePL', 
-          label: 'Downline P/L',
-          render: (item) => (
-            <span style={{ color: item.downlinePL >= 0 ? 'green' : 'red' }}>
-              {item.downlinePL >= 0 ? `+${item.downlinePL.toFixed(2)}` : item.downlinePL.toFixed(2)}
-            </span>
-          )
+        {
+          key: "date",
+          label: "Date",
+          render: (item) => new Date(item.date).toLocaleString(),
         },
-        { key: 'commission', label: 'Commission' }
       ],
-      getData: () => levelOneData
+      getData: async (page, pageSize) => {
+        try {
+          const response = await getMarketWisePlLevelTwo({
+            Type: parentData?.sportName, // Use the sportName as Type
+            pageNumber: page,
+            totalEntries: pageSize,
+          });
+
+          const formattedData = formatLevelTwoData(response.data);
+          return {
+            data: formattedData,
+            pagination: {
+              page,
+              pageSize,
+              totalItems: response.pagination?.totalItems || 0,
+              totalPages: response.pagination?.totalPages || 1,
+            },
+          };
+        } catch (error) {
+          console.error("Error fetching level two data:", error);
+          return {
+            data: [],
+            pagination: { page, pageSize, totalItems: 0, totalPages: 1 },
+          };
+        }
+      },
     },
-    // ... rest of your level configurations remain the same
+    3: {
+      columns: [
+        {
+          key: "serial",
+          label: "Serial number",
+          render: (_, index) => index + 1,
+        },
+        {
+          key: "username",
+          label: "Username",
+          render: (item) => (
+            <button
+              className="btn btn-link p-0"
+              onClick={() => handleLevelNavigation(item)}
+            >
+              {item.username}
+            </button>
+          ),
+        },
+        {
+          key: "eventName",
+          label: "Event Name",
+          render: (item) => item.eventName,
+        },
+        {
+          key: "sportName",
+          label: "Sport Name",
+          render: (item) => item.sportName,
+        },
+        {
+          key: "totalPL",
+          label: "Total P/L",
+          render: (item) => (
+            <span style={{ color: item.totalPL >= 0 ? "green" : "red" }}>
+              {item.totalPL >= 0
+                ? `+${item.totalPL.toFixed(2)}`
+                : item.totalPL.toFixed(2)}
+            </span>
+          ),
+        },
+        {
+          key: "date",
+          label: "Date",
+          render: (item) => new Date(item.date).toLocaleString(),
+        },
+      ],
+      getData: async (page, pageSize) => {
+        try {
+          const response = await getMarketWiseAllUserPlLevelThree({
+            marketId: parentData?.marketId, // Pass the selected marketId
+            pageNumber: page,
+            totalEntries: pageSize,
+          });
+
+          const formattedData = formatLevelThreeData(response.data);
+          return {
+            data: formattedData,
+            pagination: {
+              page,
+              pageSize,
+              totalItems: response.pagination?.totalItems || 0,
+              totalPages: response.pagination?.totalPages || 1,
+            },
+          };
+        } catch (error) {
+          console.error("Error fetching level three data:", error);
+          return {
+            data: [],
+            pagination: { page, pageSize, totalItems: 0, totalPages: 1 },
+          };
+        }
+      },
+    },
+   // In the level 4 configuration:
+4: {
+  columns: [
+    {
+      key: "serial",
+      label: "Serial number",
+      render: (_, index) => index + 1,
+    },
+    {
+      key: "username",
+      label: "userName",
+      render: (item) => item.userName,
+    },
+    {
+      key: "Eventname",
+      label: "Event Name",
+      render: (item) => item.marketName,
+    },
+    {
+      key: "Sportname",
+      label: "Sportname",
+      render: (item) => item.gameName,
+    },
+    {
+      key: "details",
+      label: "Details",
+      render: (item) => {
+        if (parentData?.sportName === "Lottery") {
+          return (
+            <div>
+              <div>Amount: {item.amount}</div>
+              <div>Ticket Price: {item.ticketPrice}</div>
+              <div>SEM: {item.sem}</div>
+              {item.tickets && item.tickets.length > 0 && (
+                <details>
+                  <summary>Tickets ({item.tickets.length})</summary>
+                  <div style={{ maxHeight: "200px", overflowY: "auto" }}>
+                    {item.tickets.map((ticket, i) => (
+                      <div key={i}>{ticket}</div>
+                    ))}
+                  </div>
+                </details>
+              )}
+            </div>
+          );
+        } else {
+          return (
+            <div>
+              <div>Type: {item.type}</div>
+              <div>Rate: {item.rate}</div>
+              <div>Value: {item.value}</div>
+              <div>Bid Amount: {item.bidAmount}</div>
+            </div>
+          );
+        }
+      },
+    },
+    {
+      key: "placeTime",
+      label: "Place Time",
+      render: (item) =>
+        new Date(item.placeTime || item.placeDate).toLocaleString(),
+    },
+    {
+      key: "settleTime",
+      label: "Settle Time",
+      render: (item) =>
+        item.settleTime
+          ? new Date(item.settleTime).toLocaleString()
+          : "Not settled",
+    },
+  ],
+  getData: async (page, pageSize) => {
+    try {
+      let response;
+      const params = {
+        userName: parentData?.username,
+      };
+
+      // For Lottery, use marketId
+      if (parentData?.sportName === "Lottery") {
+        params.marketId = parentData?.marketId;
+        response = await getUserWiseBetHistoryLotteryLevelFour(params);
+      } 
+      // For Color Game, use runnerId
+      else {
+        params.runnerId = parentData?.runnerId;
+        response = await getUserWiseBetHistoryColorGameLevelFour(params);
+      }
+
+      return {
+        data: response.data || [],
+        pagination: {
+          page: 1,
+          pageSize: response.data?.length || 10,
+          totalItems: response.data?.length || 0,
+          totalPages: 1,
+        },
+      };
+    } catch (error) {
+      console.error("Error fetching level four data:", error);
+      return {
+        data: [],
+        pagination: { page: 1, pageSize: 10, totalItems: 0, totalPages: 1 },
+      };
+    }
+  },
+},
   };
 
   // Handle navigation between levels
-  const handleLevelNavigation = (item) => {
-    setNavigationStack(prev => [...prev, { level: currentLevel, parent: parentData }]);
-    setParentData(item);
-    setCurrentLevel(currentLevel + 1);
+  const handleLevelNavigation = async (item) => {
+    setLoading(true);
+    try {
+      setNavigationStack((prev) => [
+        ...prev,
+        { level: currentLevel, parent: parentData },
+      ]);
+      setParentData(item);
+      setCurrentLevel(currentLevel + 1);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Handle back navigation
@@ -156,40 +465,62 @@ const EventProfitLoss = () => {
   };
 
   // Get data function for all levels
-  const getTableData = useCallback(async (page, pageSize) => {
-    if (currentLevel === 1) {
-      setPagination(prev => ({ ...prev, page, pageSize }));
+
+  const getTableData = useCallback(
+    async (page, pageSize) => {
+      if (currentLevel === 1) {
+        setPagination((prev) => ({ ...prev, page, pageSize }));
+        return {
+          data: levelOneData,
+          pagination: {
+            page,
+            pageSize,
+            totalItems: pagination.totalItems,
+            totalPages: pagination.totalPages,
+          },
+        };
+      }
+
+      // For level 2, use the getData function from levelConfig
+      if (currentLevel === 2 && levelConfig[2].getData) {
+        return levelConfig[2].getData(page, pageSize);
+      }
+
+      // For level 3, use the getData function from levelConfig
+      if (currentLevel === 3 && levelConfig[3].getData) {
+        return levelConfig[3].getData(page, pageSize);
+      }
+
+      // For level 4, use the getData function from levelConfig
+      if (currentLevel === 4 && levelConfig[4].getData) {
+        // For level 4, we'll ignore pagination parameters since it's not needed
+        return levelConfig[4].getData(1, 1000); // Using large pageSize since pagination is disabled
+      }
+
+      // Fallback for other levels
+      const config = levelConfig[currentLevel];
       return {
-        data: levelOneData,
+        data: config.data || [],
         pagination: {
           page,
           pageSize,
-          totalItems: pagination.totalItems,
-          totalPages: pagination.totalPages
-        }
+          totalItems: 0,
+          totalPages: 1,
+        },
       };
-    }
-    
-    const config = levelConfig[currentLevel];
-    let data = config.data.filter(item => 
-      currentLevel === 1 || item.parentId === parentData?.id
-    );
-
-    return {
-      data,
-      pagination: {
-        page,
-        pageSize,
-        totalItems: data.length,
-        totalPages: Math.ceil(data.length / pageSize)
-      }
-    };
-  }, [currentLevel, levelOneData, pagination.totalItems, pagination.totalPages, parentData]);
-
+    },
+    [
+      currentLevel,
+      levelOneData,
+      pagination.totalItems,
+      pagination.totalPages,
+      parentData,
+    ]
+  );
   // Handle search for level 1
   const handleSearch = useCallback((term) => {
     setSearchTerm(term);
-    setPagination(prev => ({ ...prev, page: 1 }));
+    setPagination((prev) => ({ ...prev, page: 1 }));
   }, []);
 
   return (
@@ -201,14 +532,17 @@ const EventProfitLoss = () => {
               <h4 className="mb-0 text-white">
                 {levelHeadings[currentLevel]} - Level {currentLevel}
                 {parentData && (
-                  <small className="ml-2">({parentData.sportName || parentData.eventName || parentData.username})</small>
+                  <small className="ml-2">
+                    (
+                    {parentData.sportName ||
+                      parentData.eventName ||
+                      parentData.username}
+                    )
+                  </small>
                 )}
               </h4>
               {currentLevel > 1 && (
-                <button 
-                  className="btn btn-light btn-sm" 
-                  onClick={handleBack}
-                >
+                <button className="btn btn-light btn-sm" onClick={handleBack}>
                   <i className="fas fa-arrow-left mr-2"></i> Back
                 </button>
               )}
@@ -219,7 +553,7 @@ const EventProfitLoss = () => {
               <div className="card-body border-bottom">
                 <div className="row align-items-center">
                   <div className="col-md-3 mb-2">
-                    <select 
+                    <select
                       className="form-control"
                       value={dataType}
                       onChange={(e) => setDataType(e.target.value)}
@@ -235,21 +569,31 @@ const EventProfitLoss = () => {
                         type="date"
                         className="form-control"
                         value={dateRange.from}
-                        onChange={(e) => setDateRange(prev => ({...prev, from: e.target.value}))}
+                        onChange={(e) =>
+                          setDateRange((prev) => ({
+                            ...prev,
+                            from: e.target.value,
+                          }))
+                        }
                       />
                       <span className="input-group-text">to</span>
                       <input
                         type="date"
                         className="form-control"
                         value={dateRange.to}
-                        onChange={(e) => setDateRange(prev => ({...prev, to: e.target.value}))}
+                        onChange={(e) =>
+                          setDateRange((prev) => ({
+                            ...prev,
+                            to: e.target.value,
+                          }))
+                        }
                       />
                     </div>
                   </div>
                   <div className="col-md-3 mb-2">
-                    <button className="btn btn-primary w-100" onClick={fetchLevelOneData}>
+                    {/* <button className="btn btn-primary w-100" onClick={fetchLevelOneData}>
                       <i className="fas fa-calculator mr-2"></i> Calculate P/L
-                    </button>
+                    </button> */}
                   </div>
                 </div>
               </div>
@@ -269,7 +613,7 @@ const EventProfitLoss = () => {
                   columns={levelConfig[currentLevel].columns}
                   itemsPerPage={pagination.pageSize}
                   showSearch={currentLevel === 1}
-                  paginationVisible={true}
+                  paginationVisible={currentLevel !== 4}
                   fetchData={getTableData}
                   onSearch={currentLevel === 1 ? handleSearch : undefined}
                   currentPage={pagination.page}
@@ -278,7 +622,9 @@ const EventProfitLoss = () => {
             </div>
 
             <div className="card-footer text-muted">
-              Showing {dataType} data {currentLevel === 1 && `from ${dateRange.from} to ${dateRange.to}`}
+              Showing {dataType} data{" "}
+              {currentLevel === 1 &&
+                `from ${dateRange.from} to ${dateRange.to}`}
             </div>
           </div>
         </div>
