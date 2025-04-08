@@ -1226,7 +1226,7 @@ export const downLineUsers = async (req, res) => {
     const pageSize = parseInt(req.query.pageSize, 10) || 10;
     const baseURL = process.env.COLOR_GAME_URL;
 
-    // Fetch profit/loss data from external API
+    // Fetch all profit/loss data from external API
     let profitLossResponse = { data: [] };
     try {
       const response = await axios.get(`${baseURL}/api/user-profit-loss`);
@@ -1240,8 +1240,73 @@ export const downLineUsers = async (req, res) => {
     // Create a mapping of userId to profitLoss from the external API
     const profitLossMap = {};
     profitLossResponse.data.forEach(user => {
-      profitLossMap[user.userId] = user.profitLoss;
+      profitLossMap[user.userId] = parseFloat(user.profitLoss) || 0;
     });
+
+    // Fetch all admins to build hierarchy
+    const allAdmins = await admins.findAll({
+      raw: true,
+      attributes: ['adminId', 'userName', 'roles', 'createdById']
+    });
+
+    // Create a mapping of createdById to users (for hierarchy traversal)
+    const downlineMap = {};
+    allAdmins.forEach(admin => {
+      if (!downlineMap[admin.createdById]) {
+        downlineMap[admin.createdById] = [];
+      }
+      downlineMap[admin.createdById].push(admin);
+    });
+
+    // Function to get primary role from roles array
+    const getPrimaryRole = (roles) => {
+      if (!roles || !roles.length) return null;
+      return roles[0].role; // Assuming first role is primary
+    };
+
+    // Function to calculate downline profit loss based on role
+    const calculateDownlineProfitLoss = (adminId, role) => {
+      let total = 0;
+      const queue = [...(downlineMap[adminId] || [])];
+      
+      while (queue.length > 0) {
+        const current = queue.shift();
+        // Skip if the current admin is the same as the starting admin
+        if (current.adminId !== adminId) {
+          total += profitLossMap[current.adminId] || 0;
+        }
+        
+        const currentRole = getPrimaryRole(current.roles);
+        
+        // Add to queue based on role hierarchy
+        if (role === string.whiteLabel) {
+          // WhiteLabel includes all levels below
+          if ([string.hyperAgent, string.superAgent, string.masterAgent, string.user].includes(currentRole)) {
+            queue.push(...(downlineMap[current.adminId] || []));
+          }
+        }
+        else if (role === string.hyperAgent) {
+          // HyperAgent includes SuperAgents and MasterAgents
+          if ([string.superAgent, string.masterAgent, string.user].includes(currentRole)) {
+            queue.push(...(downlineMap[current.adminId] || []));
+          }
+        }
+        else if (role === string.superAgent) {
+          // SuperAgent includes MasterAgents
+          if ([string.masterAgent, string.user].includes(currentRole)) {
+            queue.push(...(downlineMap[current.adminId] || []));
+          }
+        }
+        else if (role === string.masterAgent) {
+          // MasterAgent includes all users below, regardless of direct relationship
+          if ([string.user].includes(currentRole)) {
+            queue.push(...(downlineMap[current.adminId] || []));
+          }
+        }
+      }
+      
+      return total;
+    };
 
     const allowedRoles = [
       string.superAdmin,
@@ -1293,15 +1358,36 @@ export const downLineUsers = async (req, res) => {
       raw: true
     });
 
-    // Map admin data with corresponding profitLoss from the external API
+    // Map admin data with calculated downline profit loss
     const users = adminsData.map((admin) => {
+      const primaryRole = getPrimaryRole(admin.roles);
+      const personalProfitLoss = (profitLossMap[admin.adminId] || 0);
+      let downLineProfitLoss = 0;
+      
+      // Calculate downline based on role
+      if ([string.masterAgent, string.superAgent, string.hyperAgent, string.whiteLabel].includes(primaryRole)) {
+        downLineProfitLoss = calculateDownlineProfitLoss(admin.adminId, primaryRole);
+      }
+
+      // For agent roles, both profitLoss and downLineProfitLoss should be the same (personal + downline)
+      const agentProfitLoss = [string.masterAgent, string.superAgent, string.hyperAgent, string.whiteLabel].includes(primaryRole)
+        ? (personalProfitLoss + downLineProfitLoss).toFixed(2)
+        : personalProfitLoss.toFixed(2);
+
+      // Commission is 0 for all roles
+      const commission = "0";
+
       return {
         adminId: admin.adminId,
         userName: admin.userName,
         roles: admin.roles,
         createdById: admin.createdById,
         createdByUser: admin.createdByUser,
-        profitLoss: profitLossMap[admin.adminId] || '0.00' // Get profitLoss from the map, default to '0.00' if not found
+        profitLoss: agentProfitLoss,
+        downLineProfitLoss: [string.masterAgent, string.superAgent, string.hyperAgent, string.whiteLabel].includes(primaryRole)
+          ? agentProfitLoss
+          : downLineProfitLoss.toFixed(2),
+        commission: commission
       };
     });
 
