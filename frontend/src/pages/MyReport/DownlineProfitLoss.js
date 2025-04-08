@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import ReusableTable from "../../Reusables/ReusableTable";
 import { getAdminDownline } from "../../Utils/service/apiService";
@@ -20,7 +20,6 @@ const DownlineProfitLoss = () => {
     to: new Date().toISOString().split("T")[0],
   });
   const [tempDate, setTempDate] = useState({ from: "", to: "" });
-  const [triggerFetch, setTriggerFetch] = useState(0);
 
   const handleUserNavigateToProfitLoss = (userName) => {
     navigate(`/account-landing/${userName}/profit_loss`);
@@ -50,7 +49,6 @@ const DownlineProfitLoss = () => {
       const today = new Date().toISOString().split("T")[0];
       setDateRange({ from: today, to: today });
       setTempDate({ from: "", to: "" });
-      setTriggerFetch(prev => prev + 1);
     }
     else {
       setDateRange({ from: "", to: "" });
@@ -61,13 +59,14 @@ const DownlineProfitLoss = () => {
   // Handle Calculate P/L
   const handleCalculatePL = () => {
     if (dataType !== "live" && tempDate.from && tempDate.to) {
+      if (tempDate.to < tempDate.from) {
+        toast.error("To date cannot be earlier than From date.");
+        return;
+      }
       setDateRange({ ...tempDate });
-      setTriggerFetch(prev => prev + 1);
     }
   };
 
-
-  // Columns configuration
   const columns = [
     {
       key: "userName",
@@ -94,9 +93,20 @@ const DownlineProfitLoss = () => {
       label: "Profit/Loss",
       render: (item) =>
         item.isTotalRow ? (
-          <strong>{item.profitLoss?.toLocaleString()}</strong>
+          <strong className={`${item.profitLoss < 0
+            ? 'text-danger'
+            : item.profitLoss > 0
+              ? 'text-success'
+              : ''
+            }`}>{item.profitLoss?.toLocaleString()}</strong>
         ) : (
-          item.profitLoss?.toLocaleString()
+          <div className={`${item.profitLoss < 0
+            ? 'text-danger'
+            : item.profitLoss >= 0
+              ? 'text-success'
+              : ''
+            }`}>{item.profitLoss?.toLocaleString()}
+          </div>
         ),
     },
     {
@@ -104,9 +114,25 @@ const DownlineProfitLoss = () => {
       label: "Downline P/L",
       render: (item) =>
         item.isTotalRow ? (
-          <strong>{item.downlineProfitLoss?.toLocaleString()}</strong>
+          <strong
+            className={`${item.downLineProfitLoss < 0
+              ? 'text-danger'
+              : item.downLineProfitLoss >= 0
+                ? 'text-success'
+                : ''
+              }`}
+          >
+            {item.downLineProfitLoss?.toLocaleString()}
+          </strong>
+
         ) : (
-          item.downlineProfitLoss?.toLocaleString()
+          <div className={`${item.downLineProfitLoss < 0
+            ? 'text-danger'
+            : item.downLineProfitLoss >= 0
+              ? 'text-success'
+              : ''
+            }`}>{item.downLineProfitLoss?.toLocaleString()}
+          </div>
         ),
     },
     {
@@ -114,31 +140,80 @@ const DownlineProfitLoss = () => {
       label: "Commission",
       render: (item) =>
         item.isTotalRow ? (
-          <strong>{item.commission?.toLocaleString()}</strong>
+          <strong className={`${item.commission < 0
+            ? 'text-danger'
+            : item.commission >= 0
+              ? 'text-success'
+              : ''
+            }`}>{item.commission?.toLocaleString()}</strong>
         ) : (
-          item.commission?.toLocaleString()
+          <div className={`${item.commission < 0
+            ? 'text-danger'
+            : item.commission >= 0
+              ? 'text-success'
+              : ''
+            }`}>{item.commission?.toLocaleString()}</div>
         ),
     },
   ];
 
   // Function to fetch data (mock implementation)
-  const fetchData = async (page, pageSize, trigger) => {
-    try {
-      const response = await getAdminDownline({
-        userId,
-        pageNumber: page,
-        totalEntries: pageSize,
-        fromDate: dateRange.from,
-        toDate: dateRange.to,
-        pageSize,
-        dataSource: dataType,
-      });
-      return response;
-    } catch (error) {
-      toast.error(customErrorHandler(error));
-      return { data: [], pagination: { totalPages: 1, totalItems: 0 } };
-    }
-  };
+  const fetchData = useCallback(
+    async (page, pageSize, search) => {
+      try {
+        const response = await getAdminDownline({
+          userId,
+          pageNumber: page,
+          totalEntries: pageSize,
+          fromDate: dateRange.from,
+          toDate: dateRange.to,
+          pageSize,
+          search: search ?? "",
+          dataSource: dataType,
+        });
+
+        const data = response?.data || [];
+
+        if (data.length === 0) {
+          return [];
+        }
+        // Calculate totals
+        const totals = data.reduce(
+          (acc, item) => {
+            acc.profitLoss += parseFloat(item.profitLoss) || 0;
+            acc.downLineProfitLoss += parseFloat(item.downLineProfitLoss) || 0;
+            acc.commission += parseFloat(item.commission) || 0;
+            return acc;
+          },
+          { profitLoss: 0, downLineProfitLoss: 0, commission: 0 }
+        );
+
+
+        // Add total row to end of the list
+        const modifiedData = [
+          ...data,
+          {
+            id: "total-row",
+            userName: "Total",
+            profitLoss: totals.profitLoss,
+            downLineProfitLoss: totals.downLineProfitLoss,
+            commission: totals.commission,
+            isTotalRow: true,
+          },
+        ];
+
+        return {
+          ...response,
+          data: modifiedData,
+        };
+      } catch (error) {
+        toast.error(customErrorHandler(error));
+        return { data: [], pagination: { totalPages: 1, totalItems: 0 } };
+      }
+    },
+    [userId, dateRange.from, dateRange.to, dataType]
+  );
+
 
   return (
     <div className="container mt-4">
@@ -176,7 +251,7 @@ const DownlineProfitLoss = () => {
                   >
                     <option value="live">Live Data</option>
                     <option value="backup">Backup Data</option>
-                    <option value="old">Old Data</option>
+                    <option value="olddata">Old Data</option>
                   </select>
                 </div>
 
@@ -232,7 +307,8 @@ const DownlineProfitLoss = () => {
                 itemsPerPage={10}
                 showSearch={true}
                 paginationVisible={true}
-                fetchData={(page, pageSize) => fetchData(page, pageSize, triggerFetch)}
+                fetchData={fetchData}
+              // dataLength={}
               />
             </div>
 
