@@ -8,10 +8,10 @@ const sequelize = new Sequelize(process.env.DB_DBNAME, process.env.DB_USER, proc
   dialect: "mysql",
   logging: false,
   pool: {
-    max: 15,                 
-    min: 2,                  
-    acquire: 30000,         
-    idle: 5000,            
+    max: 60,
+    min: 10,
+    acquire: 30000,
+    idle: 10000,
   }
 });
 

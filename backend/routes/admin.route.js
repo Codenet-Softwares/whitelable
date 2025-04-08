@@ -18,7 +18,12 @@ import {
   subAdminPermissionSchema,
   userStatusSchema,
   exUpdateBalanceSchema,
+
   validateDownLineProfitLoss,
+
+  validateProfitLossInput,
+  validateProfitLossMarket,
+
 } from '../schema/commonSchema.js';
 
 import {
@@ -41,7 +46,13 @@ import {
   syncWithUserBackend,
   fetchUserHierarchy,
   getHierarchyWiseUsers,
+
   downLineUsers
+
+  getTotalProfitLoss,
+  getMarketWiseProfitLoss,
+  getAllUserProfitLoss
+
 } from '../controller/admin.controller.js';
 import { string } from '../constructor/string.js';
 
@@ -325,6 +336,32 @@ export const adminRoute = (app) => {
     string.superAgent,
     string.masterAgent,
   ]), downLineUsers );
+
+  app.get("/api/total-profitloss-hierarchy", validateProfitLossInput, customErrorHandler, Authorize([
+    string.superAdmin,
+    string.whiteLabel,
+    string.hyperAgent,
+    string.superAgent,
+    string.masterAgent,
+  ]), getTotalProfitLoss);
+
+  app.get("/api/market-wise-profit-loss",validateProfitLossMarket,customErrorHandler, Authorize([
+    string.superAdmin,
+    string.whiteLabel,
+    string.hyperAgent,
+    string.superAgent,
+    string.masterAgent,
+  ]), getMarketWiseProfitLoss)
+
+
+  app.get("/api/market-allUser-profit-loss/:marketId", Authorize([
+    string.superAdmin,
+    string.whiteLabel,
+    string.hyperAgent,
+    string.superAgent,
+    string.masterAgent,
+  ]), getAllUserProfitLoss)
+
 
   
 };
