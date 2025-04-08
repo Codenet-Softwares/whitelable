@@ -9,7 +9,7 @@ import { customErrorHandler } from "../Utils/helper";
 import { useNavigate } from "react-router-dom";
 
 const View_AddCash_history = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const { dispatch, store } = useAppContext();
   const [state, setState] = useState(view_AddCashHistory_InitialState());
   async function getView_AddCash_history() {
@@ -68,18 +68,20 @@ const View_AddCash_history = () => {
   return (
     <div className="d-flex justify-content-center m-5">
       <div className="card w-100 rounded">
-      <div 
-      className="card-heade text-white p-1 d-flex align-items-center justify-content-between"
-      style={{ backgroundColor: "#26416e" }}
-    >
-      <button className="btn btn-secondary d-flex align-items-center" onClick={() => navigate("/wallet")}>
-         Back
-      </button>
+        <div
+          className="card-heade text-white p-2 d-flex align-items-center justify-content-between"
+          style={{ backgroundColor: "#1E2761" }}
+        >
+          <i
+            className="fa fa-arrow-left text-white px-2 position-absolute start-0 arrow-button"
+            aria-hidden="true"
+            style={{ cursor: "pointer", fontSize: "1.3rem" }}
+            onClick={() => navigate("/wallet")}
+          ></i>
+          <b className="mx-auto text-uppercase">Account Statement</b>
 
-      <b className="mx-auto text-uppercase">Account Statement</b>
-
-      <div style={{ width: "90px" }}></div>
-    </div>
+          <div style={{ width: "90px" }}></div>
+        </div>
         <ul className="list-group list-group-flush">
           <li className="list-group-item">
             <div className="white_card_body">
