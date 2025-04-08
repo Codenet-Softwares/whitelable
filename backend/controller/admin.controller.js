@@ -1220,6 +1220,198 @@ export const getHierarchyWiseUsers = async (req, res) => {
 };
 
 
+export const downLineUsers = async (req, res) => {
+  try {
+    const createdById = req.params.createdById;
+    const searchTerm = req.query.searchTerm || '';
+    const page = parseInt(req.query.page, 10) || 1;
+    const pageSize = parseInt(req.query.pageSize, 10) || 10;
+    const {dataType,startDate, endDate} = req.query;
+
+    let profitLossResponse = { data: [] };
+    try {
+     const baseURL = process.env.COLOR_GAME_URL;
+      const response = await axios.get(`${baseURL}/api/user-profit-loss`,
+        {
+          params: {
+            dataType,
+            startDate,
+            endDate
+          }
+        }
+      );
+      if (response.data.success) {
+        profitLossResponse = response.data;
+      }
+    } catch (error) {
+      console.error("Error fetching profit/loss data:", error.message);
+    }
+
+    const profitLossMap = {};
+    profitLossResponse.data.forEach(user => {
+      profitLossMap[user.userId] = parseFloat(user.profitLoss) || 0;
+    });
+
+    const allAdmins = await admins.findAll({
+      raw: true,
+      attributes: ['adminId', 'userName', 'roles', 'createdById']
+    });
+
+    const downlineMap = {};
+    allAdmins.forEach(admin => {
+      if (!downlineMap[admin.createdById]) {
+        downlineMap[admin.createdById] = [];
+      }
+      downlineMap[admin.createdById].push(admin);
+    });
+
+    const getPrimaryRole = (roles) => {
+      if (!roles || !roles.length) return null;
+      return roles[0].role; 
+    };
+
+    const calculateDownlineProfitLoss = (adminId, role) => {
+      let total = 0;
+      const queue = [...(downlineMap[adminId] || [])];
+      
+      while (queue.length > 0) {
+        const current = queue.shift();
+        if (current.adminId !== adminId) {
+          total += profitLossMap[current.adminId] || 0;
+        }
+        
+        const currentRole = getPrimaryRole(current.roles);
+        
+        if (role === string.whiteLabel) {
+          if ([string.hyperAgent, string.superAgent, string.masterAgent, string.user].includes(currentRole)) {
+            queue.push(...(downlineMap[current.adminId] || []));
+          }
+        }
+        else if (role === string.hyperAgent) {
+          if ([string.superAgent, string.masterAgent, string.user].includes(currentRole)) {
+            queue.push(...(downlineMap[current.adminId] || []));
+          }
+        }
+        else if (role === string.superAgent) {
+          if ([string.masterAgent, string.user].includes(currentRole)) {
+            queue.push(...(downlineMap[current.adminId] || []));
+          }
+        }
+        else if (role === string.masterAgent) {
+          if ([string.user].includes(currentRole)) {
+            queue.push(...(downlineMap[current.adminId] || []));
+          }
+        }
+      }
+      
+      return total;
+    };
+
+    const allowedRoles = [
+      string.superAdmin,
+      string.whiteLabel,
+      string.hyperAgent,
+      string.superAgent,
+      string.masterAgent,
+      string.user,
+    ];
+
+    const baseWhere = {
+      createdById,
+      [Op.or]: allowedRoles.map((role) =>
+        fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))
+      ),
+    };
+
+    if (searchTerm) {
+      baseWhere.userName = {
+        [Op.like]: `%${searchTerm}%`
+      };
+    }
+
+    const totalRecords = await admins.count({
+      where: baseWhere
+    });
+
+    if (totalRecords === 0) {
+      return res.status(statusCode.success).json({
+        data: [],
+        success: true,
+        successCode: statusCode.success,
+        message: messages.noRecordsFound,
+        pagination: {
+          totalRecords: 0,
+          totalPages: 0,
+          currentPage: page,
+          pageSize
+        }
+      });
+    }
+
+    const offset = (page - 1) * pageSize;
+    const adminsData = await admins.findAll({
+      where: baseWhere,
+      offset,
+      limit: pageSize,
+      order: [['createdAt', 'DESC']],
+      raw: true
+    });
+
+    const users = adminsData.map((admin) => {
+      const primaryRole = getPrimaryRole(admin.roles);
+      const personalProfitLoss = (profitLossMap[admin.adminId] || 0);
+      let downLineProfitLoss = 0;
+      
+      if ([string.masterAgent, string.superAgent, string.hyperAgent, string.whiteLabel].includes(primaryRole)) {
+        downLineProfitLoss = calculateDownlineProfitLoss(admin.adminId, primaryRole);
+      }
+
+      const agentProfitLoss = [string.masterAgent, string.superAgent, string.hyperAgent, string.whiteLabel].includes(primaryRole)
+        ? (personalProfitLoss + downLineProfitLoss).toFixed(2)
+        : personalProfitLoss.toFixed(2);
+
+      const commission = "0";
+
+      return {
+        adminId: admin.adminId,
+        userName: admin.userName,
+        roles: admin.roles,
+        createdById: admin.createdById,
+        createdByUser: admin.createdByUser,
+        profitLoss: agentProfitLoss,
+        downLineProfitLoss: [string.masterAgent, string.superAgent, string.hyperAgent, string.whiteLabel].includes(primaryRole)
+          ? agentProfitLoss
+          : downLineProfitLoss.toFixed(2),
+        commission: commission
+      };
+    });
+
+    const totalPages = Math.ceil(totalRecords / pageSize);
+
+    return res.status(statusCode.success).json({
+      data: users,
+      success: true,
+      successCode: statusCode.success,
+      message: messages.success,
+      pagination: {
+        totalRecords,
+        totalPages,
+        currentPage: page,
+        pageSize,
+      }
+    });
+  } catch (error) {
+    console.error("Error in downLineUsers:", error);
+    return res.status(statusCode.internalServerError).json({
+      data: null,
+      success: false,
+      successCode: statusCode.internalServerError,
+      message: error.message
+    });
+  }
+};
+
+
 export const getTotalProfitLoss = async (req, res) => {
   try {
     const { page = 1, pageSize = 10, search = "", dataType, startDate, endDate} = req.query;
@@ -1494,4 +1686,5 @@ export const getAllUserProfitLoss = async(req,res) => {
     }
   }
 }
+
 

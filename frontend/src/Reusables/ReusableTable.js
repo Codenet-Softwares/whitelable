@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Pagination from "../components/common/Pagination";
 
-
 const ReusableTable = ({
   columns,
   itemsPerPage,
@@ -22,9 +21,10 @@ const ReusableTable = ({
       setLoading(true);
       try {
         const response = await fetchData(currentPage, itemsPerPage);
+        console.log("data", response);
         setData(response.data || []);
         setTotalPages(response.pagination?.totalPages || 1);
-        setTotalData(response.pagination?.totalItems || 0);
+        setTotalData(response.pagination?.totalRecords || 0);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -38,10 +38,14 @@ const ReusableTable = ({
   // Filter data based on search term
   const filteredData = data.filter((item) =>
     columns.some((column) =>
-      item[column.key]?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      item[column.key]
+        ?.toString()
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
     )
   );
 
+  console.log("data", filteredData)
   // Handle page change
   const onPageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -91,8 +95,8 @@ const ReusableTable = ({
                     {column.key === "serialNumber"
                       ? calculateSerialNumber(index) // Dynamically calculate serial number
                       : column.render
-                      ? column.render(row)
-                      : row[column.key]}
+                        ? column.render(row)
+                        : row[column.key]}
                   </td>
                 ))}
               </tr>
@@ -108,7 +112,7 @@ const ReusableTable = ({
       </table>
 
       {/* Pagination */}
-      {paginationVisible && totalPages > 0 && (
+      {data.length > 0 && totalPages > 0 && (
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

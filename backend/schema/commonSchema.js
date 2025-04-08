@@ -326,7 +326,11 @@ export const validateResetPassword = [
     .withMessage("New Password is required")
 ];
 
+
+export const validateDownLineProfitLoss= [
+
 export const validateProfitLossInput = [
+
   query("dataType")
     .exists()
     .withMessage("dataType is required.")
@@ -340,6 +344,7 @@ export const validateProfitLossInput = [
     .optional()
     .isInt({ min: 1 })
     .withMessage("Limit must be a positive integer."),
+
 
 ];
 
