@@ -43,7 +43,8 @@ import {
   fetchUserHierarchy,
   getHierarchyWiseUsers,
   getTotalProfitLoss,
-  getMarketWiseProfitLoss
+  getMarketWiseProfitLoss,
+  getAllUserProfitLoss
 } from '../controller/admin.controller.js';
 import { string } from '../constructor/string.js';
 
@@ -336,6 +337,16 @@ export const adminRoute = (app) => {
     string.superAgent,
     string.masterAgent,
   ]), getMarketWiseProfitLoss)
+
+
+  app.get("/api/market-allUser-profit-loss/:marketId", Authorize([
+    string.superAdmin,
+    string.whiteLabel,
+    string.hyperAgent,
+    string.superAgent,
+    string.masterAgent,
+  ]), getAllUserProfitLoss)
+
 
   
 };
