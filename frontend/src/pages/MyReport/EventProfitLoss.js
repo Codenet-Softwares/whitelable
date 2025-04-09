@@ -651,7 +651,7 @@ const EventProfitLoss = () => {
       levelOneData,
       pagination.totalItems,
       pagination.totalPages,
-      parentData,
+      parentData
     ]
   );
   // Handle search for level 1
@@ -713,6 +713,7 @@ const EventProfitLoss = () => {
                               from: e.target.value,
                             }))
                           }
+                          disabled={dataType === "live"} // Disable when live is selected
                         />
                         <span className="input-group-text">to</span>
                         <input
@@ -725,6 +726,7 @@ const EventProfitLoss = () => {
                               to: e.target.value,
                             }))
                           }
+                          disabled={dataType === "live"} // Disable when live is selected
                         />
                       </div>
                     </div>
