@@ -30,6 +30,8 @@ const DownlineProfitLoss = () => {
     setNavigationBar((prev) => [...prev, { adminId, adminName }]);
   };
 
+  console.log("userid", userId)
+
   const handleBreadcrumbClick = (clickedAdminId) => {
     const index = navigationBar.findIndex(
       (entry) => entry.adminId === clickedAdminId
@@ -308,7 +310,6 @@ const DownlineProfitLoss = () => {
                 showSearch={true}
                 paginationVisible={true}
                 fetchData={fetchData}
-              // dataLength={}
               />
             </div>
 
