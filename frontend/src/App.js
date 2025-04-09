@@ -22,9 +22,9 @@ import BetHistoryForPl from "./profileAccount/BetHistoryForPl";
 import BetHistoryLotteryForPl from "./profileAccount/BetHistoryLotteryForPl";
 
 import ResetPassword from "./components/ResetPassword/ResetPassword";
-import DemoNavside from "./Layout/DemoNavside";
+
 import LotteryMarketAnalysis from "./pages/LotteryMarketAnalysis";
-import DemoMarket_Analysis from "./pages/DemoMarket_Analysis";
+
 import PrivateRoute from "./components/common/PrivateRoute";
 import EventProfitLoss from "./pages/MyReport/EventProfitLoss";
 import DownlineProfitLoss from "./pages/MyReport/DownlineProfitLoss";
@@ -80,7 +80,7 @@ function App() {
               />
               <Route path="wallet" element={<Wallet />} />
               <Route path="CreateSubAdmin" element={<CreateSubAdmin />} />
-              <Route path="Demo" element={<DemoMarket_Analysis />} />
+            
               <Route path="ViewAllSubAdmin" element={<SubAdminView />} />
               <Route
                 path="ViewSubAdminPermission/:id"
