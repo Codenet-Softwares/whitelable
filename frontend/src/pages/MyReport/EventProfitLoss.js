@@ -81,6 +81,8 @@ const EventProfitLoss = () => {
         pageNumber: pagination.page,
         totalEntries: pagination.pageSize,
         search: searchTerm,
+        fromDate: dateRange.from,
+        toDate: dateRange.to,
       });
 
       const formattedData = formatLevelOneData(response.data);
@@ -97,14 +99,21 @@ const EventProfitLoss = () => {
     } finally {
       setLoading(false);
     }
-  }, [dataType, pagination.page, pagination.pageSize, searchTerm]);
+  }, [
+    dataType,
+    pagination.page,
+    pagination.pageSize,
+    searchTerm,
+    dateRange.from,
+    dateRange.to,
+  ]);
 
   // Fetch data when dependencies change
   useEffect(() => {
     if (currentLevel === 1) {
       fetchLevelOneData();
     }
-  }, [currentLevel, fetchLevelOneData]);
+  }, [currentLevel, fetchLevelOneData, searchTerm]);
 
   // Format API data for level 2
   const formatLevelTwoData = (apiData) => {
@@ -126,7 +135,7 @@ const EventProfitLoss = () => {
     return apiData.map((item) => ({
       id: item.userId,
       username: item.userName,
-      runnerId:item.runnerId,
+      runnerId: item.runnerId,
       eventName: item.marketName,
       sportName: item.gameName,
       marketId: item.marketId, // Ensure marketId is included
@@ -245,6 +254,7 @@ const EventProfitLoss = () => {
               pageSize,
               totalItems: response.pagination?.totalItems || 0,
               totalPages: response.pagination?.totalPages || 1,
+              totalRecords: response.pagination?.totalItems || 0,
             },
           };
         } catch (error) {
@@ -318,6 +328,7 @@ const EventProfitLoss = () => {
               pageSize,
               totalItems: response.pagination?.totalItems || 0,
               totalPages: response.pagination?.totalPages || 1,
+              totalRecords: response.pagination?.totalItems || 0, // Add this
             },
           };
         } catch (error) {
@@ -329,114 +340,235 @@ const EventProfitLoss = () => {
         }
       },
     },
-   // In the level 4 configuration:
-4: {
-  columns: [
-    {
-      key: "serial",
-      label: "Serial number",
-      render: (_, index) => index + 1,
-    },
-    {
-      key: "username",
-      label: "userName",
-      render: (item) => item.userName,
-    },
-    {
-      key: "Eventname",
-      label: "Event Name",
-      render: (item) => item.marketName,
-    },
-    {
-      key: "Sportname",
-      label: "Sportname",
-      render: (item) => item.gameName,
-    },
-    {
-      key: "details",
-      label: "Details",
-      render: (item) => {
+    // In the level 4 configuration:
+    4: {
+      columns: (() => {
+        // Debug logging
+        console.log("Current Sport:", parentData?.sportName);
+
         if (parentData?.sportName === "Lottery") {
-          return (
-            <div>
-              <div>Amount: {item.amount}</div>
-              <div>Ticket Price: {item.ticketPrice}</div>
-              <div>SEM: {item.sem}</div>
-              {item.tickets && item.tickets.length > 0 && (
-                <details>
-                  <summary>Tickets ({item.tickets.length})</summary>
-                  <div style={{ maxHeight: "200px", overflowY: "auto" }}>
-                    {item.tickets.map((ticket, i) => (
-                      <div key={i}>{ticket}</div>
-                    ))}
-                  </div>
-                </details>
-              )}
-            </div>
-          );
+          return [
+            {
+              key: "serial",
+              label: "Serial number",
+              render: (_, index) => index + 1,
+            },
+            {
+              key: "username",
+              label: "userName",
+              render: (item) => item.userName,
+            },
+            {
+              key: "Eventname",
+              label: "Event Name",
+              render: (item) => item.marketName,
+            },
+            {
+              key: "Sportname",
+              label: "Sportname",
+              render: (item) => item.gameName,
+            },
+            {
+              key: "Amount",
+              label: "Amount",
+              render: (item) => item.amount,
+            },
+            {
+              key: "Ticket Price",
+              label: "Ticket Price",
+              render: (item) => item.ticketPrice,
+            },
+            {
+              key: "sem",
+              label: "sem",
+              render: (item) => item.sem,
+            },
+            {
+              key: "details",
+              label: "Details",
+              render: (item) => (
+                <div>
+                  {item.tickets?.length > 0 && (
+                    <details>
+                      <summary>Tickets ({item.tickets.length})</summary>
+                      <div style={{ maxHeight: "200px", overflowY: "auto" }}>
+                        {item.tickets.map((ticket, i) => (
+                          <div className="text-truncate" key={i}>
+                            {ticket}
+                          </div>
+                        ))}
+                      </div>
+                    </details>
+                  )}
+                </div>
+              ),
+            },
+            {
+              key: "placeTime",
+              label: "Place Time",
+              render: (item) =>
+                new Date(item.placeTime || item.placeDate).toLocaleString(),
+            },
+            {
+              key: "settleTime",
+              label: "Settle Time",
+              render: (item) =>
+                item.settleTime
+                  ? new Date(item.settleTime).toLocaleString()
+                  : "Not settled",
+            },
+          ];
+        } else if (parentData?.sportName === "COLORGAME") {
+          return [
+            {
+              key: "serial",
+              label: "Serial number",
+              render: (_, index) => index + 1,
+            },
+            {
+              key: "username",
+              label: "Username",
+              render: (item) => item.userName,
+            },
+
+            {
+              key: "Event Name",
+              label: "Event Name",
+              render: (item) => item.marketName || "",
+            },
+            {
+              key: " Sport Type",
+              label: "Sport Type",
+              render: (item) => item.gameName || "",
+            },
+            {
+              key: " Runner Name",
+              label: "Runner Name",
+              render: (item) => item.runnerName || "",
+            },
+
+            {
+              key: "Rate",
+              label: "Rate",
+              render: (item) => item.rate || "",
+            },
+
+            {
+              key: "betType",
+              label: "Bet Type",
+              render: (item) => item.type,
+            },
+            {
+              key: "amount",
+              label: "Amount",
+              render: (item) => item.value,
+            },
+            {
+              key: "P/L",
+              label: "P/L",
+              render: (item) => (
+                <span>
+                  {item.bidAmount} (
+                  <span style={{ color: "red" }}>-{item.value}</span>)
+                </span>
+              ),
+            },
+            {
+              key: "placeTime",
+              label: "Place Time",
+              render: (item) => new Date(item.placeDate).toLocaleString(),
+            },
+            {
+              key: "Match Date",
+              label: "Match Date",
+              render: (item) => new Date(item.matchDate).toLocaleString(),
+            },
+          ];
         } else {
-          return (
-            <div>
-              <div>Type: {item.type}</div>
-              <div>Rate: {item.rate}</div>
-              <div>Value: {item.value}</div>
-              <div>Bid Amount: {item.bidAmount}</div>
-            </div>
-          );
+          // Default columns for other sports
+          return [
+            {
+              key: "serial",
+              label: "Serial number",
+              render: (_, index) => index + 1,
+            },
+            {
+              key: "username",
+              label: "Username",
+              render: (item) => item.userName,
+            },
+            {
+              key: "event",
+              label: "Event",
+              render: (item) => item.eventName || "-",
+            },
+            {
+              key: "market",
+              label: "Market",
+              render: (item) => item.marketName || "-",
+            },
+            {
+              key: "amount",
+              label: "Amount",
+              render: (item) => item.amount,
+            },
+            {
+              key: "placeTime",
+              label: "Place Time",
+              render: (item) => new Date(item.placeTime).toLocaleString(),
+            },
+          ];
+        }
+      })(),
+
+      getData: async (page, pageSize) => {
+        try {
+          let response;
+          const params = {
+            userName: parentData?.username,
+          };
+
+          if (parentData?.sportName === "Lottery") {
+            params.marketId = parentData?.marketId;
+            response = await getUserWiseBetHistoryLotteryLevelFour(params);
+          } else if (parentData?.sportName === "COLORGAME") {
+            params.runnerId = parentData?.runnerId;
+            response = await getUserWiseBetHistoryColorGameLevelFour(params);
+            console.log("Color Game API Response:", response);
+          } else {
+            // Add handling for other sports if needed
+            console.log("Unsupported sport type:", parentData?.sportName);
+            return {
+              data: [],
+              pagination: {
+                page: 1,
+                pageSize: 10,
+                totalItems: 0,
+                totalPages: 1,
+              },
+            };
+          }
+
+          return {
+            data: response?.data || [],
+            pagination: {
+              page: response?.pagination?.page || 1,
+              pageSize:
+                response?.pagination?.pageSize || response?.data?.length || 10,
+              totalItems:
+                response?.pagination?.totalItems || response?.data?.length || 0,
+              totalPages: response?.pagination?.totalPages || 1,
+            },
+          };
+        } catch (error) {
+          console.error("Error fetching level four data:", error);
+          return {
+            data: [],
+            pagination: { page: 1, pageSize: 10, totalItems: 0, totalPages: 1 },
+          };
         }
       },
     },
-    {
-      key: "placeTime",
-      label: "Place Time",
-      render: (item) =>
-        new Date(item.placeTime || item.placeDate).toLocaleString(),
-    },
-    {
-      key: "settleTime",
-      label: "Settle Time",
-      render: (item) =>
-        item.settleTime
-          ? new Date(item.settleTime).toLocaleString()
-          : "Not settled",
-    },
-  ],
-  getData: async (page, pageSize) => {
-    try {
-      let response;
-      const params = {
-        userName: parentData?.username,
-      };
-
-      // For Lottery, use marketId
-      if (parentData?.sportName === "Lottery") {
-        params.marketId = parentData?.marketId;
-        response = await getUserWiseBetHistoryLotteryLevelFour(params);
-      } 
-      // For Color Game, use runnerId
-      else {
-        params.runnerId = parentData?.runnerId;
-        response = await getUserWiseBetHistoryColorGameLevelFour(params);
-      }
-
-      return {
-        data: response.data || [],
-        pagination: {
-          page: 1,
-          pageSize: response.data?.length || 10,
-          totalItems: response.data?.length || 0,
-          totalPages: 1,
-        },
-      };
-    } catch (error) {
-      console.error("Error fetching level four data:", error);
-      return {
-        data: [],
-        pagination: { page: 1, pageSize: 10, totalItems: 0, totalPages: 1 },
-      };
-    }
-  },
-},
   };
 
   // Handle navigation between levels
@@ -467,8 +599,12 @@ const EventProfitLoss = () => {
   // Get data function for all levels
 
   const getTableData = useCallback(
-    async (page, pageSize) => {
+    async (page, pageSize, search) => {
       if (currentLevel === 1) {
+        // If search term is provided (from ReusableTable), update our state
+        if (search !== searchTerm) {
+          setSearchTerm(search);
+        }
         setPagination((prev) => ({ ...prev, page, pageSize }));
         return {
           data: levelOneData,
@@ -477,6 +613,7 @@ const EventProfitLoss = () => {
             pageSize,
             totalItems: pagination.totalItems,
             totalPages: pagination.totalPages,
+            totalRecords: pagination.totalItems, // Add this line for ReusableTable
           },
         };
       }
@@ -520,112 +657,111 @@ const EventProfitLoss = () => {
   // Handle search for level 1
   const handleSearch = useCallback((term) => {
     setSearchTerm(term);
-    setPagination((prev) => ({ ...prev, page: 1 }));
+    setPagination((prev) => ({ ...prev, page: 1 })); // Reset to first page on search
   }, []);
 
   return (
     <div className="container mt-4">
       <div className="row justify-content-center">
         <div className="col-md-12">
-        <div className="col-md-12">
-          <div className="card shadow-sm">
-            <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-              <h4 className="mb-0 text-white">
-                {levelHeadings[currentLevel]} - Level {currentLevel}
-                {parentData && (
-                  <small className="ml-2">
-                    (
-                    {parentData.sportName ||
-                      parentData.eventName ||
-                      parentData.username}
-                    )
-                  </small>
+          <div className="col-md-12">
+            <div className="card shadow-sm">
+              <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h4 className="mb-0 text-white">
+                  {levelHeadings[currentLevel]} - Level {currentLevel}
+                  {parentData && (
+                    <small className="ml-2">
+                      (
+                      {parentData.sportName ||
+                        parentData.eventName ||
+                        parentData.username}
+                      )
+                    </small>
+                  )}
+                </h4>
+                {currentLevel > 1 && (
+                  <button className="btn btn-light btn-sm" onClick={handleBack}>
+                    <i className="fas fa-arrow-left mr-2"></i> Back
+                  </button>
                 )}
-              </h4>
-              {currentLevel > 1 && (
-                <button className="btn btn-light btn-sm" onClick={handleBack}>
-                  <i className="fas fa-arrow-left mr-2"></i> Back
-                </button>
-              )}
-            </div>
+              </div>
 
-            {/* Filter Controls - Only for Level 1 */}
-            {currentLevel === 1 && (
-              <div className="card-body border-bottom">
-                <div className="row align-items-center">
-                  <div className="col-md-3 mb-2">
-                    <select
-                      className="form-control"
-                      value={dataType}
-                      onChange={(e) => setDataType(e.target.value)}
-                    >
-                      <option value="live">Live Data</option>
-                      <option value="backup">Backup Data</option>
-                      <option value="olddata">Old Data</option>
-                    </select>
-                  </div>
-                  <div className="col-md-4 mb-2">
-                    <div className="input-group">
-                      <input
-                        type="date"
+              {/* Filter Controls - Only for Level 1 */}
+              {currentLevel === 1 && (
+                <div className="card-body border-bottom">
+                  <div className="row align-items-center">
+                    <div className="col-md-3 mb-2">
+                      <select
                         className="form-control"
-                        value={dateRange.from}
-                        onChange={(e) =>
-                          setDateRange((prev) => ({
-                            ...prev,
-                            from: e.target.value,
-                          }))
-                        }
-                      />
-                      <span className="input-group-text">to</span>
-                      <input
-                        type="date"
-                        className="form-control"
-                        value={dateRange.to}
-                        onChange={(e) =>
-                          setDateRange((prev) => ({
-                            ...prev,
-                            to: e.target.value,
-                          }))
-                        }
-                      />
+                        value={dataType}
+                        onChange={(e) => setDataType(e.target.value)}
+                      >
+                        <option value="live">Live Data</option>
+                        <option value="backup">Backup Data</option>
+                        <option value="olddata">Old Data</option>
+                      </select>
                     </div>
-                  </div>
-                  <div className="col-md-3 mb-2">
-                    {/* <button className="btn btn-primary w-100" onClick={fetchLevelOneData}>
+                    <div className="col-md-4 mb-2">
+                      <div className="input-group">
+                        <input
+                          type="date"
+                          className="form-control"
+                          value={dateRange.from}
+                          onChange={(e) =>
+                            setDateRange((prev) => ({
+                              ...prev,
+                              from: e.target.value,
+                            }))
+                          }
+                        />
+                        <span className="input-group-text">to</span>
+                        <input
+                          type="date"
+                          className="form-control"
+                          value={dateRange.to}
+                          onChange={(e) =>
+                            setDateRange((prev) => ({
+                              ...prev,
+                              to: e.target.value,
+                            }))
+                          }
+                        />
+                      </div>
+                    </div>
+                    <div className="col-md-3 mb-2">
+                      {/* <button className="btn btn-primary w-100" onClick={fetchLevelOneData}>
                       <i className="fas fa-calculator mr-2"></i> Calculate P/L
                     </button> */}
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-
-            {/* Main Table */}
-            <div className="card-body">
-              {loading && currentLevel === 1 ? (
-                <div className="text-center py-5">
-                  <div className="spinner-border text-primary" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
-                </div>
-              ) : (
-                <ReusableTable
-                  key={`table-${currentLevel}-${dataType}-${pagination.page}`}
-                  columns={levelConfig[currentLevel].columns}
-                  itemsPerPage={pagination.pageSize}
-                  showSearch={currentLevel === 1}
-                  paginationVisible={currentLevel !== 4}
-                  fetchData={getTableData}
-                  onSearch={currentLevel === 1 ? handleSearch : undefined}
-                  currentPage={pagination.page}
-                />
               )}
-            </div>
 
-            <div className="card-footer text-muted">
-              Showing {dataType} data{" "}
-              {currentLevel === 1 &&
-                `from ${dateRange.from} to ${dateRange.to}`}
+              {/* Main Table */}
+              <div className="card-body">
+                {loading && currentLevel === 1 ? (
+                  <div className="text-center py-5">
+                    <div className="spinner-border text-primary" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                  </div>
+                ) : (
+                  <ReusableTable
+                    key={`table-${currentLevel}-${dataType}-${pagination.page}`}
+                    columns={levelConfig[currentLevel].columns}
+                    itemsPerPage={pagination.pageSize}
+                    showSearch={currentLevel === 1}
+                    paginationVisible={currentLevel !== 4}
+                    fetchData={getTableData}
+                  />
+                )}
+              </div>
+
+              <div className="card-footer text-muted">
+                Showing {dataType} data{" "}
+                {currentLevel === 1 &&
+                  `from ${dateRange.from} to ${dateRange.to}`}
+              </div>
             </div>
           </div>
         </div>
@@ -635,4 +771,3 @@ const EventProfitLoss = () => {
 };
 
 export default EventProfitLoss;
-

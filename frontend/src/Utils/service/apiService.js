@@ -667,7 +667,7 @@ export async function getEventPlLevelOne(body = {}, isToast = false) {
   try {
     const callParams = await getAuthCallParams(strings.GET, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.PlLevelOne}?dataType=${body.dataType}&pageSize=${body.totalEntries}&page=${body.pageNumber}`,
+      `${UrlConstant.PlLevelOne}?dataType=${body.dataType}&pageSize=${body.totalEntries}&page=${body.pageNumber}& search=${body.search}&startDate=${body.fromDate}&endDate=${body.toDate}`,
       callParams,
       isToast
     );
