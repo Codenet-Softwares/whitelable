@@ -527,6 +527,7 @@ const EventProfitLoss = () => {
     <div className="container mt-4">
       <div className="row justify-content-center">
         <div className="col-md-12">
+        <div className="col-md-12">
           <div className="card shadow-sm">
             <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
               <h4 className="mb-0 text-white">
@@ -634,3 +635,4 @@ const EventProfitLoss = () => {
 };
 
 export default EventProfitLoss;
+

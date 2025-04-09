@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
 import Pagination from "../components/common/Pagination";
 
-
 const ReusableTable = ({
   columns,
   itemsPerPage,
   showSearch,
   paginationVisible,
-  fetchData, // Function to fetch data dynamically
+  fetchData, 
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -16,38 +15,38 @@ const ReusableTable = ({
   const [totalData, setTotalData] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  // Fetch data when the component mounts or when the page changes
-  useEffect(() => {
-    const fetchDataForTable = async () => {
-      setLoading(true);
-      try {
-        const response = await fetchData(currentPage, itemsPerPage);
-        setData(response.data || []);
-        setTotalPages(response.pagination?.totalPages || 1);
-        setTotalData(response.pagination?.totalItems || 0);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Function to fetch data from backend
+  const fetchDataForTable = async () => {
+    setLoading(true);
+    try {
+      const response = await fetchData(currentPage, itemsPerPage, searchTerm);
+      setData(response.data || []);
+      setTotalPages(response.pagination?.totalPages || 1);
+      setTotalData(response.pagination?.totalRecords || 0);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchDataForTable();
   }, [currentPage, itemsPerPage, fetchData]);
 
-  // Filter data based on search term
-  const filteredData = data.filter((item) =>
-    columns.some((column) =>
-      item[column.key]?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setCurrentPage(1);
+      fetchDataForTable();
+    }, 500);
 
-  // Handle page change
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   const onPageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
 
-  // Calculate serial number for each row
   const calculateSerialNumber = (index) => {
     return (currentPage - 1) * itemsPerPage + index + 1;
   };
@@ -83,13 +82,13 @@ const ReusableTable = ({
                 Loading...
               </td>
             </tr>
-          ) : filteredData.length > 0 ? (
-            filteredData.map((row, index) => (
+          ) : data.length > 0 ? (
+            data.map((row, index) => (
               <tr key={index}>
                 {columns.map((column) => (
                   <td key={column.key} className="text-uppercase">
                     {column.key === "serialNumber"
-                      ? calculateSerialNumber(index) // Dynamically calculate serial number
+                      ? calculateSerialNumber(index)
                       : column.render
                       ? column.render(row,index)
                       : row[column.key]}
@@ -108,7 +107,7 @@ const ReusableTable = ({
       </table>
 
       {/* Pagination */}
-      {paginationVisible && totalPages > 0 && filteredData.length > 0&& (
+      {paginationVisible && data.length > 0 && totalPages > 0 && (
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

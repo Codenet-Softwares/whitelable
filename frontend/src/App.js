@@ -70,8 +70,12 @@ function App() {
                 path="hierarchyView/:userName"
                 element={<HierarchyPageView />}
               />
-              <Route
+              {/* <Route
                 path="/account-landing/:userName"
+                element={<AccountLandingModal />}
+              /> */}
+              <Route
+                path="/account-landing/:userName/:toggle"
                 element={<AccountLandingModal />}
               />
               <Route path="wallet" element={<Wallet />} />

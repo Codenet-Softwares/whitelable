@@ -227,17 +227,17 @@ const SubAdminView = () => {
   };
 
   return (
-    <div className="main_content_iner mt-5 p-5">
+    <div className="main_content_iner mt-5 p-5 rounded-3">
       <div className="container-fluid p-0">
         <div className="card">
 
         <div className="row justify-content-center">
           <div className="col-lg-12">
             <div className="white_card card_height_100 mb_30">
-              <div className="white_card_header">
+              <div className="white_card_header  rounded-3">
                 <h3
-                  className="m-0 text-center text-uppercase fw-bolder"
-                  style={{ color: "#1E2761", textDecoration: "underline" }}
+                  className="m-0 text-center text-uppercase fw-bolder text-white"
+             
                 >
                   List of User Roles
                 </h3>
