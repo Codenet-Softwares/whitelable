@@ -90,8 +90,8 @@ const ReusableTable = ({
                     {column.key === "serialNumber"
                       ? calculateSerialNumber(index)
                       : column.render
-                        ? column.render(row)
-                        : row[column.key]}
+                      ? column.render(row,index)
+                      : row[column.key]}
                   </td>
                 ))}
               </tr>
