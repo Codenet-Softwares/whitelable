@@ -1418,6 +1418,14 @@ export const getTotalProfitLoss = async (req, res) => {
     const offset = (page - 1) * pageSize;
     const adminId = req.user?.adminId;
     const userName = await getAllConnectedUsers(adminId);
+    if(userName.length == 1)
+    {
+      return res
+      .status(statusCode.success)
+      .send(
+        apiResponseSuccess([], true, statusCode.success, "Data not found!")
+      );
+    }
     const token = jwt.sign(
       { roles: req.user.roles },
       process.env.JWT_SECRET_KEY,
@@ -1512,6 +1520,15 @@ export const getMarketWiseProfitLoss = async(req,res) => {
     const adminId = req.user?.adminId;
     const userName = await getAllConnectedUsers(adminId);
 
+    if(userName.length == 1)
+      {
+        return res
+        .status(statusCode.success)
+        .send(
+          apiResponseSuccess([], true, statusCode.success, "Data not found!")
+        );
+      }
+
     const token = jwt.sign(
       { roles: req.user.roles },
       process.env.JWT_SECRET_KEY,
@@ -1604,6 +1621,15 @@ export const getAllUserProfitLoss = async(req,res) => {
 
     const adminId = req.user?.adminId;
     const userName = await getAllConnectedUsers(adminId);
+
+    if(userName.length == 1)
+      {
+        return res
+        .status(statusCode.success)
+        .send(
+          apiResponseSuccess([], true, statusCode.success, "Data not found!")
+        );
+      }
 
     const token = jwt.sign(
       { roles: req.user.roles },
