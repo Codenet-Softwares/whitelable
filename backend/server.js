@@ -54,14 +54,13 @@ sequelize.sync({ alter: true })
       console.log(`App is running on  - http://localhost:${process.env.PORT || 8000}`);
     });
 
-    process.on('SIGINT', async () => {
-      await sequelize.close();
-      process.exit(0);
-    });
     
   })
   .catch(err => {
     console.error('Unable to create tables:', err);
   });
-
+  process.on('SIGINT', async () => {
+    await sequelize.close();
+    process.exit(0);
+  });
 
