@@ -12,7 +12,7 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import { admin_Balance, balance_hierarchy } from './transaction.controller.js';
 import { findCreatorHierarchy } from '../helper/createHierarchy.js';
-import { getAllConnectedUsers } from '../controller/lotteryGame.controller.js'
+import { getAllConnectedUsers, getHierarchyUsers } from '../controller/lotteryGame.controller.js'
 
 dotenv.config();
 
@@ -1417,7 +1417,7 @@ export const getTotalProfitLoss = async (req, res) => {
     const { page = 1, pageSize = 10, search = "", dataType, startDate, endDate} = req.query;
     const offset = (page - 1) * pageSize;
     const adminId = req.user?.adminId;
-    const userName = await getAllConnectedUsers(adminId);
+    const userId = await getHierarchyUsers(adminId);
     const token = jwt.sign(
       { roles: req.user.roles },
       process.env.JWT_SECRET_KEY,
@@ -1430,7 +1430,7 @@ export const getTotalProfitLoss = async (req, res) => {
     const response = await axios.post(
       `${baseURL}/api/external-profit_loss`,
       {
-        userName,
+        userId,
       },
       {
         headers,
@@ -1510,7 +1510,7 @@ export const getMarketWiseProfitLoss = async(req,res) => {
     const offset = (parseInt(page) - 1) * parseInt(pageSize);
 
     const adminId = req.user?.adminId;
-    const userName = await getAllConnectedUsers(adminId);
+    const userId = await getHierarchyUsers(adminId);
 
     const token = jwt.sign(
       { roles: req.user.roles },
@@ -1525,7 +1525,7 @@ export const getMarketWiseProfitLoss = async(req,res) => {
     const response = await axios.post(
       `${baseURL}/api/external/market-wise-profit-loss`,
       {
-        userName,
+        userId,
       },
       {
         headers,
@@ -1603,7 +1603,7 @@ export const getAllUserProfitLoss = async(req,res) => {
     const offset = (parseInt(page) - 1) * parseInt(pageSize);
 
     const adminId = req.user?.adminId;
-    const userName = await getAllConnectedUsers(adminId);
+    const userId = await getHierarchyUsers(adminId);
 
     const token = jwt.sign(
       { roles: req.user.roles },
@@ -1618,7 +1618,7 @@ export const getAllUserProfitLoss = async(req,res) => {
     const response = await axios.post(
       `${baseURL}/api/external/allUser-profit-loss/${req.params.marketId}`,
       {
-        userName,
+        userId,
       },
       {
         headers, 
