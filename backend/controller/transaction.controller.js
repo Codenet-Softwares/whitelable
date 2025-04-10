@@ -448,12 +448,7 @@ export const accountStatement = async (req, res) => {
       order: [["date", "DESC"]],
     };
 
-   
-    
-
     const transferAmount = await transaction.findAll(transactionQuery);
-
-    console.log("transferAmount", transferAmount);
 
     let allData = JSON.parse(JSON.stringify(transferAmount));
 
