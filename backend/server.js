@@ -50,11 +50,18 @@ lotteryGameModule(app);
 sequelize.sync({ alter: true })
   .then(() => {
     console.log('Database & tables created!');
+    app.listen(process.env.PORT, () => {
+      console.log(`App is running on  - http://localhost:${process.env.PORT || 8000}`);
+    });
+
+    process.on('SIGINT', async () => {
+      await sequelize.close();
+      process.exit(0);
+    });
+    
   })
   .catch(err => {
     console.error('Unable to create tables:', err);
   });
 
-app.listen(process.env.PORT, () => {
-  console.log(`App is running on  - http://localhost:${process.env.PORT || 8000}`);
-});
+
