@@ -31,18 +31,19 @@ const ReusableTable = ({
   };
 
   useEffect(() => {
-    fetchDataForTable();
-  }, [currentPage, itemsPerPage, fetchData]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
+    if (searchTerm.length === 0) {
       setCurrentPage(1);
       fetchDataForTable();
-    }, 500);
+    } else {
+      const timer = setTimeout(() => {
+        setCurrentPage(1);
+        fetchDataForTable();
+      }, 500);
 
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
-
+      return () => clearTimeout(timer);
+    }
+  }, [searchTerm, currentPage, itemsPerPage, fetchData]);
+  
   const onPageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
