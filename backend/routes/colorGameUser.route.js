@@ -53,7 +53,7 @@ export const colorGameUserRoute = (app) => {
     userAccountStatement,
   );
 
-  app.get('/api/get-colorGame-user-betList/:userName/:runnerId', getUserBetList)
+  app.get('/api/get-colorGame-user-betList/:userName/:marketId', getUserBetList)
 
   app.post('/api/colorGame-user-lastLoginTime', userLastLogin)
 

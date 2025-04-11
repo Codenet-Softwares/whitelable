@@ -31,7 +31,8 @@ class stringConst {
         this.trashView = 'trash-view';
         this.viewSubAdmin = 'view-subAdmin';
         this.viewBalance = 'view-balance';
-        this.marketAnalysis='market-analysis'
+        this.marketAnalysis='market-analysis';
+        this.myReport = 'my-report';
     }
 }
 
