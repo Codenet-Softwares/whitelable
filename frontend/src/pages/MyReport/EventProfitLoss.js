@@ -15,8 +15,8 @@ const EventProfitLoss = () => {
   const [navigationStack, setNavigationStack] = useState([]);
   const [dataType, setDataType] = useState("live");
   const [dateRange, setDateRange] = useState({
-    from: new Date().toISOString().split("T")[0],
-    to: new Date().toISOString().split("T")[0],
+    from: "",
+    to: "",
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [levelOneData, setLevelOneData] = useState([]);
@@ -28,7 +28,25 @@ const EventProfitLoss = () => {
   });
   const [loading, setLoading] = useState(false);
 
-  const navigate = useNavigate();
+  useEffect(() => {
+    if (dataType === "live") {
+      const today = new Date().toISOString().split("T")[0];
+      setDateRange({
+        from: today,
+        to: today,
+      });
+      // Fetch immediately for live data
+      fetchLevelOneData();
+    } else {
+      // For backup/olddata, reset dates and fetch once automatically
+      setDateRange({
+        from: "",
+        to: "",
+      });
+      fetchLevelOneData(); // First automatic fetch when switching to backup/olddata
+    }
+  }, [dataType]); // Only depend on dataType
+
   console.log("parentData", parentData);
   // Table headings for each level
   const levelHeadings = {
@@ -38,19 +56,28 @@ const EventProfitLoss = () => {
     4: "Bet History",
   };
 
+ 
   // Format API data for level 1
   const formatLevelOneData = (apiData) => {
-    return apiData.map((item) => ({
+    const formattedData = apiData.map((item) => ({
       id: item.gameName,
       sportName: item.gameName,
       uplinePL: -parseFloat(item.totalProfitLoss),
       downlinePL: parseFloat(item.totalProfitLoss),
       commission: 0,
-      isTotalRow: false, // Add flag for regular rows
+      isTotalRow: false,
     }));
+
+    // Only add totals if there's data
+    if (formattedData.length > 0) {
+      const totals = calculateTotals(formattedData);
+      return [...formattedData, totals];
+    }
+
+    return formattedData;
   };
 
-  // Calculate totals for level 1
+  // Calculate totals for level 1 (only called when there's data)
   const calculateTotals = (data) => {
     const totals = data.reduce(
       (acc, item) => {
@@ -73,47 +100,55 @@ const EventProfitLoss = () => {
   };
 
   // Fetch API data for level 1 with useCallback to prevent infinite re-renders
-  const fetchLevelOneData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await getEventPlLevelOne({
+  const fetchLevelOneData = useCallback(
+    async (overrideSearchTerm = searchTerm) => {
+      console.log('fetchLevelOneData called with:', {
         dataType,
-        pageNumber: pagination.page,
-        totalEntries: pagination.pageSize,
-        search: searchTerm,
-        fromDate: dateRange.from,
-        toDate: dateRange.to,
+        from: dateRange.from,
+        to: dateRange.to,
+        search: overrideSearchTerm,
+        page: pagination.page
       });
+      setLoading(true);
+      try {
+        const response = await getEventPlLevelOne({
+          dataType,
+          pageNumber: pagination.page,
+          totalEntries: pagination.pageSize,
+          search: overrideSearchTerm,
+          fromDate: dateRange.from,
+          toDate: dateRange.to,
+        });
 
-      const formattedData = formatLevelOneData(response.data);
-      const dataWithTotals = [...formattedData, calculateTotals(formattedData)];
+        const dataWithTotals = formatLevelOneData(response.data);
 
-      setLevelOneData(dataWithTotals);
-      setPagination((prev) => ({
-        ...prev,
-        totalItems: response.pagination?.totalItems || 0,
-        totalPages: response.pagination?.totalPages || 1,
-      }));
-    } catch (error) {
-      console.error("Error fetching level one data:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [
-    dataType,
-    pagination.page,
-    pagination.pageSize,
-    searchTerm,
-    dateRange.from,
-    dateRange.to,
-  ]);
+        setLevelOneData(dataWithTotals);
+        setPagination((prev) => ({
+          ...prev,
+          totalItems: response.pagination?.totalItems || 0,
+          totalPages: response.pagination?.totalPages || 1,
+        }));
+      } catch (error) {
+        console.error("Error fetching level one data:", error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [
+      dataType,
+      pagination.page,
+      pagination.pageSize,
+      dateRange.from,
+      dateRange.to,
+    ]
+  );
 
   // Fetch data when dependencies change
   useEffect(() => {
     if (currentLevel === 1) {
       fetchLevelOneData();
     }
-  }, [currentLevel, fetchLevelOneData, searchTerm]);
+  }, [currentLevel]);
 
   // Format API data for level 2
   const formatLevelTwoData = (apiData) => {
@@ -238,12 +273,13 @@ const EventProfitLoss = () => {
           render: (item) => new Date(item.date).toLocaleString(),
         },
       ],
-      getData: async (page, pageSize) => {
+      getData: async (page, pageSize, search = "") => {
         try {
           const response = await getMarketWisePlLevelTwo({
             Type: parentData?.sportName, // Use the sportName as Type
             pageNumber: page,
             totalEntries: pageSize,
+            search: search,
           });
 
           const formattedData = formatLevelTwoData(response.data);
@@ -312,12 +348,13 @@ const EventProfitLoss = () => {
           render: (item) => new Date(item.date).toLocaleString(),
         },
       ],
-      getData: async (page, pageSize) => {
+      getData: async (page, pageSize, search = "") => {
         try {
           const response = await getMarketWiseAllUserPlLevelThree({
             marketId: parentData?.marketId, // Pass the selected marketId
             pageNumber: page,
             totalEntries: pageSize,
+            search: search,
           });
 
           const formattedData = formatLevelThreeData(response.data);
@@ -600,11 +637,9 @@ const EventProfitLoss = () => {
 
   const getTableData = useCallback(
     async (page, pageSize, search) => {
+      console.log("responsesearch", search);
       if (currentLevel === 1) {
-        // If search term is provided (from ReusableTable), update our state
-        if (search !== searchTerm) {
-          setSearchTerm(search);
-        }
+ 
         setPagination((prev) => ({ ...prev, page, pageSize }));
         return {
           data: levelOneData,
@@ -620,12 +655,12 @@ const EventProfitLoss = () => {
 
       // For level 2, use the getData function from levelConfig
       if (currentLevel === 2 && levelConfig[2].getData) {
-        return levelConfig[2].getData(page, pageSize);
+        return levelConfig[2].getData(page, pageSize, search);
       }
 
       // For level 3, use the getData function from levelConfig
       if (currentLevel === 3 && levelConfig[3].getData) {
-        return levelConfig[3].getData(page, pageSize);
+        return levelConfig[3].getData(page, pageSize, search);
       }
 
       // For level 4, use the getData function from levelConfig
@@ -651,14 +686,9 @@ const EventProfitLoss = () => {
       levelOneData,
       pagination.totalItems,
       pagination.totalPages,
-      parentData
+      parentData,
     ]
   );
-  // Handle search for level 1
-  const handleSearch = useCallback((term) => {
-    setSearchTerm(term);
-    setPagination((prev) => ({ ...prev, page: 1 })); // Reset to first page on search
-  }, []);
 
   return (
     <div className="container mt-4">
@@ -706,34 +736,47 @@ const EventProfitLoss = () => {
                         <input
                           type="date"
                           className="form-control"
-                          value={dateRange.from}
+                          value={dateRange.from || ""}
                           onChange={(e) =>
                             setDateRange((prev) => ({
                               ...prev,
                               from: e.target.value,
                             }))
                           }
-                          disabled={dataType === "live"} // Disable when live is selected
+                          disabled={dataType === "live"}
                         />
                         <span className="input-group-text">to</span>
                         <input
                           type="date"
                           className="form-control"
-                          value={dateRange.to}
+                          value={dateRange.to || ""}
                           onChange={(e) =>
                             setDateRange((prev) => ({
                               ...prev,
                               to: e.target.value,
                             }))
                           }
-                          disabled={dataType === "live"} // Disable when live is selected
+                          disabled={dataType === "live"}
                         />
                       </div>
                     </div>
                     <div className="col-md-3 mb-2">
-                      {/* <button className="btn btn-primary w-100" onClick={fetchLevelOneData}>
-                      <i className="fas fa-calculator mr-2"></i> Calculate P/L
-                    </button> */}
+                      <button
+                        className="btn btn-primary w-100"
+                        onClick={() => {
+                          if (
+                            dataType !== "live" &&
+                            (!dateRange.from || !dateRange.to)
+                          ) {
+                            alert("Please select both From and To dates");
+                            return;
+                          }
+                          fetchLevelOneData();
+                        }}
+                        disabled={dataType === "live"}
+                      >
+                        Get P&L
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -752,7 +795,7 @@ const EventProfitLoss = () => {
                     key={`table-${currentLevel}-${dataType}-${pagination.page}`}
                     columns={levelConfig[currentLevel].columns}
                     itemsPerPage={pagination.pageSize}
-                    showSearch={currentLevel === 1}
+                    showSearch={currentLevel !== 4}
                     paginationVisible={currentLevel !== 4}
                     fetchData={getTableData}
                   />
