@@ -167,13 +167,13 @@ const SubAdminView = () => {
     };
 
     if (!adminPassword) {
-      formErrors.adminPassword = "Admin Password is required!";
+      formErrors.adminPassword = "Admin Password Is Required!";
     }
     if (!password) {
-      formErrors.password = "New Password is required!";
+      formErrors.password = "New Password Is Required!";
     }
     if (!confirmPassword) {
-      formErrors.confirmPassword = "Confirm Password is required!";
+      formErrors.confirmPassword = "Confirm Password Is Required!";
     }
     if (password && confirmPassword && password !== confirmPassword) {
       formErrors.confirmPassword =
