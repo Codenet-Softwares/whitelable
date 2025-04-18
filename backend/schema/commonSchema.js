@@ -363,6 +363,11 @@ export const validateProfitLossInput = [
 ];
 
 export const validateProfitLossMarket = [
+  query("dataType")
+  .exists()
+  .withMessage("dataType is required.")
+  .isIn(["live", "olddata", "backup"])
+  .withMessage("Valid values are 'live', 'olddata', or 'backup'."),
     query("type")
     .exists()
     .withMessage("type is required."),
@@ -374,5 +379,27 @@ export const validateProfitLossMarket = [
     .optional()
     .isInt({ min: 1 })
     .withMessage("Limit must be a positive integer."),
+];
 
+
+export const validateAllUserProfitLossMarket = [
+  param("marketId")
+  .trim() 
+  .notEmpty()
+  .withMessage("Market ID is required.")
+  .isUUID()
+  .withMessage("Market ID must be a valid UUID."),
+  query("dataType")
+  .exists()
+  .withMessage("dataType is required.")
+  .isIn(["live", "olddata", "backup"])
+  .withMessage("Valid values are 'live', 'olddata', or 'backup'."),
+  query("page")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("Page must be a positive integer."),
+  query("limit")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("Limit must be a positive integer."),
 ];
