@@ -209,3 +209,21 @@ export function get_betBook(body = {}) {
   };
 }
 
+
+// initial state for event P&L
+export const getUseProfitLossState = (body = {}) => {
+  const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  };
+
+  return {
+    dataType: "live",
+    dateRange: { from: getTodayDate(), to: getTodayDate() },
+    loading: false,
+    shouldDisableButton: true, // Add this line
+    preventAPICall: false, // Add this new flag
+    tableRefreshKey: 0,
+    ...body
+  };
+};
