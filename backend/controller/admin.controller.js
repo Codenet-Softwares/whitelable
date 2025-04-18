@@ -1506,7 +1506,7 @@ export const getTotalProfitLoss = async (req, res) => {
 
 export const getMarketWiseProfitLoss = async(req,res) => {
   try {
-    const { page = 1, pageSize = 10, search = "", type  } = req.query;
+    const { page = 1, pageSize = 10, search = "", type , dataType, startDate, endDate} = req.query;
     const offset = (parseInt(page) - 1) * parseInt(pageSize);
 
     const adminId = req.user?.adminId;
@@ -1531,6 +1531,9 @@ export const getMarketWiseProfitLoss = async(req,res) => {
         headers,
         params: {
           type,
+          dataType,
+          startDate,
+          endDate
         },
       }
     );
@@ -1599,7 +1602,7 @@ export const getMarketWiseProfitLoss = async(req,res) => {
 
 export const getAllUserProfitLoss = async(req,res) => {
   try {
-    const { page = 1, pageSize = 10, search = "" } = req.query;
+    const { page = 1, pageSize = 10, search = "",dataType, startDate, endDate } = req.query;
     const offset = (parseInt(page) - 1) * parseInt(pageSize);
 
     const adminId = req.user?.adminId;
@@ -1622,6 +1625,11 @@ export const getAllUserProfitLoss = async(req,res) => {
       },
       {
         headers, 
+        params: {
+          dataType,
+          startDate,
+          endDate
+        },
       }
     );
     
