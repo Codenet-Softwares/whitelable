@@ -23,6 +23,7 @@ import {
 
   validateProfitLossInput,
   validateProfitLossMarket,
+  validateAllUserProfitLossMarket,
 
 } from '../schema/commonSchema.js';
 
@@ -352,7 +353,7 @@ export const adminRoute = (app) => {
   ]), getMarketWiseProfitLoss)
 
 
-  app.get("/api/market-allUser-profit-loss/:marketId", Authorize([
+  app.get("/api/market-allUser-profit-loss/:marketId",validateAllUserProfitLossMarket, customErrorHandler, Authorize([
     string.superAdmin,
     string.whiteLabel,
     string.hyperAgent,
