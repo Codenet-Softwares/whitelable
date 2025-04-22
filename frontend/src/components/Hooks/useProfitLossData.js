@@ -1,6 +1,12 @@
 // useProfitLossData.js
 import { useState, useRef, useCallback } from "react";
-import { getEventPlLevelOne, getMarketWisePlLevelTwo } from "../../Utils/service/apiService";
+import {
+  getEventPlLevelOne,
+  getMarketWiseAllUserPlLevelThree,
+  getMarketWisePlLevelTwo,
+  getUserWiseBetHistoryColorGameLevelFour,
+  getUserWiseBetHistoryLotteryLevelFour,
+} from "../../Utils/service/apiService";
 import { getUseProfitLossState } from "../../Utils/service/initiateState";
 
 const useProfitLossData = () => {
@@ -8,13 +14,18 @@ const useProfitLossData = () => {
     ...getUseProfitLossState(),
     currentLevel: 1,
     parentData: null,
-    levelRefreshKey: 0 // Add this new key
+    grandParentData: null,
+    greatGrandParentData: null, // For level 4 navigation
+    levelRefreshKey: 0,
   });
-  const lastFetchedData = useRef([]); // Add this line to store last fetched data
-  const lastDateRange = useRef(state.dateRange); // Add this line
-  const stateRef = useRef(state);
 
+  const lastFetchedData = useRef([]);
+  const lastDateRange = useRef(state.dateRange);
+  const stateRef = useRef(state);
   stateRef.current = state;
+
+  // Navigation history stack
+  const navigationStack = useRef([]);
 
   const calculateTotals = (data) => {
     const totals = data.reduce(
@@ -55,19 +66,78 @@ const useProfitLossData = () => {
     return formattedData;
   };
 
-
   const formatLevelTwoData = (apiData) => {
     return apiData.map((item) => ({
-      id: item.marketId, // Use marketId as the unique identifier
-      sportName: item.gameName,
-      eventName: item.marketName,
+      id: item.marketId,
+      gameName: item.gameName,
+      marketName: item.marketName,
       marketId: item.marketId,
       totalPL: parseFloat(item.totalProfitLoss),
-      date: new Date(item.date).toLocaleString(), // Format date properly
+      date: new Date(item.date).toLocaleString(),
       uplinePL: -parseFloat(item.totalProfitLoss),
       downlinePL: parseFloat(item.totalProfitLoss),
       commission: 0,
     }));
+  };
+
+  const formatLevelThreeData = (apiData) => {
+    return apiData.map((item) => ({
+      id: item.userId,
+      username: item.userName,
+      runnerId: item.runnerId,
+      marketName: item.marketName,
+      gameName: item.gameName,
+      marketId: item.marketId,
+      totalPL: parseFloat(item.totalProfitLoss),
+      date: new Date(item.date).toLocaleString(),
+      uplinePL: -parseFloat(item.totalProfitLoss),
+      downlinePL: parseFloat(item.totalProfitLoss),
+      commission: 0,
+    }));
+  };
+
+  const formatLevelFourData = (apiData, sportType) => {
+    if (sportType === "Lottery") {
+      return apiData.map((item) => ({
+        ...item,
+        id: item.userId || item.id,
+        userName: item.userName,
+        marketName: item.marketName,
+        gameName: item.gameName || "Lottery",
+        amount: item.amount,
+        ticketPrice: item.ticketPrice,
+        sem: item.sem,
+        tickets: item.tickets,
+        placeTime: item.placeTime || item.placeDate,
+        settleTime: item.settleTime,
+      }));
+    } else if (sportType === "COLORGAME") {
+      return apiData.map((item) => ({
+        ...item,
+        id: item.userId || item.id,
+        userName: item.userName,
+        marketName: item.marketName,
+        gameName: item.gameName || "COLORGAME",
+        runnerName: item.runnerName,
+        rate: item.rate,
+        type: item.type,
+        value: item.value,
+        bidAmount: item.bidAmount,
+        placeDate: item.placeDate,
+        matchDate: item.matchDate,
+      }));
+    } else {
+      // Default format for other sports
+      return apiData.map((item) => ({
+        ...item,
+        id: item.userId || item.id,
+        userName: item.userName,
+        eventName: item.eventName,
+        marketName: item.marketName,
+        amount: item.amount,
+        placeTime: item.placeTime,
+      }));
+    }
   };
 
   const getTableData = useCallback(
@@ -85,59 +155,90 @@ const useProfitLossData = () => {
           },
         };
       }
-
+      console.log("====>>> line 153", currentState.grandParentData?.sportName);
       try {
-        
-        if (currentState.currentLevel === 1)
-          {
-          const params = {
-            dataType: currentState.dataType,
-            pageNumber: page,
-            totalEntries: pageSize,
-            search,
-            fromDate:
-              currentState.dataType === "live" ? "" : currentState.dateRange.from,
-            toDate:
-              currentState.dataType === "live" ? "" : currentState.dateRange.to,
-          };
-  
-          const response = await getEventPlLevelOne(params);
-          const dataWithTotals = formatLevelOneData(response.data);
-          lastFetchedData.current = dataWithTotals; // Store the fetched data
-  
-          setState((prev) => ({ ...prev, loading: false }));
-  
-          return {
-            data: dataWithTotals,
-            pagination: {
-              totalRecords: response.pagination?.totalItems || 0,
-              totalPages: response.pagination?.totalPages || 1,
-            },
-          };
-
-
-        }else {
-          // Level 2 data fetch
-          const response = await getMarketWisePlLevelTwo({
+        let response, formattedData;
+        const baseParams = {
+          dataType: currentState.dataType,
+          fromDate:
+            currentState.dataType === "live" ? "" : currentState.dateRange.from,
+          toDate:
+            currentState.dataType === "live" ? "" : currentState.dateRange.to,
+          pageNumber: page,
+          totalEntries: pageSize,
+          search: currentState.currentLevel === 4 ? "" : search, // No search for level 4
+        };
+        console.log(
+          "====>>> line 164",
+          currentState.grandParentData?.sportName
+        );
+        if (currentState.currentLevel === 1) {
+          response = await getEventPlLevelOne(baseParams);
+          formattedData = formatLevelOneData(response.data);
+          lastFetchedData.current = formattedData;
+        } else if (currentState.currentLevel === 2) {
+          response = await getMarketWisePlLevelTwo({
+            ...baseParams,
             Type: currentState.parentData.sportName,
-            pageNumber: page,
-            totalEntries: pageSize,
-            search: search,
           });
-
-          const formattedData = formatLevelTwoData(response.data);
-          
-          return {
-            data: formattedData,
-            pagination: {
-              totalRecords: response.pagination?.totalItems || 0,
-              totalPages: response.pagination?.totalPages || 1,
-            },
+          formattedData = formatLevelTwoData(response.data);
+        } else if (currentState.currentLevel === 3) {
+          console.log("++++> level==", currentState.currentLevel === 3);
+          response = await getMarketWiseAllUserPlLevelThree({
+            ...baseParams,
+            marketId: currentState.parentData.marketId,
+          });
+          formattedData = formatLevelThreeData(response.data);
+        } else if (currentState.currentLevel === 4) {
+          console.log(
+            "🔥 currentLevel is:",
+            currentState.currentLevel,
+            typeof currentState.currentLevel
+          );
+          console.log("Level 4 params:", {
+            username: currentState.parentData?.username,
+            marketId: currentState.grandParentData?.marketId,
+            sportName: currentState.grandParentData?.gameName,
+          });
+          const level4Params = {
+            userName: currentState.parentData.username,
+            marketId: currentState.grandParentData.marketId, // Always include marketId
           };
+          console.log(
+            "====>>> line 196",
+            currentState.grandParentData?.gameName
+          );
+          // Add sport-specific parameters
+          if (currentState.grandParentData?.gameName === "Lottery") {
+            response = await getUserWiseBetHistoryLotteryLevelFour(
+              level4Params
+            );
+            console.log("====>> response 218", response);
+          } else if (currentState.grandParentData?.gameName === "COLORGAME") {
+            // For ColorGame, only pass marketId — runnerId is not needed
+            response = await getUserWiseBetHistoryColorGameLevelFour(
+              level4Params
+            );
+          }
+
+          formattedData = formatLevelFourData(
+            response?.data || [],
+            currentState.grandParentData?.gameName
+          );
         }
-    
+
+        setState((prev) => ({ ...prev, loading: false }));
+
+        return {
+          data: formattedData || [],
+          pagination: {
+            totalRecords:
+              response?.pagination?.totalItems || formattedData?.length || 0,
+            totalPages: response?.pagination?.totalPages || 1,
+          },
+        };
       } catch (error) {
-        console.error("Error fetching level one data:", error);
+        console.error("Error fetching data:", error);
         setState((prev) => ({ ...prev, loading: false }));
         throw error;
       }
@@ -145,78 +246,129 @@ const useProfitLossData = () => {
     []
   );
 
+  const navigateToLevel = useCallback(
+    async (level, item = null) => {
+      console.log("Navigating to level:", level, "with item:", item);
+      setState((prev) => {
+        const newState = {
+          ...prev,
+          loading: true,
+          currentLevel: level,
+          levelRefreshKey: prev.levelRefreshKey + 1,
+        };
 
+        // Update navigation stack and parent data based on level
+        if (level === 1) {
+          navigationStack.current = [];
+          return {
+            ...newState,
+            parentData: null,
+            grandParentData: null,
+            greatGrandParentData: null,
+          };
+        } else if (level === 2) {
+          navigationStack.current = [{ level: 1 }];
+          return {
+            ...newState,
+            parentData: item,
+            grandParentData: null,
+            greatGrandParentData: null,
+          };
+        } else if (level === 3) {
+          navigationStack.current = [
+            { level: 1 },
+            { level: 2, data: prev.parentData },
+          ];
+          return {
+            ...newState,
+            parentData: item,
+            grandParentData: prev.parentData,
+            greatGrandParentData: null,
+          };
+        } else if (level === 4) {
+          navigationStack.current = [
+            { level: 1 },
+            { level: 2, data: prev.grandParentData },
+            { level: 3, data: prev.parentData },
+          ];
+          return {
+            ...newState,
+            parentData: item,
+            grandParentData: prev.parentData,
+            greatGrandParentData: prev.grandParentData,
+          };
+        }
+        return newState;
+      });
 
-  const handleLevelNavigation = async (item) => {
-    console.log('Navigating to level 2 with item:', item);
-  
-    if (item.isTotalRow) {
-      console.log('Item is a total row, skipping navigation.');
-      return; // Skip if it's a total row
-    }
-  
-    // If already at level 2, skip fetching the data
-    if (stateRef.current.currentLevel === 2 && stateRef.current.parentData.id === item.id) {
-      console.log('Already at level 2 with the same item, skipping API call.');
-      return;
-    }
-  
-    // Set loading state and navigate to level 2
-    console.log('Fetching data for level 2...');
-    setState(prev => ({
-      ...prev,
-      loading: true,
-      currentLevel: 2,
-      parentData: item,
-      levelRefreshKey: prev.levelRefreshKey + 1, // Increment refresh key
-    }));
-  
-    try {
-      const page = 1; // or get the current page from the state if you need pagination
-      const pageSize = 10; // or get the page size from the state
-      const search = ''; // Add search functionality if needed
-  
-      // Fetch the second-level data
-      const data = await getTableData(page, pageSize, search,2);
-      console.log('Fetched level 2 data:', data);
-    } catch (error) {
-      console.error('Error fetching level 2 data:', error);
-      setState(prev => ({
+      try {
+        await getTableData(1, 10, "");
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setState((prev) => ({ ...prev, loading: false }));
+      }
+    },
+    [getTableData]
+  );
+
+  const handleBackNavigation = useCallback(async () => {
+    if (navigationStack.current.length === 0) return;
+
+    const prevLevel = navigationStack.current.pop();
+
+    setState((prev) => {
+      const newState = {
         ...prev,
-        loading: false,
-      }));
-    }
-  };
-  
-  const handleBackToLevelOne = async () => {
-    console.log('Going back to level 1...');
-  
-    // Reset state for level 1 and trigger data fetch again
-    setState(prev => ({
-      ...prev,
-      loading: true,
-      currentLevel: 1,
-      parentData: null,
-      levelRefreshKey: prev.levelRefreshKey + 1, // Increment refresh key
-    }));
-  
+        loading: true,
+        currentLevel: prevLevel.level,
+        levelRefreshKey: prev.levelRefreshKey + 1,
+      };
+
+      if (prevLevel.level === 1) {
+        return {
+          ...newState,
+          parentData: null,
+          grandParentData: null,
+          greatGrandParentData: null,
+        };
+      } else if (prevLevel.level === 2) {
+        return {
+          ...newState,
+          parentData: prevLevel.data,
+          grandParentData: null,
+          greatGrandParentData: null,
+        };
+      } else if (prevLevel.level === 3) {
+        return {
+          ...newState,
+          parentData: prevLevel.data,
+          grandParentData:
+            navigationStack.current.find((item) => item.level === 2)?.data ||
+            null,
+          greatGrandParentData: null,
+        };
+      } else if (prevLevel.level === 4) {
+        return {
+          ...newState,
+          parentData: prevLevel.data,
+          grandParentData:
+            navigationStack.current.find((item) => item.level === 3)?.data ||
+            null,
+          greatGrandParentData:
+            navigationStack.current.find((item) => item.level === 2)?.data ||
+            null,
+        };
+      }
+      return newState;
+    });
+
     try {
-      const page = 1; // or get the current page from the state if needed
-      const pageSize = 10; // or get the page size from the state
-      const search = ''; // Add search functionality if needed
-  
-      // Fetch level 1 data again
-      const data = await getTableData(page, pageSize, search);
-      console.log('Fetched level 1 data:', data);
+      await getTableData(1, 10, "");
     } catch (error) {
-      console.error('Error fetching level 1 data:', error);
-      setState(prev => ({
-        ...prev,
-        loading: false,
-      }));
+      console.error("Error fetching data:", error);
+      setState((prev) => ({ ...prev, loading: false }));
     }
-  };
-  
+  }, [getTableData]);
 
   const handleDataTypeChange = (e) => {
     const newDataType = e.target.value;
@@ -249,7 +401,6 @@ const useProfitLossData = () => {
       return;
     }
 
-    // Check if dates have changed since last API call
     const datesChanged =
       currentState.dateRange.from !== lastDateRange.current.from ||
       currentState.dateRange.to !== lastDateRange.current.to;
@@ -259,12 +410,11 @@ const useProfitLossData = () => {
       return;
     }
 
-    // Update lastDateRange with current dates
     lastDateRange.current = { ...currentState.dateRange };
 
     setState((prev) => ({
       ...prev,
-      tableRefreshKey: prev.tableRefreshKey + 1, // Refresh table
+      tableRefreshKey: prev.tableRefreshKey + 1,
     }));
   };
 
@@ -275,8 +425,8 @@ const useProfitLossData = () => {
     handleDateChange,
     handleGetPL,
     getTableData,
-    handleLevelNavigation,
-    handleBackToLevelOne,
+    navigateToLevel,
+    handleBackNavigation,
   };
 };
 

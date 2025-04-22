@@ -11,16 +11,52 @@ const DemoEvent = () => {
     handleDateChange,
     handleGetPL,
     getTableData,
-    handleLevelNavigation,
-    handleBackToLevelOne,
+    navigateToLevel,
+    handleBackNavigation,
   } = useProfitLossData();
-
-  const { levelConfig } = useProfitLossTableConfig(handleLevelNavigation);
+  console.log("line main", state);
+  const { levelConfig } = useProfitLossTableConfig(
+    state.currentLevel,
+    navigateToLevel
+  );
   const Navigation = useProfitLossNavigation({
     parentData: state.parentData,
-    handleBackToLevelOne,
+    grandParentData: state.grandParentData,
+    handleBackNavigation,
   });
 
+  //Header title
+  const getHeaderTitle = () => {
+    if (state.currentLevel === 1) return "Event P&L - Level 1";
+    if (state.currentLevel === 2)
+      return `Event P&L - ${state.parentData?.sportName}`;
+    if (state.currentLevel === 3)
+      return `User P&L - ${state.parentData?.gameName}`;
+    if (state.currentLevel === 4)
+      return `Bet Details - ${state.parentData?.username}`;
+    return "Event P&L";
+  };
+
+  //Footer text
+  const getFooterText = () => {
+    if (state.currentLevel === 1) {
+      return `Showing ${state.dataType} data ${
+        state.dateRange.from &&
+        state.dateRange.to &&
+        `from ${state.dateRange.from} to ${state.dateRange.to}`
+      }`;
+    }
+    if (state.currentLevel === 2) {
+      return `Showing events for ${state.parentData?.sportName}`;
+    }
+    if (state.currentLevel === 3) {
+      return `Showing users for ${state.parentData?.eventName}`;
+    }
+    if (state.currentLevel === 4) {
+      return `Showing bet details for ${state.parentData?.username}`;
+    }
+    return "";
+  };
   // This function to prevent manual date input
   const handleKeyDown = (e) => {
     e.preventDefault();
@@ -32,11 +68,7 @@ const DemoEvent = () => {
         <div className="col-md-12">
           <div className="card shadow-sm">
             <div className="card-header bg-primary text-white">
-              <h4 className="mb-0 text-white">
-                {state.currentLevel === 2
-                  ? `Event P&L - ${state.parentData?.sportName}`
-                  : "Event P&L - Level 1"}
-              </h4>
+              <h4 className="mb-0 text-white">{getHeaderTitle()}</h4>
             </div>
 
             {state.currentLevel === 1 && (
@@ -112,7 +144,7 @@ const DemoEvent = () => {
                 <ReusableTable
                   columns={levelConfig[state.currentLevel].columns}
                   itemsPerPage={10}
-                  showSearch={true}
+                  showSearch={state.currentLevel !== 4} // Disable search for level 4
                   paginationVisible={true}
                   fetchData={getTableData}
                   key={`level-${state.currentLevel}-${state.levelRefreshKey}-${
@@ -124,15 +156,7 @@ const DemoEvent = () => {
               )}
             </div>
 
-            <div className="card-footer text-muted">
-              {state.currentLevel === 2
-                ? `Showing events for ${state.parentData?.sportName}`
-                : `Showing ${state.dataType} data ${
-                    state.dateRange.from &&
-                    state.dateRange.to &&
-                    `from ${state.dateRange.from} to ${state.dateRange.to}`
-                  }`}
-            </div>
+            <div className="card-footer text-muted">{getFooterText()}</div>
           </div>
         </div>
       </div>
