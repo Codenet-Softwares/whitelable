@@ -109,7 +109,7 @@ const Card = ({
     ) || permissionObj.allAdmin.includes(store?.admin?.roles[0].role);
 
   const takeMeToAccount = (userName) => {
-    navigate(`/account-landing/${userName}`);
+    navigate(`/account-landing/${userName}/statement`);
   };
   return (
     <React.Fragment>
@@ -277,16 +277,7 @@ const Card = ({
             {callingParent === "Wallet" ? (
               <>
                 {" "}
-                <span
-                  className="mx-1"
-                  onClick={() =>
-                    handelOpenTransactionModal(
-                      true,
-                      "walletAmountProvider",
-                      balance
-                    )
-                  }
-                >
+                <span className="mx-1">
                   <button
                     className={`btn border border-1 rounded ${["suspended"].includes(store?.admin?.status)
                         ? "disabled"
@@ -300,6 +291,13 @@ const Card = ({
                             ? ""
                             : "disabled"
                       }`}
+                    onClick={() =>
+                      handelOpenTransactionModal(
+                        true,
+                        "walletAmountProvider",
+                        balance
+                      )
+                    }
                     style={{ background: "#84B9DF" }}
                     title="Addmoney"
                   >

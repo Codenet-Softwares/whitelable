@@ -18,6 +18,13 @@ import {
   subAdminPermissionSchema,
   userStatusSchema,
   exUpdateBalanceSchema,
+
+  validateDownLineProfitLoss,
+
+  validateProfitLossInput,
+  validateProfitLossMarket,
+  validateAllUserProfitLossMarket,
+
 } from '../schema/commonSchema.js';
 
 import {
@@ -38,7 +45,13 @@ import {
   subAdminPermission,
   userStatus,
   syncWithUserBackend,
-  fetchUserHierarchy
+  fetchUserHierarchy,
+  getHierarchyWiseUsers,
+  downLineUsers,
+  getTotalProfitLoss,
+  getMarketWiseProfitLoss,
+  getAllUserProfitLoss
+
 } from '../controller/admin.controller.js';
 import { string } from '../constructor/string.js';
 
@@ -81,7 +94,8 @@ export const adminRoute = (app) => {
       string.subHyperAgent,
       string.subSuperAgent,
       string.subMasterAgent,
-      string.createSubAdmin
+      string.createSubAdmin,
+      string.marketAnalysis
     ]),
     createSubAdmin,
   );
@@ -300,7 +314,8 @@ export const adminRoute = (app) => {
       string.whiteLabel,
       string.hyperAgent,
       string.superAgent,
-      string.masterAgent
+      string.masterAgent,
+      string.marketAnalysis
     ]),
     subAdminPermission,
   );
@@ -311,4 +326,41 @@ export const adminRoute = (app) => {
   app.post('/api/admin/extrnal/balance-update', exUpdateBalanceSchema, customErrorHandler, syncWithUserBackend);
   
   app.get("/api/user-hierarchy/:userName", fetchUserHierarchy);
+
+  app.get("/api/users-hierarchy/:userName", getHierarchyWiseUsers );
+  app.get("/api/downLineUsers/:createdById",validateDownLineProfitLoss, customErrorHandler, Authorize([
+    string.superAdmin,
+    string.whiteLabel,
+    string.hyperAgent,
+    string.superAgent,
+    string.masterAgent,
+  ]), downLineUsers );
+
+  app.get("/api/total-profitloss-hierarchy", validateProfitLossInput, customErrorHandler, Authorize([
+    string.superAdmin,
+    string.whiteLabel,
+    string.hyperAgent,
+    string.superAgent,
+    string.masterAgent,
+  ]), getTotalProfitLoss);
+
+  app.get("/api/market-wise-profit-loss",validateProfitLossMarket,customErrorHandler, Authorize([
+    string.superAdmin,
+    string.whiteLabel,
+    string.hyperAgent,
+    string.superAgent,
+    string.masterAgent,
+  ]), getMarketWiseProfitLoss)
+
+
+  app.get("/api/market-allUser-profit-loss/:marketId",validateAllUserProfitLossMarket, customErrorHandler, Authorize([
+    string.superAdmin,
+    string.whiteLabel,
+    string.hyperAgent,
+    string.superAgent,
+    string.masterAgent,
+  ]), getAllUserProfitLoss)
+
+
+  
 };

@@ -22,10 +22,12 @@ import BetHistoryForPl from "./profileAccount/BetHistoryForPl";
 import BetHistoryLotteryForPl from "./profileAccount/BetHistoryLotteryForPl";
 
 import ResetPassword from "./components/ResetPassword/ResetPassword";
-import DemoNavside from "./Layout/DemoNavside";
+
 import LotteryMarketAnalysis from "./pages/LotteryMarketAnalysis";
 import DemoMarket_Analysis from "./pages/DemoMarket_Analysis";
 import PrivateRoute from "./components/common/PrivateRoute";
+import EventProfitLoss from "./pages/MyReport/EventProfitLoss";
+import DownlineProfitLoss from "./pages/MyReport/DownlineProfitLoss";
 // import WelcomePage from "./screen/WelcomePage";
 
 function App() {
@@ -49,7 +51,14 @@ function App() {
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route index path="/" element={<Navigate to="/login" />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/" element={<PrivateRoute><AdminLayout /></PrivateRoute>}>
+            <Route
+              path="/"
+              element={
+                <PrivateRoute>
+                  <AdminLayout />
+                </PrivateRoute>
+              }
+            >
               <Route path="welcome" element={<WelcomePage />} />
               <Route path="allAdminCreate" element={<AllAdminCreate />} />
               <Route
@@ -61,8 +70,12 @@ function App() {
                 path="hierarchyView/:userName"
                 element={<HierarchyPageView />}
               />
-              <Route
+              {/* <Route
                 path="/account-landing/:userName"
+                element={<AccountLandingModal />}
+              /> */}
+              <Route
+                path="/account-landing/:userName/:toggle"
                 element={<AccountLandingModal />}
               />
               <Route path="wallet" element={<Wallet />} />
@@ -78,6 +91,8 @@ function App() {
                 element={<View_AddCash_history />}
               />
               <Route path="Market_analysis" element={<Market_Analysis />} />
+              {/* 
+              /*last page table to render for colorgame*/}
               <Route
                 path="betHistForPL/:userName/:runnerId"
                 element={<BetHistoryForPl />}
@@ -86,6 +101,9 @@ function App() {
                 path="/User_BetMarket/:marketId"
                 element={<User_BetMarket />}
               />
+
+                {/* 
+              /*last page table to render for lottery*/}
               <Route
                 path="betHistLotteryForPL/:userName/:id"
                 element={<BetHistoryLotteryForPl />}
@@ -95,11 +113,13 @@ function App() {
                 path="/Lottery_Market_Analysis/:marketId"
                 element={<LotteryMarketAnalysis />}
               />
+
+              <Route path="/event-profit-loss" element={<EventProfitLoss />} />
+              <Route
+                path="/downline-profit-loss"
+                element={<DownlineProfitLoss />}
+              />
             </Route>
-
-
-
-
           </Routes>
         </BrowserRouter>
       </AppProvider>

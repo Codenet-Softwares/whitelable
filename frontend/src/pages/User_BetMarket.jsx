@@ -20,37 +20,55 @@ import Picture from "../Assets/Picture.webp";
 import "./DemoMarket_Analysis.css";
 import ReusableModal from "../components/common/ReusableModal";
 import HierarchyModal from "./HierarchyModal";
+import Pagination from "../components/common/Pagination";
+import { useNavigate } from "react-router-dom";
 
 const User_BetMarket = () => {
+  const navigate = useNavigate();
+
   const { dispatch, store } = useAppContext();
   const [user_marketWithRunnerData, setUser_marketWithRunnerData] = useState(
     getMarketWithRunnerDataInitialState()
   );
 
-  const [user_LiveBet, setUser_LiveBet] = useState([]);
-
+  const [user_LiveBet, setUser_LiveBet] = useState({
+    data: [],
+    currentPage: 1,
+    totalEntries: 10,
+    totalPages: 0,
+    totalData: 0,
+    search: "",
+  });
   const { marketId, userName } = useParams();
   const [isModalOpen, setModalOpen] = useState(false);
   const [nestedModalOpen, setNestedModalOpen] = useState(false);
   const [hierarchyData, setHierarchyData] = useState([]);
   const [userBookModalOpen, setUserBookModalOpen] = useState(false);
+  const [viewMoreModalOpen, setViewMoreModalOpen] = useState(false);
   const [betBookData, setBetBookData] = useState([]);
   const [bodyData, setBodyData] = useState(get_betBook());
   const [liveToggle, setLiveToggle] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isHirerchyModalOpen, setHirerchyModalOpen] = useState(false);
-
+  const [isInsideViewMoreModal, setIsInsideViewMoreModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   // useEffect(()=>{fetch_BetBookData()},[bodyData])
-  const handleUsernameClick = (userName) => {
+  const handleUsernameClick = (userName , fromViewMore = false) => {
     console.log("onclick", userName);
     setSelectedUser(userName);
     setHirerchyModalOpen(true); // Open the modal when a username is clicked
+    handleCloseViewMoreModal();// #####
+    setIsInsideViewMoreModal(fromViewMore); // Track if the click was from View More modal
   };
-
   const handleHirerchyCloseModal = () => {
     setHirerchyModalOpen(false);
-    setSelectedUser(null); // Reset user selection when closing the modal
-  };
+    setSelectedUser(null); // Reset user selection
+     // Only reopen "View More" modal if it was opened from inside it
+     if (isInsideViewMoreModal) {
+      setViewMoreModalOpen(true);
+  }
+};
+
   const handleLiveToggle = () => {
     setLiveToggle(!liveToggle);
   };
@@ -65,7 +83,9 @@ const User_BetMarket = () => {
       type: "master-book",
     });
   };
-
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
   // Function to close the modal
   const handleCloseModal = () => setModalOpen(false);
 
@@ -97,6 +117,11 @@ const User_BetMarket = () => {
   };
   const handleCloseUserBookModal = () => setUserBookModalOpen(false);
 
+  const handleOpenViewMoreModal = () => {
+    setViewMoreModalOpen(true);
+    setBodyData({});
+  };
+  const handleCloseViewMoreModal = () => setViewMoreModalOpen(false);
   useEffect(() => {
     const fetchLiveUsers = async () => {
       try {
@@ -112,27 +137,55 @@ const User_BetMarket = () => {
   }, [marketId]);
 
   useEffect(() => {
-    if (liveToggle) {
-      getView_LiveBet();
-    }
-  }, [liveToggle]);
+    console.log("API Called");
+    getView_LiveBet(
+      user_LiveBet.currentPage,
+      user_LiveBet.totalEntries,
+      searchTerm
+    );
+  }, [searchTerm, liveToggle]);
 
-  async function getView_LiveBet() {
+  async function getView_LiveBet(
+    page = 1,
+    entries = user_LiveBet.totalEntries,
+    search = ""
+  ) {
     try {
       const response = await getMarket_LiveBet({
         marketId: marketId,
         adminId: store?.admin?.id,
         role: store?.admin?.roles[0]?.role,
+        pageNumber: page,
+        totalEntries: entries,
+        search,
       });
-      setUser_LiveBet(response.data);
+
+      setUser_LiveBet((prevState) => ({
+        ...prevState,
+        data: response?.data || [],
+        currentPage: response?.pagination?.page || page,
+        totalEntries: response?.pagination?.pageSize || entries,
+        totalPages: response?.pagination?.totalPages || 0,
+        totalData: response?.pagination?.totalItems || 0,
+      }));
     } catch (error) {
+      console.error("API Error:", error);
       toast.error(customErrorHandler(error));
     }
   }
 
+  const currentPage = user_LiveBet.currentPage || 1;
+  const totalEntries = user_LiveBet.totalEntries || 10;
+  const startIndex = (currentPage - 1) * totalEntries + 1;
+  const endIndex = Math.min(
+    startIndex + totalEntries - 1,
+    user_LiveBet.totalData
+  );
+
   async function getView_User_BetMarket() {
     try {
       const response = await getUserGetMarket({
+        userName: store.admin.adminName,
         marketId: marketId,
       });
       setUser_marketWithRunnerData(response.data);
@@ -184,6 +237,26 @@ const User_BetMarket = () => {
 
   const nextUserName = getNextUserName(store?.admin?.id);
 
+  const handlePageChange = (newPage) => {
+    setUser_LiveBet((prevState) => ({
+      ...prevState,
+      currentPage: newPage,
+      data: [], // Clear previous data before fetching new
+    }));
+
+    getView_LiveBet(newPage, user_LiveBet.totalEntries);
+  };
+
+  const handleEntriesChange = (e) => {
+    const newEntries = parseInt(e.target.value, 10);
+    setUser_LiveBet((prevState) => ({
+      ...prevState,
+      totalEntries: newEntries,
+      currentPage: 1, // Reset to first page
+    }));
+    getView_LiveBet(1, newEntries);
+  };
+
   const handleClick_To_InnerHierarcy = async (id, role) => {
     setBodyData((prevData) => ({
       ...prevData,
@@ -206,16 +279,23 @@ const User_BetMarket = () => {
     <div className="container-fluid my-5">
       <div className="card shadow-sm">
         <div
-          className="card-header"
+          className="card-header d-flex align-items-center"
           style={{
             backgroundColor: "#1E2761",
             color: "#FFFFFF",
           }}
         >
-          <h3 className="mb-0 fw-bold fs-5 text-center text-white p-2 text-uppercase">
+          <i
+            className="fa fa-arrow-left text-white px-2"
+            aria-hidden="true"
+            style={{ cursor: "pointer", fontSize: "1.3rem" }}
+            onClick={() => navigate("/Market_analysis")}
+          ></i>
+          <h3 className="mb-0 fw-bold fs-5 text-center flex-grow-1 text-white p-2 text-uppercase">
             User Bet Market
           </h3>
         </div>
+
         <div className="card-body">
           <SingleCard className="mb-5">
             <div className="card-group">
@@ -339,7 +419,7 @@ const User_BetMarket = () => {
                 {/* Additional Cards */}
                 <div className="card mt-3">
                   <h4
-                    className="card-header text-white fw-bold rounded-top "
+                    className="card-header text-white fw-bold rounded-top text-uppercase"
                     style={{ background: "#1E2761" }}
                   >
                     Score Card
@@ -414,144 +494,241 @@ const User_BetMarket = () => {
                       />
                     </div>
                     {/* View More Section */}
-                    <h4 className="card-header text-white fw-bold py-3 mb-0 bg-transparent ms-auto text-uppercase">
-                      View More...
-                    </h4>
-                  </div>
-                  {/* <div className="card-body ">
-                    <h5
+                    <h4
+                      className="card-header text-white fw-bold py-3 mb-0 bg-transparent ms-auto text-uppercase"
                       style={{
-                        fontSize: "20px",
-                        fontWeight: "bold",
-                        color: "gray",
+                        cursor: !liveToggle ? "not-allowed" : "pointer", // Disable when liveToggle is OFF
+                        opacity: !liveToggle ? 0.5 : 1, // Dim when disabled
+                      }}
+                      onClick={() => {
+                        if (liveToggle) {
+                          handleOpenViewMoreModal(); // Enable only when liveToggle is ON
+                        }
                       }}
                     >
-                        <h2 className="text-uppercase">Market Details</h2>
-                      <div>
-                        <div
-                          style={{
-                            border: "1px solid #ddd",
-                            borderRadius: "4px",
-                            margin: "5px",
-                            padding: "10px",
-                            backgroundColor: "#e6f2ff",
-                          }}
-                        >
-                          
-                          {liveToggle ? (
-                            user_LiveBet.map((data) => {
-                              return (
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    alignItems: "center",
-                                    marginTop: "5px",
-                                  }}
-                                >
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                    }}
-                                  >
-                                    {data.type === "back" ? (
-                                      <button
-                                        style={{
-                                          backgroundColor: "#007bff",
-                                          color: "#fff",
-                                          border: "none",
-                                          padding: "5px 10px",
-                                          borderRadius: "3px",
-                                          marginRight: "10px",
-                                          fontSize: "14px",
-                                        }}
-                                      >
-                                        {data.type}
-                                      </button>
-                                    ) : (
-                                      <button
-                                        style={{
-                                          backgroundColor: "#FFB6C1",
-                                          color: "#fff",
-                                          border: "none",
-                                          padding: "5px 10px",
-                                          borderRadius: "3px",
-                                          marginRight: "10px",
-                                          fontSize: "14px",
-                                        }}
-                                      >
-                                        {data.type}
-                                      </button>
-                                    )}
+                      View More Live Bet.....
+                    </h4>
+                  </div>
+                  <ReusableModal
+                    isOpen={viewMoreModalOpen}
+                    onClose={handleCloseViewMoreModal}
+                    title={<span className="h2 fw-bold">All Live Data</span>}
+                    bodyContent={
+                      <div style={{}}>
+                        <div className="white_box_tittle list_header">
+                          <div className="col-2 text-center">
+                            <select
+                              className="form-select form-select-sm"
+                              onChange={handleEntriesChange}
+                            >
+                              <option value="10">Show 10 Entries</option>
+                              <option value="25">25 Entries</option>
+                              <option value="50">50 Entries</option>
+                              <option value="100">100 Entries</option>
+                            </select>
+                          </div>
 
-                                    <div>
+                          <div
+                            className="serach_field_2 ms-auto"
+                            style={{ marginLeft: "-10px" }}
+                          >
+                            <div className="search_inner">
+                              <form Active="#">
+                                <div className="search_field">
+                                  <input
+                                    type="text"
+                                    placeholder="Search content here..."
+                                    value={searchTerm}
+                                    onChange={handleSearchChange}
+                                  />
+                                </div>
+                                <button type="submit">
+                                  {" "}
+                                  <i className="ti-search"></i>{" "}
+                                </button>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+                        {liveToggle ? (
+                          <>
+                            {/* Table Headers */}
+                            <div className="col-12">
+                              <div className="row text-center">
+                                <div className="col-2">
+                                  <p className="fw-bold text-dark">
+                                    Market Name
+                                  </p>
+                                </div>
+                                <div className="col-2">
+                                  <p className="fw-bold text-dark">
+                                    Runner Name
+                                  </p>
+                                </div>
+                                <div className="col-2">
+                                  <p className="fw-bold text-dark">Odds</p>
+                                </div>
+                                <div className="col-2">
+                                  <p className="fw-bold text-dark">Stake</p>
+                                </div>
+                                <div className="col-2">
+                                  <p className="fw-bold text-dark">Type</p>
+                                </div>
+                                <div className="col-2">
+                                  <p className="fw-bold text-dark">Username</p>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Table Data */}
+                            <div
+                              style={{
+                                border: "1px solid #ddd",
+                                borderRadius: "4px",
+                                // padding: "7px",
+                                backgroundColor: "#BEDCF4",
+                              }}
+                            >
+                              {user_LiveBet.data.length > 0 ? (
+                                <div>
+                                  {user_LiveBet.data.map((data) => (
+                                    <div
+                                      className="row text-center align-items-center"
+                                      style={{
+                                        borderBottom: "1px solid #ddd",
+                                        padding: "8px 0",
+                                      }}
+                                      key={data.id}
+                                    >
+                                      {/* Market Name & Type */}
+                                      <div className="col-2 d-flex align-items-center justify-content-center">
+                                        <button
+                                          style={{
+                                            backgroundColor:
+                                              data.type === "back"
+                                                ? "#7DBCE8"
+                                                : "#FFB6C1",
+                                            border: "none",
+                                            borderRadius: "3px",
+                                            marginRight: "10px",
+                                            fontSize: "12px",
+                                            textTransform: "uppercase",
+                                            width: "40px",
+                                          }}
+                                        >
+                                          {data.type}
+                                        </button>
+                                        <div>
+                                          <div style={{ fontSize: "12px" }}>
+                                            {data.runnerName}
+                                          </div>
+                                          <div
+                                            style={{
+                                              fontSize: "12px",
+                                              color: "#555",
+                                            }}
+                                          >
+                                            Match Odds
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      {/* Odds */}
                                       <div
-                                        style={{
-                                          fontWeight: "bold",
-                                          fontSize: "14px",
-                                        }}
+                                        className="col-2 fw-bold"
+                                        style={{ fontSize: "14px" }}
                                       >
                                         {data.runnerName}
                                       </div>
                                       <div
-                                        style={{
-                                          fontSize: "12px",
-                                          color: "#555",
-                                        }}
+                                        className="col-2 fw-bold"
+                                        style={{ fontSize: "14px" }}
                                       >
-                                        Match Odds
+                                        {data.rate}
                                       </div>
-                                    </div>
-                                  </div>
-                                  <div style={{ display: "flex", gap: "30px" }}>
-                                    <div style={{ fontWeight: "bold" }}>
-                                      {data.rate}
-                                    </div>
-                                    <div style={{ fontWeight: "bold" }}>
-                                      {data.value}
-                                    </div>
-                                    {data.type === "back" ? (
-                                      <div
-                                        style={{
-                                          fontWeight: "bold",
-                                          color: "#007bff",
-                                        }}
-                                      >
-                                        {data.userName}
-                                      </div>
-                                    ) : (
-                                      <div
-                                        style={{
-                                          fontWeight: "bold",
-                                          color: "#FFB6C1",
-                                        }}
-                                      >
-                                        {data.userName}
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            })
-                          ) : (
-                            <div className="card-body text-center">
-                              <h5
-                                style={{
-                                  fontSize: "20px",
-                                  fontWeight: "bold",
-                                  color: "gray",
-                                }}
-                              >
-                                There are no any bet.
-                              </h5>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </h5>
-                  </div> */}
 
+                                      {/* Stake */}
+                                      <div
+                                        className="col-2 fw-bold"
+                                        style={{ fontSize: "14px" }}
+                                      >
+                                        {data.value}
+                                      </div>
+                                      <div
+                                        className="col-2 fw-bold"
+                                        style={{
+                                          fontSize: "14px",
+                                          textTransform: "uppercase",
+                                          color:
+                                            data.type === "back"
+                                              ? "#50A0E2"
+                                              : "#E5798B",
+                                        }}
+                                      >
+                                        {data.type}
+                                      </div>
+
+                                      {/* Username */}
+                                      <div
+                                        className="col-2 fw-bold"
+                                        style={{
+                                          fontSize: "15px",
+                                          color:
+                                            data.type === "back"
+                                              ? "#007bff"
+                                              : "#FFB6C1",
+                                        }}
+                                        onClick={() =>
+                                          handleUsernameClick(data.userName,  true)
+                                        }
+                                      >
+                                        {data.userName}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="text-center p-3">
+                                  <h5
+                                    style={{
+                                      fontSize: "18px",
+                                      fontWeight: "bold",
+                                      color: "gray",
+                                    }}
+                                  >
+                                    There are no any bet.
+                                  </h5>
+                                </div>
+                              )}
+                            </div>
+                          </>
+                        ) : (
+                          <div className="card-body text-center">
+                            <h5
+                              style={{
+                                fontSize: "20px",
+                                fontWeight: "bold",
+                                color: "gray",
+                              }}
+                            >
+                              There are no any bet.
+                            </h5>
+                          </div>
+                        )}
+                        {user_LiveBet?.data?.length > 0 && (
+                          <Pagination
+                            currentPage={user_LiveBet.currentPage}
+                            totalPages={user_LiveBet.totalPages}
+                            handlePageChange={handlePageChange}
+                            startIndex={startIndex}
+                            endIndex={endIndex}
+                            totalData={user_LiveBet.totalData}
+                          />
+                        )}
+                      </div>
+                    }
+                  />
+               
                   <div className="card-body">
                     <h5
                       style={{
@@ -592,14 +769,9 @@ const User_BetMarket = () => {
                                 backgroundColor: "#BEDCF4",
                               }}
                             >
-                              {user_LiveBet.length > 0 ? (
-                                <div
-                                  style={{
-                                    maxHeight: "300px", // Set the height of the scrollable area
-                                    overflowY: "auto", // Enable vertical scroll when content exceeds
-                                  }}
-                                >
-                                  {user_LiveBet.map((data) => (
+                              {user_LiveBet.data.length > 0 ? (
+                                <div>
+                                  {user_LiveBet.data.slice(0, 5).map((data) => (
                                     <div
                                       className="row text-center align-items-center"
                                       style={{
@@ -668,7 +840,7 @@ const User_BetMarket = () => {
                                               : "#FFB6C1",
                                         }}
                                         onClick={() =>
-                                          handleUsernameClick(data.userName)
+                                          handleUsernameClick(data.userName,  false)
                                         }
                                       >
                                         {data.userName}

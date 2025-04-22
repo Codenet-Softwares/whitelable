@@ -63,7 +63,7 @@ export const getLotteryBetHistory = async (req, res) => {
   }
 }
 
-const getAllConnectedUsers = async (adminId) => {
+export const getAllConnectedUsers = async (adminId) => {
   let allUsers = [adminId];
   let queue = [adminId];
 
@@ -240,3 +240,24 @@ export const getBetHistoryP_L = async (req, res) => {
     return res.status(statusCode.internalServerError).send(apiResponseErr(null, false, statusCode.internalServerError, error.message));
   }
 }
+
+export const getHierarchyUsers = async (adminId) => {
+  let allUsers = [adminId];
+  let queue = [adminId];
+
+  while (queue.length) {
+    let currentId = queue.shift();
+
+    const users = await admins.findAll({
+      where: { createdById: currentId },
+      attributes: ["userName", "adminId"],
+    });
+
+    users.forEach((user) => {
+      allUsers.push(user.adminId);
+      queue.push(user.adminId);
+    });
+  }
+
+  return allUsers;
+};

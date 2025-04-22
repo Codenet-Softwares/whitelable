@@ -5,8 +5,11 @@ import { getLotteryMarketAnalysis } from "../Utils/service/apiService";
 import Pagination from "../components/common/Pagination";
 import "./LotteryMarketAnalysis.css";
 import TicketModal from "../modal/TicketModal";
+import { useNavigate } from "react-router-dom";
 
 const LotteryMarketAnalysis = () => {
+    const navigate = useNavigate();
+  
   const { marketId } = useParams();
   const [lotteryData, setLotteryData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -124,7 +127,14 @@ const LotteryMarketAnalysis = () => {
 
   return (
     <div className="container-fluid p-4" style={{ backgroundColor: "#f5f7fa" }}>
+        <i
+         className="fa fa-arrow-left text-dark px-2"
+         aria-hidden="true"
+         style={{ cursor: "pointer",fontSize: "1.5rem"  }}
+         onClick={() => navigate("/Market_analysis")}
+       ></i>
     <div className="card shadow-lg border-0">
+      
       <div
         className="card-header text-center text-white"
         style={{
@@ -138,7 +148,9 @@ const LotteryMarketAnalysis = () => {
           {lotteryData[0]?.marketName || "Unknown Market"}
         </span>
         <span className="live-bet-text text-truncate ">Live Bets</span> 
+       
       </div>
+      
       <div className="card-body">
         {/* Search bar container */}
         <div className="search-bar-container mb-4">

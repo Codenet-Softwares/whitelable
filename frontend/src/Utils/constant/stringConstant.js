@@ -1,69 +1,71 @@
 export class StringConstants {
-  LOGIN = 'login';
+  LOGIN = "login";
 
   //others
-  LOCAL_STORAGE_KEY = 'my_app_state';
-  applicationJSON = { 'Content-Type': 'application/json' };
+  LOCAL_STORAGE_KEY = "my_app_state";
+  applicationJSON = { "Content-Type": "application/json" };
 
   // http methods
-  GET = 'GET';
-  POST = 'POST';
-  PUT = 'PUT';
-  DELETE = 'DELETE';
+  GET = "GET";
+  POST = "POST";
+  PUT = "PUT";
+  DELETE = "DELETE";
 
   // reducer type
 
-  LOG_IN = 'LOG_IN';
-  LOG_OUT = 'LOG_OUT';
+  LOG_IN = "LOG_IN";
+  LOG_OUT = "LOG_OUT";
 
   // roles
-  superAdmin = 'superAdmin';
-  whiteLabel = 'whiteLabel';
-  hyperAgent = 'hyperAgent';
-  superAgent = 'superAgent';
-  masterAgent = 'masterAgent';
-  subWhiteLabel = 'subWhiteLabel';
-  subAdmin = 'subAdmin';
-  subHyperAgent = 'subHyperAgent';
-  subSuperAgent = 'subSuperAgent';
-  subMasterAgent = 'subMasterAgent';
-  createAdmin = 'createAdmin';
-  user = 'user'
+  superAdmin = "superAdmin";
+  whiteLabel = "whiteLabel";
+  hyperAgent = "hyperAgent";
+  superAgent = "superAgent";
+  masterAgent = "masterAgent";
+  subWhiteLabel = "subWhiteLabel";
+  subAdmin = "subAdmin";
+  subHyperAgent = "subHyperAgent";
+  subSuperAgent = "subSuperAgent";
+  subMasterAgent = "subMasterAgent";
+  createAdmin = "createAdmin";
+  user = "user";
 
   // permission
-  createSubAdmin = 'create-subAdmin';
-  transferBalance = 'transferBalance';
-  status = 'status';
-  creditRefEdit = 'creditRef-Edit';
-  partnershipEdit = 'partnership-Edit';
-  creditRefView = 'creditRef-View';
-  partnershipView = 'partnership-view';
-  userProfileView = 'user-profile-view';
-  profileView = 'profile-view';
-  viewAdminData = 'view-admin-data';
-  createAdmin = 'create-Admin';
-  createUser = 'create-user';
-  accountStatement = 'accountStatement';
-  activityLog = 'activityLog';
-  deleteAdmin = 'delete-admin';
-  restoreAdmin = 'restore-admin';
-  moveToTrash = 'move-to-trash';
-  trashView = 'trash-view';
+  createSubAdmin = "create-subAdmin";
+  transferBalance = "transferBalance";
+  status = "status";
+  creditRefEdit = "creditRef-Edit";
+  partnershipEdit = "partnership-Edit";
+  creditRefView = "creditRef-View";
+  partnershipView = "partnership-view";
+  userProfileView = "user-profile-view";
+  profileView = "profile-view";
+  viewAdminData = "view-admin-data";
+  createAdmin = "create-Admin";
+  createUser = "create-user";
+  accountStatement = "accountStatement";
+  activityLog = "activityLog";
+  deleteAdmin = "delete-admin";
+  restoreAdmin = "restore-admin";
+  moveToTrash = "move-to-trash";
+  trashView = "trash-view";
+  marketAnalysis = "market-analysis";
 
   roles = [
-    { role: 'transferBalance', name: 'Transfer Balance' },
-    { role: 'status', name: 'Status' },
-    { role: 'creditRef-Edit', name: 'CreditRef Edit' },
-    { role: 'partnership-Edit', name: 'Partnership Edit' },
-    { role: 'partnership-view', name: 'Partnership view' },
-    { role: 'user-profile-view', name: 'User Profile View' },
-    { role: 'profile-view', name: 'Profile View' },
-    { role: 'accountStatement', name: 'Account Statement' },
-    { role: 'activityLog', name: 'Activity Log' },
-    { role: 'delete-admin', name: 'Delete Admin' },
-    { role: 'restore-admin', name: 'Restore Admin' },
-    { role: 'move-to-trash', name: 'Move To Trash' },
-    { role: 'trash-view', name: 'Trash View' },
+    { role: "transferBalance", name: "Transfer Balance" },
+    { role: "status", name: "Status" },
+    { role: "creditRef-Edit", name: "CreditRef Edit" },
+    { role: "partnership-Edit", name: "Partnership Edit" },
+    { role: "partnership-view", name: "Partnership view" },
+    { role: "user-profile-view", name: "User Profile View" },
+    { role: "profile-view", name: "Profile View" },
+    { role: "accountStatement", name: "Account Statement" },
+    { role: "activityLog", name: "Activity Log" },
+    { role: "delete-admin", name: "Delete Admin" },
+    { role: "restore-admin", name: "Restore Admin" },
+    { role: "move-to-trash", name: "Move To Trash" },
+    { role: "trash-view", name: "Trash View" },
+    { role: "market-analysis", name: "Market Analysis" },
   ];
 }
 

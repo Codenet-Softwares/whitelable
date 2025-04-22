@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import ActivityLog from "./ActivityLog";
 
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import AccountStatement from "./AccountStatement";
 import AccountProfile from "./AccountProfile";
@@ -23,7 +23,8 @@ import ProfitAndLoss from "./ProfitAndLoss";
 import strings from "../Utils/constant/stringConstant";
 
 const AccountLandingModal = () => {
-  const { userName } = useParams();
+  const { userName, toggle } = useParams();
+  const navigate = useNavigate();
   const [state, setState] = useState(accountStatementInitialState());
   const [backupDate, setbackupDate] = useState({
     endDate: null,
@@ -45,7 +46,7 @@ const AccountLandingModal = () => {
     })(),
     dataSource: "live",
     dataType: "",
-    dropdownOpen: null
+    dropdownOpen: null,
   });
 
   const [profitLossData, SetProfitLossData] = useState({
@@ -63,6 +64,7 @@ const AccountLandingModal = () => {
     backupStartDate: null,
     backupEndDate: null,
   });
+  console.log("toggle", state?.profileView?.roles[0]?.role)
 
   const formatDate = (dateString) => {
     // Parse the date string to create a Date object
@@ -79,19 +81,19 @@ const AccountLandingModal = () => {
 
   useEffect(() => {
     getAll_userProfileStatement();
-    if (state.toggle === 4) {
+    if (toggle === "betHistory") {
       getGameForBetHistory();
     }
-  }, [userName, state.toggle]);
+  }, [userName, toggle]);
 
   useEffect(() => {
-    if (state.toggle === 1) {
+    if (toggle === 1) {
       getAll_transactionView();
     }
-    if (state.toggle === 2) {
+    if (toggle === "activity") {
       getActivityLog();
     }
-    if (state.toggle === 4) {
+    if (toggle === "betHistory") {
       if (betHistoryData.SelectedGameId === "lottery") {
         getHistoryForLotteryBetHistory();
       } else {
@@ -112,11 +114,11 @@ const AccountLandingModal = () => {
     state.dataSource,
     betHistoryData.dataSource,
     betHistoryData.dataType,
-    state.toggle
+    toggle,
   ]);
 
   useEffect(() => {
-    if (state.toggle === 5) {
+    if (toggle === "profit_loss") {
       getProfitLossGameWise();
     }
   }, [
@@ -126,12 +128,12 @@ const AccountLandingModal = () => {
     profitLossData.itemPerPage,
     // profitLossData.searchItem,
     profitLossData.dataSource,
-    state.toggle
+    toggle,
   ]);
 
   // Debounce for search
   useEffect(() => {
-    if (state.toggle === 5) {
+    if (toggle === "profit_loss") {
       let timer = setTimeout(() => {
         getProfitLossGameWise();
       }, 300);
@@ -303,43 +305,23 @@ const AccountLandingModal = () => {
   };
 
   const handelStatement = () => {
-    setState((prevState) => ({
-      ...prevState,
-      toggle: 1,
-      activeItem: "statement",
-    }));
+    navigate(`/account-landing/${userName}/statement`)
   };
 
   const handelActivity = () => {
-    setState((prevState) => ({
-      ...prevState,
-      toggle: 2,
-      activeItem: "activity",
-    }));
+    navigate(`/account-landing/${userName}/activity`)
   };
 
   const handelProfile = () => {
-    setState((prevState) => ({
-      ...prevState,
-      toggle: 3,
-      activeItem: "profile",
-    }));
+    navigate(`/account-landing/${userName}/profile`)
   };
 
   const handelBetHistory = () => {
-    setState((prevState) => ({
-      ...prevState,
-      toggle: 4,
-      activeItem: "betHistory",
-    }));
+    navigate(`/account-landing/${userName}/betHistory`)
   };
 
   const handelProfitLoss = () => {
-    setState((prevState) => ({
-      ...prevState,
-      toggle: 5,
-      activeItem: "profitAndLoss",
-    }));
+    navigate(`/account-landing/${userName}/profit_loss`)
   };
 
   const handleDateStatement = () => {
@@ -371,7 +353,7 @@ const AccountLandingModal = () => {
   }
 
   let componentToRender;
-  if (state.toggle === 1) {
+  if (toggle === "statement") {
     componentToRender = (
       <AccountStatement
         props={state.statementView}
@@ -395,9 +377,9 @@ const AccountLandingModal = () => {
         handleDateStatement={handleDateStatement}
       />
     );
-  } else if (state.toggle === 2) {
+  } else if (toggle === "activity") {
     componentToRender = <ActivityLog props={state.activityView} />;
-  } else if (state.toggle === 3) {
+  } else if (toggle === "profile") {
     componentToRender = (
       <AccountProfile
         props={state.profileView}
@@ -405,7 +387,7 @@ const AccountLandingModal = () => {
         createdByUser={state.profileView.createdById}
       />
     );
-  } else if (state.toggle === 4) {
+  } else if (toggle === "betHistory") {
     componentToRender = (
       <BetHistory
         props={state.profileView}
@@ -432,7 +414,7 @@ const AccountLandingModal = () => {
         dropdownOpen={betHistoryData.dropdownOpen}
       />
     );
-  } else if (state.toggle === 5) {
+  } else if (toggle === "profit_loss") {
     componentToRender = (
       <ProfitAndLoss
         props={state.profileView}
@@ -466,20 +448,26 @@ const AccountLandingModal = () => {
       <div className="row row-no-gutters">
         {/* First Section */}
         <div className="col-sm-4">
+
+          <span className="me-3" onClick={() => navigate(-1)}>
+            <button className="btn btn-secondary">&#8592;</button>
+          </span>
           <div className="card mt-3" style={{ width: "18rem" }}>
             <ul className="list-group list-group-flush">
+
               <li
                 className="list-group-item text-white h6 text-uppercase text-center"
                 style={{ backgroundColor: "#1E2761" }}
               >
                 My Account
+
               </li>
               <li
                 className="list-group-item"
                 style={{
                   cursor: "pointer",
                   backgroundColor:
-                    state.activeItem === "statement" ? "#d1d9f0" : "",
+                    toggle === "statement" ? "#d1d9f0" : "",
                 }}
                 onClick={handelStatement}
               >
@@ -490,7 +478,7 @@ const AccountLandingModal = () => {
                 style={{
                   cursor: "pointer",
                   backgroundColor:
-                    state.activeItem === "activity" ? "#d1d9f0" : "",
+                    toggle === "activity" ? "#d1d9f0" : "",
                 }}
                 onClick={handelActivity}
               >
@@ -501,7 +489,7 @@ const AccountLandingModal = () => {
                 style={{
                   cursor: "pointer",
                   backgroundColor:
-                    state.activeItem === "profile" ? "#d1d9f0" : "",
+                    toggle === "profile" ? "#d1d9f0" : "",
                 }}
                 onClick={handelProfile}
               >
@@ -515,7 +503,7 @@ const AccountLandingModal = () => {
                     style={{
                       cursor: "pointer",
                       backgroundColor:
-                        state.activeItem === "betHistory" ? "#d1d9f0" : "",
+                        toggle === "betHistory" ? "#d1d9f0" : "",
                     }}
                     onClick={handelBetHistory}
                   >
@@ -526,7 +514,7 @@ const AccountLandingModal = () => {
                     style={{
                       cursor: "pointer",
                       backgroundColor:
-                        state.activeItem === "profitAndLoss" ? "#d1d9f0" : "",
+                        toggle === "profit_loss" ? "#d1d9f0" : "",
                     }}
                     onClick={handelProfitLoss}
                   >

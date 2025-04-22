@@ -199,6 +199,12 @@ const Wallet = () => {
                       onChange={(e) => {
                         handleChange("name", e.target.value);
                       }}
+                      onKeyPress={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault(); // Prevent default behavior
+                          debouncedGetAllCreate(walletCard.name); // Call the search function
+                        }
+                      }}
                       type="text"
                       placeholder="Search content here..."
                     />

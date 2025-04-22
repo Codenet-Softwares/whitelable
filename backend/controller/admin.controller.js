@@ -12,6 +12,8 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import { admin_Balance, balance_hierarchy } from './transaction.controller.js';
 import { findCreatorHierarchy } from '../helper/createHierarchy.js';
+import { getAllConnectedUsers, getHierarchyUsers } from '../controller/lotteryGame.controller.js'
+
 dotenv.config();
 
 /**
@@ -269,15 +271,14 @@ export const calculateLoadBalance = async (adminId) => {
   const hierarchyBalance = await balance_hierarchy(admin.adminId)
 
   let exposure
-
   if (admin.roles[0].role === string.user) {
     const baseUrl = process.env.COLOR_GAME_URL;
     const user_Exposure = await axios.get(`${baseUrl}/api/external/get-exposure/${admin.adminId}`)
     const { data } = user_Exposure
     exposure = data.exposure
   }
-  if (exposure === 0) {
-    totalBalance = adminBalance;
+  
+    totalBalance = adminBalance + (exposure ?? 0);
 
     const children = await admins.findAll({
       where: { createdById: adminId },
@@ -291,27 +292,8 @@ export const calculateLoadBalance = async (adminId) => {
     if (loadBalance !== totalBalance) {
       loadBalance = totalBalance
     }
-  }
-
-  else {
-    totalBalance = hierarchyBalance;
-
-    const children = await admins.findAll({
-      where: { createdById: adminId },
-    });
-
-    for (const child of children) {
-      const childBalance = await calculateLoadBalance(child.adminId);
-      totalBalance += childBalance;
-    }
-
-    if (loadBalance !== totalBalance) {
-      loadBalance = totalBalance
-    }
-  }
-
-
   return totalBalance;
+  
 };
 
 export const calculateExposure = async (adminId) => {
@@ -328,7 +310,7 @@ export const calculateExposure = async (adminId) => {
     try {
       const user_Exposure = await axios.get(`${baseUrl}/api/external/get-exposure/${admin.adminId}`);
       const { data } = user_Exposure;
-      exposure = Number(data.exposure) || 0;
+      exposure = parseFloat(data.exposure) || 0;
     } catch (error) {
       console.error("Error fetching exposure:", error.message);
       exposure = 0;
@@ -344,7 +326,7 @@ export const calculateExposure = async (adminId) => {
   for (const child of children) {
     let childExposure = await calculateExposure(child.adminId);
 
-    childExposure = Number(childExposure) || 0;
+    childExposure = parseFloat(childExposure) || 0;
     totalExposure += childExposure;
 
   }
@@ -477,10 +459,9 @@ export const viewAllCreates = async (req, res) => {
 export const viewAllSubAdminCreates = async (req, res) => {
   try {
     const createdById = req.params.createdById;
-    const page = parseInt(req.query.page, 10) || 1;
-    const pageSize = parseInt(req.query.pageSize, 10) || 5;
 
-    const searchQuery = req.query.userName ? { userName: { [Op.like]: `%${req.query.userName}%` } } : {};
+    const { page = 1, pageSize = 10, searchQuery = ""  } = req.query;
+    const offset = (page - 1) * pageSize;
 
     const allowedRoles = [
       string.subAdmin,
@@ -490,27 +471,28 @@ export const viewAllSubAdminCreates = async (req, res) => {
       string.subSuperAgent
     ];
 
+    const whereCondition = { createdById, [Op.or]: allowedRoles.map(role => fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))) }
+
+    if(searchQuery)
+    {
+      whereCondition.userName = { [Op.like]: `%${searchQuery}%` }
+    }
+
     const totalRecords = await admins.count({
-      where: {
-        createdById,
-        ...searchQuery,
-        [Op.or]: allowedRoles.map(role => fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))),
-      },
+      where: whereCondition,
+      limit: parseInt(pageSize),
+      offset,
+      order: [['createdAt', 'DESC']],
     });
 
     if (totalRecords === 0) {
       return res.status(statusCode.success).json(apiResponseSuccess([], true, statusCode.success, messages.noRecordsFound));
     }
 
-    const offset = (page - 1) * pageSize;
     const adminsData = await admins.findAll({
-      where: {
-        createdById,
-        ...searchQuery,
-        [Op.or]: allowedRoles.map(role => fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))),
-      },
+      where: whereCondition,
+      limit: parseInt(pageSize),
       offset,
-      limit: pageSize,
       order: [['createdAt', 'DESC']],
     });
 
@@ -560,7 +542,7 @@ export const viewAllSubAdminCreates = async (req, res) => {
         {
           totalRecords,
           totalPages,
-          currentPage: page,
+          currentPage: parseInt(page),
           pageSize,
         }
       ),
@@ -1173,3 +1155,544 @@ export const fetchUserHierarchy = async (req, res) => {
     .json(apiResponseErr(null, false, statusCode.internalServerError, error.message));
   }
 };
+
+export const getHierarchyWiseUsers = async (req, res) => {
+  try {
+    const { userName } = req.params;
+
+    const getAllowedUserNames = async (userName) => {
+      const users = await admins.findAll({
+        where: {
+          createdByUser: userName,
+        },
+        attributes: ["adminId", "userName", "createdByUser", "roles"],
+      });
+
+      let allowedUserNames = [];
+      for (const user of users) {
+        const nestedUsers = await getAllowedUserNames(user.userName);
+        allowedUserNames.push({
+          userId: user.adminId, 
+          userName: user.userName,
+          roles: user.roles,
+        });
+        allowedUserNames = allowedUserNames.concat(nestedUsers);
+      }
+      return allowedUserNames;
+    };
+
+    const hierarchyWiseUsers = await getAllowedUserNames(userName);
+
+    const filteredUsers = hierarchyWiseUsers.filter((user) => {
+      return (
+        user.roles &&
+        Array.isArray(user.roles) &&
+        user.roles.some((roleObj) => roleObj.role === "user") 
+      );
+    });
+
+
+    const formattedData = {
+      users: filteredUsers.map((user) => ({
+        userId: user.userId,
+        userName: user.userName,
+      })),
+    };
+
+    return res.status(statusCode.success).send(
+      apiResponseSuccess(
+        formattedData,
+        true,
+        statusCode.success,
+        "Hierarchy-wise users fetched successfully"
+      )
+    );
+  } catch (error) {
+    res.status(statusCode.internalServerError).send(
+      apiResponseErr(
+        null,
+        false,
+        statusCode.internalServerError,
+        error.message
+      )
+    );
+  }
+};
+
+
+export const downLineUsers = async (req, res) => {
+  try {
+    const createdById = req.params.createdById;
+    const searchTerm = req.query.searchTerm || '';
+    const page = parseInt(req.query.page, 10) || 1;
+    const pageSize = parseInt(req.query.pageSize, 10) || 10;
+    const {dataType,startDate, endDate} = req.query;
+
+    let profitLossResponse = { data: [] };
+    try {
+     const baseURL = process.env.COLOR_GAME_URL;
+      const response = await axios.get(`${baseURL}/api/user-profit-loss`,
+        {
+          params: {
+            dataType,
+            startDate,
+            endDate
+          }
+        }
+      );
+      if (response.data.success) {
+        profitLossResponse = response.data;
+      }
+    } catch (error) {
+      console.error("Error fetching profit/loss data:", error.message);
+    }
+
+    const profitLossMap = {};
+    profitLossResponse.data.forEach(user => {
+      profitLossMap[user.userId] = parseFloat(user.profitLoss) || 0;
+    });
+
+    const allAdmins = await admins.findAll({
+      raw: true,
+      attributes: ['adminId', 'userName', 'roles', 'createdById']
+    });
+
+    const downlineMap = {};
+    allAdmins.forEach(admin => {
+      if (!downlineMap[admin.createdById]) {
+        downlineMap[admin.createdById] = [];
+      }
+      downlineMap[admin.createdById].push(admin);
+    });
+
+    const getPrimaryRole = (roles) => {
+      if (!roles || !roles.length) return null;
+      return roles[0].role; 
+    };
+
+    const calculateDownlineProfitLoss = (adminId, role) => {
+      let total = 0;
+      const queue = [...(downlineMap[adminId] || [])];
+      
+      while (queue.length > 0) {
+        const current = queue.shift();
+        if (current.adminId !== adminId) {
+          total += profitLossMap[current.adminId] || 0;
+        }
+        
+        const currentRole = getPrimaryRole(current.roles);
+        
+        if (role === string.whiteLabel) {
+          if ([string.hyperAgent, string.superAgent, string.masterAgent, string.user].includes(currentRole)) {
+            queue.push(...(downlineMap[current.adminId] || []));
+          }
+        }
+        else if (role === string.hyperAgent) {
+          if ([string.superAgent, string.masterAgent, string.user].includes(currentRole)) {
+            queue.push(...(downlineMap[current.adminId] || []));
+          }
+        }
+        else if (role === string.superAgent) {
+          if ([string.masterAgent, string.user].includes(currentRole)) {
+            queue.push(...(downlineMap[current.adminId] || []));
+          }
+        }
+        else if (role === string.masterAgent) {
+          if ([string.user].includes(currentRole)) {
+            queue.push(...(downlineMap[current.adminId] || []));
+          }
+        }
+      }
+      
+      return total;
+    };
+
+    const allowedRoles = [
+      string.superAdmin,
+      string.whiteLabel,
+      string.hyperAgent,
+      string.superAgent,
+      string.masterAgent,
+      string.user,
+    ];
+
+    const baseWhere = {
+      createdById,
+      [Op.or]: allowedRoles.map((role) =>
+        fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))
+      ),
+    };
+
+    if (searchTerm) {
+      baseWhere.userName = {
+        [Op.like]: `%${searchTerm}%`
+      };
+    }
+
+    const totalRecords = await admins.count({
+      where: baseWhere
+    });
+
+    if (totalRecords === 0) {
+      return res.status(statusCode.success).json({
+        data: [],
+        success: true,
+        successCode: statusCode.success,
+        message: messages.noRecordsFound,
+        pagination: {
+          totalRecords: 0,
+          totalPages: 0,
+          currentPage: page,
+          pageSize
+        }
+      });
+    }
+
+    const offset = (page - 1) * pageSize;
+    const adminsData = await admins.findAll({
+      where: baseWhere,
+      offset,
+      limit: pageSize,
+      order: [['createdAt', 'DESC']],
+      raw: true
+    });
+
+    const users = adminsData.map((admin) => {
+      const primaryRole = getPrimaryRole(admin.roles);
+      const personalProfitLoss = (profitLossMap[admin.adminId] || 0);
+      let downLineProfitLoss = 0;
+      
+      if ([string.masterAgent, string.superAgent, string.hyperAgent, string.whiteLabel].includes(primaryRole)) {
+        downLineProfitLoss = calculateDownlineProfitLoss(admin.adminId, primaryRole);
+      }
+
+      const agentProfitLoss = [string.masterAgent, string.superAgent, string.hyperAgent, string.whiteLabel].includes(primaryRole)
+        ? (personalProfitLoss + downLineProfitLoss).toFixed(2)
+        : personalProfitLoss.toFixed(2);
+
+      const commission = "0";
+
+      return {
+        adminId: admin.adminId,
+        userName: admin.userName,
+        roles: admin.roles,
+        createdById: admin.createdById,
+        createdByUser: admin.createdByUser,
+        profitLoss: agentProfitLoss,
+        downLineProfitLoss: [string.masterAgent, string.superAgent, string.hyperAgent, string.whiteLabel].includes(primaryRole)
+          ? agentProfitLoss
+          : downLineProfitLoss.toFixed(2),
+        commission: commission
+      };
+    });
+
+    const totalPages = Math.ceil(totalRecords / pageSize);
+
+    return res.status(statusCode.success).json({
+      data: users,
+      success: true,
+      successCode: statusCode.success,
+      message: messages.success,
+      pagination: {
+        totalRecords,
+        totalPages,
+        currentPage: page,
+        pageSize,
+      }
+    });
+  } catch (error) {
+    console.error("Error in downLineUsers:", error);
+    return res.status(statusCode.internalServerError).json({
+      data: null,
+      success: false,
+      successCode: statusCode.internalServerError,
+      message: error.message
+    });
+  }
+};
+
+
+export const getTotalProfitLoss = async (req, res) => {
+  try {
+    const { page = 1, pageSize = 10, search = "", dataType, startDate, endDate} = req.query;
+    const offset = (page - 1) * pageSize;
+    const adminId = req.user?.adminId;
+    const userId = await getHierarchyUsers(adminId);
+    const token = jwt.sign(
+      { roles: req.user.roles },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: "1h" }
+    );
+    const headers = {
+      Authorization: `Bearer ${token}`,
+    };
+    const baseURL = process.env.COLOR_GAME_URL;
+    const response = await axios.post(
+      `${baseURL}/api/external-profit_loss`,
+      {
+        userId,
+      },
+      {
+        headers,
+        params: {
+          dataType,
+          startDate,
+          endDate
+        },
+      }
+    );
+    
+    let data = Array.isArray(response.data)
+    ? response.data
+    : response.data?.data || [];
+
+    if (search) {
+      const searchLower = search.toLowerCase();
+      data = data.filter((item) =>
+        item.gameName?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    if (data.length == 0) {
+      return res
+        .status(statusCode.success)
+        .send(
+          apiResponseSuccess([], true, statusCode.success, "Data not found!")
+        );
+    }
+
+    const totalItems = data.length;
+    const totalPages = Math.ceil(totalItems / pageSize);
+    const paginatedData = data.slice(offset, offset + parseInt(pageSize));
+
+    const Pagination = {
+      page: parseInt(page),
+      pageSize: parseInt(pageSize),
+      totalPages,
+      totalItems,
+    };
+
+    return res
+      .status(statusCode.success)
+      .send(
+        apiResponseSuccess(
+          paginatedData,
+          true,
+          statusCode.success,
+          "Hierarchy-wise porfit/loss fetched successfully",
+          Pagination
+        )
+      );
+  } catch (error) {
+    if (error.response) {
+      return apiResponseErr(
+        null,
+        false,
+        error.response.status,
+        error.response.data.message || error.response.data.errMessage,
+        res
+      );
+    } else {
+      return apiResponseErr(
+        null,
+        false,
+        statusCode.internalServerError,
+        error.message,
+        res
+      );
+    }
+  }
+};
+
+export const getMarketWiseProfitLoss = async(req,res) => {
+  try {
+    const { page = 1, pageSize = 10, search = "", type , dataType, startDate, endDate} = req.query;
+    const offset = (parseInt(page) - 1) * parseInt(pageSize);
+
+    const adminId = req.user?.adminId;
+    const userId = await getHierarchyUsers(adminId);
+
+    const token = jwt.sign(
+      { roles: req.user.roles },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: "1h" }
+    );
+    const headers = {
+      Authorization: `Bearer ${token}`,
+    };
+
+    const baseURL = process.env.COLOR_GAME_URL;
+    const response = await axios.post(
+      `${baseURL}/api/external/market-wise-profit-loss`,
+      {
+        userId,
+      },
+      {
+        headers,
+        params: {
+          type,
+          dataType,
+          startDate,
+          endDate
+        },
+      }
+    );
+
+    let data = Array.isArray(response.data)
+    ? response.data
+    : response.data?.data || [];
+
+    if (search) {
+      const searchLower = search.toLowerCase();
+      data = data.filter((item) =>
+        item.marketName?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    if (data.length == 0) {
+      return res
+        .status(statusCode.success)
+        .send(
+          apiResponseSuccess([], true, statusCode.success, "Data not found!")
+        );
+    };
+
+    const totalItems = data.length;
+    const totalPages = Math.ceil(totalItems / parseInt(pageSize));
+    const paginatedData = data.slice(offset, offset + parseInt(pageSize));
+
+    const Pagination = {
+      page: parseInt(page),
+      pageSize: parseInt(pageSize),
+      totalPages,
+      totalItems,
+    };
+
+    return res
+    .status(statusCode.success)
+    .send(
+      apiResponseSuccess(
+        paginatedData,
+        true,
+        statusCode.success,
+        "Market-wise porfit/loss fetched successfully",
+        Pagination
+      )
+    );
+  } catch (error) {
+    if (error.response) {
+      return apiResponseErr(
+        null,
+        false,
+        error.response.status,
+        error.response.data.message || error.response.data.errMessage,
+        res
+      );
+    } else {
+      return apiResponseErr(
+        null,
+        false,
+        statusCode.internalServerError,
+        error.message,
+        res
+      );
+    }
+}
+};
+
+export const getAllUserProfitLoss = async(req,res) => {
+  try {
+    const { page = 1, pageSize = 10, search = "",dataType, startDate, endDate } = req.query;
+    const offset = (parseInt(page) - 1) * parseInt(pageSize);
+
+    const adminId = req.user?.adminId;
+    const userId = await getHierarchyUsers(adminId);
+
+    const token = jwt.sign(
+      { roles: req.user.roles },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: "1h" }
+    );
+    const headers = {
+      Authorization: `Bearer ${token}`,
+    };
+
+    const baseURL = process.env.COLOR_GAME_URL;
+    const response = await axios.post(
+      `${baseURL}/api/external/allUser-profit-loss/${req.params.marketId}`,
+      {
+        userId,
+      },
+      {
+        headers, 
+        params: {
+          dataType,
+          startDate,
+          endDate
+        },
+      }
+    );
+    
+    let data = Array.isArray(response.data)
+    ? response.data
+    : response.data?.data || [];
+
+    if (search) {
+      const searchLower = search.toLowerCase();
+      data = data.filter((item) =>
+        item.userName?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    if (data.length == 0) {
+      return res
+        .status(statusCode.success)
+        .send(
+          apiResponseSuccess([], true, statusCode.success, "Data not found!")
+        );
+    };
+
+    const totalItems = data.length;
+    const totalPages = Math.ceil(totalItems / parseInt(pageSize));
+    const paginatedData = data.slice(offset, offset + parseInt(pageSize));
+
+    const Pagination = {
+      page: parseInt(page),
+      pageSize: parseInt(pageSize),
+      totalPages,
+      totalItems,
+    };
+
+    return res
+    .status(statusCode.success)
+    .send(
+      apiResponseSuccess(
+        paginatedData,
+        true,
+        statusCode.success,
+        "Market-wise all-user porfit/loss fetched successfully",
+        Pagination
+      )
+    );
+  } catch (error) {
+    if (error.response) {
+      return apiResponseErr(
+        null,
+        false,
+        error.response.status,
+        error.response.data.message || error.response.data.errMessage,
+        res
+      );
+    } else {
+      return apiResponseErr(
+        null,
+        false,
+        statusCode.internalServerError,
+        error.message,
+        res
+      );
+    }
+  }
+}
+
+

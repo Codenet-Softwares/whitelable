@@ -134,8 +134,18 @@ const HierarchyPageView = () => {
               <div class="white_card_body">
                 <div class="QA_section">
                   <div class="white_box_tittle list_header">
-                    <h4 className='fw-bolder text-uppercase' style={{color:"#1E2761"}}>User List </h4>
-                    <div class="box_right d-flex lms_block gap-5">
+                  <div className="d-flex align-items-center">
+                      <span className="me-3" onClick={() => navigate(-1)}>
+                        <button className="btn btn-secondary">&#8592;</button>
+                      </span>
+                      <h4
+                        className="fw-bolder text-uppercase"
+                        style={{ color: "#1E2761"}}
+                      >
+                        User List
+                      </h4>
+                    </div>                
+                      <div class="box_right d-flex lms_block gap-5">
                       <select
                         class="form-select form-select-sm w-25"
                         aria-label=".form-select-sm example"
@@ -209,25 +219,25 @@ const HierarchyPageView = () => {
                             </tr>
                           </thead>
                           {hierarchyData.map((data, i) => {
-                            // const creditRefLength = data.creditRef.length;
-                            // const partnershipLength = data.partnership.length;
+                            const creditRefLength = data.creditRef.length;
+                            const partnershipLength = data.partnership.length;
                             return (
                               <Card
                                 userName={data.userName}
                                 role={data.roles[0].role}
                                 key={data.id}
                                 exposure={data.exposure}
-                                // creditRef={data.creditRef[creditRefLength - 1]?.value}
+                                creditRef={data.creditRef[creditRefLength - 1]?.value}
                                 balance={data.balance}
                                 loadBalance={data.loadBalance}
                                 refProfitLoss={data.refProfitLoss}
                                 adminId={data.id}
-                                // partnership={
-                                //     data.partnership[partnershipLength - 1]?.value
-                                // }
+                                partnership={
+                                    data.partnership[partnershipLength - 1]?.value
+                                }
                                 Status={data.status}
-                                // creditRefLength={creditRefLength}
-                                // partnershipLength={partnershipLength}
+                                creditRefLength={creditRefLength}
+                                partnershipLength={partnershipLength}
                                 callingParent="HierarchyPageView"
                               />
                             );

@@ -13,14 +13,7 @@ import { validateGetLiveUserBetMarket } from "../schema/commonSchema.js";
 
 export const liveMarketBetRoute = (app) => {
   app.get(
-    "/api/get-userBetMarket/:marketId",
-    Authorize([
-      string.superAdmin,
-      string.whiteLabel,
-      string.hyperAgent,
-      string.superAgent,
-      string.masterAgent,
-    ]),
+    "/api/get-userBetMarket/:userName/:marketId",
     getUserBetMarket
   );
 
@@ -32,6 +25,7 @@ export const liveMarketBetRoute = (app) => {
       string.hyperAgent,
       string.superAgent,
       string.masterAgent,
+      string.marketAnalysis
     ]),
     getLiveBetGames
   );
@@ -46,6 +40,7 @@ export const liveMarketBetRoute = (app) => {
       string.hyperAgent,
       string.superAgent,
       string.masterAgent,
+      string.marketAnalysis
     ]),
     getLiveUserBet
   );
@@ -72,6 +67,7 @@ export const liveMarketBetRoute = (app) => {
       string.hyperAgent,
       string.superAgent,
       string.masterAgent,
+      string.marketAnalysis
     ]),
     getUserMasterBook
   );
@@ -84,6 +80,7 @@ export const liveMarketBetRoute = (app) => {
       string.hyperAgent,
       string.superAgent,
       string.masterAgent,
+      string.marketAnalysis
     ]),
     userLiveBet
   );

@@ -195,10 +195,11 @@ export const adminPasswordResetCode = async (req, res) => {
             }
         }
         
-
-      
-
-        await admins.update({ password: encryptedPassword }, { where: { userName } });
+        if (existingUser.roles[0].role === "subAdmin") {
+            await admins.update({ password: encryptedPassword, isReset: true }, { where: { userName } });
+        } else {
+            await admins.update({ password: encryptedPassword }, { where: { userName } });
+        }
 
         return res.status(statusCode.success).send(apiResponseSuccess(existingUser, true, statusCode.success, 'Password Reset Successful!'));
     } catch (error) {

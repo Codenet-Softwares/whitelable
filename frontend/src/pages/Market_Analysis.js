@@ -99,7 +99,7 @@ const Market_Analysis = () => {
                 value={liveGmes.type}
                 onChange={handleChange}
               >
-                <option value="10">All</option>
+                <option value="">All</option>
                 <option value="colorgame">Colorgame</option>
                 <option value="lottery">Lottery</option>
               </select>
@@ -197,7 +197,7 @@ const Market_Analysis = () => {
           {/* Pagination */}
           {/* Uncomment and use the Pagination component if needed */}
 
-          {liveGmes.data.length > 0  && 
+          {liveGmes?.data?.length > 0  && 
           <Pagination
             currentPage={liveGmes.currentPage}
             totalPages={liveGmes.totalPages}

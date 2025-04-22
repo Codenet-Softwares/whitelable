@@ -68,7 +68,9 @@ const AgentDelete = () => {
         toast.info(response.message);
 
         // Reload the data first
-        const updatedData = viewAgentDelete.filter((item) => item.trashId !== id);
+        const updatedData = viewAgentDelete.filter(
+          (item) => item.trashId !== id
+        );
         setViewAgentDelete(updatedData);
 
         if (updatedData.length === 0 && page > 1) {
@@ -91,7 +93,9 @@ const AgentDelete = () => {
       const response = await restoreTrash_api(data);
       if (response) {
         toast.info(response.message);
-        const updatedData = viewAgentDelete.filter((item) => item.adminId !== adminId);
+        const updatedData = viewAgentDelete.filter(
+          (item) => item.adminId !== adminId
+        );
         setViewAgentDelete(updatedData);
         if (updatedData.length === 0 && page > 1) {
           setPage((prev) => prev - 1);
@@ -106,19 +110,17 @@ const AgentDelete = () => {
     }
   }
 
-
   return (
     <>
       <div className="container-fluid d-flex justify-content-center mt-5 rounded-5 px-5">
         <div className="card ">
-          <div className="px-3 mt-3">
-            <h3
-              className="text-center text-uppercase fw-bold"
-              style={{ color: "#1E2761", textDecoration: "underline" }}
+          <div className="">
+            <h4
+              className="text-center text-uppercase fw-bold text-white bg-dark p-3"              
             >
               Deleted Agents
-            </h3>
-            <div className="white_box_tittle list_header">
+            </h4>
+            <div className="white_box_tittle list_header px-3">
               <div className="col-2 text-center">
                 <select
                   className="form-select form-select-sm"
@@ -155,11 +157,12 @@ const AgentDelete = () => {
             </div>
 
             <div className="main_data">
-              <table className="table m-2 mt-4">
+              <table className="table mt-4">
                 <thead
+                className="P-3"
                   style={{
                     height: "10px",
-                    backgroundColor: "#1E2761",
+                    backgroundColor: "#84B9DF",
                     color: "white",
                     fontWeight: "bold",
                   }}
@@ -190,6 +193,9 @@ const AgentDelete = () => {
                             className="btn text-dark fw-bold mx-2"
                             style={{ background: "#ED5E68" }}
                             onClick={() => handleDeleteAgent(data.trashId)}
+                            disabled={["suspended"].includes(
+                              store?.admin?.status
+                            )}
                           >
                             Delete{" "}
                             <i className="fa-solid fa-trash text-dark"></i>
@@ -198,6 +204,9 @@ const AgentDelete = () => {
                             className="btn text-dark rounded fw-bold"
                             style={{ background: "#F5C93A" }}
                             onClick={() => handleRestore(data.adminId)}
+                            disabled={["suspended"].includes(
+                              store?.admin?.status
+                            )}
                           >
                             Restore{" "}
                             <i className="fa-solid fa-arrow-rotate-left"></i>
@@ -209,10 +218,8 @@ const AgentDelete = () => {
                     <tr>
                       <td colSpan="3" align="center">
                         <div
-                          className="alert mt-3 p-3 text-center"
+                          className="alert mt-3 p-3 text-center text-danger fw-bold"
                           style={{
-                            background: "#1E2761",
-                            color: "white",
                             borderRadius: "10px",
                             fontSize: "18px",
                           }}

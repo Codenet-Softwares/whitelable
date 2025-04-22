@@ -439,9 +439,9 @@ export async function getLiveGames(body = {}, isToast = false) {
 
 export async function getUserGetMarket(body = {}, isToast = false) {
   try {
-    const callParams = await getAuthCallParams(strings.GET, body, isToast);
+    const callParams = getNoAuthCallParams(strings.GET, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.get_user_BetMarket}/${body.marketId}`, ///&limit=${body.limit}&search=${body.searchName} ((by search sending blank server is not giving data))
+      `${UrlConstant.get_user_BetMarket}/${body.userName}/${body.marketId}`,
       callParams,
       isToast
     );
@@ -575,15 +575,13 @@ export async function getLotteryMarketAnalysis(body = {}, isToast = false) {
   } catch (error) {
     throw error;
   }
-
-
 }
 
 export async function getMarket_LiveBet(body = {}, isToast = false) {
   try {
     const callParams = await getAuthCallParams(strings.POST, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.liveBet}`,
+      `${UrlConstant.liveBet}?page=${body.pageNumber}&pageSize=${body.totalEntries}&search=${body.search}`,
       callParams,
       isToast
     );
@@ -591,8 +589,6 @@ export async function getMarket_LiveBet(body = {}, isToast = false) {
   } catch (error) {
     throw error;
   }
-
-
 }
 
 export async function resetPasswordSuperAdmin(body = {}, isToast = true) {
@@ -607,8 +603,6 @@ export async function resetPasswordSuperAdmin(body = {}, isToast = true) {
   } catch (error) {
     throw error;
   }
-
-
 }
 
 export async function resetPasswordSubAdmin(body = {}, isToast = true) {
@@ -623,8 +617,6 @@ export async function resetPasswordSubAdmin(body = {}, isToast = true) {
   } catch (error) {
     throw error;
   }
-
-
 }
 
 export async function deleteSubAdmin(body = {}, isToast = true) {
@@ -639,10 +631,7 @@ export async function deleteSubAdmin(body = {}, isToast = true) {
   } catch (error) {
     throw error;
   }
-
-
 }
-
 
 export async function getUserHirerchy(body = {}, isToast = false) {
   try {
@@ -656,6 +645,97 @@ export async function getUserHirerchy(body = {}, isToast = false) {
   } catch (error) {
     throw error;
   }
+}
 
 
+export async function getAdminDownline(body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.GET, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.adminDownline}/${body.userId}?pageSize=${body.totalEntries}&page=${body.pageNumber}&searchTerm=${body.search}&startDate=${body.fromDate}&endDate=${body.toDate}&dataType=${body.dataSource}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
+//Event P/L  level-1 table Api
+export async function getEventPlLevelOne(body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.GET, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.PlLevelOne}?dataType=${body.dataType}&pageSize=${body.totalEntries}&page=${body.pageNumber}&search=${body.search}&startDate=${body.fromDate}&endDate=${body.toDate}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
+//marketWise P/L  level-2 table Api
+export async function getMarketWisePlLevelTwo(body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.GET, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.MarketWiseLevelTwo}?type=${body.Type}&pageSize=${body.totalEntries}&page=${body.pageNumber}&search=${body.search}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
+
+//marketWise all user  P/L  level-3 table Api
+export async function getMarketWiseAllUserPlLevelThree(body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.GET, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.AllUserMarketwiseLevelThree}/${body.marketId}?pageSize=${body.totalEntries}&page=${body.pageNumber}&search=${body.search}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
+
+// userWise BetHistory  level-4 table Api for lottery 
+export async function getUserWiseBetHistoryLotteryLevelFour(body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.GET, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.UsertwiseBetHistoryLevelFour}/${body.userName}/${body.marketId}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
+
+// userWise BetHistory  level-4 table Api for colorgame
+export async function getUserWiseBetHistoryColorGameLevelFour(body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.GET, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.UsertwisecolorGameLevelFour}/${body.userName}/${body.runnerId}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
 }

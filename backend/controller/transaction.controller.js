@@ -218,6 +218,8 @@ export const transactionView = async (req, res) => {
     const pageSize = parseInt(req.query.pageSize) || 10;
     const dataType = req.query.dataType;
 
+    let balances = 0;
+
     let startDate, endDate;
 
     if (dataType === 'live') {
@@ -258,6 +260,8 @@ export const transactionView = async (req, res) => {
 
     const admin = await admins.findOne({ where: { userName } });
 
+    const adminId = admin.adminId
+
     if (!admin) {
       return res.status(statusCode.badRequest).send(apiResponseErr([], false, statusCode.badRequest, messages.adminNotFound));
     }
@@ -267,6 +271,7 @@ export const transactionView = async (req, res) => {
     let transactionQuery = {
       where: {
         [Sequelize.Op.or]: [
+          { adminId },
           { transferFromUserAccount: adminUserName },
           { transferToUserAccount: adminUserName },
         ],
@@ -289,26 +294,53 @@ export const transactionView = async (req, res) => {
     }
 
     const transactionData = await transaction.findAll(transactionQuery);
+    
     if (transactionData.length === 0) {
       return res.status(statusCode.success).send(apiResponseSuccess([], true, statusCode.success, "No Data Found"));
     }
     const totalItems = transactionData.length;
     let allData = JSON.parse(JSON.stringify(transactionData));
 
-    const reversedData = [...allData].reverse();
+    // const reversedData = [...allData].reverse();
 
-    let runningBalance = 0;
+    // let runningBalance = 0;
 
-    reversedData.forEach((data) => {
-      if (data.transferFromUserAccount === adminUserName) {
-        runningBalance = data.currentBalance;
-      } else if (data.transferToUserAccount === adminUserName) {
-        runningBalance = data.currentBalance;
-      }
-      data.balance = runningBalance;
-    });
+    // reversedData.forEach((data) => {
+    //   if (data.transferFromUserAccount === adminUserName) {
+    //     runningBalance = data.currentBalance;
+    //   } else if (data.transferToUserAccount === adminUserName) {
+    //     runningBalance = data.currentBalance;
+    //   }
+    //   data.balance = runningBalance;
+    // });
 
-    allData = reversedData.reverse();
+    allData.slice().reverse().map((data) => {
+        if (data.receiver_adminId === adminId) {
+          if (data.transactionType === "credit") {
+            balances += parseFloat(data.amount);
+            data.balance = balances;
+          }
+          if (data.transactionType === "withdrawal") {
+            balances -= parseFloat(data.amount);
+            data.balance = balances;
+          }
+        } else {
+          if (data.transactionType === "credit") {
+            balances -= parseFloat(data.amount);
+            data.balance = balances;
+          }
+          if (data.transactionType === "withdrawal") {
+            balances += parseFloat(data.amount);
+            data.balance = balances;
+          }
+          if (data.transactionType === "self_credit") {
+            balances += parseFloat(data.amount);
+            data.balance = balances;
+          }
+        }
+      });
+
+    // allData = reversedData.reverse();
 
     const totalPages = Math.ceil(totalItems / pageSize);
 
@@ -337,13 +369,17 @@ export const accountStatement = async (req, res) => {
     const adminId = req.params.adminId;
     const pageSize = parseInt(req.query.pageSize) || 10;
     const page = parseInt(req.query.page) || 1;
+
+    const offset = (page - 1) * pageSize;
+
     const dataType = req.query.dataType;
     let startDate, endDate;
-    if (dataType === 'live') {
+    let balances = 0;
+    if (dataType === "live") {
       const today = new Date();
       startDate = new Date(today).setHours(0, 0, 0, 0);
       endDate = new Date(today).setHours(23, 59, 59, 999);
-    } else if (dataType === 'olddata') {
+    } else if (dataType === "olddata") {
       if (req.query.startDate && req.query.endDate) {
         startDate = new Date(req.query.startDate).setHours(0, 0, 0, 0);
         endDate = new Date(req.query.endDate).setHours(23, 59, 59, 999);
@@ -353,15 +389,23 @@ export const accountStatement = async (req, res) => {
         startDate = new Date(oneYearAgo).setHours(0, 0, 0, 0);
         endDate = new Date().setHours(23, 59, 59, 999);
       }
-    } else if (dataType === 'backup') {
+    } else if (dataType === "backup") {
       if (req.query.startDate && req.query.endDate) {
         startDate = new Date(req.query.startDate).setHours(0, 0, 0, 0);
         endDate = new Date(req.query.endDate).setHours(23, 59, 59, 999);
         const maxAllowedDate = new Date(startDate);
         maxAllowedDate.setMonth(maxAllowedDate.getMonth() + 3);
         if (endDate > maxAllowedDate) {
-          return res.status(statusCode.badRequest)
-            .send(apiResponseErr([], false, statusCode.badRequest, 'The date range for backup data should not exceed 3 months.'));
+          return res
+            .status(statusCode.badRequest)
+            .send(
+              apiResponseErr(
+                [],
+                false,
+                statusCode.badRequest,
+                "The date range for backup data should not exceed 3 months."
+              )
+            );
         }
       } else {
         const today = new Date();
@@ -371,69 +415,110 @@ export const accountStatement = async (req, res) => {
         endDate = new Date(today.setHours(23, 59, 59, 999));
       }
     } else {
-      return res.status(statusCode.success)
-        .send(apiResponseSuccess([], true, statusCode.success, 'Data not found.'));
+      return res
+        .status(statusCode.success)
+        .send(
+          apiResponseSuccess([], true, statusCode.success, "Data not found.")
+        );
     }
 
     const admin = await admins.findOne({ where: { adminId } });
-
+    // console.log("admin", admin);
     if (!admin) {
-      return res.status(statusCode.badRequest).send(apiResponseErr([], false, statusCode.badRequest, messages.adminNotFound));
+      return res
+        .status(statusCode.badRequest)
+        .send(
+          apiResponseErr(
+            [],
+            false,
+            statusCode.badRequest,
+            messages.adminNotFound
+          )
+        );
     }
-
     const adminUserName = admin.userName;
-    const adminMainBalance = await admin_Balance(adminId);
-
     const transactionQuery = {
       where: {
         [Sequelize.Op.or]: [
           { adminId },
           { transferToUserAccount: adminUserName },
+          { transferFromUserAccount: adminUserName },
         ],
-        date: {
-          [Op.between]: [startDate, endDate],
-        },
       },
-      order: [['date', 'DESC']],
-      limit: pageSize,
-      offset: (page - 1) * pageSize,
+      order: [["date", "DESC"]],
     };
 
-    const transferAmount = await transaction.findAndCountAll(transactionQuery);
-    if (transferAmount.rows.length === 0) {
-      return res.status(statusCode.success).send(apiResponseSuccess([], true, statusCode.success, "No Data Found"));
-    }
+    const transferAmount = await transaction.findAll(transactionQuery);
 
-    const totalCount = transferAmount.count;
-    const totalPages = Math.ceil(totalCount / pageSize);
+    let allData = JSON.parse(JSON.stringify(transferAmount));
 
-    let runningBalance = adminMainBalance;
+    allData
+      .slice()
+      .reverse()
+      .map((data) => {
+        if (data.receiver_adminId === adminId) {
+          if (data.transactionType === "credit") {
+            balances += parseFloat(data.amount);
+            data.balance = balances;
+          }
+          if (data.transactionType === "withdrawal") {
+            balances -= parseFloat(data.amount);
+            data.balance = balances;
+          }
+        } else {
+          if (data.transactionType === "credit") {
+            balances -= parseFloat(data.amount);
+            data.balance = balances;
+          }
+          if (data.transactionType === "withdrawal") {
+            balances += parseFloat(data.amount);
+            data.balance = balances;
+          }
+          if (data.transactionType === "self_credit") {
+            balances += parseFloat(data.amount);
+            data.balance = balances;
+          }
+        }
+      });
 
-    const dataWithBalance = transferAmount.rows.map((transaction) => {
-      if (transaction.transactionType === 'credit' || transaction.transactionType === 'withdrawal') {
-        runningBalance = transaction.currentBalance;
-      }
+      allData = allData.filter((data) => {
+        const dataDate = new Date(data.date).getTime();
+        return dataDate >= startDate && dataDate <= endDate;
+      });
 
-      let adminBalanceForTransaction = null;
-      if (transaction.transferFromUserAccount === adminUserName) {
-        adminBalanceForTransaction = adminMainBalance;
-      }
+    const totalItems = allData.length;
+    const totalPages = Math.ceil(totalItems / parseInt(pageSize));
+    const paginatedData = allData.slice(offset, offset + parseInt(pageSize));
 
-      return {
-        ...transaction.toJSON(),
-        balance: runningBalance,
-        adminMainBalance: adminBalanceForTransaction
-      };
-    });
+    const pagination = {
+      page: parseInt(page),
+      limit: parseInt(pageSize),
+      totalPages,
+      totalItems,
+    };
 
-    const paginationData = apiResponsePagination(page, totalPages, totalCount, pageSize);
-
-    return res.status(statusCode.success)
-      .send(apiResponseSuccess(dataWithBalance, true, statusCode.success, messages.success, paginationData));
-
+    return res
+      .status(statusCode.success)
+      .send(
+        apiResponseSuccess(
+          paginatedData,
+          true,
+          statusCode.success,
+          "Balance fetch successfully.",
+          pagination,
+        )
+      );
   } catch (error) {
-    res.status(statusCode.internalServerError)
-      .send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
+    res
+      .status(statusCode.internalServerError)
+      .send(
+        apiResponseErr(
+          error.data ?? null,
+          false,
+          error.responseCode ?? statusCode.internalServerError,
+          error.errMessage ?? error.message
+        )
+      );
   }
 };
 
@@ -529,7 +614,7 @@ export const admin_Balance = async (adminId) => {
       const { data } = user_balance
       balance = data.balance
     }
-
+    console.log('Final balance with ext.',adminId, balance);
     return balance;
   } catch (error) {
     throw new Error(`Error calculating balance: ${error.message}`);
@@ -612,6 +697,7 @@ export const balance_hierarchy = async (adminId) => {
         }
       }
     }
+     // console.log("balance.............................",balance)
 
     return balance;
   } catch (error) {

@@ -11,7 +11,14 @@ const Navside = () => {
   const [isUser, setIsUser] = useState(true);
   const [isRequest, setIsRequest] = useState(true);
   const [userRole, setUserRole] = useState(true);
+  const [isReport, setIsReport] = useState(true); // New state for  My Report Section
   const navigate = useNavigate();
+
+  // Added toggle function for  My Report Section
+  const handleReportToggle = () => {
+    setIsReport(!isReport);
+  };
+
   const handleUserToggle = () => {
     setIsUser(!isUser);
   };
@@ -148,7 +155,6 @@ const Navside = () => {
               </ul>
             </li>
           )}
-
           {permissionObj.allAdmin.includes(store.admin.roles[0].role) && (
             <li className="" onClick={takeMeToAdminAccount}>
               <a className="" href="#" aria-expanded="false">
@@ -164,7 +170,6 @@ const Navside = () => {
               </a>
             </li>
           )}
-
           {store.admin.roles[0].permission.includes(
             strings.accountStatement
           ) && (
@@ -182,7 +187,6 @@ const Navside = () => {
               </a>
             </li>
           )}
-
           {store.admin.roles[0].permission.includes(strings.deleteAdmin) && (
             <>
               {isRequest ? (
@@ -220,7 +224,6 @@ const Navside = () => {
               )}
             </>
           )}
-
           {permissionObj.allAdmin.includes(store?.admin?.roles[0]?.role) && (
             <>
               {isRequest ? (
@@ -269,7 +272,6 @@ const Navside = () => {
               )}
             </>
           )}
-
           {permissionObj.allAdmin.includes(store.admin.roles[0].role) && (
             <>
               {userRole ? (
@@ -300,22 +302,24 @@ const Navside = () => {
                     </div>
                   </a>
                   <ul className="d-flex flex-column ml-0">
-                    <li>
-                      <Link to="/CreateSubAdmin">
-                        <span>
-                          {" "}
-                          <i
-                            class="fa-solid fa-plus"
-                            style={{
-                              color: "black",
-                              fontSize: "20px",
-                              marginLeft: "50px",
-                            }}
-                          ></i>
-                          Create New
-                        </span>
-                      </Link>
-                    </li>
+                    {!["suspended"].includes(store?.admin?.status) && (
+                      <li>
+                        <Link to="/CreateSubAdmin">
+                          <span>
+                            {" "}
+                            <i
+                              class="fa-solid fa-plus"
+                              style={{
+                                color: "black",
+                                fontSize: "20px",
+                                marginLeft: "50px",
+                              }}
+                            ></i>
+                            Create New
+                          </span>
+                        </Link>
+                      </li>
+                    )}
 
                     <li>
                       <Link to="/ViewAllSubAdmin">
@@ -337,7 +341,6 @@ const Navside = () => {
               )}
             </>
           )}
-
           {store.admin.roles[0].permission.includes(strings.createAdmin) && (
             <>
               {userRole ? (
@@ -362,14 +365,16 @@ const Navside = () => {
                     </div>
                   </a>
                   <ul className="d-flex flex-column ml-0">
-                    <li>
-                      <Link to="/CreateSubAdmin">
-                        <span>
-                          {" "}
-                          <i class="fa-solid fa-circle"></i>Create New
-                        </span>
-                      </Link>
-                    </li>
+                    {!["suspended"].includes(store?.admin?.status) && (
+                      <li>
+                        <Link to="/CreateSubAdmin">
+                          <span>
+                            {" "}
+                            <i class="fa-solid fa-circle"></i>Create New
+                          </span>
+                        </Link>
+                      </li>
+                    )}
 
                     <li>
                       <Link to="/ViewAllSubAdmin">
@@ -383,21 +388,103 @@ const Navside = () => {
               )}
             </>
           )}
-          <li>
-            <Link to="/Market_analysis" aria-expanded="false">
-              <div className="nav_icon_small">
-                <i
-                  class="fa-solid fa-chart-line"
-                  style={{ color: "black", fontSize: "20px" }}
-                >
-                  {" "}
-                </i>
-              </div>
-              <div className="nav_title">
-                <span>Market Analysis</span>
-              </div>
-            </Link>
-          </li>
+
+          {permissionObj.allAdmin.includes(store.admin.roles[0].role) && (
+            <li>
+              <Link to="/Market_analysis" aria-expanded="false">
+                <div className="nav_icon_small">
+                  <i
+                    class="fa-solid fa-chart-line"
+                    style={{ color: "black", fontSize: "20px" }}
+                  >
+                    {" "}
+                  </i>
+                </div>
+                <div className="nav_title">
+                  <span>Market Analysis</span>
+                </div>
+              </Link>
+            </li>
+          )}
+          {store.admin.roles[0].permission.includes(strings.marketAnalysis) && (
+            <li>
+              <Link to="/Market_analysis" aria-expanded="false">
+                <div className="nav_icon_small">
+                  <i
+                    class="fa-solid fa-chart-line"
+                    style={{ color: "black", fontSize: "20px" }}
+                  >
+                    {" "}
+                  </i>
+                </div>
+                <div className="nav_title">
+                  <span>Market Analysis</span>
+                </div>
+              </Link>
+            </li>
+          )}
+          {/* Added this new section for My Report */}
+          {isReport ? (
+            <li className="" onClick={handleReportToggle}>
+              <a className="has-arrow" href="#" aria-expanded="false">
+                <div className="nav_icon_small">
+                  <i
+                    class="fa-solid fa-chart-pie"
+                    style={{ color: "black", fontSize: "20px" }}
+                  ></i>
+                </div>
+                <div className="nav_title">
+                  <span>My Report</span>
+                </div>
+              </a>
+            </li>
+          ) : (
+            <li className="" onClick={handleReportToggle}>
+              <a className="has-arrow" href="#" aria-expanded="false">
+                <div className="nav_icon_small">
+                  <i
+                    class="fa-solid fa-chart-pie"
+                    style={{ color: "black", fontSize: "20px" }}
+                  ></i>
+                </div>
+                <div className="nav_title">
+                  <span>My Report</span>
+                </div>
+              </a>
+              <ul>
+                <li>
+                  <Link to="event-profit-loss">
+                    <span>
+                      <i
+                        class="fa-solid fa-chart-column"
+                        style={{
+                          color: "black",
+                          fontSize: "20px",
+                          marginLeft: "50px",
+                        }}
+                      ></i>
+                      Event Profit/Loss
+                    </span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="downline-profit-loss">
+                    <span>
+                      <i
+                        class="fa-solid fa-chart-line"
+                        style={{
+                          color: "black",
+                          fontSize: "20px",
+                          marginLeft: "50px",
+                        }}
+                      ></i>
+                      Downline Profit/Loss
+                    </span>
+                  </Link>
+                </li>
+              </ul>
+            </li>
+          )}
         </ul>
       </div>
     </nav>

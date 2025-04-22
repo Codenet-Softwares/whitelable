@@ -79,7 +79,7 @@ const SubAdminView = () => {
     if (store?.admin && permissionObj.allAdmin.includes(store?.admin?.roles[0].role)) {
       getAll_SubAdmin_Create(subAdminData.name);
     }
-  }, [store?.admin, subAdminData.currentPage, subAdminData.totalEntries, refresh]);
+  }, [store?.admin, subAdminData.currentPage, subAdminData.totalEntries, subAdminData.name, refresh]);
 
   async function getAll_SubAdmin_Create(name = subAdminData.name) {
     const response = await getAllSubAdminCreate({
@@ -100,9 +100,11 @@ const SubAdminView = () => {
   }
 
   const handlePageChange = (page) => {
-    handleChange("currentPage", page);
+    setSubAdminData((prevState) => ({
+      ...prevState,
+      currentPage: page,
+    }));
   };
-
   let startIndex = Math.min(
     (Number(subAdminData.currentPage) - 1) * Number(subAdminData.totalEntries) +
       1
@@ -165,13 +167,13 @@ const SubAdminView = () => {
     };
 
     if (!adminPassword) {
-      formErrors.adminPassword = "Admin Password is required!";
+      formErrors.adminPassword = "Admin Password Is Required!";
     }
     if (!password) {
-      formErrors.password = "New Password is required!";
+      formErrors.password = "New Password Is Required!";
     }
     if (!confirmPassword) {
-      formErrors.confirmPassword = "Confirm Password is required!";
+      formErrors.confirmPassword = "Confirm Password Is Required!";
     }
     if (password && confirmPassword && password !== confirmPassword) {
       formErrors.confirmPassword =
@@ -225,17 +227,17 @@ const SubAdminView = () => {
   };
 
   return (
-    <div className="main_content_iner mt-5 p-5">
+    <div className="main_content_iner mt-5 p-5 rounded-3">
       <div className="container-fluid p-0">
         <div className="card">
 
         <div className="row justify-content-center">
           <div className="col-lg-12">
             <div className="white_card card_height_100 mb_30">
-              <div className="white_card_header">
+              <div className="white_card_header  rounded-3">
                 <h3
-                  className="m-0 text-center text-uppercase fw-bolder"
-                  style={{ color: "#1E2761", textDecoration: "underline" }}
+                  className="m-0 text-center text-uppercase fw-bolder text-white"
+             
                 >
                   List of User Roles
                 </h3>

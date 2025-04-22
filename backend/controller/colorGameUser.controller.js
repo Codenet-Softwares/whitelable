@@ -367,14 +367,14 @@ export const userAccountStatement = async (req, res) => {
 
 export const getUserBetList = async (req, res) => {
   try {
-    const { userName, runnerId } = req.params;
+    const { userName, marketId } = req.params;
     const { page = 1, pageSize = 10 } = req.query;
-    const params = { userName, runnerId };
+    const params = { userName, marketId };
 
     const baseUrl = process.env.COLOR_GAME_URL;
 
     const response = await axios.get(
-      `${baseUrl}/api/user-external-betList/${userName}/${runnerId}`,
+      `${baseUrl}/api/user-external-betList/${userName}/${marketId}`,
       { params }
     );
 

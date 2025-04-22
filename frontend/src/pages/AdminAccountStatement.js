@@ -113,7 +113,7 @@ const AdminAccountStatement = () => {
           className="card-heade text-white p-3 text-center h5 rounded-2"
           style={{ backgroundColor: "#1E2761" }}
         >
-          <b className="">&nbsp;&nbsp;Account Statement</b>
+          <b className="text-uppercase">&nbsp;&nbsp;Account Statement</b>
         </div>
 
         <div className="form-group mb-3 mb-md-0 px-2 mt-3">
