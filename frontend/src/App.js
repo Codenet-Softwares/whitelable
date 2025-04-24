@@ -28,6 +28,7 @@ import DemoMarket_Analysis from "./pages/DemoMarket_Analysis";
 import PrivateRoute from "./components/common/PrivateRoute";
 import EventProfitLoss from "./pages/MyReport/EventProfitLoss";
 import DownlineProfitLoss from "./pages/MyReport/DownlineProfitLoss";
+import ProfileLandingModal from "./pages/profileLandingModal/ProfileLandingModal";
 // import WelcomePage from "./screen/WelcomePage";
 
 function App() {
@@ -118,6 +119,10 @@ function App() {
               <Route
                 path="/downline-profit-loss"
                 element={<DownlineProfitLoss />}
+              />
+              <Route
+                path="/profilelandingmodal/Ajuba_master1"
+                element={<ProfileLandingModal/>}
               />
             </Route>
           </Routes>

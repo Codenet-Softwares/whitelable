@@ -67,6 +67,16 @@ export class StringConstants {
     { role: "trash-view", name: "Trash View" },
     { role: "market-analysis", name: "Market Analysis" },
   ];
+
+//profilelandingmodal tab button
+selectionTab=[
+  { name: "Account Statement", toggletab: "Statement"},
+  { name: "Activity Log", toggletab:"activity"},
+  { name: "Profile", toggletab:"profile"},
+  { name: "Bet History", toggletab:"betHistory"},
+  { name: "Profit & Loss", toggletab: "profit_loss" },
+]
+
 }
 
 let strings = new StringConstants();

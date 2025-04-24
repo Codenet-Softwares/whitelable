@@ -220,7 +220,7 @@ export function accountInitialState(body = {}) {
       totalData: 0,
       startDate: '',
       totalEntries: 10,
-      dataSource: 'live',
+      dataSource: 'olddata',
     },
     activityLogView: {
       data: []
