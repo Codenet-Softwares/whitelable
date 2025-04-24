@@ -277,9 +277,12 @@ const EventProfitLoss = () => {
         try {
           const response = await getMarketWisePlLevelTwo({
             Type: parentData?.sportName, // Use the sportName as Type
-            pageNumber: page,
+            dataType,
+           pageNumber: page,
             totalEntries: pageSize,
             search: search,
+            from: dateRange.from,
+            to: dateRange.to,
           });
 
           const formattedData = formatLevelTwoData(response.data);
@@ -352,9 +355,12 @@ const EventProfitLoss = () => {
         try {
           const response = await getMarketWiseAllUserPlLevelThree({
             marketId: parentData?.marketId, // Pass the selected marketId
+            dataType,
             pageNumber: page,
             totalEntries: pageSize,
             search: search,
+            from: dateRange.from,
+            to: dateRange.to,
           });
 
           const formattedData = formatLevelThreeData(response.data);
@@ -563,13 +569,14 @@ const EventProfitLoss = () => {
           let response;
           const params = {
             userName: parentData?.username,
+          
           };
 
           if (parentData?.sportName === "Lottery") {
             params.marketId = parentData?.marketId;
             response = await getUserWiseBetHistoryLotteryLevelFour(params);
           } else if (parentData?.sportName === "COLORGAME") {
-            params.runnerId = parentData?.runnerId;
+            params.marketId = parentData?.marketId;
             response = await getUserWiseBetHistoryColorGameLevelFour(params);
             console.log("Color Game API Response:", response);
           } else {
