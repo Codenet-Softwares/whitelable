@@ -682,7 +682,7 @@ export async function getMarketWisePlLevelTwo(body = {}, isToast = false) {
   try {
     const callParams = await getAuthCallParams(strings.GET, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.MarketWiseLevelTwo}?type=${body.Type}&pageSize=${body.totalEntries}&page=${body.pageNumber}&search=${body.search}`,
+      `${UrlConstant.MarketWiseLevelTwo}?type=${body.Type}&dataType=${body.dataType}&pageSize=${body.totalEntries}&page=${body.pageNumber}&search=${body.search}`,
       callParams,
       isToast
     );
@@ -698,7 +698,7 @@ export async function getMarketWiseAllUserPlLevelThree(body = {}, isToast = fals
   try {
     const callParams = await getAuthCallParams(strings.GET, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.AllUserMarketwiseLevelThree}/${body.marketId}?pageSize=${body.totalEntries}&page=${body.pageNumber}&search=${body.search}`,
+      `${UrlConstant.AllUserMarketwiseLevelThree}/${body.marketId}?pageSize=${body.totalEntries}&dataType=${body.dataType}&page=${body.pageNumber}&search=${body.search}`,
       callParams,
       isToast
     );
@@ -730,7 +730,7 @@ export async function getUserWiseBetHistoryColorGameLevelFour(body = {}, isToast
   try {
     const callParams = await getAuthCallParams(strings.GET, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.UsertwisecolorGameLevelFour}/${body.userName}/${body.runnerId}`,
+      `${UrlConstant.UsertwisecolorGameLevelFour}/${body.userName}/${body.marketId}`,
       callParams,
       isToast
     );
