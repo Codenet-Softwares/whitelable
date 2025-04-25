@@ -1,4 +1,3 @@
-// useProfitLossData.js
 import { useState, useRef, useCallback } from "react";
 import {
   getEventPlLevelOne,
@@ -10,62 +9,57 @@ import {
 import { getUseProfitLossState } from "../../Utils/service/initiateState";
 
 const useProfitLossData = () => {
-  const [state, setState] = useState({
-    ...getUseProfitLossState(),
-    currentLevel: 1,
-    parentData: null,
-    grandParentData: null,
-    greatGrandParentData: null, // For level 4 navigation
-    levelRefreshKey: 0,
-  });
+  const [state, setState] = useState(getUseProfitLossState());
+  const lastFetchedData = useRef([]); // Stores last fetched data to avoid re-fetching
+  const lastDateRange = useRef(state.dateRange); // Tracks last used date range
+  const stateRef = useRef(state); // Ref to access current state in callbacks
+  stateRef.current = state; // Keep ref in sync with state
 
-  const lastFetchedData = useRef([]);
-  const lastDateRange = useRef(state.dateRange);
-  const stateRef = useRef(state);
-  stateRef.current = state;
-
-  // Navigation history stack
+  // Navigation stack to keep track of user navigation history for "back" functionality
   const navigationStack = useRef([]);
 
+  // Calculate totals for Profit and Loss (PL) data
   const calculateTotals = (data) => {
     const totals = data.reduce(
       (acc, item) => {
+        // Sum up the PL, commission, etc. for each item
         acc.uplinePL += item.uplinePL || 0;
         acc.downlinePL += item.downlinePL || 0;
         acc.commission += item.commission || 0;
         return acc;
       },
-      { uplinePL: 0, downlinePL: 0, commission: 0 }
+      { uplinePL: 0, downlinePL: 0, commission: 0 } // Initial values
     );
 
     return {
-      id: "total",
-      sportName: "Total",
-      uplinePL: totals.uplinePL,
-      downlinePL: totals.downlinePL,
-      commission: totals.commission,
-      isTotalRow: true,
+      id: "total", // The total row identifier
+      sportName: "Total", // Label for the total row
+      uplinePL: totals.uplinePL, // Total uplinePL
+      downlinePL: totals.downlinePL, // Total downlinePL
+      commission: totals.commission, // Total commission
+      isTotalRow: true, // A flag to identify this as a total row
     };
   };
 
+  // Format the level 1 data fetched from the API
   const formatLevelOneData = (apiData) => {
     const formattedData = apiData.map((item) => ({
       id: item.gameName,
       sportName: item.gameName,
-      uplinePL: -parseFloat(item.totalProfitLoss),
-      downlinePL: parseFloat(item.totalProfitLoss),
-      commission: 0,
-      isTotalRow: false,
+      uplinePL: -parseFloat(item.totalProfitLoss), // Convert profit/loss to numeric and handle signs
+      downlinePL: parseFloat(item.totalProfitLoss), // Convert profit/loss to numeric and handle signs
+      commission: 0, // Commission is 0 at this level
+      isTotalRow: false, // Not a total row
     }));
 
     if (formattedData.length > 0) {
-      const totals = calculateTotals(formattedData);
-      return [...formattedData, totals];
+      const totals = calculateTotals(formattedData); // Get the totals for this data
+      return [...formattedData, totals]; // Add totals as the last item in the array
     }
 
     return formattedData;
   };
-
+  // Format the level 2 data fetched from the API
   const formatLevelTwoData = (apiData) => {
     return apiData.map((item) => ({
       id: item.marketId,
@@ -79,7 +73,7 @@ const useProfitLossData = () => {
       commission: 0,
     }));
   };
-
+  // Format the level 3 data fetched from the API
   const formatLevelThreeData = (apiData) => {
     return apiData.map((item) => ({
       id: item.userId,
@@ -95,7 +89,7 @@ const useProfitLossData = () => {
       commission: 0,
     }));
   };
-
+  // Format level 4 data based on the type of sport (Lottery, COLORGAME, etc.)
   const formatLevelFourData = (apiData, sportType) => {
     if (sportType === "Lottery") {
       return apiData.map((item) => ({
@@ -139,12 +133,12 @@ const useProfitLossData = () => {
       }));
     }
   };
-
+  // Get table data for the current state, fetching from the API and formatting the results
   const getTableData = useCallback(
     async (page = 1, pageSize = 10, search = "") => {
       const currentState = stateRef.current;
 
-      // Skip API call if we're just updating dates
+      // If API call is prevented (due to the same date range and level 1), return the cached data
       if (currentState.preventAPICall && currentState.currentLevel === 1) {
         setState((prev) => ({ ...prev, preventAPICall: false }));
         return {
@@ -155,100 +149,90 @@ const useProfitLossData = () => {
           },
         };
       }
-      console.log("====>>> line 153", currentState.grandParentData?.sportName);
-      try {
-        let response, formattedData;
-        const baseParams = {
-          dataType: currentState.dataType,
-          fromDate:
-            currentState.dataType === "live" ? "" : currentState.dateRange.from,
-          toDate:
-            currentState.dataType === "live" ? "" : currentState.dateRange.to,
-          pageNumber: page,
-          totalEntries: pageSize,
-          search: currentState.currentLevel === 4 ? "" : search, // No search for level 4
-        };
-        console.log(
-          "====>>> line 164",
-          currentState.grandParentData?.sportName
-        );
-        if (currentState.currentLevel === 1) {
-          response = await getEventPlLevelOne(baseParams);
-          formattedData = formatLevelOneData(response.data);
+
+      // Base parameters with live/data handling for the API call
+      const baseParams = {
+        dataType: currentState.dataType,
+        fromDate:
+          currentState.dataType === "live" ? "" : currentState.dateRange.from,
+        toDate:
+          currentState.dataType === "live" ? "" : currentState.dateRange.to,
+        pageNumber: page,
+        totalEntries: pageSize,
+        search: currentState.currentLevel === 4 ? "" : search,
+      };
+
+      // API call mapping and handling for each level
+      const levelHandlers = {
+        1: async () => {
+          const response = await getEventPlLevelOne(baseParams);
+          const formattedData = formatLevelOneData(response.data);
           lastFetchedData.current = formattedData;
-        } else if (currentState.currentLevel === 2) {
-          response = await getMarketWisePlLevelTwo({
+          return { response, formattedData };
+        },
+        2: async () => {
+          const response = await getMarketWisePlLevelTwo({
             ...baseParams,
             Type: currentState.parentData.sportName,
           });
-          formattedData = formatLevelTwoData(response.data);
-        } else if (currentState.currentLevel === 3) {
-          console.log("++++> level==", currentState.currentLevel === 3);
-          response = await getMarketWiseAllUserPlLevelThree({
+          return {
+            response,
+            formattedData: formatLevelTwoData(response.data),
+          };
+        },
+        3: async () => {
+          const response = await getMarketWiseAllUserPlLevelThree({
             ...baseParams,
             marketId: currentState.parentData.marketId,
           });
-          formattedData = formatLevelThreeData(response.data);
-        } else if (currentState.currentLevel === 4) {
-          console.log(
-            "🔥 currentLevel is:",
-            currentState.currentLevel,
-            typeof currentState.currentLevel
-          );
-          console.log("Level 4 params:", {
-            username: currentState.parentData?.username,
-            marketId: currentState.grandParentData?.marketId,
-            sportName: currentState.grandParentData?.gameName,
-          });
+          return {
+            response,
+            formattedData: formatLevelThreeData(response.data),
+          };
+        },
+        4: async () => {
           const level4Params = {
             userName: currentState.parentData.username,
-            marketId: currentState.grandParentData.marketId, // Always include marketId
+            marketId: currentState.grandParentData.marketId,
           };
-          console.log(
-            "====>>> line 196",
-            currentState.grandParentData?.gameName
-          );
-          // Add sport-specific parameters
-          if (currentState.grandParentData?.gameName === "Lottery") {
-            response = await getUserWiseBetHistoryLotteryLevelFour(
-              level4Params
-            );
-            console.log("====>> response 218", response);
-          } else if (currentState.grandParentData?.gameName === "COLORGAME") {
-            // For ColorGame, only pass marketId — runnerId is not needed
-            response = await getUserWiseBetHistoryColorGameLevelFour(
-              level4Params
-            );
-          }
 
-          formattedData = formatLevelFourData(
-            response?.data || [],
-            currentState.grandParentData?.gameName
-          );
-        }
+          const gameType = currentState.grandParentData?.gameName;
+          const apiCall =
+            gameType === "Lottery"
+              ? getUserWiseBetHistoryLotteryLevelFour
+              : gameType === "COLORGAME"
+              ? getUserWiseBetHistoryColorGameLevelFour
+              : null;
 
-        setState((prev) => ({ ...prev, loading: false }));
+          const response = apiCall ? await apiCall(level4Params) : { data: [] };
+          return {
+            response,
+            formattedData: formatLevelFourData(response?.data || [], gameType),
+          };
+        },
+      };
 
-        return {
-          data: formattedData || [],
-          pagination: {
-            totalRecords:
-              response?.pagination?.totalItems || formattedData?.length || 0,
-            totalPages: response?.pagination?.totalPages || 1,
-          },
-        };
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setState((prev) => ({ ...prev, loading: false }));
-        throw error;
-      }
+      // Execute the appropriate handler based on the current level
+      const { response, formattedData } = await levelHandlers[
+        currentState.currentLevel
+      ]();
+
+      setState((prev) => ({ ...prev, loading: false }));
+
+      return {
+        data: formattedData || [],
+        pagination: {
+          totalRecords:
+            response?.pagination?.totalItems || formattedData?.length || 0,
+          totalPages: response?.pagination?.totalPages || 1,
+        },
+      };
     },
     []
   );
-
+  // Handle navigation to different levels of the data (e.g., level 1, level 2, etc.)
   const navigateToLevel = useCallback(
     async (level, item = null) => {
-      console.log("Navigating to level:", level, "with item:", item);
       setState((prev) => {
         const newState = {
           ...prev,
@@ -310,7 +294,7 @@ const useProfitLossData = () => {
     },
     [getTableData]
   );
-
+  // Handle back navigation, going up in the hierarchy
   const handleBackNavigation = useCallback(async () => {
     if (navigationStack.current.length === 0) return;
 
@@ -370,6 +354,7 @@ const useProfitLossData = () => {
     }
   }, [getTableData]);
 
+  // Handle changes to the data type (e.g., "live" or a specific date range)
   const handleDataTypeChange = (e) => {
     const newDataType = e.target.value;
     setState((prev) => ({
@@ -382,7 +367,7 @@ const useProfitLossData = () => {
       shouldDisableButton: newDataType === "live",
     }));
   };
-
+  // Handle date range changes (From and To dates)
   const handleDateChange = (field, value) => {
     setState((prev) => ({
       ...prev,
@@ -390,7 +375,7 @@ const useProfitLossData = () => {
       dateRange: { ...prev.dateRange, [field]: value },
     }));
   };
-
+  // Trigger API call to get Profit and Loss data based on selected criteria
   const handleGetPL = async () => {
     const currentState = stateRef.current;
     if (

@@ -730,7 +730,7 @@ export async function getUserWiseBetHistoryColorGameLevelFour(body = {}, isToast
   try {
     const callParams = await getAuthCallParams(strings.GET, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.UsertwisecolorGameLevelFour}/${body.userName}/${body.runnerId}`,
+      `${UrlConstant.UsertwisecolorGameLevelFour}/${body.userName}/${body.marketId}`,
       callParams,
       isToast
     );

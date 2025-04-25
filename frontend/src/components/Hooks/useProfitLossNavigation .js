@@ -1,25 +1,18 @@
 import React from 'react';
 
-const useProfitLossNavigation = ({ parentData, grandParentData, handleBackNavigation }) => {
-  console.log('====>>> line 4',grandParentData)
+const useProfitLossNavigation = ({ parentData, handleBackNavigation }) => {
+
   if (!parentData) return null;
 
   return (
-    <div className="d-flex align-items-center mb-3">
+    <div className="d-flex align-items-center">
       <button 
-        className="btn btn-sm btn-outline-primary me-2"
+        className="btn btn-light btn-sm  me-2"
         onClick={handleBackNavigation}
       >
-        &larr; Back
+        <i className="fas fa-arrow-left mr-2"></i> Back
       </button>
-      {grandParentData && (
-        <span className="me-2">
-          {grandParentData.sportName || grandParentData.gameName} &gt;
-        </span>
-      )}
-      <span className="me-2">
-        {parentData.sportName || parentData.gameName || parentData.marketName}
-      </span>
+
     </div>
   );
 };

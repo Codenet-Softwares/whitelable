@@ -1,18 +1,24 @@
-import React from 'react';
+import React from "react";
 
-const useProfitLossTableConfig = (currentLevel, navigateToLevel, parentData) => {
+const useProfitLossTableConfig = (
+  currentLevel,
+  navigateToLevel,
+  parentData
+) => {
+  // Function to handle item click, navigating to the next level
   const handleItemClick = (item) => {
-    const nextLevel = currentLevel + 1;
-    navigateToLevel(nextLevel, item);
+    const nextLevel = currentLevel + 1; // Increment level
+    navigateToLevel(nextLevel, item); // Navigate to next level
   };
-
+  // Define column configuration for each level
   const levelConfig = {
+    // Level 1 Configuration
     1: {
       columns: [
-        { 
-          key: "Serial number", 
-          label: "Serial number",  
-          render: (item, index) => (item.isTotalRow ? "" : index + 1), 
+        {
+          key: "Serial number",
+          label: "Serial number",
+          render: (item, index) => (item.isTotalRow ? "" : index + 1), // Render index number, except for total row
         },
         {
           key: "sportName",
@@ -27,7 +33,7 @@ const useProfitLossTableConfig = (currentLevel, navigateToLevel, parentData) => 
               >
                 {item.sportName}
               </button>
-            ),
+            ), // Render sport name with a clickable button for navigation
         },
         {
           key: "uplinePL",
@@ -35,6 +41,7 @@ const useProfitLossTableConfig = (currentLevel, navigateToLevel, parentData) => 
           render: (item) => {
             const value = item.uplinePL || 0;
             return (
+              // Display Upline P/L with color coding for positive/negative values
               <span style={{ color: value >= 0 ? "green" : "red" }}>
                 {value >= 0 ? `+${value.toFixed(2)}` : value.toFixed(2)}
               </span>
@@ -59,12 +66,13 @@ const useProfitLossTableConfig = (currentLevel, navigateToLevel, parentData) => 
         },
       ],
     },
+    // Level 2 Configuration
     2: {
       columns: [
         {
           key: "serial",
           label: "Serial number",
-          render: (_, index) => index + 1,
+          render: (_, index) => index + 1, // Display index as serial number
         },
         {
           key: "sportName",
@@ -75,6 +83,7 @@ const useProfitLossTableConfig = (currentLevel, navigateToLevel, parentData) => 
           key: "eventName",
           label: "Event Name",
           render: (item) => (
+            // Render event name with clickable button for navigation
             <button
               className="btn btn-link p-0"
               onClick={() => handleItemClick(item)}
@@ -87,6 +96,7 @@ const useProfitLossTableConfig = (currentLevel, navigateToLevel, parentData) => 
           key: "totalPL",
           label: "Total P/L",
           render: (item) => (
+            // Display Total P/L with color coding for positive/negative values
             <span style={{ color: item.totalPL >= 0 ? "green" : "red" }}>
               {item.totalPL >= 0
                 ? `+${item.totalPL.toFixed(2)}`
@@ -97,21 +107,26 @@ const useProfitLossTableConfig = (currentLevel, navigateToLevel, parentData) => 
         {
           key: "date",
           label: "Date",
+
+          // Format and display the date
           render: (item) => new Date(item.date).toLocaleString(),
         },
       ],
     },
+
+    // Level 3 Configuration
     3: {
       columns: [
         {
           key: "serial",
           label: "Serial number",
-          render: (_, index) => index + 1,
+          render: (_, index) => index + 1, // Display index as serial number
         },
         {
           key: "username",
           label: "Username",
           render: (item) => (
+            // Render username with clickable button for navigation
             <button
               className="btn btn-link p-0"
               onClick={() => handleItemClick(item)}
@@ -134,6 +149,7 @@ const useProfitLossTableConfig = (currentLevel, navigateToLevel, parentData) => 
           key: "totalPL",
           label: "Total P/L",
           render: (item) => (
+            // Display Total P/L with color coding
             <span style={{ color: item.totalPL >= 0 ? "green" : "red" }}>
               {item.totalPL >= 0
                 ? `+${item.totalPL.toFixed(2)}`
@@ -144,20 +160,23 @@ const useProfitLossTableConfig = (currentLevel, navigateToLevel, parentData) => 
         {
           key: "date",
           label: "Date",
+          // Format and display the date
           render: (item) => new Date(item.date).toLocaleString(),
         },
       ],
     },
+    // Level 4 Configuration (Dynamic based on sport type)
     4: {
       columns: (() => {
-        const sportType = parentData?.sportName || parentData?.gameName;
-        
+        const sportType = parentData?.gameName || "undefined";
+        // Conditional configuration for Lottery sport type
+
         if (sportType === "Lottery") {
           return [
             {
               key: "serial",
               label: "Serial number",
-              render: (_, index) => index + 1,
+              render: (_, index) => index + 1, // Display index as serial number
             },
             {
               key: "username",
@@ -167,7 +186,7 @@ const useProfitLossTableConfig = (currentLevel, navigateToLevel, parentData) => 
             {
               key: "event",
               label: "Event",
-              render: (item) => item.eventName || "-",
+              render: (item) => item.marketName || "-",
             },
             {
               key: "Sportname",
@@ -224,7 +243,9 @@ const useProfitLossTableConfig = (currentLevel, navigateToLevel, parentData) => 
                   : "Not settled",
             },
           ];
-        } else if (sportType === "COLORGAME") {
+        }
+        // Conditional configuration for Color Game sport type
+        else if (sportType === "COLORGAME") {
           return [
             {
               key: "serial",
@@ -270,6 +291,7 @@ const useProfitLossTableConfig = (currentLevel, navigateToLevel, parentData) => 
               key: "P/L",
               label: "P/L",
               render: (item) => (
+                // Display P/L with bid amount and negative P/L value
                 <span>
                   {item.bidAmount} (
                   <span style={{ color: "red" }}>-{item.value}</span>)
@@ -287,7 +309,9 @@ const useProfitLossTableConfig = (currentLevel, navigateToLevel, parentData) => 
               render: (item) => new Date(item.matchDate).toLocaleString(),
             },
           ];
-        } else {
+        }
+        // Default configuration for unknown sport type
+        else {
           return [
             {
               key: "serial",
@@ -322,7 +346,7 @@ const useProfitLossTableConfig = (currentLevel, navigateToLevel, parentData) => 
           ];
         }
       })(),
-    }
+    },
   };
 
   return { levelConfig };

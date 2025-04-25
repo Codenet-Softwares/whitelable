@@ -28,7 +28,7 @@ import DemoMarket_Analysis from "./pages/DemoMarket_Analysis";
 import PrivateRoute from "./components/common/PrivateRoute";
 import EventProfitLoss from "./pages/MyReport/EventProfitLoss";
 import DownlineProfitLoss from "./pages/MyReport/DownlineProfitLoss";
-import DemoEvent from "./pages/MyReport/demoEvent";
+
 // import WelcomePage from "./screen/WelcomePage";
 
 function App() {
@@ -116,7 +116,7 @@ function App() {
               />
 
               <Route path="/event-profit-loss" element={<EventProfitLoss />} />
-              <Route path="/demo-event-profit-loss" element={<DemoEvent/>} />
+          
               <Route
                 path="/downline-profit-loss"
                 element={<DownlineProfitLoss />}
