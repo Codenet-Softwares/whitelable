@@ -8,7 +8,7 @@ export function getAdminInitialState(body = {}) {
     roles: body?.roles ?? [],
     createdById: body?.createdById ?? null,
     createdByUser: body?.createdByUser ?? null,
-    AdminWallet: body?.balance ?? null
+    AdminWallet: body?.balance ?? null,
   };
 }
 
@@ -107,11 +107,11 @@ export function accountStatementInitialState(body = {}) {
     activeItem: "statement",
     currentPage: 1,
     totalPages: 0,
-    endDate: '',
+    endDate: "",
     totalData: 0,
-    startDate: '',
+    startDate: "",
     totalEntries: 10,
-    dataSource: 'live',
+    dataSource: "live",
     backupStartDate: null,
     backupEndDate: null,
   };
@@ -136,11 +136,10 @@ export function adminAccountStatementInitialState() {
     totalPages: 0,
     totalEntries: 10,
     totalData: 0,
-    endDate: '',
-    startDate: '',
-    dataSource: 'live'
+    endDate: "",
+    startDate: "",
+    dataSource: "live",
   };
-
 }
 export function view_AddCashHistory_InitialState() {
   return {
@@ -159,7 +158,7 @@ export function get_liveGames(body = {}) {
     totalEntries: 10,
     search: "",
     totalData: "",
-    type: ""
+    type: "",
   };
 }
 
@@ -190,7 +189,6 @@ export function getMarketWithRunnerDataInitialState(body = {}) {
   };
 }
 
-
 export const getAdminResetPasswordInitialState = (body = {}) => {
   return {
     userName: body.userName || "",
@@ -205,7 +203,29 @@ export function get_betBook(body = {}) {
     marketId: "",
     adminId: "",
     role: "",
-    type: ""
+    type: "",
   };
 }
 
+// initial state for event P&L
+export const getUseProfitLossState = (body = {}) => {
+  const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split("T")[0];
+  };
+
+  return {
+    dataType: "live",
+    dateRange: { from: getTodayDate(), to: getTodayDate() },
+    loading: false,
+    shouldDisableButton: true, // Add this line
+    preventAPICall: false, // Add this new flag
+    tableRefreshKey: 0,
+    currentLevel: 1,
+    parentData: null,
+    grandParentData: null,
+    greatGrandParentData: null,
+    levelRefreshKey: 0,
+    ...body,
+  };
+};
