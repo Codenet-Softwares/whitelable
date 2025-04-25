@@ -218,8 +218,8 @@ export const getUseProfitLossState = (body = {}) => {
     dataType: "live",
     dateRange: { from: getTodayDate(), to: getTodayDate() },
     loading: false,
-    shouldDisableButton: true, // Add this line
-    preventAPICall: false, // Add this new flag
+    shouldDisableButton: true,
+    preventAPICall: false, 
     tableRefreshKey: 0,
     currentLevel: 1,
     parentData: null,
