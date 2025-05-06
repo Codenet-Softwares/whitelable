@@ -24,8 +24,8 @@ export const adminLogin = async (req, res) => {
             throw new CustomError('Account is locked', null, statusCode.badRequest);
         }
         
-        const roles = existingAdmin.roles.map((role) => role.role);
-        if (roles.includes(string.user)) {
+        const roles = existingAdmin.role;
+        if (roles === string.user) {
             await existingAdmin.update({ loginStatus: 'login failed' });
             return res.status(statusCode.unauthorize).send(apiResponseErr(null, false, statusCode.unauthorize, 'User does not exist'));
         }
@@ -36,7 +36,7 @@ export const adminLogin = async (req, res) => {
             return res.status(statusCode.badRequest).send(apiResponseErr(null, false, statusCode.badRequest, messages.invalidPassword));
         }
 
-        if (roles.includes(string.superAdmin)) {
+        if (roles === string.superAdmin) {
             existingAdmin.isReset = false;
         }
 
@@ -64,9 +64,9 @@ export const adminLogin = async (req, res) => {
         else {
             let adminIdToSend;
 
-            if ([string.superAdmin, string.whiteLabel, string.hyperAgent, string.superAgent].includes(roles[0])) {
+            if ([string.superAdmin, string.whiteLabel, string.hyperAgent, string.superAgent].includes(roles)) {
                 adminIdToSend = existingAdmin.adminId;
-            } else if ([string.subWhiteLabel, string.subAdmin, string.subHyperAgent, string.subSuperAgent, string.subMasterAgent].includes(roles[0])) {
+            } else if ([string.subWhiteLabel, string.subAdmin, string.subHyperAgent, string.subSuperAgent, string.subMasterAgent].includes(roles)) {
                 adminIdToSend = existingAdmin.createdById;
             } else {
                 adminIdToSend = existingAdmin.adminId;
