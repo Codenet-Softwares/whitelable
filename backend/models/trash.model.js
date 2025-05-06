@@ -13,8 +13,8 @@ const trash = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    roles: {
-      type: DataTypes.JSON,
+    role: {
+      type: DataTypes.STRING,
       allowNull: false,
     },
     userName: {
@@ -31,14 +31,6 @@ const trash = sequelize.define(
     },
     loadBalance: {
       type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    creditRefs: {
-      type: DataTypes.JSON,
-      allowNull: false,
-    },
-    partnerships: {
-      type: DataTypes.JSON,
       allowNull: false,
     },
     createdById: {
