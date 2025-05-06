@@ -32,6 +32,7 @@ const Card = ({
   adminDelete,
   setIsLoading,
   exposure,
+  adminBalance
 }) => {
   const navigate = useNavigate();
   const { dispatch, store } = useAppContext();
@@ -394,7 +395,8 @@ const Card = ({
         role={role}
         setRefresh={setRefresh}
         setIsLoading={setIsLoading}
-        balance={clientBalance}
+        clientBalance={clientBalance}
+        adminBalance={adminBalance}
       />
       {adminId != undefined && viewModalShow && (
         <ViewPartnershipAndCreditRefModal

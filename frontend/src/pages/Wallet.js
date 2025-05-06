@@ -325,6 +325,7 @@ const Wallet = () => {
                         setRefresh={setRefresh}
                         adminDelete={setAdminDelete}
                         setIsLoading={setIsLoading}
+                        adminBalance={balance}
                       />
                     );
                   })}
@@ -353,6 +354,7 @@ const Wallet = () => {
         </div>
       </div>
       <CustomTransactionModal
+        balance={balance}
         show={modalShow}
         onHide={() => setModalShow(false)}
         message="Hi this is msg"
