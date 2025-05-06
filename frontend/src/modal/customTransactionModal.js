@@ -21,22 +21,8 @@ const CustomTransactionModal = (props) => {
     remarks: "",
   });
   const { store, showLoader, hideLoader } = useAppContext();
-  const [balance, setBalance] = useState(0);
-  console.log("=====>>> line 21", store);
   const [showPassword, setShowPassword] = useState(false);
 
-  async function view_Balance() {
-    const response = await viewBalance({
-      _id: store?.admin?.id,
-    });
-
-    if (response) {
-      setBalance(response.data.balance);
-    }
-  }
-  useEffect(() => {
-    view_Balance();
-  }, []); // Calls view_Balance() when component mounts
 
   // Setting Modal Title
   let modalTitle = "";
@@ -51,8 +37,8 @@ const CustomTransactionModal = (props) => {
           Provide Transfer Amount
           <span className="balance-info">
             | Balance Admin:
-            <span className="balance-pill" title={`Full Amount: ${balance}`}>
-              <span className="balance-text">{balance}</span>
+            <span className="balance-pill" title={`Full Amount: ${props.adminBalance}`}>
+              <span className="balance-text">{props.adminBalance}</span>
             </span>
           </span>
         </div>
@@ -300,7 +286,7 @@ const CustomTransactionModal = (props) => {
                         marginLeft: "5px",
                       }}
                     >
-                      ₹{props.balance}
+                      ₹{props.clientBalance}
                     </span>
                   </div>
                 )}
