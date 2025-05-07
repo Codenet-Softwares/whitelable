@@ -99,12 +99,17 @@ export const createAdmin = async (req, res) => {
       createdByUser: user.userName,
     }, { transaction });
 
+    console.log("newAdmin", newAdmin);
+    
     await Permission.create({
       UserId: newAdmin.adminId,
       permission: 'all-access',
     }, { transaction })
 
     const token = jwt.sign({ role: req.user.role }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
+
+    console.log("token", token);
+    
 
     let message = '';
 
@@ -124,11 +129,13 @@ export const createAdmin = async (req, res) => {
           },
         });
 
+        console.log(response, "response");
+        
         if (!response.data.success) {
           throw new Error('Failed to create user');
         } else {
           message = 'successfully';
-        }
+        } 
       } catch (error) {
         console.error("Error from API:", error.response ? error.response.data : error.message);
         throw new Error('Failed to create user in external system');
