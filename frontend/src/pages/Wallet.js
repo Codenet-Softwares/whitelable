@@ -52,8 +52,8 @@ const Wallet = () => {
   useEffect(() => {
     if (store?.admin) {
       if (
-        permissionObj.allAdmin.includes(store?.admin?.roles[0].role) ||
-        permissionObj.allSubAdmin.includes(store?.admin?.roles[0].role)
+        permissionObj.allAdmin.includes(store?.admin?.role) ||
+        permissionObj.allSubAdmin.includes(store?.admin?.role)
       ) {
         getAll_Create();
       }
@@ -69,8 +69,8 @@ const Wallet = () => {
   useEffect(() => {
     if (store?.admin) {
       if (
-        permissionObj.allAdmin.includes(store?.admin?.roles[0].role) ||
-        permissionObj.allSubAdmin.includes(store?.admin?.roles[0].role)
+        permissionObj.allAdmin.includes(store?.admin?.role) ||
+        permissionObj.allSubAdmin.includes(store?.admin?.role)
       ) {
         view_Balance();
       }
@@ -146,7 +146,7 @@ const Wallet = () => {
         </h4>
         {store?.admin?.roles &&
           store?.admin?.roles.length > 0 &&
-          store?.admin?.roles[0].role === strings.superAdmin && (
+          store?.admin?.role === strings.superAdmin && (
             <div className="row">
               <div className="col-4"></div>
               <div className="col-4 ">

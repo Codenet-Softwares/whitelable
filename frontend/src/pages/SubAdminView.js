@@ -76,7 +76,7 @@ const SubAdminView = () => {
   const handleClose = (adminId) => setShowModal(false);
 
   useEffect(() => {
-    if (store?.admin && permissionObj.allAdmin.includes(store?.admin?.roles[0].role)) {
+    if (store?.admin && permissionObj.allAdmin.includes(store?.admin?.role)) {
       getAll_SubAdmin_Create(subAdminData.name);
     }
   }, [store?.admin, subAdminData.currentPage, subAdminData.totalEntries, subAdminData.name, refresh]);
@@ -367,7 +367,7 @@ const SubAdminView = () => {
                                             )
                                           ? ""
                                           : permissionObj.allAdmin.includes(
-                                              store?.admin?.roles[0].role
+                                              store?.admin?.role
                                             )
                                           ? ""
                                           : "disabled"

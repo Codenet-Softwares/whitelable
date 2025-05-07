@@ -22,7 +22,7 @@ const ViewSubAdminPermission = () => {
 
   useEffect(() => {
     if (store?.admin) {
-      permissionObj.allAdmin.includes(store?.admin?.roles[0].role) &&
+      permissionObj.allAdmin.includes(store?.admin?.role) &&
         getSubAdminpermisson();
     }
   }, [store?.admin]);

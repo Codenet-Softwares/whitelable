@@ -107,7 +107,7 @@ const Card = ({
   const isAdminOrPartnerView =
     store?.admin?.roles[0].permission.some(
       (role) => role === strings.partnershipView
-    ) || permissionObj.allAdmin.includes(store?.admin?.roles[0].role);
+    ) || permissionObj.allAdmin.includes(store?.admin?.role);
 
   const takeMeToAccount = (userName) => {
     navigate(`/account-landing/${userName}/statement`);
@@ -149,7 +149,7 @@ const Card = ({
                       )
                         ? ""
                         : permissionObj.allAdmin.includes(
-                          store?.admin?.roles[0].role
+                          store?.admin?.role
                         )
                           ? ""
                           : "disabled"
@@ -173,7 +173,7 @@ const Card = ({
                     )
                       ? ""
                       : permissionObj.allAdmin.includes(
-                        store?.admin?.roles[0].role
+                        store?.admin?.role
                       )
                         ? ""
                         : "disabled"
@@ -202,7 +202,7 @@ const Card = ({
                       )
                         ? ""
                         : permissionObj.allAdmin.includes(
-                          store?.admin?.roles[0].role
+                          store?.admin?.role
                         )
                           ? ""
                           : "disabled"
@@ -228,7 +228,7 @@ const Card = ({
                     )
                       ? ""
                       : permissionObj.allAdmin.includes(
-                        store?.admin?.roles[0].role
+                        store?.admin?.role
                       )
                         ? ""
                         : "disabled"
@@ -287,7 +287,7 @@ const Card = ({
                         )
                           ? ""
                           : permissionObj.allAdmin.includes(
-                            store?.admin?.roles[0].role
+                            store?.admin?.role
                           )
                             ? ""
                             : "disabled"
@@ -314,7 +314,7 @@ const Card = ({
                         )
                           ? ""
                           : permissionObj.allAdmin.includes(
-                            store?.admin?.roles[0].role
+                            store?.admin?.role
                           )
                             ? ""
                             : "disabled"
@@ -337,7 +337,7 @@ const Card = ({
                 )
                     ? ""
                     : permissionObj.allAdmin.includes(
-                      store?.admin?.roles[0].role
+                      store?.admin?.role
                     )
                       ? ""
                       : "disabled"
@@ -361,7 +361,7 @@ const Card = ({
                       )
                         ? ""
                         : permissionObj.allAdmin.includes(
-                          store?.admin?.roles[0].role
+                          store?.admin?.role
                         )
                           ? ""
                           : "disabled"

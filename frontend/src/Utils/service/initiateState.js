@@ -3,12 +3,13 @@ export function getAdminInitialState(body = {}) {
     accessToken: body?.accessToken ?? "",
     status: body?.status ?? "",
     adminName: body?.userName ?? "",
-    isLogin: body.isLogin ?? false,
+    isLogin: !!body?.accessToken,
     id: body?.adminId ?? "",
-    roles: body?.roles ?? [],
+    role: body?.role ?? "",
+    permission: body?.permission ?? "",
     createdById: body?.createdById ?? null,
     createdByUser: body?.createdByUser ?? null,
-    AdminWallet: body?.balance ?? null,
+    balance: body?.balance ?? 0,
   };
 }
 
@@ -219,7 +220,7 @@ export const getUseProfitLossState = (body = {}) => {
     dateRange: { from: getTodayDate(), to: getTodayDate() },
     loading: false,
     shouldDisableButton: true,
-    preventAPICall: false, 
+    preventAPICall: false,
     tableRefreshKey: 0,
     currentLevel: 1,
     parentData: null,
