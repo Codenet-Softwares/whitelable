@@ -14,6 +14,8 @@ import { activeAdminRoute } from './routes/activeAdmin.route.js';
 import { lotteryGameModule } from './routes/lotteryGame.route.js';
 
 import './models/permissions.model.js';
+import './models/creditRefs.model.js';
+import './models/partnerships.model.js'
 
 if (process.env.NODE_ENV === 'production') {
   dotenv.config({ path: '.env.production' });
