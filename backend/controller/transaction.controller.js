@@ -608,7 +608,7 @@ export const admin_Balance = async (adminId) => {
 
     const get_id = await admins.findOne({ where: { adminId } })
     
-    if (get_id.roles[0].role ===  string.user) {
+    if (get_id.role ===  string.user) {
       const baseUrl = process.env.COLOR_GAME_URL;
       const user_balance = await axios.get(`${baseUrl}/api/external/get-user-balance/${adminId}`)
       const { data } = user_balance
