@@ -75,6 +75,11 @@ export const transferAmountSchema = [
 
 export const transactionViewSchema = [
   param('userName').exists().withMessage('User Name is required.'),
+  query("dataType")
+  .exists()
+  .withMessage("dataType is required.")
+  .isIn(["live", "olddata", "backup"])
+  .withMessage("Valid values are 'live', 'olddata', or 'backup'."),
   query('page').optional().toInt().isInt({ min: 1 }).withMessage('Page number must be a positive integer.'),
   query('limit').optional().toInt().isInt({ min: 1 }).withMessage('Limit must be a positive integer.'),
 ];
@@ -152,6 +157,11 @@ export const subAdminPermissionSchema = [
 
 export const accountStatementSchema = [
   param('adminId').exists().withMessage('Id is required.'),
+  query("dataType")
+  .exists()
+  .withMessage("dataType is required.")
+  .isIn(["live", "olddata", "backup"])
+  .withMessage("Valid values are 'live', 'olddata', or 'backup'."),
   query('page').optional().toInt().isInt({ min: 1 }).withMessage('Page number must be a positive integer.'),
   query('limit').optional().toInt().isInt({ min: 1 }).withMessage('Limit must be a positive integer.'),
 ];
