@@ -144,8 +144,8 @@ const Wallet = () => {
         >
           ₹{balance}
         </h4>
-        {store?.admin?.roles &&
-          store?.admin?.roles.length > 0 &&
+        {store?.admin?.role &&
+          store?.admin?.role.length > 0 &&
           store?.admin?.role === strings.superAdmin && (
             <div className="row">
               <div className="col-4"></div>
@@ -307,7 +307,7 @@ const Wallet = () => {
                       <Card
                         key={data.id}
                         userName={data.userName}
-                        role={data.roles[0].role}
+                        role={data.role}
                         creditRef={data?.creditRefs[creditRefLength - 1]?.value}
                         balance={data.balance}
                         loadBalance={data.loadBalance}

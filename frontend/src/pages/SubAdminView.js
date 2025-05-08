@@ -362,7 +362,7 @@ const SubAdminView = () => {
                                           store?.admin?.Status
                                         )
                                           ? "disabled"
-                                          : store?.admin?.roles[0].permission.some(
+                                          : store?.admin?.permission.some(
                                               (role) => role === strings.status
                                             )
                                           ? ""

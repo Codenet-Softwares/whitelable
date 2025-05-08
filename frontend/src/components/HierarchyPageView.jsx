@@ -224,7 +224,7 @@ const HierarchyPageView = () => {
                             return (
                               <Card
                                 userName={data.userName}
-                                role={data.roles[0].role}
+                                role={data.role}
                                 key={data.id}
                                 exposure={data.exposure}
                                 creditRef={data.creditRef[creditRefLength - 1]?.value}
