@@ -92,7 +92,7 @@ export const lotteryMarketAnalysis = async (req, res) => {
     const adminId = admin.adminId;
 
     const token = jwt.sign(
-      { roles: req.user.roles },
+      { role: req.user.role },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );
