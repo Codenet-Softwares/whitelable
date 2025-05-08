@@ -14,6 +14,8 @@ import { activeAdminRoute } from './routes/activeAdmin.route.js';
 import { lotteryGameModule } from './routes/lotteryGame.route.js';
 
 import './models/permissions.model.js';
+import { SliderRoute } from './routes/slider.route.js';
+import { AnnouncementRoute } from './routes/announcement.route.js';
 
 if (process.env.NODE_ENV === 'production') {
   dotenv.config({ path: '.env.production' });
@@ -48,6 +50,8 @@ colorGameUserRoute(app);
 liveMarketBetRoute(app);
 activeAdminRoute(app);
 lotteryGameModule(app);
+SliderRoute(app),
+AnnouncementRoute(app)
 
 sequelize.sync({ alter: true })
   .then(() => {

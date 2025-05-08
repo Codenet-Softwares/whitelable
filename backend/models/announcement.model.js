@@ -1,6 +1,5 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../db.js';
-import gameSchema from './game.model.js';
 
 const announcementSchema = sequelize.define(
   'announcement',
