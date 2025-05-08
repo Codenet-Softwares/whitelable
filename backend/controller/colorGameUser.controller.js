@@ -38,7 +38,7 @@ export const getUserBetHistory = async (req, res) => {
   try {
     const { gameId, userName } = req.params;
     const { startDate, endDate, page = 1, limit = 10, dataType, type } = req.query;
-    const token = jwt.sign({ roles: req.user.roles }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
+    const token = jwt.sign({ role: req.user.role }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
     const params = {
       gameId,
       userName,
@@ -92,7 +92,7 @@ export const getColorGameProfitLoss = async (req, res) => {
     const { page = 1, pageSize = 10, search = '', startDate, endDate } = req.query;
     const limit = parseInt(pageSize);
     const dataType = req.query.dataType;
-    const token = jwt.sign({ roles: req.user.roles }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
+    const token = jwt.sign({ role: req.user.role }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
     const params = {
       userName,
       search,

@@ -16,6 +16,8 @@ import { lotteryGameModule } from './routes/lotteryGame.route.js';
 import './models/permissions.model.js';
 import { SliderRoute } from './routes/slider.route.js';
 import { AnnouncementRoute } from './routes/announcement.route.js';
+import './models/creditRefs.model.js';
+import './models/partnerships.model.js'
 
 if (process.env.NODE_ENV === 'production') {
   dotenv.config({ path: '.env.production' });
