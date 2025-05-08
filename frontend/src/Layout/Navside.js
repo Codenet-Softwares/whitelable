@@ -12,6 +12,8 @@ const Navside = () => {
   const [isRequest, setIsRequest] = useState(true);
   const [userRole, setUserRole] = useState(true);
   const [isReport, setIsReport] = useState(true); // New state for  My Report Section
+  const [isImage,setIsImage] = useState(true)
+  const [gameAnnouncements, setGameAnnouncements] = useState(true);
   const navigate = useNavigate();
 
   // Added toggle function for  My Report Section
@@ -33,6 +35,12 @@ const Navside = () => {
   const takeMeToAdminAccount = () => {
     navigate("/adminaccountstatement");
   };
+  const handleImageToggle = ()=>{
+    setIsImage(!isImage);
+  }
+  const handleGameAnnoucementToggle = ()=>{
+    setGameAnnouncements(!gameAnnouncements);
+  }
   return (
     <nav className="sidebar" style={{ background: "#1E2761" }}>
       <div className="logo d-flex justify-content-between">
@@ -96,7 +104,7 @@ const Navside = () => {
                 </div>
               </a>
               <ul>
-                {permissionObj.allAdmin.includes(store.admin.roles[0].role) && (
+                {permissionObj.allAdmin.includes(store.admin?.roles[0].role) && (
                   <li>
                     <Link to="/allAdminCreate">
                       <span>
@@ -114,7 +122,7 @@ const Navside = () => {
                   </li>
                 )}
 
-                {store.admin.roles[0].permission.includes(
+                {store.admin?.roles[0].permission.includes(
                   strings.createAdmin
                 ) && (
                   <li>
@@ -155,7 +163,7 @@ const Navside = () => {
               </ul>
             </li>
           )}
-          {permissionObj.allAdmin.includes(store.admin.roles[0].role) && (
+          {permissionObj.allAdmin.includes(store.admin?.roles[0]?.role) && (
             <li className="" onClick={takeMeToAdminAccount}>
               <a className="" href="#" aria-expanded="false">
                 <div>
@@ -170,7 +178,7 @@ const Navside = () => {
               </a>
             </li>
           )}
-          {store.admin.roles[0].permission.includes(
+          {store.admin?.roles[0]?.permission.includes(
             strings.accountStatement
           ) && (
             <li className="" onClick={takeMeToAdminAccount}>
@@ -187,7 +195,7 @@ const Navside = () => {
               </a>
             </li>
           )}
-          {store.admin.roles[0].permission.includes(strings.deleteAdmin) && (
+          {store.admin?.roles[0]?.permission.includes(strings.deleteAdmin) && (
             <>
               {isRequest ? (
                 <li className="" onClick={handleRequestToggle}>
@@ -272,7 +280,7 @@ const Navside = () => {
               )}
             </>
           )}
-          {permissionObj.allAdmin.includes(store.admin.roles[0].role) && (
+          {permissionObj.allAdmin.includes(store.admin?.roles[0]?.role) && (
             <>
               {userRole ? (
                 <li className="" onClick={handleUserRoleToggle}>
@@ -341,7 +349,7 @@ const Navside = () => {
               )}
             </>
           )}
-          {store.admin.roles[0].permission.includes(strings.createAdmin) && (
+          {store.admin?.roles[0]?.permission.includes(strings.createAdmin) && (
             <>
               {userRole ? (
                 <li className="" onClick={handleUserRoleToggle}>
@@ -389,7 +397,7 @@ const Navside = () => {
             </>
           )}
 
-          {permissionObj.allAdmin.includes(store.admin.roles[0].role) && (
+          {permissionObj.allAdmin.includes(store.admin?.roles[0]?.role) && (
             <li>
               <Link to="/Market_analysis" aria-expanded="false">
                 <div className="nav_icon_small">
@@ -406,7 +414,7 @@ const Navside = () => {
               </Link>
             </li>
           )}
-          {store.admin.roles[0].permission.includes(strings.marketAnalysis) && (
+          {store.admin?.roles[0]?.permission.includes(strings.marketAnalysis) && (
             <li>
               <Link to="/Market_analysis" aria-expanded="false">
                 <div className="nav_icon_small">
@@ -482,6 +490,160 @@ const Navside = () => {
                     </span>
                   </Link>
                 </li>
+              </ul>
+            </li>
+          )}
+          {/* Added this new section for My Report */}
+          {isImage ? (
+            <li className="" onClick={handleImageToggle}>
+              <a className="has-arrow" href="#" aria-expanded="false">
+                <div className="nav_icon_small">
+                  <i
+                    class="fa-solid fa-chart-pie"
+                    style={{ color: "black", fontSize: "20px" }}
+                  ></i>
+                </div>
+                <div className="nav_title">
+                  <span>Add Image</span>
+                </div>
+              </a>
+            </li>
+          ) : (
+            <li className="" onClick={handleImageToggle}>
+              <a className="has-arrow" href="#" aria-expanded="false">
+                <div className="nav_icon_small">
+                  <i
+                    class="fa-solid fa-chart-pie"
+                    style={{ color: "black", fontSize: "20px" }}
+                  ></i>
+                </div>
+                <div className="nav_title">
+                <span>Add Image</span>
+                </div>
+              </a>
+              <ul>
+                <li>
+                  <Link to="outer-image">
+                    <span>
+                      <i
+                        class="fa-solid fa-chart-column"
+                        style={{
+                          color: "black",
+                          fontSize: "20px",
+                          marginLeft: "50px",
+                        }}
+                      ></i>
+                     Outer Slider Image
+                    </span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="inner-image">
+                    <span>
+                      <i
+                        class="fa-solid fa-chart-line"
+                        style={{
+                          color: "black",
+                          fontSize: "20px",
+                          marginLeft: "50px",
+                        }}
+                      ></i>
+                     Inner Slider Image
+                     </span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="GameImage-slider">
+                    <span>
+                      <i
+                        class="fa-solid fa-chart-line"
+                        style={{
+                          color: "black",
+                          fontSize: "20px",
+                          marginLeft: "50px",
+                        }}
+                      ></i>
+                     Game Image
+                     </span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="game-GIF">
+                    <span>
+                      <i
+                        class="fa-solid fa-chart-line"
+                        style={{
+                          color: "black",
+                          fontSize: "20px",
+                          marginLeft: "50px",
+                        }}
+                      ></i>
+                     Game GIF
+                     </span>
+                  </Link>
+                </li>
+              </ul>
+            </li>
+          )}
+          {gameAnnouncements ? (
+            <li className="" onClick={handleGameAnnoucementToggle}>
+              <a className="has-arrow" href="#" aria-expanded="false">
+                <div className="nav_icon_small">
+                  <i
+                    class="fa-solid fa-chart-pie"
+                    style={{ color: "black", fontSize: "20px" }}
+                  ></i>
+                </div>
+                <div className="nav_title">
+                  <span>Game Announcement</span>
+                </div>
+              </a>
+            </li>
+          ) : (
+            <li className="" onClick={handleGameAnnoucementToggle}>
+              <a className="has-arrow" href="#" aria-expanded="false">
+                <div className="nav_icon_small">
+                  <i
+                    class="fa-solid fa-chart-pie"
+                    style={{ color: "black", fontSize: "20px" }}
+                  ></i>
+                </div>
+                <div className="nav_title">
+                <span>Game Announcement</span>
+                </div>
+              </a>
+              <ul>
+                <li>
+                  <Link to="outer-announcement">
+                    <span>
+                      <i
+                        class="fa-solid fa-chart-column"
+                        style={{
+                          color: "black",
+                          fontSize: "20px",
+                          marginLeft: "50px",
+                        }}
+                      ></i>
+                     Outer Slider Image
+                    </span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="inner-announcement">
+                    <span>
+                      <i
+                        class="fa-solid fa-chart-line"
+                        style={{
+                          color: "black",
+                          fontSize: "20px",
+                          marginLeft: "50px",
+                        }}
+                      ></i>
+                     Inner Slider Image
+                     </span>
+                  </Link>
+                </li>
+               
               </ul>
             </li>
           )}

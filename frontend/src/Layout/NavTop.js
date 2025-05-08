@@ -176,7 +176,7 @@ const NavTop = () => {
                       <h5 className="m-0">{store?.admin?.adminName}</h5>
                     </div>
                     <div className="profile_info_details">
-                      {store.admin.roles[0].role === "superAdmin" && (
+                      {store.admin?.roles[0]?.role === "superAdmin" && (
                         <a
                           style={{ cursor: "pointer" }}
                           onClick={() => openModal()}

@@ -28,6 +28,12 @@ import DemoMarket_Analysis from "./pages/DemoMarket_Analysis";
 import PrivateRoute from "./components/common/PrivateRoute";
 import EventProfitLoss from "./pages/MyReport/EventProfitLoss";
 import DownlineProfitLoss from "./pages/MyReport/DownlineProfitLoss";
+import CreateImage from "./pages/AddImages/SliderImages/CreateImage";
+import CreateInnerImage from "./pages/AddImages/AddInnerImage/CreateInnerImage";
+import CreateGameImage from "./pages/AddImages/AddGameImageSlider/CreateGameImage";
+import AddGameGif from "./pages/AddImages/AddGameGIFimage/AddGameGif";
+import InnerAnnouncement from "./pages/Announcements/InnerAnnouncement";
+import OuterAnnouncement from "./pages/Announcements/OuterAnnouncement";
 
 // import WelcomePage from "./screen/WelcomePage";
 
@@ -103,7 +109,7 @@ function App() {
                 element={<User_BetMarket />}
               />
 
-                {/* 
+              {/* 
               /*last page table to render for lottery*/}
               <Route
                 path="betHistLotteryForPL/:userName/:id"
@@ -116,11 +122,21 @@ function App() {
               />
 
               <Route path="/event-profit-loss" element={<EventProfitLoss />} />
-          
+
               <Route
                 path="/downline-profit-loss"
                 element={<DownlineProfitLoss />}
               />
+              <Route
+                path="/downline-profit-loss"
+                element={<DownlineProfitLoss />}
+              />
+              <Route path="/outer-image" element={<CreateImage />} />
+              <Route path="/inner-image" element={<CreateInnerImage/>}/>
+              <Route path="/GameImage-slider" element={<CreateGameImage/>}/>
+              <Route path="/game-GIF" element={<AddGameGif/>}/>
+              <Route path="/inner-announcement" element={<InnerAnnouncement/>}/>
+              <Route path="/outer-announcement" element={<OuterAnnouncement/>}/>
             </Route>
           </Routes>
         </BrowserRouter>
