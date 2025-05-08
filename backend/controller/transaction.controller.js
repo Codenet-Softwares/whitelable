@@ -204,7 +204,7 @@ export const transferAmount = async (req, res) => {
 
       await calculateLoadBalance(adminId);
 
-      return res.status(statusCode.create).json(apiResponseSuccess(null, true, statusCode.create, 'Balance Debited Successfully' + ' ' + message));
+      return res.status(statusCode.create).json(apiResponseSuccess(null, true, statusCode.create, 'Balance credit Successfully' + ' ' + message));
     }
   } catch (error) {
     res.status(statusCode.internalServerError).send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
