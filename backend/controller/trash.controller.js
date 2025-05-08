@@ -14,7 +14,8 @@ async function checkHierarchyBalance(adminId) {
   const subAdmins = await admins.findAll({ where: { createdById: adminId } });
 
   for (const subAdmin of subAdmins) {
-    if (subAdmin.balance !== 0) {
+    const balance = await admin_Balance(subAdmin.adminId)
+    if (balance !== 0) {
       return true;
     }
 
@@ -101,8 +102,6 @@ export const moveAdminToTrash = async (req, res) => {
       role: admin.role || '',
       userName: admin.userName,
       password: admin.password,
-      balance: admin.balance || 0,
-      loadBalance: admin.loadBalance || 0,
       creditRefs: creditRefs || 0,
       partnerships: partnerships || 0,
       createdById: admin.createdById || '',
@@ -114,8 +113,6 @@ export const moveAdminToTrash = async (req, res) => {
       role: updatedTransactionData.role,
       userName: updatedTransactionData.userName,
       password: updatedTransactionData.password,
-      balance: updatedTransactionData.balance,
-      loadBalance: updatedTransactionData.loadBalance,
       creditRefs: updatedTransactionData.creditRefs,
       partnerships: updatedTransactionData.partnerships,
       createdById: updatedTransactionData.createdById,
