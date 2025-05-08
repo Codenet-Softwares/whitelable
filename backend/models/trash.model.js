@@ -25,10 +25,6 @@ const trash = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    balance: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
     loadBalance: {
       type: DataTypes.INTEGER,
       allowNull: false,

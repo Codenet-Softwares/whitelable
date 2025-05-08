@@ -7,12 +7,15 @@ import axios from 'axios';
 import { string } from '../constructor/string.js';
 import { Op } from 'sequelize';
 import { admin_Balance } from './transaction.controller.js';
+import CreditRef from '../models/creditRefs.model.js';
+import Partnership from '../models/partnerships.model.js';
 
 async function checkHierarchyBalance(adminId) {
   const subAdmins = await admins.findAll({ where: { createdById: adminId } });
 
   for (const subAdmin of subAdmins) {
-    if (subAdmin.balance !== 0) {
+    const balance = await admin_Balance(subAdmin.adminId)
+    if (balance !== 0) {
       return true;
     }
 
@@ -59,26 +62,57 @@ export const moveAdminToTrash = async (req, res) => {
       return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, `Admin is inactive or locked`));
     }
 
+    let creditRefs = 0;
+    let partnerships = 0;
+
+    const creditRefsData = await CreditRef.findAll({
+      attributes : ["CreditRef"],
+      where: { UserId: admin.adminId },
+      order: [['id', 'DESC']],
+      limit: 1,
+    });
+
+    if (creditRefsData && creditRefsData.length > 0) {
+      try {
+        creditRefs = parseFloat(creditRefsData[0].CreditRef);
+      } catch (err) {
+        creditRefs = 0;
+      }
+    }
+
+
+    const partnershipsData = await Partnership.findAll({
+      attributes: ["partnership"],
+      where: { UserId: admin.adminId },
+      order: [['id', 'DESC']],
+      limit: 1,
+    })
+
+    if (partnershipsData && partnershipsData.length > 0) {
+      try {
+        partnerships = parseFloat(partnershipsData[0].partnership);
+      } catch {
+        partnerships = 0;
+      }
+    }
+
+
     const updatedTransactionData = {
       adminId: admin.adminId,
-      roles: admin.roles || [],
+      role: admin.role || '',
       userName: admin.userName,
       password: admin.password,
-      balance: admin.balance || 0,
-      loadBalance: admin.loadBalance || 0,
-      creditRefs: admin.creditRefs || [],
-      partnerships: admin.partnerships || [],
+      creditRefs: creditRefs || 0,
+      partnerships: partnerships || 0,
       createdById: admin.createdById || '',
       createdByUser: admin.createdByUser || '',
     };
 
     const trashEntry = await trash.create({
       trashId: uuidv4(),
-      roles: updatedTransactionData.roles,
+      role: updatedTransactionData.role,
       userName: updatedTransactionData.userName,
       password: updatedTransactionData.password,
-      balance: updatedTransactionData.balance,
-      loadBalance: updatedTransactionData.loadBalance,
       creditRefs: updatedTransactionData.creditRefs,
       partnerships: updatedTransactionData.partnerships,
       createdById: updatedTransactionData.createdById,
@@ -98,7 +132,7 @@ export const moveAdminToTrash = async (req, res) => {
 
     // sync with colorgame user
     let message = '';
-    if (admin.roles[0].role === string.user) {
+    if (admin.role === string.user) {
       const dataToSend = {
         userId: requestId,
       };
@@ -273,7 +307,7 @@ export const restoreAdminUser = async (req, res) => {
     
     // sync with colorgame user
     let message = '';
-    if (existingAdminUser.roles[0].role === string.user) {
+    if (existingAdminUser.role === string.user) {
     const dataToSend = {
       userId : adminId,
     };

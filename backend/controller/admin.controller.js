@@ -101,8 +101,6 @@ export const createAdmin = async (req, res) => {
       createdByUser: user.userName,
     }, { transaction });
 
-    console.log("newAdmin", newAdmin);
-    
     await Permission.create({
       UserId: newAdmin.adminId,
       permission: 'all-access',
@@ -110,8 +108,6 @@ export const createAdmin = async (req, res) => {
 
     const token = jwt.sign({ role: req.user.role }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
 
-    console.log("token", token);
-    
 
     let message = '';
 
@@ -131,7 +127,7 @@ export const createAdmin = async (req, res) => {
           },
         });
 
-        console.log(response, "response");
+        //console.log(response, "response");
         
         if (!response.data.success) {
           throw new Error('Failed to create user');
@@ -506,7 +502,7 @@ export const viewAllSubAdminCreates = async (req, res) => {
       string.subSuperAgent
     ];
 
-    const whereCondition = { createdById, [Op.or]: allowedRoles.map(role => fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))) }
+    const whereCondition = { createdById, role: { [Op.or]: allowedRoles } };
 
     if(searchQuery)
     {
@@ -531,40 +527,62 @@ export const viewAllSubAdminCreates = async (req, res) => {
       order: [['createdAt', 'DESC']],
     });
 
-    const users = adminsData.map(admin => {
-      let creditRefs = [];
-      let partnerships = [];
+    const users = await Promise.all(
+      adminsData.map(async (admin) => {
+        let creditRefs = 0;
+        let partnerships = 0;
 
-      if (admin.creditRefs) {
-        try {
-          creditRefs = JSON.parse(admin.creditRefs);
-        } catch {
-          creditRefs = [];
+        const creditRefsData = await CreditRef.findAll({
+          attributes : ["CreditRef"],
+          where: { UserId: admin.adminId },
+          order: [['id', 'DESC']],
+          limit: 1,
+        })
+
+        if (creditRefsData && creditRefsData.length > 0) {
+          try {
+            creditRefs = parseFloat(creditRefsData[0].CreditRef);
+          } catch (err) {
+            creditRefs = 0;
+          }
         }
-      }
 
-      if (admin.partnerships) {
-        try {
-          partnerships = JSON.parse(admin.partnerships);
-        } catch {
-          partnerships = [];
+        const partnershipsData = await Partnership.findAll({
+          attributes: ["partnership"],
+          where: { UserId: admin.adminId },
+          order: [['id', 'DESC']],
+          limit: 1,
+        })
+
+        if (partnershipsData && partnershipsData.length > 0) {
+          try {
+            partnerships = parseFloat(partnershipsData[0].partnership);
+          } catch {
+            partnerships = 0;
+          }
         }
-      }
 
-      return {
-        adminId: admin.adminId,
-        userName: admin.userName,
-        roles: admin.roles,
-        balance: admin.balance,
-        loadBalance: admin.loadBalance,
-        creditRefs,
-        createdById: admin.createdById,
-        createdByUser: admin.createdByUser,
-        partnerships,
-        status: admin.isActive ? "Active" : !admin.locked ? "Locked" : !admin.isActive ? "Suspended" : "",
-        exposure: admin.exposure
-      };
-    });
+        return {
+          adminId: admin.adminId,
+          userName: admin.userName,
+          role: admin.role,
+          balance: admin.balance,
+          loadBalance: admin.loadBalance,
+          creditRefs : creditRefs,
+          createdById: admin.createdById,
+          createdByUser: admin.createdByUser,
+          partnerships : partnerships,
+          status: admin.isActive
+            ? "Active"
+            : !admin.locked
+              ? "Locked"
+              : !admin.isActive
+                ? "Suspended"
+                : "",
+          exposure: admin.exposure,
+        };
+      })
+    );
 
     const totalPages = Math.ceil(totalRecords / pageSize);
 
@@ -826,7 +844,7 @@ export const buildRootPath = async (req, res) => {
         where: {
           createdByUser: user.userName,
           ...likeCondition,
-          [Op.or]: allowedRoles.map(role => fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))),
+          role: { [Op.or]: allowedRoles },
         },
       });
 
@@ -836,7 +854,7 @@ export const buildRootPath = async (req, res) => {
         where: {
           createdByUser: user.userName,
           ...likeCondition,
-          [Op.or]: allowedRoles.map(role => fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))),
+          role: { [Op.or]: allowedRoles },
         },
         offset: (page - 1) * pageSize,
         limit: pageSize,
@@ -844,14 +862,30 @@ export const buildRootPath = async (req, res) => {
 
       const createdUsersDetails = await Promise.all(
         createdUsers.map(async (createdUser) => {
-          let creditRef = [];
+          let creditRef = 0;
           let refProfitLoss = [];
-          let partnership = [];
+          let partnership = 0;
+
+
+          const creditRefsData = await CreditRef.findAll({
+            attributes : ["CreditRef"],
+            where: { UserId: createdUser.adminId },
+            order: [['id', 'DESC']],
+            limit: 1,
+          })
+
+
+          const partnershipsData = await Partnership.findAll({
+            attributes: ["partnership"],
+            where: { UserId: createdUser.adminId },
+            order: [['id', 'DESC']],
+            limit: 1,
+          })
 
           try {
-            creditRef = createdUser.creditRefs ? JSON.parse(createdUser.creditRefs) : [];
+            creditRef = parseFloat(creditRefsData[0]?.CreditRef) ? parseFloat(creditRefsData[0]?.CreditRef) : 0;
             refProfitLoss = createdUser.refProfitLoss ? JSON.parse(createdUser.refProfitLoss) : [];
-            partnership = createdUser.partnerships ? JSON.parse(createdUser.partnerships) : [];
+            partnership = parseFloat(partnershipsData[0]?.partnership) ? parseFloat(partnershipsData[0]?.partnership) : 0;
           } catch (e) {
             console.error("JSON parsing error:", e);
           }
@@ -863,7 +897,7 @@ export const buildRootPath = async (req, res) => {
           return {
             id: createdUser.adminId,
             userName: createdUser.userName,
-            roles: createdUser.roles,
+            role: createdUser.role,
             balance: adminBalance,
             loadBalance: loadBalance,
             creditRef: creditRef,
@@ -995,9 +1029,17 @@ export const singleSubAdmin = async (req, res) => {
       return res.status(statusCode.notFound).json(apiResponseErr(null, false, statusCode.notFound, 'Sub Admin not found with the given Id'));
     }
 
+    const permissions = await Permission.findAll({ 
+      where: { UserId: adminId },
+      attributes: ['permission']
+    })
+
+    const permissionValues = permissions.map(permission => permission.permission);
+
     const data = {
       userName: subAdmin.userName,
       role: subAdmin.role,
+      permission : permissionValues,
     };
 
     return res.status(statusCode.success).json(apiResponseSuccess(data, true, statusCode.success, messages.success));
@@ -1259,7 +1301,7 @@ export const downLineUsers = async (req, res) => {
           total += profitLossMap[current.adminId] || 0;
         }
         
-        const currentRole = getPrimaryRole(current.roles);
+        const currentRole = getPrimaryRole(current.role);
         
         if (role === string.whiteLabel) {
           if ([string.hyperAgent, string.superAgent, string.masterAgent, string.user].includes(currentRole)) {
@@ -1354,7 +1396,7 @@ export const downLineUsers = async (req, res) => {
       return {
         adminId: admin.adminId,
         userName: admin.userName,
-        roles: admin.roles,
+        role: admin.role,
         createdById: admin.createdById,
         createdByUser: admin.createdByUser,
         profitLoss: agentProfitLoss,
@@ -1380,13 +1422,23 @@ export const downLineUsers = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error("Error in downLineUsers:", error);
-    return res.status(statusCode.internalServerError).json({
-      data: null,
-      success: false,
-      successCode: statusCode.internalServerError,
-      message: error.message
-    });
+    if (error.response) {
+      return apiResponseErr(
+        null,
+        false,
+        error.response.status,
+        error.response.data.message || error.response.data.errMessage,
+        res
+      );
+    } else {
+      return apiResponseErr(
+        null,
+        false,
+        statusCode.internalServerError,
+        error.message,
+        res
+      );
+    }
   }
 };
 
@@ -1398,7 +1450,7 @@ export const getTotalProfitLoss = async (req, res) => {
     const adminId = req.user?.adminId;
     const userId = await getHierarchyUsers(adminId);
     const token = jwt.sign(
-      { roles: req.user.roles },
+      { role: req.user.role },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );
@@ -1492,7 +1544,7 @@ export const getMarketWiseProfitLoss = async(req,res) => {
     const userId = await getHierarchyUsers(adminId);
 
     const token = jwt.sign(
-      { roles: req.user.roles },
+      { role: req.user.role },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );
@@ -1588,7 +1640,7 @@ export const getAllUserProfitLoss = async(req,res) => {
     const userId = await getHierarchyUsers(adminId);
 
     const token = jwt.sign(
-      { roles: req.user.roles },
+      { role: req.user.role },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );
