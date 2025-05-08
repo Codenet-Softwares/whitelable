@@ -844,7 +844,7 @@ export const buildRootPath = async (req, res) => {
         where: {
           createdByUser: user.userName,
           ...likeCondition,
-          [Op.or]: allowedRoles.map(role => fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))),
+          role: { [Op.or]: allowedRoles },
         },
       });
 
@@ -854,7 +854,7 @@ export const buildRootPath = async (req, res) => {
         where: {
           createdByUser: user.userName,
           ...likeCondition,
-          [Op.or]: allowedRoles.map(role => fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))),
+          role: { [Op.or]: allowedRoles },
         },
         offset: (page - 1) * pageSize,
         limit: pageSize,
@@ -862,14 +862,30 @@ export const buildRootPath = async (req, res) => {
 
       const createdUsersDetails = await Promise.all(
         createdUsers.map(async (createdUser) => {
-          let creditRef = [];
+          let creditRef = 0;
           let refProfitLoss = [];
-          let partnership = [];
+          let partnership = 0;
+
+
+          const creditRefsData = await CreditRef.findAll({
+            attributes : ["CreditRef"],
+            where: { UserId: createdUser.adminId },
+            order: [['id', 'DESC']],
+            limit: 1,
+          })
+
+
+          const partnershipsData = await Partnership.findAll({
+            attributes: ["partnership"],
+            where: { UserId: createdUser.adminId },
+            order: [['id', 'DESC']],
+            limit: 1,
+          })
 
           try {
-            creditRef = createdUser.creditRefs ? JSON.parse(createdUser.creditRefs) : [];
+            creditRef = parseFloat(creditRefsData[0]?.CreditRef) ? parseFloat(creditRefsData[0]?.CreditRef) : 0;
             refProfitLoss = createdUser.refProfitLoss ? JSON.parse(createdUser.refProfitLoss) : [];
-            partnership = createdUser.partnerships ? JSON.parse(createdUser.partnerships) : [];
+            partnership = parseFloat(partnershipsData[0]?.partnership) ? parseFloat(partnershipsData[0]?.partnership) : 0;
           } catch (e) {
             console.error("JSON parsing error:", e);
           }
@@ -881,7 +897,7 @@ export const buildRootPath = async (req, res) => {
           return {
             id: createdUser.adminId,
             userName: createdUser.userName,
-            roles: createdUser.roles,
+            role: createdUser.role,
             balance: adminBalance,
             loadBalance: loadBalance,
             creditRef: creditRef,
@@ -1013,9 +1029,17 @@ export const singleSubAdmin = async (req, res) => {
       return res.status(statusCode.notFound).json(apiResponseErr(null, false, statusCode.notFound, 'Sub Admin not found with the given Id'));
     }
 
+    const permissions = await Permission.findAll({ 
+      where: { UserId: adminId },
+      attributes: ['permission']
+    })
+
+    const permissionValues = permissions.map(permission => permission.permission);
+
     const data = {
       userName: subAdmin.userName,
       role: subAdmin.role,
+      permission : permissionValues,
     };
 
     return res.status(statusCode.success).json(apiResponseSuccess(data, true, statusCode.success, messages.success));

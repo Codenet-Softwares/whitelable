@@ -307,7 +307,7 @@ export const restoreAdminUser = async (req, res) => {
     
     // sync with colorgame user
     let message = '';
-    if (existingAdminUser.roles[0].role === string.user) {
+    if (existingAdminUser.role === string.user) {
     const dataToSend = {
       userId : adminId,
     };
