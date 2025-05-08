@@ -19,7 +19,7 @@ const ViewSubAdminPermission = () => {
     getSubAdminPermissionData()
   );
   const [displayEdit, setDisplayEdit] = useState(true);
-
+console.log('====>> line 22',subAdminPermissionData)
   useEffect(() => {
     if (store?.admin) {
       permissionObj.allAdmin.includes(store?.admin?.role) &&
@@ -31,15 +31,18 @@ const ViewSubAdminPermission = () => {
     const response = await getviewSubAdminPermission({
       _id: id,
     });
+    console.log( response)
     if (response) {
       setSubAdminPersionData({
         userName: response.data.userName,
-        roles: response.data.roles,
+        roles: response.data.role,
+        permission:response.data.permission
       });
     }
   };
   const handleEditSubAdminPermission = async () => {
     const permissions = subAdminPermissionData?.roles[0]?.permission;
+    console.log('line 43',permissions)
 
     if (permissions.length === 0) {
       toast.error("Please select at least one permission.");
@@ -117,8 +120,8 @@ const ViewSubAdminPermission = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {subAdminPermissionData?.roles[0]?.permission &&
-                            subAdminPermissionData?.roles[0]?.permission.map(
+                          {subAdminPermissionData?.permission &&
+                            subAdminPermissionData?.permission.map(
                               (user, index) => (
                                 <tr key={user._id}>
                                   <th>{user}</th>
