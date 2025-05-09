@@ -68,7 +68,8 @@ export function getAllSubAdminCreateState(body = {}) {
 export function getSubAdminPermissionData(body = {}) {
   return {
     userName: "",
-    roles: [],
+    roles: "",
+    permission:[]
   };
 }
 

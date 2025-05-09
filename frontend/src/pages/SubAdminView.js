@@ -51,20 +51,20 @@ const SubAdminView = () => {
   const handleChange = (name, value) => {
     setSubAdminData((prevData) => ({
       ...prevData,
-      [name]: value,  // Updating the search term
+      [name]: value, // Updating the search term
     }));
-  
+
     // Clear previous timeout
     if (searchTimeout.current) {
       clearTimeout(searchTimeout.current);
     }
-  
+
     // Set a new timeout to delay the API call
     searchTimeout.current = setTimeout(() => {
       getAll_SubAdmin_Create(value); // Pass the updated value
     }, 500); // 500ms debounce time
   };
-  
+
   const handleStatusModalShow = (adminId, status, userName, role) => {
     setShowModal(true);
     setAdminIdForStatus(adminId);
@@ -79,7 +79,13 @@ const SubAdminView = () => {
     if (store?.admin && permissionObj.allAdmin.includes(store?.admin?.role)) {
       getAll_SubAdmin_Create(subAdminData.name);
     }
-  }, [store?.admin, subAdminData.currentPage, subAdminData.totalEntries, subAdminData.name, refresh]);
+  }, [
+    store?.admin,
+    subAdminData.currentPage,
+    subAdminData.totalEntries,
+    subAdminData.name,
+    refresh,
+  ]);
 
   async function getAll_SubAdmin_Create(name = subAdminData.name) {
     const response = await getAllSubAdminCreate({
@@ -230,216 +236,225 @@ const SubAdminView = () => {
     <div className="main_content_iner mt-5 p-5 rounded-3">
       <div className="container-fluid p-0">
         <div className="card">
-
-        <div className="row justify-content-center">
-          <div className="col-lg-12">
-            <div className="white_card card_height_100 mb_30">
-              <div className="white_card_header  rounded-3">
-                <h3
-                  className="m-0 text-center text-uppercase fw-bolder text-white"
-             
-                >
-                  List of User Roles
-                </h3>
-                <div className="box_header m-0"></div>
-              </div>
-              <div className="white_card_body mt-4">
-                <div className="QA_section">
-                  <div className="white_box_tittle list_header">
-                    <div className="col-2 text-center">
-                      <select
-                        className="form-select form-select-sm"
-                        aria-label=".form-select-sm example"
-                        onChange={(e) =>
-                          handleChange("totalEntries", e.target.value)
-                        }
-                      >
-                        <option value="10">Show 10 Entries</option>
-                        <option value="25">25 Entries</option>
-                        <option value="50">50 Entries</option>
-                        <option value="100">100 Entries</option>
-                      </select>
-                    </div>
-
-                    <div
-                      className="serach_field_2 ms-auto"
-                      style={{ marginLeft: "-10px" }}
-                    >
-                      <div className="search_inner">
-                        <form Active="#">
-                          <div className="search_field">
-                            <input
-                              value={subAdminData.name}
-                              onChange={(e) => {
-                                handleChange("name", e.target.value);
-                              }}
-                              type="text"
-                              placeholder="Search content here..."
-                            />
-                          </div>
-                          <button type="submit">
-                            {" "}
-                            <i className="ti-search"></i>{" "}
-                          </button>
-                        </form>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="QA_table mb_30" style={{ overflow: "auto" }}>
-                    {/* table-responsive */}
-                    {subAdminData?.userList.length > 0 ? (
-                      <React.Fragment>
-                        <table className="table lms_table_active3 ">
-                          <thead
-                            style={{
-                              height: "10px",
-                              backgroundColor: "#1E2761",
-                              color: "white",
-                              fontWeight: "bold",
-                            }}
-                          >
-                            <tr>
-                              <th
-                                scope="col"
-                                style={{ fontWeight: "bold", color: "white" }}
-                              >
-                                Serial Number
-                              </th>
-                              <th
-                                scope="col"
-                                style={{ fontWeight: "bold", color: "white" }}
-                              >
-                                Name
-                              </th>
-                              <th
-                                scope="col"
-                                style={{ fontWeight: "bold", color: "white" }}
-                              >
-                                Detail
-                              </th>
-                              <th
-                                scope="col"
-                                style={{ fontWeight: "bold", color: "white" }}
-                              >
-                                Status
-                              </th>
-                              <th
-                                scope="col"
-                                style={{ fontWeight: "bold", color: "white" }}
-                              >
-                                Change Status
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {subAdminData?.userList?.map((user, index) => (
-                              <tr key={user._id}>
-                                <th scope="row">{index + 1}</th>
-                                <td>{user.userName}</td>
-
-                                <td>
-                                  <Link
-                                    to={`/ViewSubAdminPermission/${user.adminId}`}
-                                  >
-                                    <button className="btn btn-sm btn-success">
-                                      Go To
-                                    </button>
-                                  </Link>
-                                </td>
-                                <td>
-                                  <button
-                                    className="border border-1 w-75 text-center bg-success rounded-pill "
-                                    style={{ cursor: "auto" }}
-                                  >
-                                    {user.status}
-                                  </button>
-                                </td>
-                                <td>
-                                  <span className="mx-1">
-                                    <button
-                                      className={`btn border border-2 rounded ${
-                                        ["Suspended"].includes(
-                                          store?.admin?.Status
-                                        )
-                                          ? "disabled"
-                                          : store?.admin?.roles[0].permission.some(
-                                              (role) => role === strings.status
-                                            )
-                                          ? ""
-                                          : permissionObj.allAdmin.includes(
-                                              store?.admin?.role
-                                            )
-                                          ? ""
-                                          : "disabled"
-                                      }`}
-                                      title="Setting"
-                                      type="button"
-                                      onClick={() =>
-                                        handleStatusModalShow(
-                                          user?.adminId,
-                                          user?.status,
-                                          user?.userName,
-                                          user?.roles[0]?.role
-                                        )
-                                      }
-                                    >
-                                      <i className="fa-thin fas fa-gear"></i>
-                                    </button>
-                                  </span>
-                                  <span className="mx-1">
-                                    <button
-                                       className={`btn border border-2 rounded  ${["Suspended", "Locked"].includes(user.status)
-                                        && "disabled"}`}
-                                      style={{ background: "lightgreen" }}
-                                      title="Reset Password"
-                                      onClick={() => openModal(user.userName)}
-                                    >
-                                      <i className="bi bi-shield-lock"></i>
-                                    </button>
-                                  </span>
-                                  {}{" "}
-                                  <span className="mx-1">
-                                    <button
-                                   className={`btn border border-2 rounded  ${["Suspended", "Locked"].includes(user.status)
-                                    && "disabled"}`}
-                                      style={{ background: "#ED5E68" }}
-                                      title="Delete"
-                                      onClick={(e) => {
-                                        handleDelete(user.adminId);
-                                      }}
-                                    >
-                                      <i class="fa-light fas fa-trash"></i>
-                                    </button>
-                                  </span>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </React.Fragment>
-                    ) : (
-                      <div
-                        className="alert text-dark p-4"
-                        role="alert"
-                        style={{
-                          background: "#1E2761",
-                          border: "2px solid #84B9DF",
-                        }}
-                      >
-                        <div
-                          className="alert-text d-flex justify-content-center text-light"
-                          style={{}}
+          <div className="row justify-content-center">
+            <div className="col-lg-12">
+              <div className="white_card card_height_100 mb_30">
+                <div className="white_card_header  rounded-3">
+                  <h3 className="m-0 text-center text-uppercase fw-bolder text-white">
+                    List of User Roles
+                  </h3>
+                  <div className="box_header m-0"></div>
+                </div>
+                <div className="white_card_body mt-4">
+                  <div className="QA_section">
+                    <div className="white_box_tittle list_header">
+                      <div className="col-2 text-center">
+                        <select
+                          className="form-select form-select-sm"
+                          aria-label=".form-select-sm example"
+                          onChange={(e) =>
+                            handleChange("totalEntries", e.target.value)
+                          }
                         >
-                          <b> &#128680; No Data Found !! </b>
+                          <option value="10">Show 10 Entries</option>
+                          <option value="25">25 Entries</option>
+                          <option value="50">50 Entries</option>
+                          <option value="100">100 Entries</option>
+                        </select>
+                      </div>
+
+                      <div
+                        className="serach_field_2 ms-auto"
+                        style={{ marginLeft: "-10px" }}
+                      >
+                        <div className="search_inner">
+                          <form Active="#">
+                            <div className="search_field">
+                              <input
+                                value={subAdminData.name}
+                                onChange={(e) => {
+                                  handleChange("name", e.target.value);
+                                }}
+                                type="text"
+                                placeholder="Search content here..."
+                              />
+                            </div>
+                            <button type="submit">
+                              {" "}
+                              <i className="ti-search"></i>{" "}
+                            </button>
+                          </form>
                         </div>
                       </div>
-                    )}
+                    </div>
+                    <div
+                      className="QA_table mb_30"
+                      style={{ overflow: "auto" }}
+                    >
+                      {/* table-responsive */}
+                      {subAdminData?.userList.length > 0 ? (
+                        <React.Fragment>
+                          <table className="table lms_table_active3 ">
+                            <thead
+                              style={{
+                                height: "10px",
+                                backgroundColor: "#1E2761",
+                                color: "white",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              <tr>
+                                <th
+                                  scope="col"
+                                  style={{ fontWeight: "bold", color: "white" }}
+                                >
+                                  Serial Number
+                                </th>
+                                <th
+                                  scope="col"
+                                  style={{ fontWeight: "bold", color: "white" }}
+                                >
+                                  Name
+                                </th>
+                                <th
+                                  scope="col"
+                                  style={{ fontWeight: "bold", color: "white" }}
+                                >
+                                  Detail
+                                </th>
+                                <th
+                                  scope="col"
+                                  style={{ fontWeight: "bold", color: "white" }}
+                                >
+                                  Status
+                                </th>
+                                <th
+                                  scope="col"
+                                  style={{ fontWeight: "bold", color: "white" }}
+                                >
+                                  Change Status
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {subAdminData?.userList?.map((user, index) => (
+                                <tr key={user._id}>
+                                  <th scope="row">{index + 1}</th>
+                                  <td>{user.userName}</td>
+
+                                  <td>
+                                    <Link
+                                      to={`/ViewSubAdminPermission/${user.adminId}`}
+                                    >
+                                      <button className="btn btn-sm btn-success">
+                                        Go To
+                                      </button>
+                                    </Link>
+                                  </td>
+                                  <td>
+                                    <button
+                                      className="border border-1 w-75 text-center bg-success rounded-pill "
+                                      style={{ cursor: "auto" }}
+                                    >
+                                      {user.status}
+                                    </button>
+                                  </td>
+                                  <td>
+                                    <span className="mx-1">
+                                      <button
+                                        className={`btn border border-2 rounded ${
+                                          ["Suspended"].includes(
+                                            store?.admin?.Status
+                                          )
+                                            ? "disabled"
+                                            : Array.isArray(
+                                                store?.admin?.permission
+                                              ) &&
+                                              store.admin.permission.some(
+                                                (role) =>
+                                                  role === strings.status
+                                              )
+                                            ? ""
+                                            : permissionObj.allAdmin.includes(
+                                                store?.admin?.role
+                                              )
+                                            ? ""
+                                            : "disabled"
+                                        }`}
+                                        title="Setting"
+                                        type="button"
+                                        onClick={() =>
+                                          handleStatusModalShow(
+                                            user?.adminId,
+                                            user?.status,
+                                            user?.userName,
+                                            user?.role
+                                          )
+                                        }
+                                      >
+                                        <i className="fa-thin fas fa-gear"></i>
+                                      </button>
+                                    </span>
+                                    <span className="mx-1">
+                                      <button
+                                        className={`btn border border-2 rounded  ${
+                                          ["Suspended", "Locked"].includes(
+                                            user.status
+                                          ) && "disabled"
+                                        }`}
+                                        style={{ background: "lightgreen" }}
+                                        title="Reset Password"
+                                        onClick={() => openModal(user.userName)}
+                                      >
+                                        <i className="bi bi-shield-lock"></i>
+                                      </button>
+                                    </span>
+                                    {}{" "}
+                                    <span className="mx-1">
+                                      <button
+                                        className={`btn border border-2 rounded  ${
+                                          ["Suspended", "Locked"].includes(
+                                            user.status
+                                          ) && "disabled"
+                                        }`}
+                                        style={{ background: "#ED5E68" }}
+                                        title="Delete"
+                                        onClick={(e) => {
+                                          handleDelete(user.adminId);
+                                        }}
+                                      >
+                                        <i class="fa-light fas fa-trash"></i>
+                                      </button>
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </React.Fragment>
+                      ) : (
+                        <div
+                          className="alert text-dark p-4"
+                          role="alert"
+                          style={{
+                            background: "#1E2761",
+                            border: "2px solid #84B9DF",
+                          }}
+                        >
+                          <div
+                            className="alert-text d-flex justify-content-center text-light"
+                            style={{}}
+                          >
+                            <b> &#128680; No Data Found !! </b>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
         </div>
         {subAdminData?.userList.length > 0 && (
           <Pagination
@@ -466,7 +481,9 @@ const SubAdminView = () => {
             <div className="modal-dialog">
               <div className="modal-content">
                 <div className="modal-header">
-                  <h5 className="modal-title fw-bold text-uppercase text-dark">Reset Password</h5>
+                  <h5 className="modal-title fw-bold text-uppercase text-dark">
+                    Reset Password
+                  </h5>
                   <button type="button" className="close" onClick={closeModal}>
                     &times;
                   </button>
