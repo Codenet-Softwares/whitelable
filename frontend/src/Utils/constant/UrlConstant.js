@@ -15,8 +15,8 @@ class UrlConstant {
   allCreate = `${this.url_dev}/${this.view}-all-creates`;
   createAdminHierarchy = `${this.url_dev}/${this.admin}-admin-create`;
   createUserRole = `${this.url_dev}/${this.admin}-create-subAdmin`;
-  updateCreditRef = `${this.url_dev}/${this.admin}/update-credit-ref`;
-  updatePartnership = `${this.url_dev}/${this.admin}/update-partnership`;
+  updateCreditRef = `${this.url_dev}/${this.admin}/add-credit-ref`;
+  updatePartnership = `${this.url_dev}/${this.admin}/add-partnership`;
   transferAmount = `${this.url_dev}/transfer-amount`;
   addCash = `${this.url_dev}/${this.admin}/deposit-amount`;
   viewPartnership = `${this.url_dev}/partnershipView`;

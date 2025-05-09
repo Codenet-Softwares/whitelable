@@ -308,7 +308,7 @@ const Wallet = () => {
                         key={data.id}
                         userName={data.userName}
                         role={data.role}
-                        creditRef={data?.creditRefs[creditRefLength - 1]?.value}
+                        creditRef={data?.creditRefs}
                         balance={data.balance}
                         loadBalance={data.loadBalance}
                         refProfitLoss={data.refProfitLoss}
@@ -316,7 +316,7 @@ const Wallet = () => {
                         userId={data.adminId} // pending for decision TOM
                         exposure={data.exposure}
                         partnership={
-                          data?.partnerships[partnershipLength - 1]?.value
+                          data?.partnerships
                         }
                         Status={data.status}
                         creditRefLength={creditRefLength}

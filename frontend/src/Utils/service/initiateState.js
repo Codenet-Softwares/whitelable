@@ -44,15 +44,12 @@ export function getCreditRefAndPartnership(body = {}) {
 
 export function getCreateSubAdmin(body = {}) {
   return {
-    userName: "",
-    password: "",
-    roles: [
-      {
-        permission: [],
-      },
-    ],
+    userName: body.userName || "",
+    password: body.password || "",
+    permission: body?.permission || [],
   };
 }
+
 
 export function getAllSubAdminCreateState(body = {}) {
   return {
@@ -68,7 +65,7 @@ export function getAllSubAdminCreateState(body = {}) {
 export function getSubAdminPermissionData(body = {}) {
   return {
     userName: "",
-    roles: "",
+    role: "",
     permission:[]
   };
 }
