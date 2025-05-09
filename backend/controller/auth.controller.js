@@ -16,8 +16,6 @@ export const adminLogin = async (req, res) => {
 
         const existingAdmin = await admins.findOne({ where: { userName } });
 
-        const permission =  await Permission.findOne({ where: { userId: existingAdmin.adminId } })
-
         if (!existingAdmin) {
             return res.status(statusCode.badRequest).send(apiResponseErr(null, false, statusCode.badRequest, 'Admin doesn`t exist'));
         }
@@ -42,6 +40,27 @@ export const adminLogin = async (req, res) => {
         if (roles === string.superAdmin) {
             existingAdmin.isReset = false;
         }
+        let permission = [];
+
+        if (
+          roles === string.superAdmin ||
+          roles === string.hyperAgent ||
+          roles === string.superAgent ||
+          roles === string.masterAgent
+        ) {
+          const result = await Permission.findOne({ where: { UserId: existingAdmin.adminId } });
+          permission = result ? [result.permission] : [];
+        } else if (
+          roles === string.subWhiteLabel ||
+          roles === string.subHyperAgent ||
+          roles === string.subSuperAgent ||
+          roles === string.subMasterAgent
+        ) {
+          const results = await Permission.findAll({ where: { UserId: existingAdmin.adminId } });
+          permission = results.map((perm) => perm.permission);
+        }
+
+        console.log('Permission:', permission);
 
         if (existingAdmin.isReset === true) {
             const resetTokenResponse = {
@@ -84,7 +103,7 @@ export const adminLogin = async (req, res) => {
                 userName: existingAdmin.userName,
                 balance : adminBalance,
                 role: existingAdmin.role,
-                permission: permission.permission,
+                permission: permission || [],
                 status: existingAdmin.isActive
                     ? 'active'
                     : !existingAdmin.locked
@@ -101,7 +120,7 @@ export const adminLogin = async (req, res) => {
                 userName: existingAdmin.userName,
                 balance : adminBalance,
                 role: existingAdmin.role,
-                permission: permission.permission,
+                permission: permission || [],
                 status: existingAdmin.isActive
                     ? 'active'
                     : !existingAdmin.locked
@@ -130,6 +149,7 @@ export const adminLogin = async (req, res) => {
         }
 
     } catch (error) {
+        console.log('Error in adminLogin:', error);
         res.status(statusCode.internalServerError).send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
     }
 };
