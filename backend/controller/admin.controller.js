@@ -14,6 +14,8 @@ import { admin_Balance, balance_hierarchy } from './transaction.controller.js';
 import { findCreatorHierarchy } from '../helper/createHierarchy.js';
 import { getAllConnectedUsers, getHierarchyUsers } from '../controller/lotteryGame.controller.js'
 import Permission from '../models/permissions.model.js';
+import CreditRef  from '../models/creditRefs.model.js';
+import Partnership from '../models/partnerships.model.js';
 
 dotenv.config();
 
@@ -99,8 +101,6 @@ export const createAdmin = async (req, res) => {
       createdByUser: user.userName,
     }, { transaction });
 
-    console.log("newAdmin", newAdmin);
-    
     await Permission.create({
       UserId: newAdmin.adminId,
       permission: 'all-access',
@@ -108,8 +108,6 @@ export const createAdmin = async (req, res) => {
 
     const token = jwt.sign({ role: req.user.role }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
 
-    console.log("token", token);
-    
 
     let message = '';
 
@@ -129,7 +127,7 @@ export const createAdmin = async (req, res) => {
           },
         });
 
-        console.log(response, "response");
+        //console.log(response, "response");
         
         if (!response.data.success) {
           throw new Error('Failed to create user');
@@ -377,9 +375,9 @@ export const viewAllCreates = async (req, res) => {
       where: {
         createdById,
         ...searchQuery,
-        [Op.or]: allowedRoles.map((role) =>
-          fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))
-        ),
+        role: {
+          [Op.or]: allowedRoles,
+        },
       },
     });
 
@@ -394,9 +392,9 @@ export const viewAllCreates = async (req, res) => {
       where: {
         createdById,
         ...searchQuery,
-        [Op.or]: allowedRoles.map((role) =>
-          fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))
-        ),
+        role: {
+          [Op.or]: allowedRoles,
+        },
       },
       offset,
       limit: pageSize,
@@ -406,22 +404,37 @@ export const viewAllCreates = async (req, res) => {
     // Map through adminsData and calculate load balance
     const users = await Promise.all(
       adminsData.map(async (admin) => {
-        let creditRefs = [];
-        let partnerships = [];
+        let creditRefs = 0;
+        let partnerships = 0;
 
-        if (admin.creditRefs) {
+        const creditRefsData = await CreditRef.findAll({
+          attributes : ["CreditRef"],
+          where: { UserId: admin.adminId },
+          order: [['id', 'DESC']],
+          limit: 1,
+        })
+
+
+        if (creditRefsData && creditRefsData.length > 0) {
           try {
-            creditRefs = JSON.parse(admin.creditRefs);
-          } catch {
-            creditRefs = [];
+            creditRefs = parseFloat(creditRefsData[0].CreditRef);
+          } catch (err) {
+            creditRefs = 0;
           }
         }
 
-        if (admin.partnerships) {
+        const partnershipsData = await Partnership.findAll({
+          attributes: ["partnership"],
+          where: { UserId: admin.adminId },
+          order: [['id', 'DESC']],
+          limit: 1,
+        })
+
+        if (partnershipsData && partnershipsData.length > 0) {
           try {
-            partnerships = JSON.parse(admin.partnerships);
+            partnerships = parseFloat(partnershipsData[0].partnership);
           } catch {
-            partnerships = [];
+            partnerships = 0;
           }
         }
 
@@ -432,13 +445,13 @@ export const viewAllCreates = async (req, res) => {
         return {
           adminId: admin.adminId,
           userName: admin.userName,
-          roles: admin.roles,
+          role: admin.role,
           balance: adminBalance,
           loadBalance, // Add loadBalance to response
-          creditRefs,
+          creditRefs : creditRefs,
           createdById: admin.createdById,
           createdByUser: admin.createdByUser,
-          partnerships,
+          partnerships : partnerships,
           status: admin.isActive
             ? 'Active'
             : !admin.locked
@@ -489,7 +502,7 @@ export const viewAllSubAdminCreates = async (req, res) => {
       string.subSuperAgent
     ];
 
-    const whereCondition = { createdById, [Op.or]: allowedRoles.map(role => fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))) }
+    const whereCondition = { createdById, role: { [Op.or]: allowedRoles } };
 
     if(searchQuery)
     {
@@ -514,40 +527,62 @@ export const viewAllSubAdminCreates = async (req, res) => {
       order: [['createdAt', 'DESC']],
     });
 
-    const users = adminsData.map(admin => {
-      let creditRefs = [];
-      let partnerships = [];
+    const users = await Promise.all(
+      adminsData.map(async (admin) => {
+        let creditRefs = 0;
+        let partnerships = 0;
 
-      if (admin.creditRefs) {
-        try {
-          creditRefs = JSON.parse(admin.creditRefs);
-        } catch {
-          creditRefs = [];
+        const creditRefsData = await CreditRef.findAll({
+          attributes : ["CreditRef"],
+          where: { UserId: admin.adminId },
+          order: [['id', 'DESC']],
+          limit: 1,
+        })
+
+        if (creditRefsData && creditRefsData.length > 0) {
+          try {
+            creditRefs = parseFloat(creditRefsData[0].CreditRef);
+          } catch (err) {
+            creditRefs = 0;
+          }
         }
-      }
 
-      if (admin.partnerships) {
-        try {
-          partnerships = JSON.parse(admin.partnerships);
-        } catch {
-          partnerships = [];
+        const partnershipsData = await Partnership.findAll({
+          attributes: ["partnership"],
+          where: { UserId: admin.adminId },
+          order: [['id', 'DESC']],
+          limit: 1,
+        })
+
+        if (partnershipsData && partnershipsData.length > 0) {
+          try {
+            partnerships = parseFloat(partnershipsData[0].partnership);
+          } catch {
+            partnerships = 0;
+          }
         }
-      }
 
-      return {
-        adminId: admin.adminId,
-        userName: admin.userName,
-        roles: admin.roles,
-        balance: admin.balance,
-        loadBalance: admin.loadBalance,
-        creditRefs,
-        createdById: admin.createdById,
-        createdByUser: admin.createdByUser,
-        partnerships,
-        status: admin.isActive ? "Active" : !admin.locked ? "Locked" : !admin.isActive ? "Suspended" : "",
-        exposure: admin.exposure
-      };
-    });
+        return {
+          adminId: admin.adminId,
+          userName: admin.userName,
+          role: admin.role,
+          balance: admin.balance,
+          loadBalance: admin.loadBalance,
+          creditRefs : creditRefs,
+          createdById: admin.createdById,
+          createdByUser: admin.createdByUser,
+          partnerships : partnerships,
+          status: admin.isActive
+            ? "Active"
+            : !admin.locked
+              ? "Locked"
+              : !admin.isActive
+                ? "Suspended"
+                : "",
+          exposure: admin.exposure,
+        };
+      })
+    );
 
     const totalPages = Math.ceil(totalRecords / pageSize);
 
@@ -572,7 +607,7 @@ export const viewAllSubAdminCreates = async (req, res) => {
   }
 };
 // done
-export const editCreditRef = async (req, res) => {
+export const addCreditRef = async (req, res) => {
   try {
     const adminId = req.params.adminId;
     const authAdmin = req.user;
@@ -597,37 +632,17 @@ export const editCreditRef = async (req, res) => {
       return res.status(statusCode.unauthorize).json(apiResponseErr(null, false, statusCode.unauthorize, "Account is locked"));
     }
 
-    const newCreditRefEntry = {
-      value: creditRef,
-      date: new Date(),
-    };
-
-    let creditRefList = [];
-    if (typeof admin.creditRefs === 'string') {
-      try {
-        creditRefList = JSON.parse(admin.creditRefs);
-      } catch (error) {
-        return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, messages.invalidCreditRes));
-      }
-    } else if (Array.isArray(admin.creditRefs)) {
-      creditRefList = admin.creditRefs;
-    }
-
-    creditRefList.push(newCreditRefEntry);
-
-    if (creditRefList.length > 10) {
-      creditRefList.shift();
-    }
-
-    admin.creditRefs = JSON.stringify(creditRefList);
-    await admin.save();
+    const newCreditRefEntry = await CreditRef.create({
+      UserId : admin.adminId,
+      CreditRef : creditRef,
+    });
 
     const adminDetails = {
       adminId: admin.adminId,
       userName: admin.userName,
     };
 
-    return res.status(statusCode.success).json(apiResponseSuccess({ adminDetails, creditRef: creditRefList }, true, statusCode.success, 'CreditRef Edited successfully'));
+    return res.status(statusCode.success).json(apiResponseSuccess({ adminDetails, creditRef: newCreditRefEntry }, true, statusCode.success, 'CreditRef add successfully'));
   } catch (error) {
     res
       .status(statusCode.internalServerError)
@@ -635,7 +650,7 @@ export const editCreditRef = async (req, res) => {
   }
 };
 // done
-export const editPartnership = async (req, res) => {
+export const addPartnership = async (req, res) => {
   try {
     const adminId = req.params.adminId;
     const authAdmin = req.user;
@@ -662,36 +677,16 @@ export const editPartnership = async (req, res) => {
       return res.status(statusCode.unauthorize).json(apiResponseErr(null, false, statusCode.unauthorize, "Account is locked"));
     }
 
-    const newPartnershipEntry = {
-      value: partnership,
-      date: new Date(),
-    };
-
-    let partnershipsList;
-    try {
-      if (typeof admin.partnerships === 'string' && admin.partnerships.trim() !== '') {
-        partnershipsList = JSON.parse(admin.partnerships);
-      } else {
-        partnershipsList = [];
-      }
-    } catch (error) {
-      return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, messages.invalidPartnership));
-    }
-
-    partnershipsList.push(newPartnershipEntry);
-    if (partnershipsList.length > 10) {
-      partnershipsList = partnershipsList.slice(-10);
-    }
-
-    admin.partnerships = JSON.stringify(partnershipsList);
-    await admin.save();
+    const newPartnershipEntry = await Partnership.create({
+      UserId : admin.adminId,
+      partnership : partnership,
+    });
 
     const adminDetails = {
       adminId: admin.adminId,
       userName: admin.userName,
     };
-
-    return res.status(statusCode.success).json(apiResponseSuccess({ adminDetails, partnerships: partnershipsList }, true, statusCode.success, 'Partnership edited successfully'));
+    return res.status(statusCode.success).json(apiResponseSuccess({ adminDetails, partnerships: newPartnershipEntry }, true, statusCode.success, 'Partnership Add successfully'));
   } catch (error) {
     return res.status(statusCode.internalServerError).json(
       apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message)
@@ -708,31 +703,25 @@ export const partnershipView = async (req, res) => {
       return res.status(statusCode.notFound).json(apiResponseErr(null, false, statusCode.notFound, messages.adminNotFound));
     }
 
-    let partnershipsList;
-    if (typeof admin.partnerships === 'string') {
-      try {
-        partnershipsList = JSON.parse(admin.partnerships);
-      } catch (error) {
-        return res.status(statusCode.internalServerError).json(apiResponseErr(null, false, statusCode.internalServerError, messages.invalidPartnership));
-      }
-    } else if (Array.isArray(admin.partnerships)) {
-      partnershipsList = admin.partnerships;
-    } else {
-      partnershipsList = [];
+    const partnershipsData = await Partnership.findAll({
+      where: { UserId: admin.adminId },
+      order: [['id', 'DESC']],
+      limit: 10,
+    })
+
+    if (!partnershipsData || partnershipsData.length === 0) {
+      return res.status(statusCode.success).json(apiResponseErr(null, true, statusCode.success, messages.noRecordsFound));
     }
 
-    if (!Array.isArray(partnershipsList)) {
-      return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, 'partnerships not found or not an array'));
-    }
+    const result = partnershipsData.map((item) => {
+      return {
+        userName: admin.userName,
+        partnerships: item.partnership,
+        date: item.createdAt,
+      };
+    });
 
-    const last10partnerships = partnershipsList.slice(-10);
-
-    const transferData = {
-      partnerships: last10partnerships,
-      userName: admin.userName,
-    };
-
-    return res.status(statusCode.success).json(apiResponseSuccess(transferData, true, statusCode.success, messages.success));
+    return res.status(statusCode.success).json(apiResponseSuccess(result, true, statusCode.success, messages.success));
   } catch (error) {
     return res.status(statusCode.internalServerError).send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
   }
@@ -747,30 +736,26 @@ export const creditRefView = async (req, res) => {
       return res.status(statusCode.notFound).json(apiResponseErr(null, false, statusCode.notFound, messages.adminNotFound));
     }
 
-    let creditRefList;
-    if (typeof admin.creditRefs === 'string') {
-      try {
-        creditRefList = JSON.parse(admin.creditRefs);
-      } catch (error) {
-        return res.status(statusCode.internalServerError).json(apiResponseErr(null, false, statusCode.internalServerError, messages.invalidCreditRes));
-      }
-    } else if (Array.isArray(admin.creditRefs)) {
-      creditRefList = admin.creditRefs;
-    } else {
-      creditRefList = [];
+    const creditRefsData = await CreditRef.findAll({
+      where: { UserId: admin.adminId },
+      order: [['id', 'DESC']],
+      limit: 10,
+    })
+
+    if (!creditRefsData || creditRefsData.length === 0) {
+      return res.status(statusCode.success).json(apiResponseErr(null, true, statusCode.success, messages.noRecordsFound));
     }
 
-    if (!Array.isArray(creditRefList)) {
-      return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, 'creditRefs not found or not an array'));
-    }
+    const result = creditRefsData.map((item) => {
+      return {
+        userName: admin.userName,
+        creditRef: item.CreditRef,
+        date: item.createdAt,
+      };
+    });
 
-    const last10creditRefs = creditRefList.slice(-10);
-
-    const transferData = {
-      creditRefs: last10creditRefs,
-      userName: admin.userName,
-    };
-    return res.status(statusCode.success).json(apiResponseSuccess(transferData, true, statusCode.success, messages.success));
+    
+    return res.status(statusCode.success).json(apiResponseSuccess(result, true, statusCode.success, messages.success));
   } catch (error) {
     return res.status(statusCode.internalServerError).send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
   }
@@ -800,15 +785,15 @@ export const profileView = async (req, res) => {
     const userName = req.params.userName;
     const admin = await admins.findOne({ where: { userName } });
     if (!admin) {
-      return res.status(statusCode.badRequest).json(apiResponseErr(null, statusCode.badRequest, false, messages.adminNotFound));
+      return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, messages.adminNotFound));
     }
     const transferData = {
       adminId: admin.adminId,
-      roles: admin.roles,
+      role: admin.role,
       userName: admin.userName,
       createdById: admin.createdById
     };
-    return res.status(statusCode.success).json(apiResponseSuccess(transferData, null, statusCode.success, true, 'successfully'));
+    return res.status(statusCode.success).json(apiResponseSuccess(transferData, true, statusCode.success, 'successfully'));
   } catch (error) {
     res
       .status(statusCode.internalServerError)
@@ -976,15 +961,12 @@ export const viewSubAdmins = async (req, res) => {
     ];
 
     const subAdmins = await admins.findAll({
-      attributes: ['adminId', 'userName', 'roles', 'isActive', 'locked'],
+      attributes: ['adminId', 'userName', 'role', 'isActive', 'locked'],
       where: {
         createdById: id,
-        [Op.or]: allowedRoles.map(role => {
-          return sequelize.where(
-            sequelize.fn('JSON_CONTAINS', sequelize.col('roles'), JSON.stringify({ role })),
-            true
-          );
-        }),
+        role :{
+          [Op.or]: allowedRoles
+        },
         userName: {
           [Op.like]: `%${searchName}%`
         }
@@ -998,7 +980,7 @@ export const viewSubAdmins = async (req, res) => {
     const users = subAdmins.map(user => ({
       adminId: user.adminId,
       userName: user.userName,
-      roles: user.roles,
+      role: user.role,
       status: user.isActive ? "Active" : !user.locked ? "Locked" : !user.isActive ? "Suspended" : ""
     }));
 
@@ -1021,7 +1003,7 @@ export const singleSubAdmin = async (req, res) => {
     const adminId = req.params.adminId;
 
     const subAdmin = await admins.findOne({
-      attributes: ['userName', 'roles'],
+      attributes: ['userName', 'role'],
       where: {
         adminId: adminId
       }
@@ -1033,7 +1015,7 @@ export const singleSubAdmin = async (req, res) => {
 
     const data = {
       userName: subAdmin.userName,
-      roles: subAdmin.roles,
+      role: subAdmin.role,
     };
 
     return res.status(statusCode.success).json(apiResponseSuccess(data, true, statusCode.success, messages.success));
@@ -1061,30 +1043,26 @@ export const subAdminPermission = async (req, res) => {
       return res.status(statusCode.notFound).json(apiResponseErr(null, false, statusCode.notFound, 'Sub Admin not found'));
     }
 
-    let roles = subAdmin.roles;
+    let role = subAdmin.role;
 
-    if (!roles || roles.length === 0) {
+    if (!role || role.length === 0) {
       return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, 'Roles not found for Sub Admin'));
     }
 
     const permissionsArray = Array.isArray(permission) ? permission : [permission];
 
-    if (!roles[0]) {
-      roles[0] = { permission: [] };
-    }
+    await Permission.destroy({
+      where: { UserId: subAdminId }
+    });
 
-    roles[0].permission = permissionsArray;
+    const bulkPermissions = permissionsArray.map(per => ({
+      UserId: subAdminId,
+      permission: per
+    }));
 
-    await admins.update(
-      { roles: roles },
-      {
-        where: {
-          adminId: subAdminId
-        }
-      }
-    );
+    await Permission.bulkCreate(bulkPermissions);
 
-    return res.status(statusCode.success).json(apiResponseSuccess(null, true, statusCode.success, `${subAdmin.userName} permissions edited successfully`));
+    return res.status(statusCode.success).json(apiResponseSuccess(bulkPermissions, true, statusCode.success, `${subAdmin.userName} permissions edited successfully`));
   } catch (error) {
     res.status(statusCode.internalServerError).json(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
   }
@@ -1110,7 +1088,6 @@ export const userStatus = async (req, res) => {
 
     return res.status(statusCode.success).json(apiResponseSuccess(userStatus, true, statusCode.success, messages.success));
   } catch (error) {
-    console.error('Error:', error);
     res.status(statusCode.internalServerError).json(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
   }
 };
@@ -1183,7 +1160,7 @@ export const getHierarchyWiseUsers = async (req, res) => {
         where: {
           createdByUser: userName,
         },
-        attributes: ["adminId", "userName", "createdByUser", "roles"],
+        attributes: ["adminId", "userName", "createdByUser", "role"],
       });
 
       let allowedUserNames = [];
@@ -1192,7 +1169,7 @@ export const getHierarchyWiseUsers = async (req, res) => {
         allowedUserNames.push({
           userId: user.adminId, 
           userName: user.userName,
-          roles: user.roles,
+          role: user.role,
         });
         allowedUserNames = allowedUserNames.concat(nestedUsers);
       }
@@ -1202,13 +1179,15 @@ export const getHierarchyWiseUsers = async (req, res) => {
     const hierarchyWiseUsers = await getAllowedUserNames(userName);
 
     const filteredUsers = hierarchyWiseUsers.filter((user) => {
-      return (
-        user.roles &&
-        Array.isArray(user.roles) &&
-        user.roles.some((roleObj) => roleObj.role === "user") 
-      );
+      if (!user.role) return false;
+    
+      if (Array.isArray(user.role)) {
+        return user.role.some((roleObj) => roleObj.role === "user");
+      }
+    
+      return user.role === "user";
     });
-
+    
 
     const formattedData = {
       users: filteredUsers.map((user) => ({
@@ -1272,7 +1251,7 @@ export const downLineUsers = async (req, res) => {
 
     const allAdmins = await admins.findAll({
       raw: true,
-      attributes: ['adminId', 'userName', 'roles', 'createdById']
+      attributes: ['adminId', 'userName', 'role', 'createdById']
     });
 
     const downlineMap = {};
@@ -1298,7 +1277,7 @@ export const downLineUsers = async (req, res) => {
           total += profitLossMap[current.adminId] || 0;
         }
         
-        const currentRole = getPrimaryRole(current.roles);
+        const currentRole = getPrimaryRole(current.role);
         
         if (role === string.whiteLabel) {
           if ([string.hyperAgent, string.superAgent, string.masterAgent, string.user].includes(currentRole)) {
@@ -1336,9 +1315,9 @@ export const downLineUsers = async (req, res) => {
 
     const baseWhere = {
       createdById,
-      [Op.or]: allowedRoles.map((role) =>
-        fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))
-      ),
+      role: {
+        [Op.or]: allowedRoles
+      },
     };
 
     if (searchTerm) {
@@ -1376,7 +1355,7 @@ export const downLineUsers = async (req, res) => {
     });
 
     const users = adminsData.map((admin) => {
-      const primaryRole = getPrimaryRole(admin.roles);
+      const primaryRole = getPrimaryRole(admin.role);
       const personalProfitLoss = (profitLossMap[admin.adminId] || 0);
       let downLineProfitLoss = 0;
       
@@ -1393,7 +1372,7 @@ export const downLineUsers = async (req, res) => {
       return {
         adminId: admin.adminId,
         userName: admin.userName,
-        roles: admin.roles,
+        role: admin.role,
         createdById: admin.createdById,
         createdByUser: admin.createdByUser,
         profitLoss: agentProfitLoss,
@@ -1419,13 +1398,23 @@ export const downLineUsers = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error("Error in downLineUsers:", error);
-    return res.status(statusCode.internalServerError).json({
-      data: null,
-      success: false,
-      successCode: statusCode.internalServerError,
-      message: error.message
-    });
+    if (error.response) {
+      return apiResponseErr(
+        null,
+        false,
+        error.response.status,
+        error.response.data.message || error.response.data.errMessage,
+        res
+      );
+    } else {
+      return apiResponseErr(
+        null,
+        false,
+        statusCode.internalServerError,
+        error.message,
+        res
+      );
+    }
   }
 };
 
@@ -1437,7 +1426,7 @@ export const getTotalProfitLoss = async (req, res) => {
     const adminId = req.user?.adminId;
     const userId = await getHierarchyUsers(adminId);
     const token = jwt.sign(
-      { roles: req.user.roles },
+      { role: req.user.role },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );
@@ -1531,7 +1520,7 @@ export const getMarketWiseProfitLoss = async(req,res) => {
     const userId = await getHierarchyUsers(adminId);
 
     const token = jwt.sign(
-      { roles: req.user.roles },
+      { role: req.user.role },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );
@@ -1627,7 +1616,7 @@ export const getAllUserProfitLoss = async(req,res) => {
     const userId = await getHierarchyUsers(adminId);
 
     const token = jwt.sign(
-      { roles: req.user.roles },
+      { role: req.user.role },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );

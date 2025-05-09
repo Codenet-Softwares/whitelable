@@ -74,7 +74,7 @@ export const getLiveBetGames = async (req, res) => {
     const offset = (page - 1) * limit;
 
     const token = jwt.sign(
-      { roles: req.user.roles },
+      { role: req.user.role },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );
@@ -121,9 +121,7 @@ export const getLiveBetGames = async (req, res) => {
     // });
 
 
-    const isSuperAdmin =
-      Array.isArray(req.user.roles) &&
-      req.user.roles.some((roleObj) => roleObj.role === "superAdmin");
+    const isSuperAdmin = req.user.role === "superAdmin"
 
     let combinedData = [];
 
@@ -365,7 +363,7 @@ export const getLiveUserBetMarket = async (req, res) => {
     const { marketId } = req.params;
     const loggedInAdminId = req.user.adminId;
     const token = jwt.sign(
-      { roles: req.user.roles },
+      { role: req.user.role },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );
@@ -437,7 +435,7 @@ export const getUserMasterBook = async (req, res) => {
     const { marketId, adminId, role, type } = req.body;
 
     const token = jwt.sign(
-      { roles: req.user.roles },
+      { role: req.user.role },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );
@@ -494,7 +492,7 @@ export const getUserMasterBook = async (req, res) => {
         where: {
           createdById: adminId,
         },
-        attributes: ["userName", "createdById", "createdByUser","roles"],
+        attributes: ["userName", "createdById", "createdByUser","role"],
       });
 
       users = data.usersDetails
@@ -518,7 +516,7 @@ export const getUserMasterBook = async (req, res) => {
           "adminId",
           "createdById",
           "createdByUser",
-          "roles",
+          "role",
         ],
       });
 
@@ -605,7 +603,7 @@ export const userLiveBet = async (req, res) => {
     const adminId = admin.adminId;
 
     const token = jwt.sign(
-      { roles: req.user.roles },
+      { role: req.user.role },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );
