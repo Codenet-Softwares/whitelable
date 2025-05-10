@@ -509,7 +509,7 @@ export const accountStatement = async (req, res) => {
         )
       );
   } catch (error) {
-    res
+   return res
       .status(statusCode.internalServerError)
       .send(
         apiResponseErr(

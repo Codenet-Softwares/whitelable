@@ -62,48 +62,13 @@ export const moveAdminToTrash = async (req, res) => {
       return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, `Admin is inactive or locked`));
     }
 
-    let creditRefs = 0;
-    let partnerships = 0;
-
-    const creditRefsData = await CreditRef.findAll({
-      attributes : ["CreditRef"],
-      where: { UserId: admin.adminId },
-      order: [['id', 'DESC']],
-      limit: 1,
-    });
-
-    if (creditRefsData && creditRefsData.length > 0) {
-      try {
-        creditRefs = parseFloat(creditRefsData[0].CreditRef);
-      } catch (err) {
-        creditRefs = 0;
-      }
-    }
-
-
-    const partnershipsData = await Partnership.findAll({
-      attributes: ["partnership"],
-      where: { UserId: admin.adminId },
-      order: [['id', 'DESC']],
-      limit: 1,
-    })
-
-    if (partnershipsData && partnershipsData.length > 0) {
-      try {
-        partnerships = parseFloat(partnershipsData[0].partnership);
-      } catch {
-        partnerships = 0;
-      }
-    }
-
 
     const updatedTransactionData = {
       adminId: admin.adminId,
       role: admin.role || '',
       userName: admin.userName,
       password: admin.password,
-      creditRefs: creditRefs || 0,
-      partnerships: partnerships || 0,
+      loadBalance: adminBalance || 0 ,
       createdById: admin.createdById || '',
       createdByUser: admin.createdByUser || '',
     };
@@ -113,8 +78,7 @@ export const moveAdminToTrash = async (req, res) => {
       role: updatedTransactionData.role,
       userName: updatedTransactionData.userName,
       password: updatedTransactionData.password,
-      creditRefs: updatedTransactionData.creditRefs,
-      partnerships: updatedTransactionData.partnerships,
+      loadBalance : updatedTransactionData.loadBalance,
       createdById: updatedTransactionData.createdById,
       adminId: updatedTransactionData.adminId,
       createdByUser: updatedTransactionData.createdByUser,
@@ -130,7 +94,6 @@ export const moveAdminToTrash = async (req, res) => {
       return res.status(statusCode.badRequest).json(apiResponseErr(null, statusCode.badRequest, false, `Failed to delete Admin User with id: ${requestId}`));
     }
 
-    // sync with colorgame user
     let message = '';
     if (admin.role === string.user) {
       const dataToSend = {
@@ -147,7 +110,7 @@ export const moveAdminToTrash = async (req, res) => {
 
     return res.status(statusCode.success).json(apiResponseSuccess(null, statusCode.success, true, 'Admin User moved to Trash' + " " + message));
   } catch (error) {
-    res
+   return res
       .status(statusCode.internalServerError)
       .send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
   }
@@ -281,13 +244,9 @@ export const restoreAdminUser = async (req, res) => {
     }
 
     const restoreRemoveData = {
-      roles: existingAdminUser.roles,
+      role: existingAdminUser.role,
       userName: existingAdminUser.userName,
       password: existingAdminUser.password,
-      balance: existingAdminUser.balance,
-      loadBalance: existingAdminUser.loadBalance,
-      creditRefs: existingAdminUser.creditRefs,
-      partnerships: existingAdminUser.partnerships,
       createdById: existingAdminUser.createdById,
       adminId: existingAdminUser.adminId,
       createdByUser: existingAdminUser.createdByUser,
@@ -324,7 +283,7 @@ export const restoreAdminUser = async (req, res) => {
   }
     return res.status(statusCode.success).json(apiResponseSuccess(null, statusCode.success, true, 'Admin restored from trash' + " " + message));
   } catch (error) {
-    res
+    return res
       .status(statusCode.internalServerError)
       .send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
   }
