@@ -53,17 +53,17 @@ const SubAdminView = () => {
       ...prevData,
       [name]: value, // Updating the search term
     }));
-
-    // Clear previous timeout
-    if (searchTimeout.current) {
-      clearTimeout(searchTimeout.current);
-    }
-
-    // Set a new timeout to delay the API call
-    searchTimeout.current = setTimeout(() => {
-      getAll_SubAdmin_Create(value); // Pass the updated value
-    }, 500); // 500ms debounce time
   };
+
+  useEffect(() => {
+    let timer = setTimeout(() => {
+      if (store?.admin && permissionObj.allAdmin.includes(store?.admin?.role)) {
+        getAll_SubAdmin_Create(subAdminData.name);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [subAdminData.name]);
+  console.log("search",subAdminData.name)
 
   const handleStatusModalShow = (adminId, status, userName, role) => {
     setShowModal(true);
@@ -83,7 +83,6 @@ const SubAdminView = () => {
     store?.admin,
     subAdminData.currentPage,
     subAdminData.totalEntries,
-    subAdminData.name,
     refresh,
   ]);
 
