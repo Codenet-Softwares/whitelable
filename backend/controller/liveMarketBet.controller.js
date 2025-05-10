@@ -28,6 +28,7 @@ export const getUserBetMarket = async (req, res) => {
     const params = {
       marketId,
     };
+
     const baseUrl = process.env.COLOR_GAME_URL;
     const response = await axios.get(
       `${baseUrl}/api/user-external-liveBet/${userName}/${marketId}`,
@@ -36,6 +37,7 @@ export const getUserBetMarket = async (req, res) => {
        
       }
     );
+
     if (!response.data.success) {
       return res
         .status(statusCode.badRequest)
@@ -51,9 +53,18 @@ export const getUserBetMarket = async (req, res) => {
 
     const { data } = response.data;
 
+    const hierarchicalUsers = await getAllConnectedUsers(req.user.adminId);
+
+    const hierarchicalData = {
+      marketData: data,
+      users: hierarchicalUsers,
+    };
+
     res
       .status(statusCode.success)
-      .send(apiResponseSuccess(data, true, statusCode.success, "Success"));
+      .send(
+        apiResponseSuccess(hierarchicalData, true, statusCode.success, "Success")
+      );
   } catch (error) {
     res
       .status(statusCode.internalServerError)
