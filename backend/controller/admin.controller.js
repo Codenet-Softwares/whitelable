@@ -475,6 +475,7 @@ export const viewAllCreates = async (req, res) => {
       })
     );
   } catch (error) {
+    console.log("error", error);
     return res.status(statusCode.internalServerError).json(
       apiResponseErr(
         error.data ?? null,
