@@ -96,7 +96,7 @@ const Navside = () => {
                 </div>
               </a>
               <ul>
-                {permissionObj.allAdmin.includes(store.admin.roles[0].role) && (
+                {permissionObj.allAdmin.includes(store.admin.role) && (
                   <li>
                     <Link to="/allAdminCreate">
                       <span>
@@ -114,7 +114,7 @@ const Navside = () => {
                   </li>
                 )}
 
-                {store.admin.roles[0].permission.includes(
+                {store.admin.permission.includes(
                   strings.createAdmin
                 ) && (
                   <li>
@@ -155,7 +155,7 @@ const Navside = () => {
               </ul>
             </li>
           )}
-          {permissionObj.allAdmin.includes(store.admin.roles[0].role) && (
+          {permissionObj.allAdmin.includes(store.admin.role) && (
             <li className="" onClick={takeMeToAdminAccount}>
               <a className="" href="#" aria-expanded="false">
                 <div>
@@ -170,7 +170,7 @@ const Navside = () => {
               </a>
             </li>
           )}
-          {store.admin.roles[0].permission.includes(
+          {store.admin.permission.includes(
             strings.accountStatement
           ) && (
             <li className="" onClick={takeMeToAdminAccount}>
@@ -187,7 +187,7 @@ const Navside = () => {
               </a>
             </li>
           )}
-          {store.admin.roles[0].permission.includes(strings.deleteAdmin) && (
+          {store.admin.permission.includes(strings.deleteAdmin) && (
             <>
               {isRequest ? (
                 <li className="" onClick={handleRequestToggle}>
@@ -224,7 +224,7 @@ const Navside = () => {
               )}
             </>
           )}
-          {permissionObj.allAdmin.includes(store?.admin?.roles[0]?.role) && (
+          {permissionObj.allAdmin.includes(store?.admin?.role) && (
             <>
               {isRequest ? (
                 <li className="" onClick={handleRequestToggle}>
@@ -272,7 +272,7 @@ const Navside = () => {
               )}
             </>
           )}
-          {permissionObj.allAdmin.includes(store.admin.roles[0].role) && (
+          {permissionObj.allAdmin.includes(store.admin.role) && (
             <>
               {userRole ? (
                 <li className="" onClick={handleUserRoleToggle}>
@@ -341,7 +341,7 @@ const Navside = () => {
               )}
             </>
           )}
-          {store.admin.roles[0].permission.includes(strings.createAdmin) && (
+          {store.admin.permission.includes(strings.createAdmin) && (
             <>
               {userRole ? (
                 <li className="" onClick={handleUserRoleToggle}>
@@ -389,7 +389,7 @@ const Navside = () => {
             </>
           )}
 
-          {permissionObj.allAdmin.includes(store.admin.roles[0].role) && (
+          {permissionObj.allAdmin.includes(store.admin.role) && (
             <li>
               <Link to="/Market_analysis" aria-expanded="false">
                 <div className="nav_icon_small">
@@ -406,7 +406,7 @@ const Navside = () => {
               </Link>
             </li>
           )}
-          {store.admin.roles[0].permission.includes(strings.marketAnalysis) && (
+          {store.admin.permission.includes(strings.marketAnalysis) && (
             <li>
               <Link to="/Market_analysis" aria-expanded="false">
                 <div className="nav_icon_small">

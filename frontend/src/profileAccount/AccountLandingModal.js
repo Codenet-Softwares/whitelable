@@ -64,7 +64,7 @@ const AccountLandingModal = () => {
     backupStartDate: null,
     backupEndDate: null,
   });
-  console.log("toggle", state?.profileView?.roles[0]?.role)
+
 
   const formatDate = (dateString) => {
     // Parse the date string to create a Date object
@@ -495,7 +495,7 @@ const AccountLandingModal = () => {
               >
                 Profile
               </li>
-              {state?.profileView?.roles[0]?.role === strings.user && (
+              {state?.profileView?.role === strings.user && (
                 <>
                   {" "}
                   <li

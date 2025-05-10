@@ -52,8 +52,8 @@ const Wallet = () => {
   useEffect(() => {
     if (store?.admin) {
       if (
-        permissionObj.allAdmin.includes(store?.admin?.roles[0].role) ||
-        permissionObj.allSubAdmin.includes(store?.admin?.roles[0].role)
+        permissionObj.allAdmin.includes(store?.admin?.role) ||
+        permissionObj.allSubAdmin.includes(store?.admin?.role)
       ) {
         getAll_Create();
       }
@@ -69,8 +69,8 @@ const Wallet = () => {
   useEffect(() => {
     if (store?.admin) {
       if (
-        permissionObj.allAdmin.includes(store?.admin?.roles[0].role) ||
-        permissionObj.allSubAdmin.includes(store?.admin?.roles[0].role)
+        permissionObj.allAdmin.includes(store?.admin?.role) ||
+        permissionObj.allSubAdmin.includes(store?.admin?.role)
       ) {
         view_Balance();
       }
@@ -144,9 +144,9 @@ const Wallet = () => {
         >
           ₹{balance}
         </h4>
-        {store?.admin?.roles &&
-          store?.admin?.roles.length > 0 &&
-          store?.admin?.roles[0].role === strings.superAdmin && (
+        {store?.admin?.role &&
+          store?.admin?.role.length > 0 &&
+          store?.admin?.role === strings.superAdmin && (
             <div className="row">
               <div className="col-4"></div>
               <div className="col-4 ">
@@ -307,8 +307,8 @@ const Wallet = () => {
                       <Card
                         key={data.id}
                         userName={data.userName}
-                        role={data.roles[0].role}
-                        creditRef={data?.creditRefs[creditRefLength - 1]?.value}
+                        role={data.role}
+                        creditRef={data?.creditRefs}
                         balance={data.balance}
                         loadBalance={data.loadBalance}
                         refProfitLoss={data.refProfitLoss}
@@ -316,7 +316,7 @@ const Wallet = () => {
                         userId={data.adminId} // pending for decision TOM
                         exposure={data.exposure}
                         partnership={
-                          data?.partnerships[partnershipLength - 1]?.value
+                          data?.partnerships
                         }
                         Status={data.status}
                         creditRefLength={creditRefLength}

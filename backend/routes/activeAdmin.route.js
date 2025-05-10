@@ -64,7 +64,8 @@ export const activeAdminRoute = (app) => {
         return res.status(statusCode.success).send({ message, adminActive });
       } catch (error) {
         // Handle errors
-        res.status(error.responseCode ?? statusCode.internalServerError).send(
+        console.log("error", error);
+       return res.status(error.responseCode ?? statusCode.internalServerError).send(
           apiResponseErr(
             error.data ?? null,
             false,

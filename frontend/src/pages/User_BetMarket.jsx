@@ -154,7 +154,7 @@ const User_BetMarket = () => {
       const response = await getMarket_LiveBet({
         marketId: marketId,
         adminId: store?.admin?.id,
-        role: store?.admin?.roles[0]?.role,
+        role: store?.admin?.role,
         pageNumber: page,
         totalEntries: entries,
         search,
@@ -210,8 +210,8 @@ const User_BetMarket = () => {
   useEffect(() => {
     if (store?.admin) {
       if (
-        permissionObj.allAdmin.includes(store?.admin?.roles[0].role) ||
-        permissionObj.allSubAdmin.includes(store?.admin?.roles[0].role)
+        permissionObj.allAdmin.includes(store?.admin?.role) ||
+        permissionObj.allSubAdmin.includes(store?.admin?.role)
       ) {
         getView_User_BetMarket();
       }
@@ -454,7 +454,7 @@ const User_BetMarket = () => {
                     <button
                       className="btn text-white fw-bolder px-5 text-uppercase"
                       style={{ background: "#1E2761" }}
-                      disabled={store?.admin?.roles[0]?.role === "superAdmin"}
+                      disabled={store?.admin?.role === "superAdmin"}
                       onClick={handleOpenUserBookModal}
                     >
                       User Book

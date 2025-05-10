@@ -52,7 +52,7 @@ export async function getAllCreate(body = {}, isToast = false) {
 
 export async function updateCreditRef(body = {}, isToast = false) {
   try {
-    const callParams = await getAuthCallParams(strings.PUT, body.data, isToast);
+    const callParams = await getAuthCallParams(strings.POST, body.data, isToast);
     const response = await makeCall(
       `${UrlConstant.updateCreditRef}/${body.id}`,
       callParams,
@@ -66,7 +66,7 @@ export async function updateCreditRef(body = {}, isToast = false) {
 
 export async function updatePartnership(body = {}, isToast = false) {
   try {
-    const callParams = await getAuthCallParams(strings.PUT, body.data, isToast);
+    const callParams = await getAuthCallParams(strings.POST, body.data, isToast);
     const response = await makeCall(
       `${UrlConstant.updatePartnership}/${body.id}`,
       callParams,
