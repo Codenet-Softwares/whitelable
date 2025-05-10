@@ -108,7 +108,7 @@ const ViewPartnershipAndCreditRefModal = (props) => {
                   <tr>
                     <th>Sl. No.</th>
                     <th>Date</th>
-                    <th>Credit Ref. Amount</th>
+                    <th>Partnership Amount</th>
                   </tr>
                 </thead>
                 <tbody>
