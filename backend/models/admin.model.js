@@ -31,8 +31,8 @@ const admins = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    roles: {
-      type: DataTypes.JSON,
+    role: {
+      type: DataTypes.STRING,
       allowNull: true,
     },
     lastLoginTime: {
@@ -118,16 +118,6 @@ const admins = sequelize.define(
     path: {
       type: DataTypes.JSON,
       allowNull: true,
-    },
-    creditRefs: {
-      type: DataTypes.JSON,
-      allowNull: true,
-      defaultValue: [],
-    },
-    partnerships: {
-      type: DataTypes.JSON,
-      allowNull: true,
-      defaultValue: [],
     },
     loginStatus: {
       type: DataTypes.STRING,

@@ -32,11 +32,9 @@ import {
   createSubAdmin,
   getIpDetail,
   viewAllSubAdminCreates,
-  editCreditRef,
   activeStatus,
   profileView,
   viewAllCreates,
-  editPartnership,
   partnershipView,
   creditRefView,
   buildRootPath,
@@ -50,7 +48,9 @@ import {
   downLineUsers,
   getTotalProfitLoss,
   getMarketWiseProfitLoss,
-  getAllUserProfitLoss
+  getAllUserProfitLoss,
+  addCreditRef,
+  addPartnership
 
 } from '../controller/admin.controller.js';
 import { string } from '../constructor/string.js';
@@ -184,7 +184,7 @@ export const adminRoute = (app) => {
   );
 
   // Credit Ref Edit API ("DONE")
-  app.put('/api/admin/update-credit-ref/:adminId',
+  app.post('/api/admin/add-credit-ref/:adminId',
     creditRefSchema,
     customErrorHandler,
     Authorize([
@@ -195,11 +195,11 @@ export const adminRoute = (app) => {
       string.masterAgent,
       string.creditRefEdit
     ]),
-    editCreditRef,
+    addCreditRef,
   );
 
   // PartnerShip Edit API ("DONE")
-  app.put('/api/admin/update-partnership/:adminId',
+  app.post('/api/admin/add-partnership/:adminId',
     partnershipEditSchema,
     customErrorHandler,
     Authorize([
@@ -210,7 +210,7 @@ export const adminRoute = (app) => {
       string.masterAgent,
       string.partnershipEdit
     ]),
-    editPartnership,
+    addPartnership,
   );
 
   // PartnerShip View API ("DONE")

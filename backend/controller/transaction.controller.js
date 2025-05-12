@@ -204,7 +204,7 @@ export const transferAmount = async (req, res) => {
 
       await calculateLoadBalance(adminId);
 
-      return res.status(statusCode.create).json(apiResponseSuccess(null, true, statusCode.create, 'Balance Debited Successfully' + ' ' + message));
+      return res.status(statusCode.create).json(apiResponseSuccess(null, true, statusCode.create, 'Balance credit Successfully' + ' ' + message));
     }
   } catch (error) {
     res.status(statusCode.internalServerError).send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
@@ -608,13 +608,12 @@ export const admin_Balance = async (adminId) => {
 
     const get_id = await admins.findOne({ where: { adminId } })
     
-    if (get_id.roles[0].role ===  string.user) {
+    if (get_id.role ===  string.user) {
       const baseUrl = process.env.COLOR_GAME_URL;
       const user_balance = await axios.get(`${baseUrl}/api/external/get-user-balance/${adminId}`)
       const { data } = user_balance
       balance = data.balance
     }
-    console.log('Final balance with ext.',adminId, balance);
     return balance;
   } catch (error) {
     throw new Error(`Error calculating balance: ${error.message}`);
