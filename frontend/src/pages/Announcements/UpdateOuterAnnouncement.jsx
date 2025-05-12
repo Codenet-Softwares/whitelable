@@ -15,7 +15,7 @@ const UpdateOuterAnnouncement = () => {
   const fetchAnnouncements = async () => {
     try {
       const response = await getOuterAnnouncement(store.user);
-      setAnnouncements(response.data.data || []);  
+      setAnnouncements(response.data || []);  
     } catch (error) {
       toast.error("Failed to fetch announcements.");
       console.error("Error fetching announcements:", error);
@@ -29,7 +29,6 @@ const UpdateOuterAnnouncement = () => {
 
     try {
       await deleteOuterAnnouncement(store.user, announceId);  
-      toast.success("Announcement deleted successfully!");
       fetchAnnouncements(); 
     } catch (error) {
       toast.error("Failed to delete the announcement. Please try again.");

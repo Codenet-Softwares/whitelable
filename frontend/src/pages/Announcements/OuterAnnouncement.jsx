@@ -52,7 +52,6 @@ const OuterAnnouncement = () => {
 
     try {
       await CreateOuterAnnouncement(store, data);
-      toast.success("Announcement created successfully!");
       setAnnouncementData({ announcement: "" });
     } catch (error) {
       if (error.response && error.response.data && error.response.data.errMessage) {

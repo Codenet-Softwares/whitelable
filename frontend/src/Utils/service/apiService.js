@@ -752,6 +752,20 @@ export async function addOuterImage(body = {}, isToast = false) {
     throw error;
   }
 }
+export async function getAddOuterImage(body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.POST, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.user_carrouselImageDynamic}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
 export async function updateOuterImage(body = {}, isToast = false) {
   try {
     const callParams = await getAuthCallParams(strings.GET, body, isToast);
@@ -765,41 +779,12 @@ export async function updateOuterImage(body = {}, isToast = false) {
     throw error;
   }
 }
-export async function deleteOuterImage(body = {}, isToast = false) {
-  try {
-    const callParams = await getAuthCallParams(strings.DELETE, body, isToast);
-    const response = await makeCall(
-      `${UrlConstant.DeleteImage}/${body.imageId}`,
-      callParams,
-      isToast
-    );
-    return response;
-  } catch (error) {
-    throw error;
-  }
-}
-// export async function activeInactiveImage(body = {}, isToast = false) {
-//   try {
-//     const callParams = await getAuthCallParams(strings.GET, body, isToast);
-//     const response = await makeCall(
-//       `${UrlConstant.ActiveInactiveOuterImage}/${body.imageId}/`,
-//       callParams,
-//       isToast
-//     );
-//     return response;
-//   } catch (error) {
-//     throw error;
-//   }
-// }
-export async function activeInactiveImage(body = {}, isToast = false) {
-  try {
-    const callParams = await getAuthCallParams("POST", {
-      token: body.token,
-      data: { isActive: body.isActive },
-    }, isToast);
 
+export async function deleteOuterImage(imageId,body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.DELETE,body, isToast);
     const response = await makeCall(
-      `${UrlConstant.ActiveInactiveOuterImage}/${body.imageId}/`,
+      `${UrlConstant.DeleteImage}/${imageId}`,
       callParams,
       isToast
     );
@@ -808,6 +793,23 @@ export async function activeInactiveImage(body = {}, isToast = false) {
     throw error;
   }
 }
+
+export async function activeInactiveImage(imageId, body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.POST, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.ActiveInactiveOuterImage}/${imageId}`,
+      callParams,
+      isToast
+    );
+    
+    console.log("API Response==============>", response);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
 
 export async function addInnerImage(body = {}, isToast = false) {
   try {
@@ -835,11 +837,11 @@ export async function updateInnerImage(body = {}, isToast = false) {
     throw error;
   }
 }
-export async function deleteInnerImage(body = {}, isToast = false) {
+export async function deleteInnerImage(imageId,body = {}, isToast = false) {
   try {
     const callParams = await getAuthCallParams(strings.DELETE, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.DeleteInImage}/${body.imageId}`,
+      `${UrlConstant.DeleteInImage}/${imageId}`,
       callParams,
       isToast
     );
@@ -848,24 +850,23 @@ export async function deleteInnerImage(body = {}, isToast = false) {
     throw error;
   }
 }
-export async function activeInactiveInnerImage(body = {}, isToast = false) {
+
+export async function activeInactiveInnerImage(imageId, body = {}, isToast = false) {
   try {
-    const callParams = await getAuthCallParams("POST", {
-      token: body.token,
-      data: { isActive: body.isActive },
-    }, isToast);
-
+    const callParams = await getAuthCallParams(strings.POST, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.ActiveInactiveInImage}/${body.imageId}/`,
+      `${UrlConstant.ActiveInactiveInImage}/${imageId}`, 
       callParams,
       isToast
     );
+    
+    console.log("API Response==============>", response); 
     return response;
   } catch (error) {
+    console.error("API Error:", error);
     throw error;
   }
 }
-
 export async function gameSliderImage(body = {}, isToast = false) {
   try {
     const callParams = await getAuthCallParams(strings.POST, body, isToast);
@@ -893,11 +894,12 @@ export async function getGameSliderImage(body = {}, isToast = false) {
     throw error;
   }
 }
-export async function deleteGameCreatedImage(body = {}, isToast = false) {
+
+export async function deleteGameCreatedImage(imageId, body = {}, isToast = false) {
   try {
     const callParams = await getAuthCallParams(strings.DELETE, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.DeleteGameImage}/${body.imageId}`,
+      `${UrlConstant.DeleteGameImage}/${imageId}`, 
       callParams,
       isToast
     );
@@ -906,23 +908,25 @@ export async function deleteGameCreatedImage(body = {}, isToast = false) {
     throw error;
   }
 }
-export async function activeInactiveGameImage(body = {}, isToast = false) {
-  try {
-    const callParams = await getAuthCallParams("POST", {
-      token: body.token,
-      data: { isActive: body.isActive },
-    }, isToast);
 
+export async function activeInactiveGameImage(imageId, body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.POST, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.ActiveInactiveGmImage}/${body.imageId}/`,
+      `${UrlConstant.ActiveInactiveGmImage}/${imageId}`,
+
       callParams,
       isToast
     );
+
+    console.log("API Response==============>", response); // Debugging the API response
     return response;
   } catch (error) {
-    throw error;
+    console.error("API Error:", error);
+    throw error; // Propagate error to the calling function
   }
 }
+
 
 export async function gifSliderImage(body = {}, isToast = false) {
   try {
@@ -950,11 +954,11 @@ export async function getGifSlider(body = {}, isToast = false) {
     throw error;
   }
 }
-export async function deleteCreateGif(body = {}, isToast = false) {
+export async function deleteCreateGif(imageId,body = {}, isToast = false) {
   try {
     const callParams = await getAuthCallParams(strings.DELETE, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.DeleteGameGIF}/${body.imageId}`,
+      `${UrlConstant.DeleteGameGIF}/${imageId}`,
       callParams,
       isToast
     );
@@ -963,24 +967,22 @@ export async function deleteCreateGif(body = {}, isToast = false) {
     throw error;
   }
 }
-export async function activeInactiveGameGif(body = {}, isToast = false) {
+
+export async function activeInactiveGameGif(imageId, body = {}, isToast = false) {
   try {
-    const callParams = await getAuthCallParams("POST", {
-      token: body.token,
-      data: { isActive: body.isActive },
-    }, isToast);
-
+    const callParams = await getAuthCallParams(strings.POST, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.ActiveInactiveGIF}/${body.imageId}/`,
+      `${UrlConstant.ActiveInactiveGIF}/${imageId}`,
       callParams,
       isToast
     );
+    
+    console.log("API Response==============>", response);
     return response;
   } catch (error) {
     throw error;
   }
 }
-
 export async function CreateInnerAnnouncement(body = {}, isToast = false) {
   try {
     const callParams = await getAuthCallParams(strings.POST, body, isToast);
@@ -1007,11 +1009,11 @@ export async function getInnerAnnouncement(body = {}, isToast = false) {
     throw error;
   }
 }
-export async function deleteInnerAnnouncement(body = {}, isToast = false) {
+export async function deleteInnerAnnouncement(announceId,body = {}, isToast = false) {
   try {
     const callParams = await getAuthCallParams(strings.DELETE, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.InnerDeleteAnnouncement}/${body.announceId}`,
+      `${UrlConstant.InnerDeleteAnnouncement}/${announceId}`,
       callParams,
       isToast
     );
@@ -1046,11 +1048,11 @@ export async function getOuterAnnouncement(body = {}, isToast = false) {
     throw error;
   }
 }
-export async function deleteOuterAnnouncement(body = {}, isToast = false) {
+export async function deleteOuterAnnouncement(announceId,body = {}, isToast = false) {
   try {
     const callParams = await getAuthCallParams(strings.DELETE, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.OuterDeleteAnnouncement}/${body.announceId}`,
+      `${UrlConstant.OuterDeleteAnnouncement}/${announceId}`,
       callParams,
       isToast
     );

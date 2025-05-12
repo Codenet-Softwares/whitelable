@@ -48,7 +48,6 @@ const InnerAnnouncement = () => {
   
       try {
         await CreateInnerAnnouncement(store, data);
-        toast.success("Inner Announcement created successfully!");
         setAnnouncementData({ announcement: "" });
         setRefreshTrigger(prev => prev + 1); // Triggers re-fetch in child
         
@@ -73,8 +72,7 @@ const InnerAnnouncement = () => {
     };
   
     return (
-      <div className="container my-5 p-5">
-  
+      <div className="container my-5 p-5"> 
           <div className="row">
         <div className="col-6">
         {/* Show loading spinner */}

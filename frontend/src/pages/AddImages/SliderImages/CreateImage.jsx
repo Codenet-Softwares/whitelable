@@ -1,21 +1,35 @@
-import React, { useState } from "react";
-// import { useAuth } from "../../../Utils/Auth";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import SliderImageDelete from "./SliderImageDelete";
-import { addOuterImage } from "../../../Utils/service/apiService";
+import { addOuterImage, updateOuterImage } from "../../../Utils/service/apiService";
 import { useAppContext } from "../../../contextApi/context";
 import "../Images.css";
+
 const CreateImage = () => {
   const [file, setFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-  const [validationMessage, setValidationMessage] = useState(""); // State for validation message
+  const [validationMessage, setValidationMessage] = useState("");
+  const [sliderImages, setSliderImages] = useState([]);
   const { store } = useAppContext();
+
+  const fetchSliderImages = () => {
+    updateOuterImage(store.user)
+      .then((res) => {
+        const imageData = res?.data ?? [];
+        setSliderImages(imageData);
+      })
+      .catch((err) => {
+        toast.error("Failed to load slider images.");
+      });
+  };
+
+  useEffect(() => {
+    fetchSliderImages();
+  }, []);
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     setFile(selectedFile);
-
-    // Reset validation message when file changes
     setValidationMessage("");
 
     const fileReader = new FileReader();
@@ -28,11 +42,10 @@ const CreateImage = () => {
   const handleRemoveImage = () => {
     setFile(null);
     setImagePreview(null);
-    setValidationMessage(""); // Reset validation message when the image is removed
+    setValidationMessage("");
   };
 
-  const handleAddImage = async () => {
-    // Validation before upload
+  const handleAddImage = () => {
     if (!file) {
       setValidationMessage("Please select an image to upload.");
       return;
@@ -43,16 +56,8 @@ const CreateImage = () => {
       return;
     }
 
-    // const maxFileSize = 5 * 1024 * 1024;
-    // if (file.size > maxFileSize) {
-    //   setValidationMessage("File size exceeds the 5MB limit.");
-    //   return;
-    // }
-
-    // auth.showLoader();
-
     const reader = new FileReader();
-    reader.onloadend = async () => {
+    reader.onloadend = () => {
       const docBase = reader.result;
       const base64Image = docBase.split(",")[1];
 
@@ -61,30 +66,30 @@ const CreateImage = () => {
           {
             docBase: base64Image,
             isActive: true,
+            text: "Some description text for the slider image",
+            headingText: "Main heading for the slider",
           },
         ],
       };
 
-      try {
-        const response = await addOuterImage(store.user, data);
-
-        toast.success("Image uploaded successfully!");
-        setFile(null);
-        setImagePreview(null);
-        setValidationMessage(""); // Reset validation message after successful upload
-      } catch (error) {
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.errMessage
-        ) {
-          toast.error(error.response.data.errMessage);
-        } else {
-          toast.error("Failed to upload the image. Please try again.");
-        }
-      } finally {
-        store.hideLoader();
-      }
+      addOuterImage(data, true)
+        .then((response) => {
+          setFile(null);
+          setImagePreview(null);
+          setValidationMessage("");
+          fetchSliderImages();
+        })
+        .catch((error) => {
+          if (
+            error.response &&
+            error.response.data &&
+            error.response.data.errMessage
+          ) {
+            toast.error(error.response.data.errMessage);
+          } else {
+            toast.error("Failed to upload the image. Please try again.");
+          }
+        });
     };
 
     reader.readAsDataURL(file);
@@ -100,7 +105,6 @@ const CreateImage = () => {
           >
             <h4 className="fw-bold">Choose Image</h4>
             <i className="fas fa-plus-circle"></i>
-            {/* Display the image preview if available */}
             {imagePreview && (
               <img
                 className="image_size"
@@ -110,12 +114,10 @@ const CreateImage = () => {
             )}
           </div>
 
-          {/* Display validation error message */}
           {validationMessage && (
             <div className="validation_msg">{validationMessage}</div>
           )}
 
-          {/* Cross button outside the box */}
           {imagePreview && (
             <div className="image_preview" onClick={handleRemoveImage}>
               <i className="fas fa-times"></i>
@@ -135,7 +137,11 @@ const CreateImage = () => {
             Upload Image
           </button>
         </div>
-        <SliderImageDelete />
+
+        <SliderImageDelete
+          sliderImages={sliderImages}
+          refreshImages={fetchSliderImages}
+        />
       </div>
     </div>
   );

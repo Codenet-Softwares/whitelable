@@ -17,26 +17,19 @@ const UpdateInnerAnnouncement = () => {
   const fetchAnnouncements = async () => {
     try {
       const response = await getInnerAnnouncement(store.user);  
-      setAnnouncements(response.data.data || []);  
+      setAnnouncements(response.data || []);  
     } catch (error) {
       toast.error("Failed to fetch inner announcements.");
       console.error("Error fetching inner announcements:", error);
-    }finally {
-      // auth.hideLoader();
     }
   };
 
   const handleDelete = async (announceId) => {
-    // auth.showLoader();
     try {
       await deleteInnerAnnouncement(store.user, announceId);  
-      toast.success("Inner Announcement deleted successfully!");
       fetchAnnouncements(); 
     } catch (error) {
       toast.error("Failed to delete the inner announcement. Please try again.");
-      console.error("Error deleting inner announcement:", error);
-    }finally {
-      // auth.hideLoader();
     }
   };
 

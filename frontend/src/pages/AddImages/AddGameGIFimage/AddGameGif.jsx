@@ -64,9 +64,8 @@ const AddGameGif = () => {
         };
   
         try {
-          const response = await gifSliderImage(store.user, data);
-        
-          toast.success("GIF uploaded successfully!");
+            const response = await gifSliderImage(data);
+        console.log("response===========>",response)
           setFile(null);
           setGifPreview(null);
           setValidationMessage(""); // Reset validation message after successful upload

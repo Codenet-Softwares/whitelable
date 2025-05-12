@@ -13,7 +13,7 @@ export const AnnouncementRoute = (app) => {
   
   app.get('/api/admin/get-announcements', customErrorHandler, getAnnouncement);
  
-  app.get('/api/admin/get-admin-announcements', customErrorHandler, getAnnouncement);
+  app.get('/api/admin/get-admin-announcements', customErrorHandler,Authorize([string.superAdmin]), getAnnouncement);
   
   app.delete('/api/admin/delete-announcements/:announceId', Authorize([string.superAdmin]), customErrorHandler, deleteAnnouncementData);
 
@@ -29,7 +29,7 @@ export const AnnouncementRoute = (app) => {
      
   app.get('/api/admin/get-inner-announcements', customErrorHandler, getInnerAnnouncement);
     
-  app.get('/api/admin/get-admin-inner-announcements', customErrorHandler, getInnerAnnouncement);
+  app.get('/api/admin/get-admin-inner-announcements', customErrorHandler,Authorize([string.superAdmin]), getInnerAnnouncement);
      
   app.delete('/api/admin/delete-inner-announcements/:announceId', Authorize([string.superAdmin]), customErrorHandler, deleteInnerAnnouncementData);
 
