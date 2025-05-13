@@ -63,7 +63,6 @@ const SubAdminView = () => {
     }, 300);
     return () => clearTimeout(timer);
   }, [subAdminData.name]);
-  console.log("search",subAdminData.name)
 
   const handleStatusModalShow = (adminId, status, userName, role) => {
     setShowModal(true);
@@ -383,7 +382,7 @@ const SubAdminView = () => {
                                           user?.adminId,
                                           user?.status,
                                           user?.userName,
-                                          user?.roles[0]?.role
+                                          user?.role
                                         )
                                       }
                                     >
