@@ -81,7 +81,7 @@ const DownlineProfitLoss = () => {
             className="btn btn-link p-0 text-decoration-none"
             style={{ color: "black" }}
             onClick={() =>
-              item?.roles[0]?.role === "user"
+              item?.role === "user"
                 ? handleUserNavigateToProfitLoss(item.userName)
                 : handleAdminNavigateToChild(item.adminId, item.userName)
             }

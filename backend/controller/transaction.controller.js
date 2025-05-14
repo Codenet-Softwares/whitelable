@@ -9,6 +9,7 @@ import { messages, string } from '../constructor/string.js';
 import axios from 'axios';
 import { calculateLoadBalance } from './admin.controller.js';
 import { Op } from 'sequelize'
+import { sql } from '../db.js';
 
 export const depositTransaction = async (req, res) => {
   try {
@@ -102,11 +103,11 @@ export const transferAmount = async (req, res) => {
 
       const receiver_admin_balance = await admin_Balance(receiveUserId)
 
-      if (receiver_admin_balance < parsedWithdrawalAmt) {
+      if (receiver_admin_balance[0]?.[0].adminBalance < parsedWithdrawalAmt) {
         return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, 'Insufficient Balance For Withdrawal'));
       }
 
-      const deductionBalance = receiver_admin_balance - parsedWithdrawalAmt;
+      const deductionBalance = receiver_admin_balance[0]?.[0].adminBalance - parsedWithdrawalAmt;
 
       const withdrawalRecord = {
         transactionId: uuidv4(),
@@ -155,11 +156,11 @@ export const transferAmount = async (req, res) => {
 
       const sender_admin_balance = await admin_Balance(adminId)
       const receiver_admin_balance = await admin_Balance(receiveUserId)
-      if (sender_admin_balance < parsedTransferAmount) {
+      if (sender_admin_balance[0]?.[0].adminBalance < parsedTransferAmount) {
         return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, 'Insufficient Balance For Transfer'));
       }
 
-      const receiverBalance = receiver_admin_balance + parsedTransferAmount;
+      const receiverBalance = receiver_admin_balance[0]?.[0]?.adminBalance + parsedTransferAmount;
 
       const transactionId = uuidv4();
 
@@ -509,7 +510,7 @@ export const accountStatement = async (req, res) => {
         )
       );
   } catch (error) {
-    res
+   return res
       .status(statusCode.internalServerError)
       .send(
         apiResponseErr(
@@ -526,35 +527,8 @@ export const accountStatement = async (req, res) => {
 export const viewAdminBalance = async (req, res) => {
   try {
     const adminId = req.params.adminId;
-    let balance = 0;
-
-    const adminTransactions = await transaction.findAll({
-      where: {
-        [Op.or]: [{ adminId }, { receiver_adminId: adminId }],
-      },
-    });
-
-    for (const transaction of adminTransactions) {
-      const { receiver_adminId, transactionType, amount } = transaction;
-      const parsedAmount = parseFloat(amount);
-
-      if (receiver_adminId === adminId) {
-        if (transactionType === "credit") {
-          balance += parsedAmount;
-        } else if (transactionType === "withdrawal") {
-          balance -= parsedAmount;
-        }
-
-      } else {
-        if (transactionType === "credit") {
-          balance -= parsedAmount;
-        } else if (transactionType === "withdrawal") {
-          balance += parsedAmount;
-        } else if (transactionType === "self_credit") {
-          balance += parsedAmount;
-        }
-      }
-    }
+    const adminBalance = await admin_Balance(adminId);
+    const balance = adminBalance[0]?.[0].adminBalance;
     return res.status(statusCode.success).json(apiResponseSuccess({ balance }, true, statusCode.success, "Balance calculated successfully."));
   } catch (error) {
     return res
@@ -573,48 +547,11 @@ export const viewAdminBalance = async (req, res) => {
 // Generic admin Balance function
 export const admin_Balance = async (adminId) => {
   try {
-
-    let balance = 0;
-    const admin_transactions = await transaction.findAll({
-      where: {
-        [Op.or]: [
-          { adminId },
-          { receiver_adminId: adminId },
-        ],
-      },
-    });
-
-    for (const transaction of admin_transactions) {
-      if (transaction.receiver_adminId === adminId) {
-        if (transaction.transactionType === 'credit') {
-          balance += parseFloat(transaction.amount);
-        }
-        if (transaction.transactionType === 'withdrawal') {
-          balance -= parseFloat(transaction.amount);
-        }
-
-      } else {
-        if (transaction.transactionType === 'credit') {
-          balance -= parseFloat(transaction.amount);
-        }
-        if (transaction.transactionType === 'withdrawal') {
-          balance += parseFloat(transaction.amount);
-        }
-        if (transaction.transactionType === 'self_credit') {
-          balance += parseFloat(transaction.amount);
-        }
-      }
-    }
-
-    const get_id = await admins.findOne({ where: { adminId } })
-    
-    if (get_id.role ===  string.user) {
-      const baseUrl = process.env.COLOR_GAME_URL;
-      const user_balance = await axios.get(`${baseUrl}/api/external/get-user-balance/${adminId}`)
-      const { data } = user_balance
-      balance = data.balance
-    }
-    return balance;
+    const [results] = await sql.query(
+      `CALL adminBalance(?)`,
+      [adminId]
+    );
+    return results;
   } catch (error) {
     throw new Error(`Error calculating balance: ${error.message}`);
   }

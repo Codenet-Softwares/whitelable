@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 import admins from '../models/admin.model.js';
 import { messages, string } from '../constructor/string.js';
 import { Op, fn, col, Sequelize } from 'sequelize';
-import sequelize from '../db.js';
+import sequelize, { sql } from '../db.js';
 import { statusCode } from '../helper/statusCodes.js';
 import trash from '../models/trash.model.js';
 import axios from 'axios';
@@ -284,7 +284,6 @@ export const calculateLoadBalance = async (adminId) => {
   if (!admin) return 0;
 
   const adminBalance = await admin_Balance(admin.adminId)
-  const hierarchyBalance = await balance_hierarchy(admin.adminId)
 
   let exposure
   if (admin.role === string.user) {
@@ -294,7 +293,7 @@ export const calculateLoadBalance = async (adminId) => {
     exposure = data.exposure
   }
   
-    totalBalance = adminBalance + (exposure ?? 0);
+    totalBalance = adminBalance[0]?.[0].adminBalance + (exposure ?? 0);
 
     const children = await admins.findAll({
       where: { createdById: adminId },
@@ -341,10 +340,8 @@ export const calculateExposure = async (adminId) => {
 
   for (const child of children) {
     let childExposure = await calculateExposure(child.adminId);
-
     childExposure = parseFloat(childExposure) || 0;
     totalExposure += childExposure;
-
   }
 
   if (loadExposure !== totalExposure) {
@@ -401,69 +398,41 @@ export const viewAllCreates = async (req, res) => {
       order: [['createdAt', 'DESC']],
     });
 
-    // Map through adminsData and calculate load balance
-    const users = await Promise.all(
-      adminsData.map(async (admin) => {
-        let creditRefs = 0;
-        let partnerships = 0;
-
-        const creditRefsData = await CreditRef.findAll({
-          attributes : ["CreditRef"],
-          where: { UserId: admin.adminId },
-          order: [['id', 'DESC']],
-          limit: 1,
-        })
-
-
-        if (creditRefsData && creditRefsData.length > 0) {
-          try {
-            creditRefs = parseFloat(creditRefsData[0].CreditRef);
-          } catch (err) {
-            creditRefs = 0;
-          }
-        }
-
-        const partnershipsData = await Partnership.findAll({
-          attributes: ["partnership"],
-          where: { UserId: admin.adminId },
-          order: [['id', 'DESC']],
-          limit: 1,
-        })
-
-        if (partnershipsData && partnershipsData.length > 0) {
-          try {
-            partnerships = parseFloat(partnershipsData[0].partnership);
-          } catch {
-            partnerships = 0;
-          }
-        }
-
-        const adminBalance = await admin_Balance(admin.adminId);
-        const loadBalance = await calculateLoadBalance(admin.adminId);
-        const loadTotalExposure = await calculateExposure(admin.adminId);
-
-        return {
-          adminId: admin.adminId,
-          userName: admin.userName,
-          role: admin.role,
-          balance: adminBalance,
-          loadBalance, // Add loadBalance to response
-          creditRefs : creditRefs,
-          createdById: admin.createdById,
-          createdByUser: admin.createdByUser,
-          partnerships : partnerships,
-          status: admin.isActive
-            ? 'Active'
-            : !admin.locked
-              ? 'Locked'
-              : !admin.isActive
-                ? 'Suspended'
-                : '',
-          exposure: loadTotalExposure,
-        };
-      })
-    );
-
+    const users = await Promise.all(adminsData.map(async (admin) => {
+      const [rows] = await sql.execute(
+        `SELECT 
+           getCreditRef(?) AS creditRef,
+           getPartnership(?) AS partnership`,
+        [admin.adminId, admin.adminId]
+      );
+    
+      const adminBalance = await admin_Balance(admin.adminId);
+      const loadBalance = await calculateLoadBalance(admin.adminId);
+      const loadTotalExposure = await calculateExposure(admin.adminId);
+    
+      const result = {
+        adminId: admin.adminId,
+        userName: admin.userName,
+        role: admin.role,
+        balance: adminBalance[0]?.[0].adminBalance,
+        loadBalance,
+        creditRefs: rows[0].creditRef,
+        createdById: admin.createdById,
+        createdByUser: admin.createdByUser,
+        partnerships: rows[0].partnership,
+        status: admin.isActive
+          ? 'Active'
+          : !admin.locked
+            ? 'Locked'
+            : !admin.isActive
+              ? 'Suspended'
+              : '',
+        exposure: loadTotalExposure,
+      };
+    
+      return result;
+    }));
+      
     const totalPages = Math.ceil(totalRecords / pageSize);
 
     return res.status(statusCode.success).json(
@@ -475,6 +444,7 @@ export const viewAllCreates = async (req, res) => {
       })
     );
   } catch (error) {
+    console.log("error", error);
     return res.status(statusCode.internalServerError).json(
       apiResponseErr(
         error.data ?? null,
@@ -844,7 +814,7 @@ export const buildRootPath = async (req, res) => {
         where: {
           createdByUser: user.userName,
           ...likeCondition,
-          [Op.or]: allowedRoles.map(role => fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))),
+          role: { [Op.or]: allowedRoles },
         },
       });
 
@@ -854,7 +824,7 @@ export const buildRootPath = async (req, res) => {
         where: {
           createdByUser: user.userName,
           ...likeCondition,
-          [Op.or]: allowedRoles.map(role => fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))),
+          role: { [Op.or]: allowedRoles },
         },
         offset: (page - 1) * pageSize,
         limit: pageSize,
@@ -862,14 +832,30 @@ export const buildRootPath = async (req, res) => {
 
       const createdUsersDetails = await Promise.all(
         createdUsers.map(async (createdUser) => {
-          let creditRef = [];
+          let creditRef = 0;
           let refProfitLoss = [];
-          let partnership = [];
+          let partnership = 0;
+
+
+          const creditRefsData = await CreditRef.findAll({
+            attributes : ["CreditRef"],
+            where: { UserId: createdUser.adminId },
+            order: [['id', 'DESC']],
+            limit: 1,
+          })
+
+
+          const partnershipsData = await Partnership.findAll({
+            attributes: ["partnership"],
+            where: { UserId: createdUser.adminId },
+            order: [['id', 'DESC']],
+            limit: 1,
+          })
 
           try {
-            creditRef = createdUser.creditRefs ? JSON.parse(createdUser.creditRefs) : [];
+            creditRef = parseFloat(creditRefsData[0]?.CreditRef) ? parseFloat(creditRefsData[0]?.CreditRef) : 0;
             refProfitLoss = createdUser.refProfitLoss ? JSON.parse(createdUser.refProfitLoss) : [];
-            partnership = createdUser.partnerships ? JSON.parse(createdUser.partnerships) : [];
+            partnership = parseFloat(partnershipsData[0]?.partnership) ? parseFloat(partnershipsData[0]?.partnership) : 0;
           } catch (e) {
             console.error("JSON parsing error:", e);
           }
@@ -881,8 +867,8 @@ export const buildRootPath = async (req, res) => {
           return {
             id: createdUser.adminId,
             userName: createdUser.userName,
-            roles: createdUser.roles,
-            balance: adminBalance,
+            role: createdUser.role,
+            balance: adminBalance[0]?.[0].adminBalance,
             loadBalance: loadBalance,
             creditRef: creditRef,
             refProfitLoss: refProfitLoss,
@@ -1013,9 +999,17 @@ export const singleSubAdmin = async (req, res) => {
       return res.status(statusCode.notFound).json(apiResponseErr(null, false, statusCode.notFound, 'Sub Admin not found with the given Id'));
     }
 
+    const permissions = await Permission.findAll({ 
+      where: { UserId: adminId },
+      attributes: ['permission']
+    })
+
+    const permissionValues = permissions.map(permission => permission.permission);
+
     const data = {
       userName: subAdmin.userName,
       role: subAdmin.role,
+      permission : permissionValues,
     };
 
     return res.status(statusCode.success).json(apiResponseSuccess(data, true, statusCode.success, messages.success));

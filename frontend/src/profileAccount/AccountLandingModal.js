@@ -47,6 +47,8 @@ const AccountLandingModal = () => {
     dataSource: "live",
     dataType: "",
     dropdownOpen: null,
+    backupStartDate: null,
+    backupEndDate: null,
   });
 
   const [profitLossData, SetProfitLossData] = useState({
@@ -64,7 +66,6 @@ const AccountLandingModal = () => {
     backupStartDate: null,
     backupEndDate: null,
   });
-  console.log("toggle", state?.profileView?.roles[0]?.role)
 
   const formatDate = (dateString) => {
     // Parse the date string to create a Date object
@@ -87,7 +88,7 @@ const AccountLandingModal = () => {
   }, [userName, toggle]);
 
   useEffect(() => {
-    if (toggle === 1) {
+    if (toggle === "statement") {
       getAll_transactionView();
     }
     if (toggle === "activity") {
@@ -305,23 +306,23 @@ const AccountLandingModal = () => {
   };
 
   const handelStatement = () => {
-    navigate(`/account-landing/${userName}/statement`)
+    navigate(`/account-landing/${userName}/statement`);
   };
 
   const handelActivity = () => {
-    navigate(`/account-landing/${userName}/activity`)
+    navigate(`/account-landing/${userName}/activity`);
   };
 
   const handelProfile = () => {
-    navigate(`/account-landing/${userName}/profile`)
+    navigate(`/account-landing/${userName}/profile`);
   };
 
   const handelBetHistory = () => {
-    navigate(`/account-landing/${userName}/betHistory`)
+    navigate(`/account-landing/${userName}/betHistory`);
   };
 
   const handelProfitLoss = () => {
-    navigate(`/account-landing/${userName}/profit_loss`)
+    navigate(`/account-landing/${userName}/profit_loss`);
   };
 
   const handleDateStatement = () => {
@@ -339,7 +340,14 @@ const AccountLandingModal = () => {
       endDate: formatDate(profitLossData.backupEndDate),
     }));
   };
-
+  const handleDateForBetHistory = () => {
+    SetBetHistoryData((prevState) => ({
+      ...prevState,
+      startDate: prevState.startDate,
+      endDate: prevState.endDate,
+      currentPage: 1, // Reset to first page when new dates are submitted
+    }));
+  };
   function formatDateForUi(dateString) {
     const options = {
       year: "numeric",
@@ -412,6 +420,7 @@ const AccountLandingModal = () => {
         formatDateForUi={formatDateForUi}
         dataType={betHistoryData.dataType}
         dropdownOpen={betHistoryData.dropdownOpen}
+        handleDateForBetHistory={handleDateForBetHistory}
       />
     );
   } else if (toggle === "profit_loss") {
@@ -448,26 +457,22 @@ const AccountLandingModal = () => {
       <div className="row row-no-gutters">
         {/* First Section */}
         <div className="col-sm-4">
-
           <span className="me-3" onClick={() => navigate(-1)}>
             <button className="btn btn-secondary">&#8592;</button>
           </span>
           <div className="card mt-3" style={{ width: "18rem" }}>
             <ul className="list-group list-group-flush">
-
               <li
                 className="list-group-item text-white h6 text-uppercase text-center"
                 style={{ backgroundColor: "#1E2761" }}
               >
                 My Account
-
               </li>
               <li
                 className="list-group-item"
                 style={{
                   cursor: "pointer",
-                  backgroundColor:
-                    toggle === "statement" ? "#d1d9f0" : "",
+                  backgroundColor: toggle === "statement" ? "#d1d9f0" : "",
                 }}
                 onClick={handelStatement}
               >
@@ -477,8 +482,7 @@ const AccountLandingModal = () => {
                 className="list-group-item"
                 style={{
                   cursor: "pointer",
-                  backgroundColor:
-                    toggle === "activity" ? "#d1d9f0" : "",
+                  backgroundColor: toggle === "activity" ? "#d1d9f0" : "",
                 }}
                 onClick={handelActivity}
               >
@@ -488,22 +492,20 @@ const AccountLandingModal = () => {
                 className="list-group-item"
                 style={{
                   cursor: "pointer",
-                  backgroundColor:
-                    toggle === "profile" ? "#d1d9f0" : "",
+                  backgroundColor: toggle === "profile" ? "#d1d9f0" : "",
                 }}
                 onClick={handelProfile}
               >
                 Profile
               </li>
-              {state?.profileView?.roles[0]?.role === strings.user && (
+              {state?.profileView?.role === strings.user && (
                 <>
                   {" "}
                   <li
                     className="list-group-item"
                     style={{
                       cursor: "pointer",
-                      backgroundColor:
-                        toggle === "betHistory" ? "#d1d9f0" : "",
+                      backgroundColor: toggle === "betHistory" ? "#d1d9f0" : "",
                     }}
                     onClick={handelBetHistory}
                   >

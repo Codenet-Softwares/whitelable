@@ -147,7 +147,7 @@ const NavTop = () => {
                 }}
               >
                 <span style={{ color: "#F5C93A" }}>
-                  {store?.admin?.roles[0]?.role}
+                  {store?.admin?.role}
                 </span>{" "}
                 Admin <span style={{ color: "#F5C93A" }}>Panel</span>
               </h2>
@@ -171,12 +171,12 @@ const NavTop = () => {
                   >
                     <div className="profile_author_name">
                       <p className="mb-1 small">
-                        {store?.admin?.roles[0]?.role}
+                        {store?.admin?.role}
                       </p>
                       <h5 className="m-0">{store?.admin?.adminName}</h5>
                     </div>
                     <div className="profile_info_details">
-                      {store.admin.roles[0].role === "superAdmin" && (
+                      {store.admin.role === "superAdmin" && (
                         <a
                           style={{ cursor: "pointer" }}
                           onClick={() => openModal()}
