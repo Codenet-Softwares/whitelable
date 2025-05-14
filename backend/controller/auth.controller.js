@@ -101,7 +101,7 @@ export const adminLogin = async (req, res) => {
                 createdById: existingAdmin.createdById,
                 createdByUser: existingAdmin.createdByUser,
                 userName: existingAdmin.userName,
-                balance : adminBalance,
+                balance : adminBalance[0]?.[0].adminBalance,
                 role: existingAdmin.role,
                 permission: permission || [],
                 status: existingAdmin.isActive
