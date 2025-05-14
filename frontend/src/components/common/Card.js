@@ -121,7 +121,7 @@ const Card = ({
         <tr>
           <th scope="row" className="">
             <button
-              className="border border-1 text-center rounded-pill fw-bold p-1"
+              className="border border-1 text-center rounded-pill fw-bold p-1 text-uppercase"
               // data-bs-toggle="modal"
               // data-bs-target={`#hierarchyview-${userId}`}
               style={{ cursor: "auto", background: "#F5C93A", width: "90px" }}
@@ -130,7 +130,7 @@ const Card = ({
             </button>
 
             <p
-              className="fw-bold text-dark"
+              className="fw-bold text-dark text-uppercase"
               onClick={() => {
                 takeMeToHierarchy(userName);
               }}

@@ -77,9 +77,9 @@ const DownlineProfitLoss = () => {
         item.isTotalRow ? (
           <strong>{item.userName}</strong>
         ) : (
-          <button
-            className="btn btn-link p-0 text-decoration-none"
-            style={{ color: "black" }}
+          <Link
+            className="btn btn-link p-0 "
+          
             onClick={() =>
               item?.role === "user"
                 ? handleUserNavigateToProfitLoss(item.userName)
@@ -87,7 +87,7 @@ const DownlineProfitLoss = () => {
             }
           >
             {item.userName}
-          </button>
+          </Link>
         ),
     },
     {

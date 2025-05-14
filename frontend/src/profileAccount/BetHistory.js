@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import Pagination from "../components/common/Pagination";
 import "./BetHistory.css";
+import { isFormValidForApiCall } from "../Utils/helper";
 
 const BetHistory = ({
   setEndDate,
@@ -16,53 +17,60 @@ const BetHistory = ({
   currentPage,
   totalPages,
   handlePageChange,
-  SetBetHistoryData,
   formatDateForUi,
   dataType,
   dropdownOpen,
   handleDateForBetHistory,
 }) => {
-  console.log("", data);
-  const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+
   const handelGameId = (event) => {
-    setData((prevState) => ({
-      ...prevState,
+    setData((prev) => ({
+      ...prev,
       SelectedGameId: event.target.value,
       currentPage: 1,
+      dataHistory: [], // Clear previous data when game changes
     }));
   };
 
   const toggleDropdown = (id) => {
-    setData((prevState) => ({
-      ...prevState,
+    setData((prev) => ({
+      ...prev,
       dropdownOpen: dropdownOpen === id ? null : id,
     }));
   };
+
   const handelItemPerPage = (event) => {
-    setData((prevState) => ({
-      ...prevState,
+    setData((prev) => ({
+      ...prev,
       itemPerPage: Number(event.target.value),
-      currentPage: Number(currentPage),
+      currentPage: 1, // Reset to first page when items per page changes
     }));
   };
 
   const handleDataSourceChange = (e) => {
     const newDataSource = e.target.value;
-    SetBetHistoryData((prevState) => ({
-      ...prevState,
-      dataSource: newDataSource,
-      startDate:
-        newDataSource === "live"
-          ? new Date(new Date().setDate(new Date().getDate() - 1))
-          : null,
-      endDate: newDataSource === "live" ? new Date() : null,
-      currentPage: 1, // Reset to first page when data source changes
-    }));
+    const isLive = newDataSource === "live";
 
-    setIsSubmitDisabled(
-      newDataSource === "live" ||
-        (newDataSource !== "live" && (!startDate || !endDate))
-    );
+    setData((prev) => ({
+      ...prev,
+      dataSource: newDataSource,
+      startDate: isLive
+        ? new Date(new Date().setDate(new Date().getDate() - 1))
+        : null,
+      endDate: isLive ? new Date() : null,
+      currentPage: 1,
+      dataHistory: [], // Clear previous data when source changes
+    }));
+  };
+
+  const handleDataTypeChange = (e) => {
+    setData((prev) => ({
+      ...prev,
+      dataType: e.target.value,
+      currentPage: 1,
+      dataHistory: [], // Clear previous data when type changes
+    }));
   };
 
   const handleDateChange = (date, isStartDate) => {
@@ -71,28 +79,20 @@ const BetHistory = ({
     } else {
       setEndDate(date);
     }
-
-    setIsSubmitDisabled(
-      data.dataSource === "live" ||
-        !date ||
-        (isStartDate ? !endDate : !startDate)
-    );
   };
 
-  const handleSubmit = () => {
-    if (data.dataSource === "live") return;
-    handleDateForBetHistory();
-  };
-  useEffect(() => {
-    // Auto-fetch for LIVE data when sport or type changes
-    if (data.dataSource === "live" && data.SelectedGameId) {
-      handleDateForBetHistory();
+  const handleSubmit = async () => {
+    if (isFormValidForApiCall(data)) {
+      setIsLoading(true);
+      try {
+        await handleDateForBetHistory();
+      } finally {
+        setIsLoading(false);
+      }
     }
-  }, [data.SelectedGameId, data.dataType, data.dataSource]);
+  };
 
-  useEffect(() => {
-    setIsSubmitDisabled(data.dataSource === "live" || !startDate || !endDate);
-  }, [data.dataSource, startDate, endDate]);
+  const isSubmitDisabled = !isFormValidForApiCall(data) || isLoading;
 
   return (
     <div className="col-sm-8 mt-3">
@@ -103,14 +103,16 @@ const BetHistory = ({
         >
           <div className="form-group mb-3 mb-md-0 px-2">
             <div class="container">
-              <div class="row">
-                <div class="col-sm">Choose Sport</div>
-                {data.SelectedGameId !== null ? (
-                  <div class="col-sm">Data Source</div>
-                ) : null}
-                <div class="col-sm">Choose Type</div>
-                <div class="col-sm">From</div>
-                <div class="col-sm">To</div>
+              <div className="row">
+                <div className="col-sm">Choose Sport</div>
+                {data.SelectedGameId && (
+                  <div className="col-sm">Data Source</div>
+                )}
+                {data.SelectedGameId && (
+                  <div className="col-sm">Choose Type</div>
+                )}
+                <div className="col-sm">From</div>
+                <div className="col-sm">To</div>
               </div>
             </div>
 
@@ -119,87 +121,113 @@ const BetHistory = ({
                 {" "}
                 <select
                   className={`form-select ${
-                    data.SelectedGameId === null ? "bounce" : ""
+                    !data.SelectedGameId ? "bounce" : ""
                   }`}
-                  aria-label="Default select example"
+                  aria-label="Select sport"
                   onChange={handelGameId}
+                  value={data.SelectedGameId || ""}
                 >
-                  <option selected>Select</option>
-                  {data?.gameList.length &&
-                    data?.gameList?.map((game) => (
-                      <option value={game.gameId}>{game.gameName}</option>
-                    ))}
-                  <option value="lottery">Lottery</option>
+                  <option>Select Sport</option>
+                  {data.gameList.map((game) => (
+                    <option key={game.gameId} value={game.gameId}>
+                      {game.gameName}
+                    </option>
+                  ))}
+
+                  <option value="lottery" className="text-uppercase">
+                    {" "}
+                    Lottery
+                  </option>
                 </select>
               </div>
-              {data.SelectedGameId !== null ? (
-                <div class="col-sm">
-                  {" "}
+              {data.SelectedGameId && (
+                <div className="col-sm">
                   <select
-                    class="form-select form-select-sm w-100 m-1"
-                    aria-label="Default select example"
+                    className="form-select"
+                    aria-label="Select data source"
                     onChange={handleDataSourceChange}
+                    value={data.dataSource}
                   >
-                    <option value="live" selected>
-                      LIVE DATA
-                    </option>
+                    <option value="">Select Source</option>
+                    <option value="live">LIVE DATA</option>
                     <option value="backup">BACKUP DATA</option>
                     <option value="olddata">OLD DATA</option>
                   </select>
                 </div>
-              ) : null}
+              )}
 
-              <div class="col-sm">
-                {" "}
-                <select
-                  class="form-select"
-                  aria-label="Default select example"
-                  onChange={(e) => {
-                    SetBetHistoryData((prevState) => ({
-                      ...prevState,
-                      dataType: e.target.value,
-                    }));
-                  }}
-                >
-                  <option selected>Select</option>
-                  <option value="settle">Settle</option>
-                  <option value="unsettle">UnSettle</option>
-                  <option value="void">void</option>
-                </select>
-              </div>
+              {data.SelectedGameId && (
+                <div className="col-sm">
+                  <select
+                    className="form-select"
+                    aria-label="Select bet type"
+                    onChange={handleDataTypeChange}
+                    value={data.dataType}
+                  >
+                    <option value="">Select Type</option>
+                    <option value="settle">Settled</option>
+                    <option value="unsettle">Unsettled</option>
+                    <option value="void">Void</option>
+                  </select>
+                </div>
+              )}
 
               <div class="col-sm">
                 <DatePicker
-                selected={data.dataSource === "live" ? startDate : (startDate || null)}
+                  selected={startDate}
                   onChange={(date) => handleDateChange(date, true)}
                   readOnly={data.dataSource === "live"}
-                  onKeyDown={(e) => e.preventDefault()}
+                  selectsStart
+                  startDate={startDate}
+                  endDate={endDate}
+                  maxDate={endDate || new Date()}
                   placeholderText={
-                    data.dataSource === "live" ? "" : "Select date"
+                    data.dataSource === "live"
+                      ? "Auto-set for LIVE"
+                      : "Select start date"
                   }
                   className="form-control"
+                  disabled={!data.dataSource || data.dataSource === "live"}
                 />
               </div>
               <div class="col-sm">
                 {" "}
                 <DatePicker
-                  selected={data.dataSource === "live" ? endDate : (endDate || null)}
+                  selected={endDate}
                   onChange={(date) => handleDateChange(date, false)}
                   readOnly={data.dataSource === "live"}
-                  onKeyDown={(e) => e.preventDefault()}
+                  selectsEnd
+                  startDate={startDate}
+                  endDate={endDate}
+                  minDate={startDate}
+                  maxDate={new Date()}
                   placeholderText={
-                    data.dataSource === "live" ? "" : "Select date"
+                    data.dataSource === "live"
+                      ? "Auto-set for LIVE"
+                      : "Select end date"
                   }
                   className="form-control"
+                  disabled={!data.dataSource || data.dataSource === "live"}
                 />
               </div>
               <div class="col-sm">
                 <button
-                  className="btn btn-primary "
+                  className="btn btn-primary"
                   onClick={handleSubmit}
                   disabled={isSubmitDisabled}
                 >
-                  Get Statement
+                  {isLoading ? (
+                    <>
+                      <span
+                        className="spinner-border spinner-border-sm"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
+                      Loading...
+                    </>
+                  ) : (
+                    "Get Statement"
+                  )}
                 </button>
               </div>
             </div>
@@ -214,8 +242,11 @@ const BetHistory = ({
           style={{ backgroundColor: "#1E2761" }}
         >
           <b>
-            &nbsp;&nbsp;
-            {dataType === "void"
+            {!data.SelectedGameId
+              ? "Please Select A Sport"
+              : !data.dataType
+              ? "Please Select Bet Type"
+              : dataType === "void"
               ? "Void Game"
               : dataType === "settle"
               ? "Settled Bets"
@@ -224,15 +255,31 @@ const BetHistory = ({
               : "Bet History"}
           </b>
         </div>
-        <select className="w-25 m-1" onChange={handelItemPerPage}>
-          <option value="10" selected>
-            Showing 10 Entries
-          </option>
-          <option value="25">25 Entries</option>
-          <option value="50">50 Entries</option>
-          <option value="100">100 Entries</option>
-        </select>
-        {data.SelectedGameId === "lottery" ? (
+        {data.SelectedGameId && (
+          <select
+            className="w-25 m-1"
+            onChange={handelItemPerPage}
+            value={data.itemPerPage}
+          >
+            <option value="10">10 Entries</option>
+            <option value="25">25 Entries</option>
+            <option value="50">50 Entries</option>
+            <option value="100">100 Entries</option>
+          </select>
+        )}
+        {data.SelectedGameId === null ? (
+          <div className="alert alert-info fw-bold m-3" role="alert">
+            Please Select A Sport Name From Menubar
+          </div>
+        ) : !data.dataType ? (
+          <div className="alert alert-info fw-bold m-3" role="alert">
+            Please Select The Type Of Bet From Menubar
+          </div>
+        ) : data.dataHistory.length === 0 ? (
+          <div className="alert alert-info fw-bold m-3" role="alert">
+            No Data Found For Selected Criteria
+          </div>
+        ) : data.SelectedGameId === "lottery" ? (
           <ul class="list-group list-group-flush">
             <li class="list-group-item  p-0 m-1">
               <div class="white_card_body ">

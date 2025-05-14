@@ -94,4 +94,38 @@ export const getTicketStyle = (sem) => {
   };
 
   
+  // for bet history for users
+
+  // betHistoryHelpers.js
+export const initialBetHistoryState = {
+  gameList: [],
+  SelectedGameId: null,
+  dataHistory: [],
+  totalPages: 0,
+  totalData: 0,
+  currentPage: 1,
+  itemPerPage: 10,
+  endDate: null,
+  startDate: null,
+  dataSource: "", // Start with empty to force selection
+  dataType: "", // Start with empty to force selection
+  dropdownOpen: null,
+  backupStartDate: null,
+  backupEndDate: null,
+  initialized: false, // Track if initial setup is done
+};
+
+export const isFormValidForApiCall = (state) => {
+  // For initial call (without dates)
+  const hasRequiredSelections = 
+    state.SelectedGameId && 
+    state.dataSource && 
+    state.dataType;
   
+  // For date-filtered calls
+  const hasValidDates = 
+    state.dataSource === "live" || 
+    (state.startDate && state.endDate);
+  
+  return hasRequiredSelections && hasValidDates;
+};
