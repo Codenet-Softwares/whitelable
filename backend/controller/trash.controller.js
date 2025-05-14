@@ -15,7 +15,7 @@ async function checkHierarchyBalance(adminId) {
 
   for (const subAdmin of subAdmins) {
     const balance = await admin_Balance(subAdmin.adminId)
-    if (balance !== 0) {
+    if (balance[0]?.[0].adminBalance !== 0) {
       return true;
     }
 
@@ -42,7 +42,7 @@ export const moveAdminToTrash = async (req, res) => {
 
     const adminBalance = await admin_Balance(admin.adminId)
 
-    if (adminBalance !== 0) {
+    if (adminBalance[0]?.[0].adminBalance !== 0) {
       return res.status(statusCode.badRequest).json(
         apiResponseErr(null, false, statusCode.badRequest, `Balance should be 0 to move to Trash`)
       );

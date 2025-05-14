@@ -29,7 +29,7 @@ const ViewPartnershipAndCreditRefModal = (props) => {
     });
 
     if (response) {
-      SetViewCreditRefData(response.data.creditRefs);
+      SetViewCreditRefData(response.data);
     }
   }
 
@@ -39,7 +39,7 @@ const ViewPartnershipAndCreditRefModal = (props) => {
     });
 
     if (response) {
-      SetViewPartnershipData(response.data.partnerships);
+      SetViewPartnershipData(response.data);
     }
   }
 
@@ -90,7 +90,7 @@ const ViewPartnershipAndCreditRefModal = (props) => {
                         <td>{i + 1}</td>
 
                         <td>{formattedDate}</td>
-                        <td>{data.value}</td>
+                        <td>{data.creditRef}</td>
                       </tr>
                     );
                   })}
@@ -108,7 +108,7 @@ const ViewPartnershipAndCreditRefModal = (props) => {
                   <tr>
                     <th>Sl. No.</th>
                     <th>Date</th>
-                    <th>Credit Ref. Amount</th>
+                    <th>Partnership Amount</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -129,7 +129,7 @@ const ViewPartnershipAndCreditRefModal = (props) => {
                         <td>{i + 1}</td>
 
                         <td>{formattedDate}</td>
-                        <td>{data.value}</td>
+                        <td>{data.partnerships}</td>
                       </tr>
                     );
                   })}
