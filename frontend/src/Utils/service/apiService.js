@@ -996,6 +996,7 @@ export async function CreateInnerAnnouncement(body = {}, isToast = false) {
     throw error;
   }
 }
+
 export async function getInnerAnnouncement(body = {}, isToast = false) {
   try {
     const callParams = await getAuthCallParams(strings.GET, body, isToast);
@@ -1048,6 +1049,7 @@ export async function getOuterAnnouncement(body = {}, isToast = false) {
     throw error;
   }
 }
+
 export async function deleteOuterAnnouncement(announceId,body = {}, isToast = false) {
   try {
     const callParams = await getAuthCallParams(strings.DELETE, body, isToast);
