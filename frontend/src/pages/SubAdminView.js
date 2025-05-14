@@ -340,109 +340,122 @@ const SubAdminView = () => {
                                   <th scope="row">{index + 1}</th>
                                   <td>{user.userName}</td>
 
-                                <td>
-                                  <Link
-                                    to={`/ViewSubAdminPermission/${user.adminId}`}
-                                  >
-                                    <button className="btn btn-sm btn-success">
-                                      Go To
-                                    </button>
-                                  </Link>
-                                </td>
-                                <td>
-                                  <button
-                                    className="border border-1 w-75 text-center bg-success rounded-pill "
-                                    style={{ cursor: "auto" }}
-                                  >
-                                    {user.status}
-                                  </button>
-                                </td>
-                                <td>
-                                  <span className="mx-1">
+                                  <td>
+                                    <Link
+                                      to={`/ViewSubAdminPermission/${user.adminId}`}
+                                    >
+                                      <button className="btn btn-sm btn-success">
+                                        Go To
+                                      </button>
+                                    </Link>
+                                  </td>
+                                  <td>
                                     <button
-                                      className={`btn border border-2 rounded ${
-                                        ["Suspended"].includes(
-                                          store?.admin?.Status
-                                        )
-                                          ? "disabled"
-                                          : [store?.admin?.permission].some(
-                                              (role) => role === strings.status
-                                            )
-                                          ? ""
-                                          : permissionObj.allAdmin.includes(
-                                              store?.admin?.role
-                                            )
-                                          ? ""
-                                          : "disabled"
+                                      className={`border border-1 w-75 text-center text-uppercase rounded-pill text-white ${
+                                        user.status === "Active"
+                                          ? "bg-success"
+                                          : user.status === "Suspended"
+                                          ? "bg-danger"
+                                          : "bg-secondary"
                                       }`}
-                                      title="Setting"
-                                      type="button"
-                                      onClick={() =>
-                                        handleStatusModalShow(
-                                          user?.adminId,
-                                          user?.status,
-                                          user?.userName,
-                                          user?.role
-                                        )
-                                      }
+                                      style={{ cursor: "auto" }}
                                     >
-                                      <i className="fa-thin fas fa-gear"></i>
+                                      {user.status}
                                     </button>
-                                  </span>
-                                  <span className="mx-1">
-                                    <button
-                                       className={`btn border border-2 rounded  ${["Suspended", "Locked"].includes(user.status)
-                                        && "disabled"}`}
-                                      style={{ background: "lightgreen" }}
-                                      title="Reset Password"
-                                      onClick={() => openModal(user.userName)}
-                                    >
-                                      <i className="bi bi-shield-lock"></i>
-                                    </button>
-                                  </span>
-                                  {}{" "}
-                                  <span className="mx-1">
-                                    <button
-                                   className={`btn border border-2 rounded  ${["Suspended", "Locked"].includes(user.status)
-                                    && "disabled"}`}
-                                      style={{ background: "#ED5E68" }}
-                                      title="Delete"
-                                      onClick={(e) => {
-                                        handleDelete(user.adminId);
-                                      }}
-                                    >
-                                      <i class="fa-light fas fa-trash"></i>
-                                    </button>
-                                  </span>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </React.Fragment>
-                    ) : (
-                      <div
-                        className="alert text-dark p-4"
-                        role="alert"
-                        style={{
-                          background: "#1E2761",
-                          border: "2px solid #84B9DF",
-                        }}
-                      >
+                                  </td>
+                                  <td>
+                                    <span className="mx-1">
+                                      <button
+                                        className={`btn border border-2 rounded ${
+                                          ["Suspended"].includes(
+                                            store?.admin?.Status
+                                          )
+                                            ? "disabled"
+                                            : [store?.admin?.permission].some(
+                                                (role) =>
+                                                  role === strings.status
+                                              )
+                                            ? ""
+                                            : permissionObj.allAdmin.includes(
+                                                store?.admin?.role
+                                              )
+                                            ? ""
+                                            : "disabled"
+                                        }`}
+                                        title="Setting"
+                                        type="button"
+                                        onClick={() =>
+                                          handleStatusModalShow(
+                                            user?.adminId,
+                                            user?.status,
+                                            user?.userName,
+                                            user?.role
+                                          )
+                                        }
+                                      >
+                                        <i className="fa-thin fas fa-gear"></i>
+                                      </button>
+                                    </span>
+                                    <span className="mx-1">
+                                      <button
+                                        className={`btn border border-2 rounded  ${
+                                          ["Suspended", "Locked"].includes(
+                                            user.status
+                                          ) && "disabled"
+                                        }`}
+                                        style={{ background: "lightgreen" }}
+                                        title="Reset Password"
+                                        onClick={() => openModal(user.userName)}
+                                      >
+                                        <i className="bi bi-shield-lock"></i>
+                                      </button>
+                                    </span>
+                                    {}{" "}
+                                    <span className="mx-1">
+                                      <button
+                                        className={`btn border border-2 rounded  ${
+                                          ["Suspended", "Locked"].includes(
+                                            user.status
+                                          ) && "disabled"
+                                        }`}
+                                        style={{ background: "#ED5E68" }}
+                                        title="Delete"
+                                        onClick={(e) => {
+                                          handleDelete(user.adminId);
+                                        }}
+                                      >
+                                        <i class="fa-light fas fa-trash"></i>
+                                      </button>
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </React.Fragment>
+                      ) : (
                         <div
-                          className="alert-text d-flex justify-content-center text-light"
-                          style={{}}
+                          className="alert text-dark p-4"
+                          role="alert"
+                          style={{
+                            background: "#1E2761",
+                            border: "2px solid #84B9DF",
+                          }}
                         >
-                          <b> &#128680; No Data Found !! </b>
+                          <div
+                            className="alert-text d-flex justify-content-center text-light"
+                            style={{}}
+                          >
+                            <b> &#128680; No Data Found !! </b>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
         </div>
         {subAdminData?.userList.length > 0 && (
           <Pagination
