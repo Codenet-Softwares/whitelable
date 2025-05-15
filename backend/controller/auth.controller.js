@@ -7,6 +7,7 @@ import { statusCode } from '../helper/statusCodes.js';
 import CustomError from '../helper/extendError.js';
 import axios from 'axios';
 import { admin_Balance } from './transaction.controller.js';
+import Permission from '../models/permissions.model.js';
 
 // done
 export const adminLogin = async (req, res) => {
@@ -24,8 +25,8 @@ export const adminLogin = async (req, res) => {
             throw new CustomError('Account is locked', null, statusCode.badRequest);
         }
         
-        const roles = existingAdmin.roles.map((role) => role.role);
-        if (roles.includes(string.user)) {
+        const roles = existingAdmin.role;
+        if (roles === string.user) {
             await existingAdmin.update({ loginStatus: 'login failed' });
             return res.status(statusCode.unauthorize).send(apiResponseErr(null, false, statusCode.unauthorize, 'User does not exist'));
         }
@@ -36,9 +37,30 @@ export const adminLogin = async (req, res) => {
             return res.status(statusCode.badRequest).send(apiResponseErr(null, false, statusCode.badRequest, messages.invalidPassword));
         }
 
-        if (roles.includes(string.superAdmin)) {
+        if (roles === string.superAdmin) {
             existingAdmin.isReset = false;
         }
+        let permission = [];
+
+        if (
+          roles === string.superAdmin ||
+          roles === string.hyperAgent ||
+          roles === string.superAgent ||
+          roles === string.masterAgent
+        ) {
+          const result = await Permission.findOne({ where: { UserId: existingAdmin.adminId } });
+          permission = result ? [result.permission] : [];
+        } else if (
+          roles === string.subWhiteLabel ||
+          roles === string.subHyperAgent ||
+          roles === string.subSuperAgent ||
+          roles === string.subMasterAgent
+        ) {
+          const results = await Permission.findAll({ where: { UserId: existingAdmin.adminId } });
+          permission = results.map((perm) => perm.permission);
+        }
+
+        console.log('Permission:', permission);
 
         if (existingAdmin.isReset === true) {
             const resetTokenResponse = {
@@ -46,7 +68,7 @@ export const adminLogin = async (req, res) => {
                 userName: null,
                 userType: null,
                 isReset: existingAdmin.isReset,
-                roles: []
+                role: ''
             };
             return res
         .status(statusCode.success)
@@ -64,9 +86,9 @@ export const adminLogin = async (req, res) => {
         else {
             let adminIdToSend;
 
-            if ([string.superAdmin, string.whiteLabel, string.hyperAgent, string.superAgent].includes(roles[0])) {
+            if ([string.superAdmin, string.whiteLabel, string.hyperAgent, string.superAgent].includes(roles)) {
                 adminIdToSend = existingAdmin.adminId;
-            } else if ([string.subWhiteLabel, string.subAdmin, string.subHyperAgent, string.subSuperAgent, string.subMasterAgent].includes(roles[0])) {
+            } else if ([string.subWhiteLabel, string.subAdmin, string.subHyperAgent, string.subSuperAgent, string.subMasterAgent].includes(roles)) {
                 adminIdToSend = existingAdmin.createdById;
             } else {
                 adminIdToSend = existingAdmin.adminId;
@@ -79,11 +101,9 @@ export const adminLogin = async (req, res) => {
                 createdById: existingAdmin.createdById,
                 createdByUser: existingAdmin.createdByUser,
                 userName: existingAdmin.userName,
-                balance : adminBalance,
-                roles: existingAdmin.roles.map((role) => ({
-                    role: role.role,
-                    permission: role.permission,
-                })),
+                balance : adminBalance[0]?.[0].adminBalance,
+                role: existingAdmin.role,
+                permission: permission || [],
                 status: existingAdmin.isActive
                     ? 'active'
                     : !existingAdmin.locked
@@ -99,10 +119,8 @@ export const adminLogin = async (req, res) => {
                 createdByUser: existingAdmin.createdByUser,
                 userName: existingAdmin.userName,
                 balance : adminBalance,
-                roles: existingAdmin.roles.map((role) => ({
-                    role: role.role,
-                    permission: role.permission,
-                })),
+                role: existingAdmin.role,
+                permission: permission || [],
                 status: existingAdmin.isActive
                     ? 'active'
                     : !existingAdmin.locked
@@ -131,6 +149,7 @@ export const adminLogin = async (req, res) => {
         }
 
     } catch (error) {
+        console.log('Error in adminLogin:', error);
         res.status(statusCode.internalServerError).send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
     }
 };
@@ -168,7 +187,7 @@ export const adminPasswordResetCode = async (req, res) => {
         const passwordSalt = await bcrypt.genSalt();
         const encryptedPassword = await bcrypt.hash(password, passwordSalt);
 
-        const token = jwt.sign({ roles: req.user.roles }, process.env.JWT_SECRET_KEY);
+        const token = jwt.sign({ role: req.user.role }, process.env.JWT_SECRET_KEY);
 
         const baseUrl = process.env.COLOR_GAME_URL;
 
@@ -177,7 +196,7 @@ export const adminPasswordResetCode = async (req, res) => {
             password
         }
 
-        if(existingUser.roles[0].role === "user"){
+        if(existingUser.role === "user"){
             const response = await axios.post(
                 `${baseUrl}/api/external-reset-password`,
                 dataToSend,
@@ -195,7 +214,7 @@ export const adminPasswordResetCode = async (req, res) => {
             }
         }
         
-        if (existingUser.roles[0].role === "subAdmin") {
+        if (existingUser.role === "subAdmin") {
             await admins.update({ password: encryptedPassword, isReset: true }, { where: { userName } });
         } else {
             await admins.update({ password: encryptedPassword }, { where: { userName } });

@@ -21,33 +21,14 @@ import { accountStatementInitialState } from "../Utils/service/initiateState";
 import BetHistory from "./BetHistory";
 import ProfitAndLoss from "./ProfitAndLoss";
 import strings from "../Utils/constant/stringConstant";
+import { initialBetHistoryState, isFormValidForApiCall } from "../Utils/helper";
 
 const AccountLandingModal = () => {
   const { userName, toggle } = useParams();
   const navigate = useNavigate();
   const [state, setState] = useState(accountStatementInitialState());
-  const [backupDate, setbackupDate] = useState({
-    endDate: null,
-    startDate: null,
-  });
-  const [betHistoryData, SetBetHistoryData] = useState({
-    gameList: [],
-    SelectedGameId: null,
-    dataHistory: [],
-    totalPages: 0,
-    totalData: 0,
-    currentPage: 1,
-    itemPerPage: 10,
-    endDate: new Date(),
-    startDate: (() => {
-      const date = new Date();
-      date.setDate(date.getDate() - 1);
-      return date;
-    })(),
-    dataSource: "live",
-    dataType: "",
-    dropdownOpen: null,
-  });
+
+  const [betHistoryData, SetBetHistoryData] = useState(initialBetHistoryState);
 
   const [profitLossData, SetProfitLossData] = useState({
     dataGameWise: [],
@@ -64,7 +45,6 @@ const AccountLandingModal = () => {
     backupStartDate: null,
     backupEndDate: null,
   });
-  console.log("toggle", state?.profileView?.roles[0]?.role)
 
   const formatDate = (dateString) => {
     // Parse the date string to create a Date object
@@ -87,17 +67,24 @@ const AccountLandingModal = () => {
   }, [userName, toggle]);
 
   useEffect(() => {
-    if (toggle === 1) {
+    if (toggle === "statement") {
       getAll_transactionView();
     }
     if (toggle === "activity") {
       getActivityLog();
     }
-    if (toggle === "betHistory") {
-      if (betHistoryData.SelectedGameId === "lottery") {
-        getHistoryForLotteryBetHistory();
-      } else {
-        getHistoryForBetHistory();
+    if (toggle === "betHistory" && betHistoryData.initialized) {
+      // Only make initial API call if we have all required selections
+      if (
+        betHistoryData.SelectedGameId &&
+        betHistoryData.dataSource &&
+        betHistoryData.dataType
+      ) {
+        if (betHistoryData.SelectedGameId === "lottery") {
+          getHistoryForLotteryBetHistory();
+        } else {
+          getHistoryForBetHistory();
+        }
       }
     }
   }, [
@@ -115,6 +102,7 @@ const AccountLandingModal = () => {
     betHistoryData.dataSource,
     betHistoryData.dataType,
     toggle,
+    betHistoryData.initialized,
   ]);
 
   useEffect(() => {
@@ -174,73 +162,63 @@ const AccountLandingModal = () => {
     }));
   }
 
-  // For Bet History Page DropDown
-  // async function getGameForBetHistory() {
-  //   const response = await getGameNames();
-  //   SetBetHistoryData((betHistoryData) => ({
-  //     ...betHistoryData,
-  //     gameList: response.data || [] ,
-  //   }));
-  // }
+  // FOR BETHISTORY GAMENAMES
   async function getGameForBetHistory() {
-    try {
-      const response = await getGameNames();
+    const response = await getGameNames();
+    const gameList = response?.data || [];
 
-      // Validate response and fallback if data is null
-      const gameList = response?.data || []; // Fallback to an empty array if data is null
-
-      // Update state with validated data
-      SetBetHistoryData((betHistoryData) => ({
-        ...betHistoryData,
-        gameList: gameList,
-      }));
-    } catch (error) {
-      console.error("Error fetching game names:", error);
-
-      // Handle the error by setting a default value
-      SetBetHistoryData((betHistoryData) => ({
-        ...betHistoryData,
-        gameList: [], // Fallback to an empty array
-      }));
-    }
+    SetBetHistoryData((prev) => ({
+      ...prev,
+      gameList,
+      initialized: true,
+    }));
   }
-
-  // For Bet History Data to show
+  // FOR BETHISTORY OF COLORGAME
   async function getHistoryForBetHistory() {
+    if (!isFormValidForApiCall(betHistoryData)) return;
+
     const response = await getBetHistory({
       userName,
       gameId: betHistoryData.SelectedGameId,
-      fromDate: formatDate(betHistoryData.startDate),
-      toDate: formatDate(betHistoryData.endDate),
-      page: betHistoryData.currentPage || "1",
-      limit: betHistoryData.itemPerPage || "10",
+      fromDate: betHistoryData.startDate
+        ? formatDate(betHistoryData.startDate)
+        : "",
+      toDate: betHistoryData.endDate ? formatDate(betHistoryData.endDate) : "",
+      page: betHistoryData.currentPage,
+      limit: betHistoryData.itemPerPage,
       dataSource: betHistoryData.dataSource,
       dataType: betHistoryData.dataType,
     });
-    SetBetHistoryData((prevState) => ({
-      ...prevState,
-      dataHistory: response?.data,
-      totalPages: response?.pagination?.totalPages,
-      totalData: response?.pagination?.totalItems,
+
+    SetBetHistoryData((prev) => ({
+      ...prev,
+      dataHistory: response?.data || [],
+      totalPages: response?.pagination?.totalPages || 0,
+      totalData: response?.pagination?.totalItems || 0,
     }));
   }
-
+  // FOR BETHISTORY OF LOTTERY
   async function getHistoryForLotteryBetHistory() {
+    if (!isFormValidForApiCall(betHistoryData)) return;
+
     const response = await getLotteryBetHistory({
       userName,
       gameId: betHistoryData.SelectedGameId,
-      fromDate: formatDate(betHistoryData.startDate),
-      toDate: formatDate(betHistoryData.endDate),
-      page: betHistoryData.currentPage || "1",
-      limit: betHistoryData.itemPerPage || "10",
+      fromDate: betHistoryData.startDate
+        ? formatDate(betHistoryData.startDate)
+        : "",
+      toDate: betHistoryData.endDate ? formatDate(betHistoryData.endDate) : "",
+      page: betHistoryData.currentPage,
+      limit: betHistoryData.itemPerPage,
       dataSource: betHistoryData.dataSource,
       dataType: betHistoryData.dataType,
     });
-    SetBetHistoryData((prevState) => ({
-      ...prevState,
-      dataHistory: response?.data,
-      totalPages: response?.pagination?.totalPages,
-      totalData: response?.pagination?.totalItems,
+
+    SetBetHistoryData((prev) => ({
+      ...prev,
+      dataHistory: response?.data || [],
+      totalPages: response?.pagination?.totalPages || 0,
+      totalData: response?.pagination?.totalItems || 0,
     }));
   }
 
@@ -305,23 +283,23 @@ const AccountLandingModal = () => {
   };
 
   const handelStatement = () => {
-    navigate(`/account-landing/${userName}/statement`)
+    navigate(`/account-landing/${userName}/statement`);
   };
 
   const handelActivity = () => {
-    navigate(`/account-landing/${userName}/activity`)
+    navigate(`/account-landing/${userName}/activity`);
   };
 
   const handelProfile = () => {
-    navigate(`/account-landing/${userName}/profile`)
+    navigate(`/account-landing/${userName}/profile`);
   };
 
   const handelBetHistory = () => {
-    navigate(`/account-landing/${userName}/betHistory`)
+    navigate(`/account-landing/${userName}/betHistory`);
   };
 
   const handelProfitLoss = () => {
-    navigate(`/account-landing/${userName}/profit_loss`)
+    navigate(`/account-landing/${userName}/profit_loss`);
   };
 
   const handleDateStatement = () => {
@@ -339,7 +317,13 @@ const AccountLandingModal = () => {
       endDate: formatDate(profitLossData.backupEndDate),
     }));
   };
-
+ const handleDateForBetHistory = () => {
+  if (betHistoryData.SelectedGameId === "lottery") {
+    getHistoryForLotteryBetHistory();
+  } else {
+    getHistoryForBetHistory();
+  }
+};
   function formatDateForUi(dateString) {
     const options = {
       year: "numeric",
@@ -412,6 +396,7 @@ const AccountLandingModal = () => {
         formatDateForUi={formatDateForUi}
         dataType={betHistoryData.dataType}
         dropdownOpen={betHistoryData.dropdownOpen}
+        handleDateForBetHistory={handleDateForBetHistory}
       />
     );
   } else if (toggle === "profit_loss") {
@@ -448,26 +433,22 @@ const AccountLandingModal = () => {
       <div className="row row-no-gutters">
         {/* First Section */}
         <div className="col-sm-4">
-
           <span className="me-3" onClick={() => navigate(-1)}>
             <button className="btn btn-secondary">&#8592;</button>
           </span>
           <div className="card mt-3" style={{ width: "18rem" }}>
             <ul className="list-group list-group-flush">
-
               <li
                 className="list-group-item text-white h6 text-uppercase text-center"
                 style={{ backgroundColor: "#1E2761" }}
               >
                 My Account
-
               </li>
               <li
                 className="list-group-item"
                 style={{
                   cursor: "pointer",
-                  backgroundColor:
-                    toggle === "statement" ? "#d1d9f0" : "",
+                  backgroundColor: toggle === "statement" ? "#d1d9f0" : "",
                 }}
                 onClick={handelStatement}
               >
@@ -477,8 +458,7 @@ const AccountLandingModal = () => {
                 className="list-group-item"
                 style={{
                   cursor: "pointer",
-                  backgroundColor:
-                    toggle === "activity" ? "#d1d9f0" : "",
+                  backgroundColor: toggle === "activity" ? "#d1d9f0" : "",
                 }}
                 onClick={handelActivity}
               >
@@ -488,22 +468,20 @@ const AccountLandingModal = () => {
                 className="list-group-item"
                 style={{
                   cursor: "pointer",
-                  backgroundColor:
-                    toggle === "profile" ? "#d1d9f0" : "",
+                  backgroundColor: toggle === "profile" ? "#d1d9f0" : "",
                 }}
                 onClick={handelProfile}
               >
                 Profile
               </li>
-              {state?.profileView?.roles[0]?.role === strings.user && (
+              {state?.profileView?.role === strings.user && (
                 <>
                   {" "}
                   <li
                     className="list-group-item"
                     style={{
                       cursor: "pointer",
-                      backgroundColor:
-                        toggle === "betHistory" ? "#d1d9f0" : "",
+                      backgroundColor: toggle === "betHistory" ? "#d1d9f0" : "",
                     }}
                     onClick={handelBetHistory}
                   >

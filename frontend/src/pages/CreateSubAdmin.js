@@ -46,7 +46,6 @@ const CreateSubAdmin = () => {
   } = useFormik({
     initialValues: {
       ...createSubAdminState,
-      roles: createSubAdminState.roles || [{ permission: [] }],
     },
     validationSchema: CreateSubAdminSchema,
     onSubmit: async (values, action) => {
@@ -66,10 +65,10 @@ const CreateSubAdmin = () => {
   const handleCheckboxChange = (event) => {
     const { name, checked } = event.target;
     const updatedPermissions = checked
-      ? [...values.roles[0].permission, name]
-      : values.roles[0].permission.filter((item) => item !== name);
+      ? [...values.permission, name]
+      : values.permission.filter((item) => item !== name);
 
-    setFieldValue("roles[0].permission", updatedPermissions);
+    setFieldValue("permission", updatedPermissions);
   };
   async function create_SubAdmin(values) {
     setIsLoading(true);
@@ -173,7 +172,7 @@ const CreateSubAdmin = () => {
                             type="checkbox"
                             className="form-check-input"
                             name={permission.role}
-                            checked={values.roles[0].permission.includes(
+                            checked={values.permission.includes(
                               permission.role
                             )}
                             onChange={handleCheckboxChange}
