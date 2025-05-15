@@ -55,12 +55,10 @@ const BetHistory = ({
     setData((prev) => ({
       ...prev,
       dataSource: newDataSource,
-      startDate: isLive
-        ? new Date(new Date().setDate(new Date().getDate() - 1))
-        : null,
-      endDate: isLive ? new Date() : null,
+      startDate: isLive ? new Date() : null, // Set today's date for LIVE
+      endDate: isLive ? new Date() : null, // Set today's date for LIVE
       currentPage: 1,
-      dataHistory: [], // Clear previous data when source changes
+      dataHistory: [], // Clear previous data
     }));
   };
 
@@ -177,17 +175,13 @@ const BetHistory = ({
                   selected={startDate}
                   onChange={(date) => handleDateChange(date, true)}
                   readOnly={data.dataSource === "live"}
-                  selectsStart
-                  startDate={startDate}
-                  endDate={endDate}
-                  maxDate={endDate || new Date()}
                   placeholderText={
                     data.dataSource === "live"
                       ? "Auto-set for LIVE"
                       : "Select start date"
                   }
                   className="form-control"
-                  disabled={!data.dataSource || data.dataSource === "live"}
+                  disabled={data.dataSource === "live"} // Disable for LIVE data
                 />
               </div>
               <div class="col-sm">
@@ -196,38 +190,26 @@ const BetHistory = ({
                   selected={endDate}
                   onChange={(date) => handleDateChange(date, false)}
                   readOnly={data.dataSource === "live"}
-                  selectsEnd
-                  startDate={startDate}
-                  endDate={endDate}
-                  minDate={startDate}
-                  maxDate={new Date()}
                   placeholderText={
                     data.dataSource === "live"
                       ? "Auto-set for LIVE"
                       : "Select end date"
                   }
                   className="form-control"
-                  disabled={!data.dataSource || data.dataSource === "live"}
+                  disabled={data.dataSource === "live"} // Disable for LIVE data
                 />
               </div>
               <div class="col-sm">
                 <button
                   className="btn btn-primary"
                   onClick={handleSubmit}
-                  disabled={isSubmitDisabled}
+                  disabled={
+                    data.dataSource === "live" ||
+                    !isFormValidForApiCall(data) ||
+                    isLoading
+                  }
                 >
-                  {isLoading ? (
-                    <>
-                      <span
-                        className="spinner-border spinner-border-sm"
-                        role="status"
-                        aria-hidden="true"
-                      ></span>
-                      Loading...
-                    </>
-                  ) : (
-                    "Get Statement"
-                  )}
+                  {isLoading ? "Loading..." : "Get Statement"}
                 </button>
               </div>
             </div>

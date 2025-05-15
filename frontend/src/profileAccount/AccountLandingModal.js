@@ -66,44 +66,62 @@ const AccountLandingModal = () => {
     }
   }, [userName, toggle]);
 
-  useEffect(() => {
-    if (toggle === "statement") {
-      getAll_transactionView();
-    }
-    if (toggle === "activity") {
-      getActivityLog();
-    }
-    if (toggle === "betHistory" && betHistoryData.initialized) {
-      // Only make initial API call if we have all required selections
-      if (
-        betHistoryData.SelectedGameId &&
-        betHistoryData.dataSource &&
-        betHistoryData.dataType
-      ) {
-        if (betHistoryData.SelectedGameId === "lottery") {
+useEffect(() => {
+  if (toggle === "statement") {
+    getAll_transactionView();
+  }
+
+  if (toggle === "activity") {
+    getActivityLog();
+  }
+
+  if (toggle === "betHistory" && betHistoryData.initialized) {
+    const {
+      SelectedGameId,
+      dataSource,
+      dataType,
+      startDate,
+      endDate,
+    } = betHistoryData;
+
+    const isLive = dataSource === "live";
+    const isBackup = dataSource === "backup" || dataSource === "olddata";
+    const noDatesSelected = !startDate && !endDate;
+
+    if (SelectedGameId && dataSource && dataType) {
+      if (isLive) {
+        if (SelectedGameId === "lottery") {
+          getHistoryForLotteryBetHistory();
+        } else {
+          getHistoryForBetHistory();
+        }
+      } else if (isBackup && noDatesSelected) {
+        console.log("Fetching backup/olddata with empty dates");
+        if (SelectedGameId === "lottery") {
           getHistoryForLotteryBetHistory();
         } else {
           getHistoryForBetHistory();
         }
       }
     }
-  }, [
-    userName,
-    state.currentPage,
-    state.startDate,
-    state.endDate,
-    state.totalEntries,
-    betHistoryData.SelectedGameId,
-    betHistoryData.currentPage,
-    betHistoryData.itemPerPage,
-    betHistoryData.endDate,
-    betHistoryData.startDate,
-    state.dataSource,
-    betHistoryData.dataSource,
-    betHistoryData.dataType,
-    toggle,
-    betHistoryData.initialized,
-  ]);
+  }
+}, [
+  userName,
+  state.currentPage,
+  state.startDate,
+  state.endDate,
+  state.totalEntries,
+  betHistoryData.SelectedGameId,
+  betHistoryData.currentPage,
+  betHistoryData.itemPerPage,
+  betHistoryData.endDate,
+  betHistoryData.startDate,
+  betHistoryData.dataSource,
+  betHistoryData.dataType,
+  toggle,
+  betHistoryData.initialized,
+]);
+
 
   useEffect(() => {
     if (toggle === "profit_loss") {
@@ -162,7 +180,7 @@ const AccountLandingModal = () => {
     }));
   }
 
-  // FOR BETHISTORY GAMENAMES
+  // FOR BETHISTORY GAMENAMES  ONLY FOR COLORGAMES in slect dropdown
   async function getGameForBetHistory() {
     const response = await getGameNames();
     const gameList = response?.data || [];
@@ -173,54 +191,65 @@ const AccountLandingModal = () => {
       initialized: true,
     }));
   }
-  // FOR BETHISTORY OF COLORGAME
-  async function getHistoryForBetHistory() {
-    if (!isFormValidForApiCall(betHistoryData)) return;
+ // FOR BETHISTORY OF COLORGAME
+async function getHistoryForBetHistory() {
+  const { dataSource, startDate, endDate, SelectedGameId, currentPage, itemPerPage, dataType } = betHistoryData;
 
-    const response = await getBetHistory({
-      userName,
-      gameId: betHistoryData.SelectedGameId,
-      fromDate: betHistoryData.startDate
-        ? formatDate(betHistoryData.startDate)
-        : "",
-      toDate: betHistoryData.endDate ? formatDate(betHistoryData.endDate) : "",
-      page: betHistoryData.currentPage,
-      limit: betHistoryData.itemPerPage,
-      dataSource: betHistoryData.dataSource,
-      dataType: betHistoryData.dataType,
-    });
+  const isBackup = dataSource === "backup" || dataSource === "olddata";
+  const noDatesSelected = !startDate && !endDate;
 
-    SetBetHistoryData((prev) => ({
-      ...prev,
-      dataHistory: response?.data || [],
-      totalPages: response?.pagination?.totalPages || 0,
-      totalData: response?.pagination?.totalItems || 0,
-    }));
-  }
-  // FOR BETHISTORY OF LOTTERY
-  async function getHistoryForLotteryBetHistory() {
-    if (!isFormValidForApiCall(betHistoryData)) return;
+  // Only block API call if LIVE or if BACKUP but dates are partially selected
+  const shouldValidate = dataSource === "live" || (isBackup && (startDate || endDate));
+  if (shouldValidate && !isFormValidForApiCall(betHistoryData)) return;
 
-    const response = await getLotteryBetHistory({
-      userName,
-      gameId: betHistoryData.SelectedGameId,
-      fromDate: betHistoryData.startDate
-        ? formatDate(betHistoryData.startDate)
-        : "",
-      toDate: betHistoryData.endDate ? formatDate(betHistoryData.endDate) : "",
-      page: betHistoryData.currentPage,
-      limit: betHistoryData.itemPerPage,
-      dataSource: betHistoryData.dataSource,
-      dataType: betHistoryData.dataType,
-    });
+  const response = await getBetHistory({
+    userName,
+    gameId: SelectedGameId,
+    fromDate: startDate ? formatDate(startDate) : "",
+    toDate: endDate ? formatDate(endDate) : "",
+    page: currentPage,
+    limit: itemPerPage,
+    dataSource,
+    dataType,
+  });
 
-    SetBetHistoryData((prev) => ({
-      ...prev,
-      dataHistory: response?.data || [],
-      totalPages: response?.pagination?.totalPages || 0,
-      totalData: response?.pagination?.totalItems || 0,
-    }));
-  }
+  SetBetHistoryData((prev) => ({
+    ...prev,
+    dataHistory: response?.data || [],
+    totalPages: response?.pagination?.totalPages || 0,
+    totalData: response?.pagination?.totalItems || 0,
+  }));
+}
+
+// FOR BETHISTORY OF LOTTERY
+async function getHistoryForLotteryBetHistory() {
+  const { dataSource, startDate, endDate, SelectedGameId, currentPage, itemPerPage, dataType } = betHistoryData;
+
+  const isBackup = dataSource === "backup" || dataSource === "olddata";
+  const noDatesSelected = !startDate && !endDate;
+
+  const shouldValidate = dataSource === "live" || (isBackup && (startDate || endDate));
+  if (shouldValidate && !isFormValidForApiCall(betHistoryData)) return;
+
+  const response = await getLotteryBetHistory({
+    userName,
+    gameId: SelectedGameId,
+    fromDate: startDate ? formatDate(startDate) : "",
+    toDate: endDate ? formatDate(endDate) : "",
+    page: currentPage,
+    limit: itemPerPage,
+    dataSource,
+    dataType,
+  });
+
+  SetBetHistoryData((prev) => ({
+    ...prev,
+    dataHistory: response?.data || [],
+    totalPages: response?.pagination?.totalPages || 0,
+    totalData: response?.pagination?.totalItems || 0,
+  }));
+}
+
 
   // For Game wise Profit Loss Data to show
   async function getProfitLossGameWise() {
