@@ -105,8 +105,8 @@ export const initialBetHistoryState = {
   totalData: 0,
   currentPage: 1,
   itemPerPage: 10,
-  endDate: null,
-  startDate: null,
+  endDate: "",
+  startDate: "",
   dataSource: "", // Start with empty to force selection
   dataType: "", // Start with empty to force selection
   dropdownOpen: null,
@@ -115,17 +115,17 @@ export const initialBetHistoryState = {
   initialized: false, // Track if initial setup is done
 };
 
+// betHistoryHelpers.js
 export const isFormValidForApiCall = (state) => {
-  // For initial call (without dates)
+  // Basic validation - must have these three selections
   const hasRequiredSelections = 
     state.SelectedGameId && 
     state.dataSource && 
     state.dataType;
   
-  // For date-filtered calls
-  const hasValidDates = 
-    state.dataSource === "live" || 
-    (state.startDate && state.endDate);
+  // For LIVE data - no date validation needed
+  if (state.dataSource === "live") return hasRequiredSelections;
   
-  return hasRequiredSelections && hasValidDates;
+  // For non-LIVE data - must have both dates
+  return hasRequiredSelections && state.startDate && state.endDate;
 };
