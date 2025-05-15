@@ -13,6 +13,12 @@ import { liveMarketBetRoute } from './routes/liveMarketBet.route.js';
 import { activeAdminRoute } from './routes/activeAdmin.route.js';
 import { lotteryGameModule } from './routes/lotteryGame.route.js';
 
+import './models/permissions.model.js';
+import { SliderRoute } from './routes/slider.route.js';
+import { AnnouncementRoute } from './routes/announcement.route.js';
+import './models/creditRefs.model.js';
+import './models/partnerships.model.js'
+
 if (process.env.NODE_ENV === 'production') {
   dotenv.config({ path: '.env.production' });
 } else {
@@ -46,8 +52,10 @@ colorGameUserRoute(app);
 liveMarketBetRoute(app);
 activeAdminRoute(app);
 lotteryGameModule(app);
+SliderRoute(app),
+AnnouncementRoute(app)
 
-sequelize.sync({ alter: false })
+sequelize.sync({ alter: true })
   .then(() => {
     console.log('Database & tables created!');
     app.listen(process.env.PORT, () => {

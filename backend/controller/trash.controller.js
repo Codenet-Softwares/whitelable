@@ -7,12 +7,15 @@ import axios from 'axios';
 import { string } from '../constructor/string.js';
 import { Op } from 'sequelize';
 import { admin_Balance } from './transaction.controller.js';
+import CreditRef from '../models/creditRefs.model.js';
+import Partnership from '../models/partnerships.model.js';
 
 async function checkHierarchyBalance(adminId) {
   const subAdmins = await admins.findAll({ where: { createdById: adminId } });
 
   for (const subAdmin of subAdmins) {
-    if (subAdmin.balance !== 0) {
+    const balance = await admin_Balance(subAdmin.adminId)
+    if (balance[0]?.[0].adminBalance !== 0) {
       return true;
     }
 
@@ -39,7 +42,7 @@ export const moveAdminToTrash = async (req, res) => {
 
     const adminBalance = await admin_Balance(admin.adminId)
 
-    if (adminBalance !== 0) {
+    if (adminBalance[0]?.[0].adminBalance !== 0) {
       return res.status(statusCode.badRequest).json(
         apiResponseErr(null, false, statusCode.badRequest, `Balance should be 0 to move to Trash`)
       );
@@ -59,28 +62,23 @@ export const moveAdminToTrash = async (req, res) => {
       return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, `Admin is inactive or locked`));
     }
 
+
     const updatedTransactionData = {
       adminId: admin.adminId,
-      roles: admin.roles || [],
+      role: admin.role || '',
       userName: admin.userName,
       password: admin.password,
-      balance: admin.balance || 0,
-      loadBalance: admin.loadBalance || 0,
-      creditRefs: admin.creditRefs || [],
-      partnerships: admin.partnerships || [],
+      loadBalance: adminBalance || 0 ,
       createdById: admin.createdById || '',
       createdByUser: admin.createdByUser || '',
     };
 
     const trashEntry = await trash.create({
       trashId: uuidv4(),
-      roles: updatedTransactionData.roles,
+      role: updatedTransactionData.role,
       userName: updatedTransactionData.userName,
       password: updatedTransactionData.password,
-      balance: updatedTransactionData.balance,
-      loadBalance: updatedTransactionData.loadBalance,
-      creditRefs: updatedTransactionData.creditRefs,
-      partnerships: updatedTransactionData.partnerships,
+      loadBalance : updatedTransactionData.loadBalance,
       createdById: updatedTransactionData.createdById,
       adminId: updatedTransactionData.adminId,
       createdByUser: updatedTransactionData.createdByUser,
@@ -96,9 +94,8 @@ export const moveAdminToTrash = async (req, res) => {
       return res.status(statusCode.badRequest).json(apiResponseErr(null, statusCode.badRequest, false, `Failed to delete Admin User with id: ${requestId}`));
     }
 
-    // sync with colorgame user
     let message = '';
-    if (admin.roles[0].role === string.user) {
+    if (admin.role === string.user) {
       const dataToSend = {
         userId: requestId,
       };
@@ -113,7 +110,7 @@ export const moveAdminToTrash = async (req, res) => {
 
     return res.status(statusCode.success).json(apiResponseSuccess(null, statusCode.success, true, 'Admin User moved to Trash' + " " + message));
   } catch (error) {
-    res
+   return res
       .status(statusCode.internalServerError)
       .send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
   }
@@ -247,13 +244,9 @@ export const restoreAdminUser = async (req, res) => {
     }
 
     const restoreRemoveData = {
-      roles: existingAdminUser.roles,
+      role: existingAdminUser.role,
       userName: existingAdminUser.userName,
       password: existingAdminUser.password,
-      balance: existingAdminUser.balance,
-      loadBalance: existingAdminUser.loadBalance,
-      creditRefs: existingAdminUser.creditRefs,
-      partnerships: existingAdminUser.partnerships,
       createdById: existingAdminUser.createdById,
       adminId: existingAdminUser.adminId,
       createdByUser: existingAdminUser.createdByUser,
@@ -273,7 +266,7 @@ export const restoreAdminUser = async (req, res) => {
     
     // sync with colorgame user
     let message = '';
-    if (existingAdminUser.roles[0].role === string.user) {
+    if (existingAdminUser.role === string.user) {
     const dataToSend = {
       userId : adminId,
     };
@@ -290,7 +283,7 @@ export const restoreAdminUser = async (req, res) => {
   }
     return res.status(statusCode.success).json(apiResponseSuccess(null, statusCode.success, true, 'Admin restored from trash' + " " + message));
   } catch (error) {
-    res
+    return res
       .status(statusCode.internalServerError)
       .send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
   }
