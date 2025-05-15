@@ -708,162 +708,36 @@ export const profileView = async (req, res) => {
 export const buildRootPath = async (req, res) => {
   try {
     const { userName, action } = req.params;
-    const searchName = req.query.searchName;
-    const page = parseInt(req.query.page) || 1;
-    const pageSize = parseInt(req.query.pageSize) || 5;
-    const allowedRoles = [
-      string.superAdmin,
-      string.whiteLabel,
-      string.hyperAgent,
-      string.superAgent,
-      string.masterAgent,
-      string.user
-    ];
-    if (!globalUsernames) {
-      globalUsernames = [];
-    }
+    const searchName = req.query.userName || '';
+    const page = parseInt(req.query.page, 10) || 1;
+    const pageSize = parseInt(req.query.pageSize, 10) || 10;
 
-    if (!userName) {
-      return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, 'userName parameter is required'));
-    }
-
-    const user = await admins.findOne({ where: { userName } });
-
-    if (!user) {
-      return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, messages.userNotFound));
-    }
-
-    if (action === 'store') {
-      const newPath = user.userName;
-      const indexToRemove = globalUsernames.indexOf(newPath);
-
-      if (indexToRemove !== -1) {
-        globalUsernames.splice(indexToRemove + 1);
-      } else {
-        globalUsernames.push(newPath);
-      }
-
-      const likeCondition = searchName ? { userName: { [Op.like]: `%${searchName}%` } } : {};
-      const totalRecords = await admins.count({
-        where: {
-          createdByUser: user.userName,
-          ...likeCondition,
-          role: { [Op.or]: allowedRoles },
-        },
-      });
-
-      const totalPages = Math.ceil(totalRecords / pageSize);
-
-      const createdUsers = await admins.findAll({
-        where: {
-          createdByUser: user.userName,
-          ...likeCondition,
-          role: { [Op.or]: allowedRoles },
-        },
-        offset: (page - 1) * pageSize,
-        limit: pageSize,
-      });
-
-      const createdUsersDetails = await Promise.all(
-        createdUsers.map(async (createdUser) => {
-          let creditRef = 0;
-          let refProfitLoss = [];
-          let partnership = 0;
-
-
-          const creditRefsData = await CreditRef.findAll({
-            attributes: ["CreditRef"],
-            where: { UserId: createdUser.adminId },
-            order: [['id', 'DESC']],
-            limit: 1,
-          })
-
-
-          const partnershipsData = await Partnership.findAll({
-            attributes: ["partnership"],
-            where: { UserId: createdUser.adminId },
-            order: [['id', 'DESC']],
-            limit: 1,
-          })
-
-          try {
-            creditRef = parseFloat(creditRefsData[0]?.CreditRef) ? parseFloat(creditRefsData[0]?.CreditRef) : 0;
-            refProfitLoss = createdUser.refProfitLoss ? JSON.parse(createdUser.refProfitLoss) : [];
-            partnership = parseFloat(partnershipsData[0]?.partnership) ? parseFloat(partnershipsData[0]?.partnership) : 0;
-          } catch (e) {
-            console.error("JSON parsing error:", e);
-          }
-
-          const adminBalance = await admin_Balance(createdUser.adminId);
-          const loadBalance = await calculateLoadBalance(createdUser.adminId);
-          const loadTotalExposure = await calculateExposure(createdUser.adminId);
-
-          return {
-            id: createdUser.adminId,
-            userName: createdUser.userName,
-            role: createdUser.role,
-            balance: adminBalance[0]?.[0].adminBalance,
-            loadBalance: loadBalance,
-            creditRef: creditRef,
-            refProfitLoss: refProfitLoss,
-            partnership: partnership,
-            status: createdUser.isActive
-              ? 'Active'
-              : !createdUser.locked
-                ? 'Locked'
-                : !createdUser.isActive
-                  ? 'Suspended'
-                  : '',
-            exposure: loadTotalExposure,
-          };
-        })
-      );
-
-      const userDetails = { createdUsers: createdUsersDetails };
-      const message = 'Path stored successfully';
-      return res.status(statusCode.create).json(
-        apiResponseSuccess(
-          {
-            path: globalUsernames,
-            userDetails,
-            page,
-            pageSize,
-            totalPages,
-            totalRecords
-          },
-          true,
-          statusCode.create,
-          message
-        )
-      );
-    } else if (action === 'clear') {
-      const lastUsername = globalUsernames.pop();
-
-      if (lastUsername) {
-        const indexToRemove = globalUsernames.indexOf(lastUsername);
-
-        if (indexToRemove !== -1) {
-          globalUsernames.splice(indexToRemove, 1);
-        }
-      }
-    } else if (action === 'clearAll') {
-      globalUsernames.length = 0;
-    } else {
-      throw { code: statusCode.badRequest, message: 'Invalid action provided' };
-    }
-
-    await user.update({ path: JSON.stringify(globalUsernames) });
-
-    const successMessage = action === 'store' ? 'Path stored successfully' : 'Path cleared successfully';
-    return res.status(statusCode.success).json(
-      apiResponseSuccess({ path: globalUsernames, page, pageSize, totalPages: 1 }, true, statusCode.success, successMessage)
+    const [results] = await sql.query(
+      `CALL getAllAdminDataByPath(?,?,?,?,?)`,
+      [searchName, userName, action, pageSize, page]
     );
+    
+    const users = results[0];
+    const totalRecords = results[1][0]?.totalCount || 0;
+    const totalPages = Math.ceil(totalRecords / pageSize);
+
+    return res.status(statusCode.success).json(
+      apiResponseSuccess(users, true, statusCode.success, messages.success, {
+        totalRecords,
+        totalPages,
+        currentPage: page,
+        pageSize,
+      })
+    );
+    
   } catch (error) {
     return res
       .status(statusCode.internalServerError)
       .send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
   }
 };
+
+
 // done
 export const viewSubAdmins = async (req, res) => {
   try {

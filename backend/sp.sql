@@ -166,12 +166,12 @@ DELIMITER ;
 
 -- This script creates a stored procedure to get the user details based on the provided user ID.
 
-use whiteLabel_refactor;
+USE whiteLabel_refactor;
 DROP PROCEDURE IF EXISTS getAllAdminData;
 DELIMITER $$
 
 CREATE PROCEDURE getAllAdminData (
-	IN vUserName VARCHAR(100),
+    IN vUserName VARCHAR(100),
     IN vCreatedById VARCHAR(100),
     IN pageSize INT,
     IN pageNumber INT
@@ -180,29 +180,51 @@ BEGIN
     DECLARE offsetValue INT;
     SET offsetValue = (pageNumber - 1) * pageSize;
 
-    SELECT *,
-        (
-            SELECT IFNULL(CAST(CreditRef AS CHAR), '0')
+    -- First: Return paginated results
+    SELECT 
+        adminId, 
+        userName, 
+        role, 
+        createdById, 
+        createdByUser, 
+        isActive, 
+        locked,
+        CASE 
+            WHEN isActive = 1 THEN 'Active'
+            WHEN locked = 0 THEN 'Locked'
+            WHEN isActive = 0 THEN 'Suspended'
+            ELSE ''
+        END AS status,
+        IFNULL((
+            SELECT CAST(CreditRef AS CHAR)
             FROM CreditRefs
             WHERE UserId = adminId
             ORDER BY id DESC
             LIMIT 1
-        ) AS creditRefs,
-        (
-            SELECT IFNULL(CAST(partnership AS CHAR), '0')
+        ), '0') AS creditRefs,
+        IFNULL((
+            SELECT CAST(partnership AS CHAR)
             FROM Partnerships
             WHERE UserId = adminId
             ORDER BY id DESC
             LIMIT 1
-        ) AS partnerships,
+        ), '0') AS partnerships,
         getExposure(adminId) AS exposure,
         getAdminBalance(adminId) AS balance,
         getLoadBalance(adminId) AS loadBalance
     FROM admins 
-    WHERE (vCreatedById IS NULL OR createdById = vCreatedById)
-      AND userName LIKE CONCAT('%', vUserName, '%')
+    WHERE 
+        (vCreatedById IS NULL OR createdById = vCreatedById)
+        AND userName LIKE CONCAT('%', vUserName, '%')
+        AND role IN ('superAdmin', 'whiteLabel', 'hyperAgent', 'superAgent', 'masterAgent', 'user')
     LIMIT offsetValue, pageSize;
+
+    -- Second: Return total count
+    SELECT COUNT(*) AS totalCount
+    FROM admins 
+    WHERE 
+        (vCreatedById IS NULL OR createdById = vCreatedById)
+        AND userName LIKE CONCAT('%', vUserName, '%')
+        AND role IN ('superAdmin', 'whiteLabel', 'hyperAgent', 'superAgent', 'masterAgent', 'user');
 END $$
-
 DELIMITER ;
-
