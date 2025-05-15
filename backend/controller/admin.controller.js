@@ -14,7 +14,7 @@ import { admin_Balance, balance_hierarchy } from './transaction.controller.js';
 import { findCreatorHierarchy } from '../helper/createHierarchy.js';
 import { getAllConnectedUsers, getHierarchyUsers } from '../controller/lotteryGame.controller.js'
 import Permission from '../models/permissions.model.js';
-import CreditRef  from '../models/creditRefs.model.js';
+import CreditRef from '../models/creditRefs.model.js';
 import Partnership from '../models/partnerships.model.js';
 
 dotenv.config();
@@ -128,12 +128,12 @@ export const createAdmin = async (req, res) => {
         });
 
         //console.log(response, "response");
-        
+
         if (!response.data.success) {
           throw new Error('Failed to create user');
         } else {
           message = 'successfully';
-        } 
+        }
       } catch (error) {
         console.error("Error from API:", error.response ? error.response.data : error.message);
         throw new Error('Failed to create user in external system');
@@ -292,23 +292,23 @@ export const calculateLoadBalance = async (adminId) => {
     const { data } = user_Exposure
     exposure = data.exposure
   }
-  
-    totalBalance = adminBalance[0]?.[0].adminBalance + (exposure ?? 0);
 
-    const children = await admins.findAll({
-      where: { createdById: adminId },
-    });
+  totalBalance = adminBalance[0]?.[0].adminBalance + (exposure ?? 0);
 
-    for (const child of children) {
-      const childBalance = await calculateLoadBalance(child.adminId);
-      totalBalance += childBalance;
-    }
+  const children = await admins.findAll({
+    where: { createdById: adminId },
+  });
 
-    if (loadBalance !== totalBalance) {
-      loadBalance = totalBalance
-    }
+  for (const child of children) {
+    const childBalance = await calculateLoadBalance(child.adminId);
+    totalBalance += childBalance;
+  }
+
+  if (loadBalance !== totalBalance) {
+    loadBalance = totalBalance
+  }
   return totalBalance;
-  
+
 };
 
 export const calculateExposure = async (adminId) => {
@@ -356,83 +356,17 @@ export const viewAllCreates = async (req, res) => {
   try {
     const createdById = req.params.createdById;
     const page = parseInt(req.query.page, 10) || 1;
-    const pageSize = parseInt(req.query.pageSize, 10) || 5;
+    const pageSize = parseInt(req.query.pageSize, 10) || 10;
 
-    const searchQuery = req.query.userName ? { userName: { [Op.like]: `%${req.query.userName}%` } } : {};
-    const allowedRoles = [
-      string.superAdmin,
-      string.whiteLabel,
-      string.hyperAgent,
-      string.superAgent,
-      string.masterAgent,
-      string.user,
-    ];
+    const userName = req.query.userName || '';
 
-    const totalRecords = await admins.count({
-      where: {
-        createdById,
-        ...searchQuery,
-        role: {
-          [Op.or]: allowedRoles,
-        },
-      },
-    });
+    const [results] = await sql.query(
+      `CALL getAllAdminData(?,?,?,?)`,
+      [userName, createdById, pageSize, page]
+    );
 
-    if (totalRecords === 0) {
-      return res
-        .status(statusCode.success)
-        .json(apiResponseSuccess(null, true, statusCode.success, messages.noRecordsFound));
-    }
-
-    const offset = (page - 1) * pageSize;
-    const adminsData = await admins.findAll({
-      where: {
-        createdById,
-        ...searchQuery,
-        role: {
-          [Op.or]: allowedRoles,
-        },
-      },
-      offset,
-      limit: pageSize,
-      order: [['createdAt', 'DESC']],
-    });
-
-    const users = await Promise.all(adminsData.map(async (admin) => {
-      const [rows] = await sql.execute(
-        `SELECT 
-           getCreditRef(?) AS creditRef,
-           getPartnership(?) AS partnership`,
-        [admin.adminId, admin.adminId]
-      );
-    
-      const adminBalance = await admin_Balance(admin.adminId);
-      const loadBalance = await calculateLoadBalance(admin.adminId);
-      const loadTotalExposure = await calculateExposure(admin.adminId);
-    
-      const result = {
-        adminId: admin.adminId,
-        userName: admin.userName,
-        role: admin.role,
-        balance: adminBalance[0]?.[0].adminBalance,
-        loadBalance,
-        creditRefs: rows[0].creditRef,
-        createdById: admin.createdById,
-        createdByUser: admin.createdByUser,
-        partnerships: rows[0].partnership,
-        status: admin.isActive
-          ? 'Active'
-          : !admin.locked
-            ? 'Locked'
-            : !admin.isActive
-              ? 'Suspended'
-              : '',
-        exposure: loadTotalExposure,
-      };
-    
-      return result;
-    }));
-      
+    const users = results[0];
+    const totalRecords = results[1][0]?.totalCount || 0;
     const totalPages = Math.ceil(totalRecords / pageSize);
 
     return res.status(statusCode.success).json(
@@ -456,12 +390,13 @@ export const viewAllCreates = async (req, res) => {
   }
 };
 
+
 // done
 export const viewAllSubAdminCreates = async (req, res) => {
   try {
     const createdById = req.params.createdById;
 
-    const { page = 1, pageSize = 10, searchQuery = ""  } = req.query;
+    const { page = 1, pageSize = 10, searchQuery = "" } = req.query;
     const offset = (page - 1) * pageSize;
 
     const allowedRoles = [
@@ -474,8 +409,7 @@ export const viewAllSubAdminCreates = async (req, res) => {
 
     const whereCondition = { createdById, role: { [Op.or]: allowedRoles } };
 
-    if(searchQuery)
-    {
+    if (searchQuery) {
       whereCondition.userName = { [Op.like]: `%${searchQuery}%` }
     }
 
@@ -503,7 +437,7 @@ export const viewAllSubAdminCreates = async (req, res) => {
         let partnerships = 0;
 
         const creditRefsData = await CreditRef.findAll({
-          attributes : ["CreditRef"],
+          attributes: ["CreditRef"],
           where: { UserId: admin.adminId },
           order: [['id', 'DESC']],
           limit: 1,
@@ -538,10 +472,10 @@ export const viewAllSubAdminCreates = async (req, res) => {
           role: admin.role,
           balance: admin.balance,
           loadBalance: admin.loadBalance,
-          creditRefs : creditRefs,
+          creditRefs: creditRefs,
           createdById: admin.createdById,
           createdByUser: admin.createdByUser,
-          partnerships : partnerships,
+          partnerships: partnerships,
           status: admin.isActive
             ? "Active"
             : !admin.locked
@@ -603,8 +537,8 @@ export const addCreditRef = async (req, res) => {
     }
 
     const newCreditRefEntry = await CreditRef.create({
-      UserId : admin.adminId,
-      CreditRef : creditRef,
+      UserId: admin.adminId,
+      CreditRef: creditRef,
     });
 
     const adminDetails = {
@@ -648,8 +582,8 @@ export const addPartnership = async (req, res) => {
     }
 
     const newPartnershipEntry = await Partnership.create({
-      UserId : admin.adminId,
-      partnership : partnership,
+      UserId: admin.adminId,
+      partnership: partnership,
     });
 
     const adminDetails = {
@@ -724,7 +658,7 @@ export const creditRefView = async (req, res) => {
       };
     });
 
-    
+
     return res.status(statusCode.success).json(apiResponseSuccess(result, true, statusCode.success, messages.success));
   } catch (error) {
     return res.status(statusCode.internalServerError).send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
@@ -838,7 +772,7 @@ export const buildRootPath = async (req, res) => {
 
 
           const creditRefsData = await CreditRef.findAll({
-            attributes : ["CreditRef"],
+            attributes: ["CreditRef"],
             where: { UserId: createdUser.adminId },
             order: [['id', 'DESC']],
             limit: 1,
@@ -874,12 +808,12 @@ export const buildRootPath = async (req, res) => {
             refProfitLoss: refProfitLoss,
             partnership: partnership,
             status: createdUser.isActive
-            ? 'Active'
-            : !createdUser.locked
-              ? 'Locked'
-              : !createdUser.isActive
-                ? 'Suspended'
-                : '',
+              ? 'Active'
+              : !createdUser.locked
+                ? 'Locked'
+                : !createdUser.isActive
+                  ? 'Suspended'
+                  : '',
             exposure: loadTotalExposure,
           };
         })
@@ -950,7 +884,7 @@ export const viewSubAdmins = async (req, res) => {
       attributes: ['adminId', 'userName', 'role', 'isActive', 'locked'],
       where: {
         createdById: id,
-        role :{
+        role: {
           [Op.or]: allowedRoles
         },
         userName: {
@@ -999,7 +933,7 @@ export const singleSubAdmin = async (req, res) => {
       return res.status(statusCode.notFound).json(apiResponseErr(null, false, statusCode.notFound, 'Sub Admin not found with the given Id'));
     }
 
-    const permissions = await Permission.findAll({ 
+    const permissions = await Permission.findAll({
       where: { UserId: adminId },
       attributes: ['permission']
     })
@@ -1009,7 +943,7 @@ export const singleSubAdmin = async (req, res) => {
     const data = {
       userName: subAdmin.userName,
       role: subAdmin.role,
-      permission : permissionValues,
+      permission: permissionValues,
     };
 
     return res.status(statusCode.success).json(apiResponseSuccess(data, true, statusCode.success, messages.success));
@@ -1125,8 +1059,8 @@ export const fetchUserHierarchy = async (req, res) => {
 
     if (!hierarchy) {
       return res
-      .status(statusCode.notFound)
-      .json(apiResponseErr(null, false, statusCode.notFound, 'User Not Found'));
+        .status(statusCode.notFound)
+        .json(apiResponseErr(null, false, statusCode.notFound, 'User Not Found'));
     }
 
     const formattedHierarchy = hierarchy.map(item => ({
@@ -1140,8 +1074,8 @@ export const fetchUserHierarchy = async (req, res) => {
       .json(apiResponseSuccess(formattedHierarchy, true, statusCode.success, 'Hierarchy retractive successfully'));
   } catch (error) {
     res
-    .status(statusCode.internalServerError)
-    .json(apiResponseErr(null, false, statusCode.internalServerError, error.message));
+      .status(statusCode.internalServerError)
+      .json(apiResponseErr(null, false, statusCode.internalServerError, error.message));
   }
 };
 
@@ -1161,7 +1095,7 @@ export const getHierarchyWiseUsers = async (req, res) => {
       for (const user of users) {
         const nestedUsers = await getAllowedUserNames(user.userName);
         allowedUserNames.push({
-          userId: user.adminId, 
+          userId: user.adminId,
           userName: user.userName,
           role: user.role,
         });
@@ -1174,14 +1108,14 @@ export const getHierarchyWiseUsers = async (req, res) => {
 
     const filteredUsers = hierarchyWiseUsers.filter((user) => {
       if (!user.role) return false;
-    
+
       if (Array.isArray(user.role)) {
         return user.role.some((roleObj) => roleObj.role === "user");
       }
-    
+
       return user.role === "user";
     });
-    
+
 
     const formattedData = {
       users: filteredUsers.map((user) => ({
@@ -1217,11 +1151,11 @@ export const downLineUsers = async (req, res) => {
     const searchTerm = req.query.searchTerm || '';
     const page = parseInt(req.query.page, 10) || 1;
     const pageSize = parseInt(req.query.pageSize, 10) || 10;
-    const {dataType,startDate, endDate} = req.query;
+    const { dataType, startDate, endDate } = req.query;
 
     let profitLossResponse = { data: [] };
     try {
-     const baseURL = process.env.COLOR_GAME_URL;
+      const baseURL = process.env.COLOR_GAME_URL;
       const response = await axios.get(`${baseURL}/api/user-profit-loss`,
         {
           params: {
@@ -1258,21 +1192,21 @@ export const downLineUsers = async (req, res) => {
 
     const getPrimaryRole = (roles) => {
       if (!roles || !roles.length) return null;
-      return roles[0].role; 
+      return roles[0].role;
     };
 
     const calculateDownlineProfitLoss = (adminId, role) => {
       let total = 0;
       const queue = [...(downlineMap[adminId] || [])];
-      
+
       while (queue.length > 0) {
         const current = queue.shift();
         if (current.adminId !== adminId) {
           total += profitLossMap[current.adminId] || 0;
         }
-        
+
         const currentRole = getPrimaryRole(current.role);
-        
+
         if (role === string.whiteLabel) {
           if ([string.hyperAgent, string.superAgent, string.masterAgent, string.user].includes(currentRole)) {
             queue.push(...(downlineMap[current.adminId] || []));
@@ -1294,7 +1228,7 @@ export const downLineUsers = async (req, res) => {
           }
         }
       }
-      
+
       return total;
     };
 
@@ -1352,7 +1286,7 @@ export const downLineUsers = async (req, res) => {
       const primaryRole = getPrimaryRole(admin.role);
       const personalProfitLoss = (profitLossMap[admin.adminId] || 0);
       let downLineProfitLoss = 0;
-      
+
       if ([string.masterAgent, string.superAgent, string.hyperAgent, string.whiteLabel].includes(primaryRole)) {
         downLineProfitLoss = calculateDownlineProfitLoss(admin.adminId, primaryRole);
       }
@@ -1415,7 +1349,7 @@ export const downLineUsers = async (req, res) => {
 
 export const getTotalProfitLoss = async (req, res) => {
   try {
-    const { page = 1, pageSize = 10, search = "", dataType, startDate, endDate} = req.query;
+    const { page = 1, pageSize = 10, search = "", dataType, startDate, endDate } = req.query;
     const offset = (page - 1) * pageSize;
     const adminId = req.user?.adminId;
     const userId = await getHierarchyUsers(adminId);
@@ -1442,10 +1376,10 @@ export const getTotalProfitLoss = async (req, res) => {
         },
       }
     );
-    
+
     let data = Array.isArray(response.data)
-    ? response.data
-    : response.data?.data || [];
+      ? response.data
+      : response.data?.data || [];
 
     if (search) {
       const searchLower = search.toLowerCase();
@@ -1505,9 +1439,9 @@ export const getTotalProfitLoss = async (req, res) => {
   }
 };
 
-export const getMarketWiseProfitLoss = async(req,res) => {
+export const getMarketWiseProfitLoss = async (req, res) => {
   try {
-    const { page = 1, pageSize = 10, search = "", type , dataType, startDate, endDate} = req.query;
+    const { page = 1, pageSize = 10, search = "", type, dataType, startDate, endDate } = req.query;
     const offset = (parseInt(page) - 1) * parseInt(pageSize);
 
     const adminId = req.user?.adminId;
@@ -1540,8 +1474,8 @@ export const getMarketWiseProfitLoss = async(req,res) => {
     );
 
     let data = Array.isArray(response.data)
-    ? response.data
-    : response.data?.data || [];
+      ? response.data
+      : response.data?.data || [];
 
     if (search) {
       const searchLower = search.toLowerCase();
@@ -1570,16 +1504,16 @@ export const getMarketWiseProfitLoss = async(req,res) => {
     };
 
     return res
-    .status(statusCode.success)
-    .send(
-      apiResponseSuccess(
-        paginatedData,
-        true,
-        statusCode.success,
-        "Market-wise porfit/loss fetched successfully",
-        Pagination
-      )
-    );
+      .status(statusCode.success)
+      .send(
+        apiResponseSuccess(
+          paginatedData,
+          true,
+          statusCode.success,
+          "Market-wise porfit/loss fetched successfully",
+          Pagination
+        )
+      );
   } catch (error) {
     if (error.response) {
       return apiResponseErr(
@@ -1598,12 +1532,12 @@ export const getMarketWiseProfitLoss = async(req,res) => {
         res
       );
     }
-}
+  }
 };
 
-export const getAllUserProfitLoss = async(req,res) => {
+export const getAllUserProfitLoss = async (req, res) => {
   try {
-    const { page = 1, pageSize = 10, search = "",dataType, startDate, endDate } = req.query;
+    const { page = 1, pageSize = 10, search = "", dataType, startDate, endDate } = req.query;
     const offset = (parseInt(page) - 1) * parseInt(pageSize);
 
     const adminId = req.user?.adminId;
@@ -1625,7 +1559,7 @@ export const getAllUserProfitLoss = async(req,res) => {
         userId,
       },
       {
-        headers, 
+        headers,
         params: {
           dataType,
           startDate,
@@ -1633,10 +1567,10 @@ export const getAllUserProfitLoss = async(req,res) => {
         },
       }
     );
-    
+
     let data = Array.isArray(response.data)
-    ? response.data
-    : response.data?.data || [];
+      ? response.data
+      : response.data?.data || [];
 
     if (search) {
       const searchLower = search.toLowerCase();
@@ -1665,16 +1599,16 @@ export const getAllUserProfitLoss = async(req,res) => {
     };
 
     return res
-    .status(statusCode.success)
-    .send(
-      apiResponseSuccess(
-        paginatedData,
-        true,
-        statusCode.success,
-        "Market-wise all-user porfit/loss fetched successfully",
-        Pagination
-      )
-    );
+      .status(statusCode.success)
+      .send(
+        apiResponseSuccess(
+          paginatedData,
+          true,
+          statusCode.success,
+          "Market-wise all-user porfit/loss fetched successfully",
+          Pagination
+        )
+      );
   } catch (error) {
     if (error.response) {
       return apiResponseErr(
