@@ -387,6 +387,7 @@ const Wallet = () => {
                               setIsLoading={setIsLoading}
                               adminBalance={balance}
                               handleAdminNavigateToChild={handleAdminNavigateToChild}
+                              navigationBar={navigationBar}
                             />
                           );
                         })}

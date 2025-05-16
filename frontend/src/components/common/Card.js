@@ -33,7 +33,8 @@ const Card = ({
   setIsLoading,
   exposure,
   adminBalance,
-  handleAdminNavigateToChild
+  handleAdminNavigateToChild,
+  navigationBar
 }) => {
   const navigate = useNavigate();
   console.log("partnership", partnership)
@@ -145,28 +146,31 @@ const Card = ({
 
           <td scope="row" className="fs-6 text-center">
             <span>{creditRef}</span>
-            {callingParent === "Wallet" ? (
-              <span className="">
-                <button
-                  className={`border border-0  btn ${["suspended"].includes(store?.admin?.status)
-                    ? "disabled"
-                    : (Array.isArray(store?.admin?.permission) &&
-                      store.admin.permission.some(
-                        (role) => role === strings.creditRefEdit
-                      )) ||
-                      permissionObj.allAdmin.includes(store?.admin?.role)
-                      ? ""
-                      : "disabled"
-                    }`}
-                  aria-label="Close"
-                  onClick={() =>
-                    handelOpenTransactionModal(true, "creditRefProvider")
-                  }
-                >
-                  <i className="fa-solid fa-pen-to-square"></i>
-                </button>
-              </span>
-            ) : null}
+
+            {store?.admin?.
+              adminName === navigationBar[navigationBar.length - 1]?.adminName && <> {callingParent === "Wallet" ? (
+                <span className="">
+                  <button
+                    className={`border border-0  btn ${["suspended"].includes(store?.admin?.status)
+                      ? "disabled"
+                      : (Array.isArray(store?.admin?.permission) &&
+                        store.admin.permission.some(
+                          (role) => role === strings.creditRefEdit
+                        )) ||
+                        permissionObj.allAdmin.includes(store?.admin?.role)
+                        ? ""
+                        : "disabled"
+                      }`}
+                    aria-label="Close"
+                    onClick={() =>
+                      handelOpenTransactionModal(true, "creditRefProvider")
+                    }
+                  >
+                    <i className="fa-solid fa-pen-to-square"></i>
+                  </button>
+                </span>
+              ) : null}</>}
+
 
             <span>
               <button
@@ -190,8 +194,7 @@ const Card = ({
           <td scope="row" className="fs-6 text-center">
             <span>{partnership}</span>
 
-
-            {callingParent === "Wallet" ? (
+            {store?.admin?.adminName === navigationBar[navigationBar.length - 1]?.adminName && <> {callingParent === "Wallet" ? (
               <span className="">
                 <button
                   className={`border border-0  btn ${["suspended"].includes(store?.admin?.status)
@@ -214,7 +217,7 @@ const Card = ({
                   ></i>
                 </button>
               </span>
-            ) : null}
+            ) : null}</>}
 
             <span>
               <button
