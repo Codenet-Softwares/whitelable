@@ -79,7 +79,7 @@ const User_BetMarket = () => {
     setBodyData({
       marketId: marketId,
       adminId: store?.admin?.id,
-      role: store?.admin?.roles[0]?.role,
+      role: store?.admin?.role,
       type: "master-book",
     });
   };
@@ -101,7 +101,7 @@ const User_BetMarket = () => {
     setBodyData({
       marketId: marketId,
       adminId: store?.admin?.id,
-      role: store?.admin?.roles[0]?.role,
+      role: store?.admin?.role,
       type: "master-book",
     });
   };
@@ -111,7 +111,7 @@ const User_BetMarket = () => {
     setBodyData({
       marketId: marketId,
       adminId: store?.admin?.id,
-      role: store?.admin?.roles[0]?.role,
+      role: store?.admin?.role,
       type: "user-book",
     });
   };
