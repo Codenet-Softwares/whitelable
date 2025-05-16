@@ -227,7 +227,10 @@ const Wallet = () => {
                 <div class="white_box_tittle list_header">
                   <div className="d-flex align-items-center">
                     <span className="me-3" onClick={() => navigate(-1)}>
+                      {store?.admin?.
+                        adminName === navigationBar[navigationBar.length - 1]?.adminName &&
                       <button className="btn btn-secondary">&#8592;</button>
+                      }
                     </span>
                     {/* <h4
                       className="fw-bolder text-uppercase"
