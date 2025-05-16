@@ -151,9 +151,9 @@ export const createAdmin = async (req, res) => {
     if (isSubRole) {
       await newAdmin.update({ createdById: user.createdById || user.adminId }, { transaction });
     }
-    if (user.adminId) {
-      await calculateLoadBalance(user.adminId, transaction);
-    }
+    // if (user.adminId) {
+    //   await calculateLoadBalance(user.adminId, transaction);
+    // }
 
     await transaction.commit();
     const successMessage = isUserRole ? 'User created' : 'Admin created successfully';
@@ -277,78 +277,32 @@ export const getIpDetail = async (req, res) => {
 };
 
 export const calculateLoadBalance = async (adminId) => {
-  let loadBalance = 0
-  let totalBalance
-
-  const admin = await admins.findOne({ where: { adminId } });
-  if (!admin) return 0;
-
-  const adminBalance = await admin_Balance(admin.adminId)
-
-  let exposure
-  if (admin.role === string.user) {
-    const baseUrl = process.env.COLOR_GAME_URL;
-    const user_Exposure = await axios.get(`${baseUrl}/api/external/get-exposure/${admin.adminId}`)
-    const { data } = user_Exposure
-    exposure = data.exposure
+  try {
+    const [result] = await sql.query(
+      'SELECT getLoadBalance(?)',
+      [adminId]
+    );
+    console.log("result", result);
+    const totalBalance = result[0]?.totalBalance ?? 0;
+    return totalBalance;
+  } catch (error) {
+    console.error('Error calculating load balance:', error);
+    return null;
   }
-
-  totalBalance = adminBalance[0]?.[0].adminBalance + (exposure ?? 0);
-
-  const children = await admins.findAll({
-    where: { createdById: adminId },
-  });
-
-  for (const child of children) {
-    const childBalance = await calculateLoadBalance(child.adminId);
-    totalBalance += childBalance;
-  }
-
-  if (loadBalance !== totalBalance) {
-    loadBalance = totalBalance
-  }
-  return totalBalance;
-
 };
 
 export const calculateExposure = async (adminId) => {
-  let loadExposure = 0;
-  let totalExposure = 0;
-
-  const admin = await admins.findOne({ where: { adminId } });
-  if (!admin) return 0;
-
-  let exposure = 0;
-
-  if (admin.role === string.user) {
-    const baseUrl = process.env.COLOR_GAME_URL;
-    try {
-      const user_Exposure = await axios.get(`${baseUrl}/api/external/get-exposure/${admin.adminId}`);
-      const { data } = user_Exposure;
-      exposure = parseFloat(data.exposure) || 0;
-    } catch (error) {
-      console.error("Error fetching exposure:", error.message);
-      exposure = 0;
-    }
+  try {
+    const [result] = await sql.query(
+      'SELECT getExposure(?)',
+      [adminId]
+    );
+    const totalExposure = result[0]?.totalBalance ?? 0;
+    return totalExposure;
+  } catch (error) {
+    console.error('Error calculating load balance:', error);
+    return null;
   }
-
-  totalExposure = exposure;
-
-  const children = await admins.findAll({
-    where: { createdById: adminId },
-  });
-
-  for (const child of children) {
-    let childExposure = await calculateExposure(child.adminId);
-    childExposure = parseFloat(childExposure) || 0;
-    totalExposure += childExposure;
-  }
-
-  if (loadExposure !== totalExposure) {
-    loadExposure = totalExposure;
-  }
-
-  return totalExposure;
 };
 
 // done
@@ -395,114 +349,27 @@ export const viewAllCreates = async (req, res) => {
 export const viewAllSubAdminCreates = async (req, res) => {
   try {
     const createdById = req.params.createdById;
+    const page = parseInt(req.query.page, 10) || 1;
+    const pageSize = parseInt(req.query.pageSize, 10) || 10;
 
-    const { page = 1, pageSize = 10, searchQuery = "" } = req.query;
-    const offset = (page - 1) * pageSize;
+    const userName = req.query.userName || '';
 
-    const allowedRoles = [
-      string.subAdmin,
-      string.subHyperAgent,
-      string.subMasterAgent,
-      string.subWhiteLabel,
-      string.subSuperAgent
-    ];
-
-    const whereCondition = { createdById, role: { [Op.or]: allowedRoles } };
-
-    if (searchQuery) {
-      whereCondition.userName = { [Op.like]: `%${searchQuery}%` }
-    }
-
-    const totalRecords = await admins.count({
-      where: whereCondition,
-      limit: parseInt(pageSize),
-      offset,
-      order: [['createdAt', 'DESC']],
-    });
-
-    if (totalRecords === 0) {
-      return res.status(statusCode.success).json(apiResponseSuccess([], true, statusCode.success, messages.noRecordsFound));
-    }
-
-    const adminsData = await admins.findAll({
-      where: whereCondition,
-      limit: parseInt(pageSize),
-      offset,
-      order: [['createdAt', 'DESC']],
-    });
-
-    const users = await Promise.all(
-      adminsData.map(async (admin) => {
-        let creditRefs = 0;
-        let partnerships = 0;
-
-        const creditRefsData = await CreditRef.findAll({
-          attributes: ["CreditRef"],
-          where: { UserId: admin.adminId },
-          order: [['id', 'DESC']],
-          limit: 1,
-        })
-
-        if (creditRefsData && creditRefsData.length > 0) {
-          try {
-            creditRefs = parseFloat(creditRefsData[0].CreditRef);
-          } catch (err) {
-            creditRefs = 0;
-          }
-        }
-
-        const partnershipsData = await Partnership.findAll({
-          attributes: ["partnership"],
-          where: { UserId: admin.adminId },
-          order: [['id', 'DESC']],
-          limit: 1,
-        })
-
-        if (partnershipsData && partnershipsData.length > 0) {
-          try {
-            partnerships = parseFloat(partnershipsData[0].partnership);
-          } catch {
-            partnerships = 0;
-          }
-        }
-
-        return {
-          adminId: admin.adminId,
-          userName: admin.userName,
-          role: admin.role,
-          balance: admin.balance,
-          loadBalance: admin.loadBalance,
-          creditRefs: creditRefs,
-          createdById: admin.createdById,
-          createdByUser: admin.createdByUser,
-          partnerships: partnerships,
-          status: admin.isActive
-            ? "Active"
-            : !admin.locked
-              ? "Locked"
-              : !admin.isActive
-                ? "Suspended"
-                : "",
-          exposure: admin.exposure,
-        };
-      })
+    const [results] = await sql.query(
+      `CALL getAllAdminData(?,?,?,?)`,
+      [userName, createdById, pageSize, page]
     );
 
+    const users = results[0];
+    const totalRecords = results[1][0]?.totalCount || 0;
     const totalPages = Math.ceil(totalRecords / pageSize);
 
     return res.status(statusCode.success).json(
-      apiResponseSuccess(
-        users,
-        true,
-        statusCode.success,
-        messages.success,
-        {
-          totalRecords,
-          totalPages,
-          currentPage: parseInt(page),
-          pageSize,
-        }
-      ),
+      apiResponseSuccess(users, true, statusCode.success, messages.success, {
+        totalRecords,
+        totalPages,
+        currentPage: page,
+        pageSize,
+      })
     );
   } catch (error) {
     return res.status(statusCode.internalServerError).json(

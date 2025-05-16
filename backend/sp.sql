@@ -228,3 +228,113 @@ BEGIN
         AND role IN ('superAdmin', 'whiteLabel', 'hyperAgent', 'superAgent', 'masterAgent', 'user');
 END $$
 DELIMITER ;
+
+
+-- This script creates a stored procedure to get the user details based on the provided user ID.
+
+USE whiteLabel_refactor;
+DROP PROCEDURE IF EXISTS getAllAdminDataByPath;
+DELIMITER $$
+
+CREATE PROCEDURE getAllAdminDataByPath (
+    IN vUserName VARCHAR(100),
+    IN vCreatedByUser VARCHAR(100),
+    IN vAction VARCHAR(100),
+    IN pageSize INT,
+    IN pageNumber INT
+)
+BEGIN
+    DECLARE offsetValue INT;
+    DECLARE existingIndex INT DEFAULT NULL;
+
+    SET offsetValue = (pageNumber - 1) * pageSize;
+
+    -- Handle path actions
+    IF vAction = 'store' THEN
+        -- Check if the userName already exists in path
+        SELECT id INTO existingIndex
+        FROM Paths
+        WHERE UserName = vCreatedByUser
+        ORDER BY id DESC
+        LIMIT 1;
+
+        -- If exists, delete all paths after it
+        IF existingIndex IS NOT NULL THEN
+            DELETE FROM Paths
+            WHERE id > existingIndex;
+        END IF;
+
+        -- If not already present, insert it
+        IF NOT EXISTS (
+            SELECT 1 FROM Paths WHERE UserName = vCreatedByUser
+        ) THEN
+            INSERT INTO Paths (UserName) VALUES (vCreatedByUser);
+        END IF;
+
+    ELSEIF vAction = 'clear' THEN
+        -- Delete the last inserted path (most recent)
+        DELETE FROM Paths
+        ORDER BY id DESC
+        LIMIT 1;
+
+    ELSEIF vAction = 'clearAll' THEN
+        -- Delete all paths
+        DELETE FROM Paths;
+
+    ELSE
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Invalid action provided';
+    END IF;
+
+    -- First: Return paginated results
+    SELECT 
+        adminId, 
+        userName, 
+        role, 
+        createdById, 
+        createdByUser, 
+        isActive, 
+        locked,
+        CASE 
+            WHEN isActive = 1 THEN 'Active'
+            WHEN locked = 0 THEN 'Locked'
+            WHEN isActive = 0 THEN 'Suspended'
+            ELSE ''
+        END AS status,
+        IFNULL((
+            SELECT CAST(CreditRef AS CHAR)
+            FROM CreditRefs
+            WHERE UserId = adminId
+            ORDER BY id DESC
+            LIMIT 1
+        ), '0') AS creditRefs,
+        IFNULL((
+            SELECT CAST(partnership AS CHAR)
+            FROM Partnerships
+            WHERE UserId = adminId
+            ORDER BY id DESC
+            LIMIT 1
+        ), '0') AS partnerships,
+        getExposure(adminId) AS exposure,
+        getAdminBalance(adminId) AS balance,
+        getLoadBalance(adminId) AS loadBalance
+    FROM admins 
+    WHERE 
+        (vCreatedByUser IS NULL OR createdByUser = vCreatedByUser)
+        AND userName LIKE CONCAT('%', vUserName, '%')
+        AND role IN ('superAdmin', 'whiteLabel', 'hyperAgent', 'superAgent', 'masterAgent', 'user')
+    LIMIT offsetValue, pageSize;
+
+    -- Second: Return total count
+    SELECT COUNT(*) AS totalCount
+    FROM admins 
+    WHERE 
+        (vCreatedByUser IS NULL OR createdByUser = vCreatedByUser)
+        AND userName LIKE CONCAT('%', vUserName, '%')
+        AND role IN ('superAdmin', 'whiteLabel', 'hyperAgent', 'superAgent', 'masterAgent', 'user');
+
+    -- Third: Return current path (for frontend to display path)
+    SELECT UserName FROM Paths ORDER BY id ASC;
+
+END$$
+DELIMITER ;
