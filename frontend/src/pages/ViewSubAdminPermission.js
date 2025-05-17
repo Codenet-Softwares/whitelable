@@ -1,231 +1,190 @@
+// ViewSubAdminPermission.js
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { permissionObj } from "../Utils/constant/permission";
+import { toast } from "react-toastify";
 import { useAppContext } from "../contextApi/context";
 import {
-  getEditSubAdminPermission,
   getviewSubAdminPermission,
+  getEditSubAdminPermission,
 } from "../Utils/service/apiService";
 import { getSubAdminPermissionData } from "../Utils/service/initiateState";
+import { permissionObj } from "../Utils/constant/permission";
 import strings from "../Utils/constant/stringConstant";
-import { toast } from "react-toastify";
+import {
+  ContainerWrapper,
+  BootstrapCard,
+  InfoRow,
+  ToggleSwitch,
+  IconButton,
+} from "../Reusables/UIComponents";
 
 const ViewSubAdminPermission = () => {
   const navigate = useNavigate();
-
   const { id } = useParams();
-  const { store, dispatch } = useAppContext();
-  const [subAdminPermissionData, setSubAdminPersionData] = useState(
-    getSubAdminPermissionData()
-  );
-  const [displayEdit, setDisplayEdit] = useState(true);
-console.log('====>> line 22',subAdminPermissionData)
+  const { store } = useAppContext();
+  const [data, setData] = useState(getSubAdminPermissionData());
+  const [editMode, setEditMode] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
-    if (store?.admin) {
-      permissionObj.allAdmin.includes(store?.admin?.role) &&
-        getSubAdminpermisson();
+    if (store?.admin && permissionObj.allAdmin.includes(store.admin.role)) {
+      fetchPermissions();
     }
   }, [store?.admin]);
 
-  const getSubAdminpermisson = async () => {
-    const response = await getviewSubAdminPermission({
-      _id: id,
-    });
-    console.log( response)
-    if (response) {
-      setSubAdminPersionData({
-        userName: response.data.userName,
-        role: response.data.role,
-        permission: response.data.permission
-
-      });
+  const fetchPermissions = async () => {
+    setLoading(true);
+    try {
+      const res = await getviewSubAdminPermission({ _id: id });
+      if (res?.data) {
+        setData({
+          userName: res.data.userName,
+          role: res.data.role,
+          permission: res.data.permission || [],
+        });
+      }
+    } catch {
+      toast.error("Unable to fetch permissions");
+    } finally {
+      setLoading(false);
     }
   };
-  
-  const handleEditSubAdminPermission = async () => {
-    const permissions = subAdminPermissionData?.permission;
 
-    if (permissions.length === 0) {
+  const handleCheckboxChange = (e) => {
+    const { name, checked } = e.target;
+    setData((prev) => ({
+      ...prev,
+      permission: checked
+        ? [...prev.permission, name]
+        : prev.permission.filter((p) => p !== name),
+    }));
+  };
+
+  const handleSave = async () => {
+    if (!data.permission.length) {
       toast.error("Please select at least one permission.");
       return;
     }
-
-    const value = {
-      _id: id,
-      permission: permissions,
-    };
-
-    const response = await getEditSubAdminPermission(value, true);
-    if (response) {
-      setDisplayEdit(true);
+    setLoading(true);
+    try {
+      const res = await getEditSubAdminPermission(
+        { _id: id, permission: data.permission },
+        true
+      );
+      if (res) {
+        toast.success("Permissions updated successfully");
+        setEditMode(false);
+      }
+    } catch {
+      toast.error("Failed to update permissions");
+    } finally {
+      setLoading(false);
     }
   };
-  const handleChange = () => {
-    setDisplayEdit(false);
-    getSubAdminPermissionData();
-  };
 
-  const handleChangeCheckBox = (event) => {
-    const { name, checked } = event.target;
-
-    setSubAdminPersionData((prevState) => {
-      if (!prevState?.permission) return prevState;
-
-      const updatedPermissions = checked
-        ? [...prevState.permission, name]
-        : prevState.permission.filter((item) => item !== name);
-
-      return {
-        ...prevState,
-        permission: updatedPermissions,
-      };
-    });
-  };
-
-
-  const viewSingleSubAdmin = () => {
-    return (
-      <div className="container-fluid mt-5 px-5 rounded-3">
-        <div className="main_content_iner ">
-          <div className="row justify-content-center">
-            <div className="col-lg-12">
-              <div className="white_card card_height_100 mb_30">
-                <div className="white_card_header rounded-3">
-                  <div className="box_header m-0">
-                    <div className="main-title d-flex justify-content-between align-items-center position-relative">
-                      <i
-                        className="fa fa-arrow-left text-white px-2 position-absolute start-0 arrow-button"
-                        aria-hidden="true"
-                        style={{ cursor: "pointer", fontSize: "1.5rem" }}
-                        onClick={() => navigate("/ViewAllSubAdmin")}
-                      ></i>
-
-                      <h3 className="m-0 mx-5 text-white">PERMISSION DETAILS</h3>
-                    </div>
-                  </div>
-                </div>
-                <div className="white_card_body">
-                  <div className="QA_section">
-                    <div className="white_box_tittle list_header">
-                      <h4>Username: {subAdminPermissionData?.userName}</h4>
-                    </div>
-                    <div className="QA_table mb_30 fw-bold">
-                      <table className="table lms_table_active3 ">
-                        <thead >
-                          <tr>
-                            <th scope="col" className="fw-bolder">PERMISSIONS ACCESSED</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {subAdminPermissionData?.permission &&
-                            subAdminPermissionData?.permission.map(
-                              (user, index) => (
-                                <tr key={user._id}>
-                                  <th>{user?.toUpperCase()}</th>
-                                </tr>
-                              )
-                            )}
-                        </tbody>
-                        <button
-                          className="btn btn-info fw-bold"
-                          onClick={() => handleChange()}
-                        >
-                          Renew Permission
-                        </button>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+  return (
+    <ContainerWrapper>
+      <BootstrapCard
+        title={editMode ? "Edit Sub-Admin Permissions" : "View Sub-Admin Permissions"}
+        onBack={
+          editMode
+            ? () => {
+                setEditMode(false);
+                fetchPermissions();
+              }
+            : () => navigate("/ViewAllSubAdmin")
+        }
+        headerVariant={editMode ? "info" : "primary"}
+      >
+        {loading ? (
+          <div className="text-center py-5">
+            <div className="spinner-border text-primary" role="status" />
           </div>
-        </div>
-      </div>
-    );
-  };
-
-  const modifySingleSubAdmin = () => {
-    return (
-      <div>
-        <form>
-          <div className="card m-5 rounded-3" >
-            <div
-              className="card-header d-flex justify-content-between align-items-center rounded-3"
-              style={{
-                flexDirection: "column",
-                alignItems: "center",
-                backgroundColor: "#1E2761",
-                width: "100%",
-                justifyContent: "space-between",
-              }}
-            >
-              <i
-                className="fa fa-arrow-left text-white px-2 position-absolute start-0"
-                aria-hidden="true"
-                style={{ cursor: "pointer", fontSize: "1.5rem" }}
-                onClick={() => setDisplayEdit(true)}
-              ></i>
-
-              <h1
-                className="h4 card-title mb-0"
-                style={{ fontWeight: "bold", margin: "auto", color: "white" }}
-              >
-                Renew The Permissions
-              </h1>
-              <div
-                className="white_box_tittle list_header text-end"
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  fontWeight: "bold",
-                  color: "white",
-                }}
-              >
-                <span className="mt-5">
-                  Username: {subAdminPermissionData?.userName}
-                </span>
-                <br />
-                <span className="mb-0">
-                  Role:{subAdminPermissionData?.role}
-                </span>
-              </div>
+        ) : (
+          <>
+            {/* User Info */}
+            <div className="mb-4 pb-3 border-bottom">
+              <h5 className="text-secondary mb-3 ">Sub-Admin Details</h5>
+              <InfoRow icon="user-tie" label="Username" value={data.userName} />
+              <InfoRow icon="user-shield" label="Role" value={data.role} />
             </div>
-            <div className="card-body">
-              {strings.roles.map((permission) => (
-                <div className="mb-1 input-group-lg">
-                  <label>
-                    <input
-                      type="checkbox"
-                      name={permission.role}
-                      value={permission.role}
-                      checked={subAdminPermissionData.permission.includes(
-                        permission.role
-                      )}
-                      onChange={handleChangeCheckBox}
-                    />
-                    <span className="my-1">{permission.name}</span>
-                  </label>
+
+            {/* Permissions */}
+            <div className="mb-4">
+              <h5 className="text-secondary mb-3">
+                <i className="fas fa-key me-2 text-primary" />
+                Assigned Permissions
+              </h5>
+
+              {editMode ? (
+                <div className="row g-3 text-dark">
+                  {strings.roles.map((roleObj) => (
+                    <div key={roleObj.role} className="col-sm-6 col-md-4 col-lg-3">
+                      <ToggleSwitch
+                        id={`perm-${roleObj.role}`}
+                        label={roleObj.name}
+                        icon={roleObj.icon || "check"}
+                        checked={data.permission.includes(roleObj.role)}
+                        onChange={handleCheckboxChange}
+                      />
+                    </div>
+                  ))}
                 </div>
-              ))}
+              ) : data.permission.length > 0 ? (
+                <div className="d-flex flex-wrap gap-2">
+                  {data.permission.map((perm, i) => (
+                    <span
+                      key={i}
+                      className="badge bg-secondary-subtle border text-dark fw-semibold px-3 py-2"
+                    >
+                      <i className="fas fa-check-circle text-success me-1"></i>
+                      {perm.toUpperCase()}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <div className="alert alert-warning small">
+                  No permissions have been assigned yet.
+                </div>
+              )}
             </div>
-            <div className="card-footer text-center">
-              <div className="col-12 text-end">
-                <button
-                  onClick={() => handleEditSubAdminPermission()}
-                  className="btn btn-primary mb-0"
-                >
-                  Save
-                </button>
-              </div>
-              <div></div>
-            </div>
-          </div>
-        </form>
-      </div>
-    );
-  };
 
-  return <>{displayEdit ? viewSingleSubAdmin() : modifySingleSubAdmin()}</>;
+            {/* Actions */}
+            <div className="text-end pt-3 border-top ">
+              {editMode ? (
+                <>
+                  <IconButton
+                    label="Cancel"
+                    icon="times"
+                    onClick={() => {
+                      setEditMode(false);
+                      fetchPermissions();
+                    }}
+                    variant="secondary"
+                    outline
+                  />
+                  <IconButton
+                    label="Save"
+                    icon="save"
+                    onClick={handleSave}
+                    variant="success"
+                    className="ms-2"
+                  />
+                </>
+              ) : (
+                <IconButton
+                  label="Edit Permissions"
+                  icon="edit"
+                  onClick={() => setEditMode(true)}
+                  variant="primary"
+                />
+              )}
+            </div>
+          </>
+        )}
+      </BootstrapCard>
+    </ContainerWrapper>
+  );
 };
 
 export default ViewSubAdminPermission;
