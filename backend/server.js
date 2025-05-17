@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import sequelize from './db.js';
+import {sequelize} from './db.js';
 
 import { adminRoute } from './routes/admin.route.js';
 import { authRoute } from './routes/auth.route.js';
