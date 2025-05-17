@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../db.js';
+import {sequelize} from '../db.js';
 
 const trash = sequelize.define(
   'trash',
@@ -13,8 +13,8 @@ const trash = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    roles: {
-      type: DataTypes.JSON,
+    role: {
+      type: DataTypes.STRING,
       allowNull: false,
     },
     userName: {
@@ -25,20 +25,8 @@ const trash = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    balance: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
     loadBalance: {
       type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    creditRefs: {
-      type: DataTypes.JSON,
-      allowNull: false,
-    },
-    partnerships: {
-      type: DataTypes.JSON,
       allowNull: false,
     },
     createdById: {

@@ -19,42 +19,6 @@ export const createAdminSchema = [
 export const createSubAdminSchema = [
   body('userName').trim().notEmpty().withMessage('User Name is required'),
   body('password').trim().notEmpty().withMessage('Password is required'),
-  body('roles')
-    .isArray({ min: 1 }).withMessage('Roles must be an array with at least one role')
-    .custom((value) => {
-      const allowedPermissions = [
-        string.transferBalance,
-        string.status,
-        string.creditRefEdit,
-        string.partnershipEdit,
-        string.creditRefView,
-        string.partnershipView,
-        string.userProfileView,
-        string.profileView,
-        string.viewAdminData,
-        string.createAdmin,
-        string.createUser,
-        string.accountStatement,
-        string.activityLog,
-        string.deleteAdmin,
-        string.restoreAdmin,
-        string.moveToTrash,
-        string.trashView,
-        string.viewSubAdmin,
-        string.marketAnalysis
-      ];
-      for (let i = 0; i < value.length; i++) {
-        if (!value[i].permission || !Array.isArray(value[i].permission) || value[i].permission.length === 0) {
-          throw new Error('Permission must be a non-empty array');
-        }
-        for (let j = 0; j < value[i].permission.length; j++) {
-          if (!allowedPermissions.includes(value[i].permission[j])) {
-            throw new Error(`Invalid permission: ${value[i].permission[j]}`);
-          }
-        }
-      }
-      return true;
-    })
 ];
 
 export const adminLoginSchema = [
@@ -111,6 +75,11 @@ export const transferAmountSchema = [
 
 export const transactionViewSchema = [
   param('userName').exists().withMessage('User Name is required.'),
+  query("dataType")
+  .exists()
+  .withMessage("dataType is required.")
+  .isIn(["live", "olddata", "backup"])
+  .withMessage("Valid values are 'live', 'olddata', or 'backup'."),
   query('page').optional().toInt().isInt({ min: 1 }).withMessage('Page number must be a positive integer.'),
   query('limit').optional().toInt().isInt({ min: 1 }).withMessage('Limit must be a positive integer.'),
 ];
@@ -188,6 +157,11 @@ export const subAdminPermissionSchema = [
 
 export const accountStatementSchema = [
   param('adminId').exists().withMessage('Id is required.'),
+  query("dataType")
+  .exists()
+  .withMessage("dataType is required.")
+  .isIn(["live", "olddata", "backup"])
+  .withMessage("Valid values are 'live', 'olddata', or 'backup'."),
   query('page').optional().toInt().isInt({ min: 1 }).withMessage('Page number must be a positive integer.'),
   query('limit').optional().toInt().isInt({ min: 1 }).withMessage('Limit must be a positive integer.'),
 ];

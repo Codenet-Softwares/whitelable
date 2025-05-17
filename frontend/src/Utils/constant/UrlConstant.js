@@ -15,8 +15,8 @@ class UrlConstant {
   allCreate = `${this.url_dev}/${this.view}-all-creates`;
   createAdminHierarchy = `${this.url_dev}/${this.admin}-admin-create`;
   createUserRole = `${this.url_dev}/${this.admin}-create-subAdmin`;
-  updateCreditRef = `${this.url_dev}/${this.admin}/update-credit-ref`;
-  updatePartnership = `${this.url_dev}/${this.admin}/update-partnership`;
+  updateCreditRef = `${this.url_dev}/${this.admin}/add-credit-ref`;
+  updatePartnership = `${this.url_dev}/${this.admin}/add-partnership`;
   transferAmount = `${this.url_dev}/transfer-amount`;
   addCash = `${this.url_dev}/${this.admin}/deposit-amount`;
   viewPartnership = `${this.url_dev}/partnershipView`;
@@ -63,6 +63,41 @@ MarketWiseLevelTwo =`${this.url_dev}/market-wise-profit-loss`;
 AllUserMarketwiseLevelThree = `${this.url_dev}/market-allUser-profit-loss`;
 UsertwiseBetHistoryLevelFour = `${this.url_dev}/lottery-betHistory-profitLoss`;
 UsertwisecolorGameLevelFour = `${this.url_dev}/${this.get}-colorGame-user-betList`;
+
+//Outer Carousel Image Start
+OuterImage = `${this.url_dev}/${this.admin}/create-slider-text-img`;
+UpdateImage = `${this.url_dev}/${this.admin}/all-slider-text-img`;
+DeleteImage = `${this.url_dev}/delete/img`;
+ActiveInactiveOuterImage = `${this.url_dev}/${this.admin}/active-slider`;
+
+//Inner Carousel Image Start
+InnerImage = `${this.url_dev}/${this.admin}/create-inner-img`;
+UpdateInImage = `${this.url_dev}/${this.admin}/get-all-inner-img`;
+DeleteInImage = `${this.url_dev}/delete/inner-img`;
+ActiveInactiveInImage = `${this.url_dev}/${this.admin}/inner-game-img`;
+
+//Outer Carousel Mini Image Start
+gameMiniImage = `${this.url_dev}/${this.admin}/create-game-img`;
+UpdateGameImage = `${this.url_dev}/${this.admin}/get-all-game-img`;
+DeleteGameImage = `${this.url_dev}/delete/game-img`;
+ActiveInactiveGmImage = `${this.url_dev}/${this.admin}/active-game-img`;
+
+//Game Image Start
+gifGameSliderImage = `${this.url_dev}/${this.admin}/create-gif`;
+UpdateGIF = `${this.url_dev}/${this.admin}/get-all-gif`;
+DeleteGameGIF = `${this.url_dev}/delete/gif`;
+ActiveInactiveGIF = `${this.url_dev}/${this.admin}/active-gif`;
+
+// InnerGameAnnouncement Start
+InnerGameAnnouncement = `${this.url_dev}/${this.admin}/inner-announcements-create`;
+UpdateInnerAnnouncement = `${this.url_dev}/${this.admin}/get-inner-announcements`;
+InnerDeleteAnnouncement = `${this.url_dev}/${this.admin}/delete-inner-announcements`;
+
+// OuterGameAnnouncement Start
+OuterGameAnnouncement = `${this.url_dev}/${this.admin}/announcements-create`;
+UpdateOuterAnnouncement = `${this.url_dev}/${this.admin}/get-admin-announcements`;
+OuterDeleteAnnouncement = `${this.url_dev}/${this.admin}/delete-announcements`;
+
 }
 
 
