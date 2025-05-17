@@ -44,7 +44,6 @@ const handleToggleActiveStatus = async (imageId, currentStatus) => {
             Outer Images
           </h3>
         </div>
-        <div className="card-body">
           <div
             className="card-container"
             style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}
@@ -63,7 +62,7 @@ const handleToggleActiveStatus = async (imageId, currentStatus) => {
                   className="card"
                   style={{
                     width: "385px",
-                    border: "2px solid #3E5879",
+                   
                     borderRadius: "10px",
                     backgroundColor: "#f8f9fa",
                   }}
@@ -120,7 +119,6 @@ const handleToggleActiveStatus = async (imageId, currentStatus) => {
               ))
             )}
           </div>
-        </div>
       </div>
     </div>
   );
