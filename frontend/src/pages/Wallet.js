@@ -25,7 +25,6 @@ const Wallet = () => {
     { adminName: store?.admin?.adminName, adminId: store?.admin?.id },
   ]);
   const [userId, setUserId] = useState(store?.admin?.id);
-  console.log("navigationBar", navigationBar)
   //  debounced search handler
   const debouncedGetAllCreate = useCallback(
     debounce((searchName) => {
@@ -33,13 +32,12 @@ const Wallet = () => {
     }, 1500),
     []
   );
-
+  console.log("navigationBar", navigationBar)
   const handleAdminNavigateToChild = (adminId, adminName) => {
     setUserId(adminId);
     setNavigationBar((prev) => [...prev, { adminId, adminName }]);
   };
 
-  console.log("userid", userId)
 
   const handleBreadcrumbClick = (clickedAdminId) => {
     const index = navigationBar.findIndex(
@@ -226,12 +224,12 @@ const Wallet = () => {
               <div class="QA_section">
                 <div class="white_box_tittle list_header">
                   <div className="d-flex align-items-center">
-                    <span className="me-3" onClick={() => navigate(-1)}>
+                    {/* <span className="me-3" >
                       {store?.admin?.
                         adminName === navigationBar[navigationBar.length - 1]?.adminName &&
                       <button className="btn btn-secondary">&#8592;</button>
                       }
-                    </span>
+                    </span> */}
                     {/* <h4
                       className="fw-bolder text-uppercase"
                       style={{ color: "#1E2761" }}
@@ -382,9 +380,6 @@ const Wallet = () => {
                                 data?.partnerships
                               }
                               Status={data.status}
-                              // creditRefLength={creditRefLength}
-                              // partnershipLength={partnershipLength}
-                              callingParent="Wallet"
                               setRefresh={setRefresh}
                               adminDelete={setAdminDelete}
                               setIsLoading={setIsLoading}

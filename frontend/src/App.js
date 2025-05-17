@@ -9,9 +9,7 @@ import Wallet from "./pages/Wallet";
 import CreateSubAdmin from "./pages/CreateSubAdmin";
 import SubAdminView from "./pages/SubAdminView";
 import ViewSubAdminPermission from "./pages/ViewSubAdminPermission";
-import HierarchyPageView from "./components/HierarchyPageView";
 import AccountLandingModal from "./profileAccount/AccountLandingModal";
-
 import AdminAccountStatement from "./pages/AdminAccountStatement";
 import AgentDelete from "./pages/AgentDelete";
 import WelcomePage from "./pages/welcomepage/WelcomePage";
@@ -20,9 +18,7 @@ import Market_Analysis from "./pages/Market_Analysis";
 import User_BetMarket from "./pages/User_BetMarket";
 import BetHistoryForPl from "./profileAccount/BetHistoryForPl";
 import BetHistoryLotteryForPl from "./profileAccount/BetHistoryLotteryForPl";
-
 import ResetPassword from "./components/ResetPassword/ResetPassword";
-
 import LotteryMarketAnalysis from "./pages/LotteryMarketAnalysis";
 import DemoMarket_Analysis from "./pages/DemoMarket_Analysis";
 import PrivateRoute from "./components/common/PrivateRoute";
@@ -34,8 +30,6 @@ import CreateGameImage from "./pages/AddImages/AddGameImageSlider/CreateGameImag
 import AddGameGif from "./pages/AddImages/AddGameGIFimage/AddGameGif";
 import InnerAnnouncement from "./pages/Announcements/InnerAnnouncement";
 import OuterAnnouncement from "./pages/Announcements/OuterAnnouncement";
-
-// import WelcomePage from "./screen/WelcomePage";
 
 function App() {
   return (
@@ -73,10 +67,7 @@ function App() {
                 element={<AdminAccountStatement />}
               />
               <Route path="/agentDelete" element={<AgentDelete />} />
-              <Route
-                path="hierarchyView/:userName"
-                element={<HierarchyPageView />}
-              />
+              
               {/* <Route
                 path="/account-landing/:userName"
                 element={<AccountLandingModal />}

@@ -195,43 +195,47 @@ const Navside = () => {
               </a>
             </li>
           )}
-          {store.admin.permission.includes(strings.deleteAdmin) && (
-            <>
-              {isRequest ? (
-                <li className="" onClick={handleRequestToggle}>
-                  <a className="has-arrow" href="#" aria-expanded="false">
-                    <div className="nav_icon_small">
-                      <img src="../../img/menu-icon/dashboard.svg" alt="" />
-                    </div>
-                    <div className="nav_title">
-                      <span>Request</span>
-                    </div>
-                  </a>
-                </li>
-              ) : (
-                <li className="" onClick={handleRequestToggle}>
-                  <a className="has-arrow" href="#" aria-expanded="false">
-                    <div>
-                      <img src="../../img/menu-icon/dashboard.svg" alt="" />
-                    </div>
-                    <div>
-                      <span>Request</span>
-                    </div>
-                  </a>
-                  <ul>
-                    <li>
-                      <Link to="/agentDelete">
-                        <span>
-                          {" "}
-                          <i class="fa-solid fa-circle"></i>Approve delete
-                        </span>
-                      </Link>
-                    </li>
-                  </ul>
-                </li>
-              )}
-            </>
-          )}
+          {[
+            strings.deleteAdmin,
+            strings.restoreAdmin,
+            strings.trashView,
+          ].some(permission => store.admin.permission.includes(permission)) && (
+              <>
+                {isRequest ? (
+                  <li onClick={handleRequestToggle}>
+                    <a className="has-arrow" href="#" aria-expanded="false">
+                      <div className="nav_icon_small">
+                        <img src="../../img/menu-icon/dashboard.svg" alt="" />
+                      </div>
+                      <div className="nav_title">
+                        <span>Request</span>
+                      </div>
+                    </a>
+                  </li>
+                ) : (
+                  <li onClick={handleRequestToggle}>
+                    <a className="has-arrow" href="#" aria-expanded="false">
+                      <div>
+                        <img src="../../img/menu-icon/dashboard.svg" alt="" />
+                      </div>
+                      <div>
+                        <span>Request</span>
+                      </div>
+                    </a>
+                    <ul>
+                      <li>
+                        <Link to="/agentDelete">
+                          <span>
+                            <i className="fa-solid fa-circle"></i> Approve delete
+                          </span>
+                        </Link>
+                      </li>
+                    </ul>
+                  </li>
+                )}
+              </>
+            )}
+
           {permissionObj.allAdmin.includes(store?.admin?.role) && (
             <>
               {isRequest ? (

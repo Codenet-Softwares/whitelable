@@ -3,31 +3,22 @@ import { useNavigate } from "react-router-dom";
 import { useAppContext } from "../../contextApi/context";
 import CustomTransactionModal from "../../modal/customTransactionModal";
 import ViewPartnershipAndCreditRefModal from "../../modal/viewPartnershipAndCreditRefModal";
-import {
-  getHierarchy,
-  getPartnershipLog,
-} from "../../Utils/service/apiService";
 import StatusModal from "../../modal/StatusModal";
 import { moveToTrash_api } from "../../Utils/service/apiService";
-import Button from "react-bootstrap/Button";
 import strings from "../../Utils/constant/stringConstant";
 import { permissionObj } from "../../Utils/constant/permission";
 import { toast } from "react-toastify";
+import { hasPermission } from "../../Utils/helper";
 
 const Card = ({
   role,
   adminId,
   userName,
-  statusId,
   creditRef,
   balance,
   loadBalance,
-  refProfitLoss,
   partnership,
   Status,
-  creditRefLength,
-  partnershipLength,
-  callingParent,
   setRefresh,
   adminDelete,
   setIsLoading,
@@ -37,8 +28,7 @@ const Card = ({
   navigationBar
 }) => {
   const navigate = useNavigate();
-  console.log("partnership", partnership)
-  const { dispatch, store } = useAppContext();
+  const { store } = useAppContext();
   const [transactionModalShow, setTransactionModalShow] = useState(false);
   const [viewModalShow, setViewModalShow] = useState(false);
   const [differentiate, setDifferentiate] = useState("");
@@ -63,8 +53,6 @@ const Card = ({
     setAdminIdForStatus(adminId);
   };
 
-  const handleStatusChange = (status) => { };
-
   async function handleDelete() {
     const userConfirmed = window.confirm(
       "Balance should be 0 to move the Admin User to trash"
@@ -84,35 +72,6 @@ const Card = ({
 
     setDifferentiate(differentiateParam);
   };
-  let action = "";
-  async function takeMeToHierarchy(userName) {
-    if (role !== "user") {
-      if (callingParent === "HierarchyPageView") {
-        action = "store";
-      } else {
-        action = "clearAll";
-      }
-
-      const response = await getHierarchy({
-        adminName: userName,
-        action: action,
-      });
-      if (response.successCode) {
-        navigate(`/hierarchyView/${userName}`);
-      }
-    }
-  }
-
-  const handleStatus = () => {
-    // Any additional logic for handling status button click
-  };
-
-  const isAdminOrPartnerView =
-    (Array.isArray(store?.admin?.permission) &&
-      store.admin.permission.some(
-        (role) => role === strings.partnershipView
-      )) ||
-    permissionObj.allAdmin.includes(store?.admin?.role);
 
   const takeMeToAccount = (userName) => {
     navigate(`/account-landing/${userName}/statement`);
@@ -124,8 +83,6 @@ const Card = ({
           <th scope="row" className="">
             <button
               className="border border-1 text-center rounded-pill fw-bold p-1 text-uppercase"
-              // data-bs-toggle="modal"
-              // data-bs-target={`#hierarchyview-${userId}`}
               style={{ cursor: "auto", background: "#F5C93A", width: "90px" }}
             >
               {role}
@@ -147,43 +104,24 @@ const Card = ({
           <td scope="row" className="fs-6 text-center">
             <span>{creditRef}</span>
 
-            {store?.admin?.
-              adminName === navigationBar[navigationBar.length - 1]?.adminName && <> {callingParent === "Wallet" ? (
-                <span className="">
-                  <button
-                    className={`border border-0  btn ${["suspended"].includes(store?.admin?.status)
-                      ? "disabled"
-                      : (Array.isArray(store?.admin?.permission) &&
-                        store.admin.permission.some(
-                          (role) => role === strings.creditRefEdit
-                        )) ||
-                        permissionObj.allAdmin.includes(store?.admin?.role)
-                        ? ""
-                        : "disabled"
-                      }`}
-                    aria-label="Close"
-                    onClick={() =>
-                      handelOpenTransactionModal(true, "creditRefProvider")
-                    }
-                  >
-                    <i className="fa-solid fa-pen-to-square"></i>
-                  </button>
-                </span>
-              ) : null}</>}
+            {navigationBar.length === 1 ? (
+              <span className="">
+                <button
+                  className={`border border-0  btn ${hasPermission(strings.creditRefEdit, store)}`}
+                  aria-label="Close"
+                  onClick={() =>
+                    handelOpenTransactionModal(true, "creditRefProvider")
+                  }
+                >
+                  <i className="fa-solid fa-pen-to-square"></i>
+                </button>
+              </span>
+            ) : null}
 
 
             <span>
               <button
-                className={`border border-0 btn ${["suspended"].includes(store?.admin?.status)
-                  ? "disabled"
-                  : (Array.isArray(store?.admin?.permission) &&
-                    store.admin.permission.some(
-                      (role) => role === strings.creditRefView
-                    )) ||
-                    permissionObj.allAdmin.includes(store?.admin?.role)
-                    ? ""
-                    : "disabled"
-                  }`}
+                className={`border border-0 btn ${hasPermission(strings.creditRefView, store)}`}
                 onClick={() => handelOpenViewModal(true, "creditRefViewer")}
               >
                 <i className="fa-regular fa-eye" aria-label="Close"></i>
@@ -194,19 +132,10 @@ const Card = ({
           <td scope="row" className="fs-6 text-center">
             <span>{partnership}</span>
 
-            {store?.admin?.adminName === navigationBar[navigationBar.length - 1]?.adminName && <> {callingParent === "Wallet" ? (
+            {navigationBar.length === 1 ? (
               <span className="">
                 <button
-                  className={`border border-0  btn ${["suspended"].includes(store?.admin?.status)
-                    ? "disabled"
-                    : (Array.isArray(store?.admin?.permission) &&
-                      store.admin.permission.some(
-                        (role) => role === strings.partnershipEdit
-                      )) ||
-                      permissionObj.allAdmin.includes(store?.admin?.role)
-                      ? ""
-                      : "disabled"
-                    }`}
+                  className={`border border-0  btn ${hasPermission(strings.partnershipEdit, store)}`}
                 >
                   <i
                     className="fa-solid fa-pen-to-square"
@@ -217,20 +146,11 @@ const Card = ({
                   ></i>
                 </button>
               </span>
-            ) : null}</>}
+            ) : null}
 
             <span>
               <button
-                className={`border border-0 btn ${["suspended"].includes(store?.admin?.status)
-                  ? "disabled"
-                  : (Array.isArray(store?.admin?.permission) &&
-                    store.admin.permission.some(
-                      (role) => role === strings.partnershipEdit
-                    )) ||
-                    permissionObj.allAdmin.includes(store?.admin?.role)
-                    ? ""
-                    : "disabled"
-                  }`}
+                className={`border border-0 btn ${hasPermission(strings.partnershipEdit, store)}`}
                 onClick={() => handelOpenViewModal(true, "partnershipViewer")}
               >
                 <i className="fa-regular fa-eye"></i>
@@ -273,21 +193,12 @@ const Card = ({
             </p>
           </td>
           <td scope="row" className="fs-6 text-center">
-            {callingParent === "Wallet" ? (
+            {navigationBar.length === 1 ? (
               <>
                 {" "}
                 <span className="mx-1">
                   <button
-                    className={`btn border border-1 rounded ${["suspended"].includes(store?.admin?.status)
-                      ? "disabled"
-                      : (Array.isArray(store?.admin?.permission) &&
-                        store.admin.permission.some(
-                          (role) => role === strings.transferBalance
-                        )) ||
-                        permissionObj.allAdmin.includes(store?.admin?.role)
-                        ? ""
-                        : "disabled"
-                      }`}
+                    className={`btn border border-1 rounded ${hasPermission(strings.transferBalance, store)}`}
                     onClick={() =>
                       handelOpenTransactionModal(
                         true,
@@ -303,16 +214,7 @@ const Card = ({
                 </span>
                 <span className="mx-1">
                   <button
-                    className={`btn border border-2 rounded ${["suspended"].includes(store?.admin?.status)
-                      ? "disabled"
-                      : (Array.isArray(store?.admin?.permission) &&
-                        store.admin.permission.some(
-                          (role) => role === strings.status
-                        )) ||
-                        permissionObj.allAdmin.includes(store?.admin?.role)
-                        ? ""
-                        : "disabled"
-                      }`}
+                    className={`btn border border-2 rounded ${hasPermission(strings.status, store)}`}
                     style={{ background: "#25F1F7" }}
                     title="Setting"
                     type="button"
@@ -326,14 +228,7 @@ const Card = ({
 
             <span className="mx-1">
               <button
-                className={`btn border border-2 rounded ${(Array.isArray(store?.admin?.roles?.[0]?.permission) &&
-                  store.admin.roles[0].permission.some(
-                    (role) => role === strings.profileView
-                  )) ||
-                  permissionObj.allAdmin.includes(store?.admin?.role)
-                  ? ""
-                  : "disabled"
-                  }`}
+                className={`btn border border-2 rounded ${hasPermission(strings.profileView, store)}`}
                 style={{ background: "#F5C93A" }}
                 title="Profile"
                 onClick={() => takeMeToAccount(userName)}
@@ -341,19 +236,10 @@ const Card = ({
                 <i className="fa-solid fa-user"></i>
               </button>
             </span>
-            {callingParent === "Wallet" ? (
+            {navigationBar.length === 1 ? (
               <span className="mx-1">
                 <button
-                  className={`btn border border-2 rounded  ${["suspended"].includes(store?.admin?.status)
-                    ? "disabled"
-                    : (Array.isArray(store?.admin?.permission) &&
-                      store.admin.permission.some(
-                        (role) => role === strings.deleteAdmin
-                      )) ||
-                      permissionObj.allAdmin.includes(store?.admin?.role)
-                      ? ""
-                      : "disabled"
-                    }`}
+                  className={`btn border border-2 rounded  ${hasPermission(strings.deleteAdmin, store)}`}
                   style={{ background: "#ED5E68" }}
                   title="Delete"
                   onClick={(e) => handleDelete()}
@@ -363,11 +249,6 @@ const Card = ({
               </span>
             ) : null}
 
-            {/* <span className="mx-1">
-              <button className="btn border border-2 rounded" title="Wallet">
-                <i class="fa-regular fas fa-wallet"></i>
-              </button>
-            </span> */}
           </td>
         </tr>
       </tbody>
