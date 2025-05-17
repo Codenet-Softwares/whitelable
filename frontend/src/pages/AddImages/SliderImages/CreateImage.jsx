@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import SliderImageDelete from "./SliderImageDelete";
-import { addOuterImage, updateOuterImage } from "../../../Utils/service/apiService";
+import {
+  addOuterImage,
+  updateOuterImage,
+} from "../../../Utils/service/apiService";
 import { useAppContext } from "../../../contextApi/context";
 import "../Images.css";
 
@@ -10,7 +13,7 @@ const CreateImage = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [validationMessage, setValidationMessage] = useState("");
   const [sliderImages, setSliderImages] = useState([]);
-  const { store } = useAppContext();
+  const { store, showLoader, hideLoader } = useAppContext();
 
   const fetchSliderImages = () => {
     updateOuterImage(store.user)
@@ -46,13 +49,17 @@ const CreateImage = () => {
   };
 
   const handleAddImage = () => {
+    showLoader();
+
     if (!file) {
       setValidationMessage("Please select an image to upload.");
+      hideLoader();
       return;
     }
 
     if (!file.type.startsWith("image/")) {
       setValidationMessage("Please select a valid image file.");
+      hideLoader();
       return;
     }
 
@@ -78,6 +85,7 @@ const CreateImage = () => {
           setImagePreview(null);
           setValidationMessage("");
           fetchSliderImages();
+          hideLoader(); // ✅ hideLoader on success
         })
         .catch((error) => {
           if (
@@ -89,6 +97,7 @@ const CreateImage = () => {
           } else {
             toast.error("Failed to upload the image. Please try again.");
           }
+          hideLoader(); // ✅ hideLoader on error
         });
     };
 

@@ -8,7 +8,7 @@ import {
 import { useAppContext } from "../../../contextApi/context";
 
 const UpdateGifSlider = () => {
-  const { store } = useAppContext();
+  const { store, showLoader, hideLoader  } = useAppContext();
   const [gifImages, setGifImages] = useState([]);
 
   useEffect(() => {
@@ -25,12 +25,16 @@ const UpdateGifSlider = () => {
   };
 
   const handleDelete = async (imageId) => {
+          showLoader(); 
+
     try {
       await deleteCreateGif(imageId);
       fetchGifImages(); // 🔁 Refresh after delete
     } catch (error) {
       toast.error("Failed to delete the GIF. Please try again.");
-    }
+    }finally {
+        hideLoader(); 
+      }
   };
 
   const handleToggleActiveStatus = async (imageId, currentStatus) => {
@@ -41,6 +45,7 @@ const UpdateGifSlider = () => {
 
     const newStatus = !currentStatus;
     const body = { isActive: newStatus };
+      showLoader(); 
 
     try {
       const response = await activeInactiveGameGif(imageId, body);
@@ -56,7 +61,9 @@ const UpdateGifSlider = () => {
       }
     } catch (error) {
       toast.error("Failed to update GIF status. Please try again.");
-    }
+    }finally {
+        hideLoader(); // Hide loader after the async operation is complete
+      }
   };
 
   return (
