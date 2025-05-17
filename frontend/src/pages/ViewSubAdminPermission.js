@@ -19,10 +19,10 @@ const ViewSubAdminPermission = () => {
     getSubAdminPermissionData()
   );
   const [displayEdit, setDisplayEdit] = useState(true);
-
+console.log('====>> line 22',subAdminPermissionData)
   useEffect(() => {
     if (store?.admin) {
-      permissionObj.allAdmin.includes(store?.admin?.roles[0].role) &&
+      permissionObj.allAdmin.includes(store?.admin?.role) &&
         getSubAdminpermisson();
     }
   }, [store?.admin]);
@@ -31,15 +31,19 @@ const ViewSubAdminPermission = () => {
     const response = await getviewSubAdminPermission({
       _id: id,
     });
+    console.log( response)
     if (response) {
       setSubAdminPersionData({
         userName: response.data.userName,
-        roles: response.data.roles,
+        role: response.data.role,
+        permission: response.data.permission
+
       });
     }
   };
+  
   const handleEditSubAdminPermission = async () => {
-    const permissions = subAdminPermissionData?.roles[0]?.permission;
+    const permissions = subAdminPermissionData?.permission;
 
     if (permissions.length === 0) {
       toast.error("Please select at least one permission.");
@@ -65,23 +69,19 @@ const ViewSubAdminPermission = () => {
     const { name, checked } = event.target;
 
     setSubAdminPersionData((prevState) => {
-      if (!prevState?.roles[0]) return;
+      if (!prevState?.permission) return prevState;
 
       const updatedPermissions = checked
-        ? [...prevState.roles[0].permission, name]
-        : prevState.roles[0].permission.filter((item) => item !== name);
+        ? [...prevState.permission, name]
+        : prevState.permission.filter((item) => item !== name);
 
       return {
         ...prevState,
-        roles: [
-          {
-            ...prevState.roles[0],
-            permission: updatedPermissions,
-          },
-        ],
+        permission: updatedPermissions,
       };
     });
   };
+
 
   const viewSingleSubAdmin = () => {
     return (
@@ -117,11 +117,11 @@ const ViewSubAdminPermission = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {subAdminPermissionData?.roles[0]?.permission &&
-                            subAdminPermissionData?.roles[0]?.permission.map(
+                          {subAdminPermissionData?.permission &&
+                            subAdminPermissionData?.permission.map(
                               (user, index) => (
                                 <tr key={user._id}>
-                                  <th>{user}</th>
+                                  <th>{user?.toUpperCase()}</th>
                                 </tr>
                               )
                             )}
@@ -186,7 +186,7 @@ const ViewSubAdminPermission = () => {
                 </span>
                 <br />
                 <span className="mb-0">
-                  Role:{subAdminPermissionData?.roles[0]?.role}
+                  Role:{subAdminPermissionData?.role}
                 </span>
               </div>
             </div>
@@ -198,7 +198,7 @@ const ViewSubAdminPermission = () => {
                       type="checkbox"
                       name={permission.role}
                       value={permission.role}
-                      checked={subAdminPermissionData.roles[0].permission.includes(
+                      checked={subAdminPermissionData.permission.includes(
                         permission.role
                       )}
                       onChange={handleChangeCheckBox}

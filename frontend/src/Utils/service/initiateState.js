@@ -3,12 +3,13 @@ export function getAdminInitialState(body = {}) {
     accessToken: body?.accessToken ?? "",
     status: body?.status ?? "",
     adminName: body?.userName ?? "",
-    isLogin: body.isLogin ?? false,
+    isLogin: !!body?.accessToken,
     id: body?.adminId ?? "",
-    roles: body?.roles ?? [],
+    role: body?.role ?? "",
+    permission: body?.permission ?? "",
     createdById: body?.createdById ?? null,
     createdByUser: body?.createdByUser ?? null,
-    AdminWallet: body?.balance ?? null,
+    balance: body?.balance ?? 0,
   };
 }
 
@@ -43,15 +44,12 @@ export function getCreditRefAndPartnership(body = {}) {
 
 export function getCreateSubAdmin(body = {}) {
   return {
-    userName: "",
-    password: "",
-    roles: [
-      {
-        permission: [],
-      },
-    ],
+    userName: body.userName || "",
+    password: body.password || "",
+    permission: body?.permission || [],
   };
 }
+
 
 export function getAllSubAdminCreateState(body = {}) {
   return {
@@ -67,7 +65,8 @@ export function getAllSubAdminCreateState(body = {}) {
 export function getSubAdminPermissionData(body = {}) {
   return {
     userName: "",
-    roles: [],
+    role: "",
+    permission:[]
   };
 }
 
@@ -219,7 +218,7 @@ export const getUseProfitLossState = (body = {}) => {
     dateRange: { from: getTodayDate(), to: getTodayDate() },
     loading: false,
     shouldDisableButton: true,
-    preventAPICall: false, 
+    preventAPICall: false,
     tableRefreshKey: 0,
     currentLevel: 1,
     parentData: null,
