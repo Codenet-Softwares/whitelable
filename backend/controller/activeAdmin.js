@@ -13,70 +13,70 @@ async (adminId, isActive, locked) => {
     const whiteLabel = await admins.findAll({
       where: {
         createdById: adminId,
-        [Op.and]: Sequelize.literal(`JSON_CONTAINS(roles, '{"role": "${string.whiteLabel}"}')`)
+        role : string.whiteLabel
       }
     });
 
     const hyperAgent = await admins.findAll({
       where: {
         createdById: adminId,
-        [Op.and]: Sequelize.literal(`JSON_CONTAINS(roles, '{"role": "${string.hyperAgent}"}')`)
+        role:  string.hyperAgent
       }
     });
 
     const masterAgent = await admins.findAll({
       where: {
         createdById: adminId,
-        [Op.and]: Sequelize.literal(`JSON_CONTAINS(roles, '{"role": "${string.masterAgent}"}')`)
+        role :  string.masterAgent
       }
     });
 
     const superAgent = await admins.findAll({
       where: {
         createdById: adminId,
-        [Op.and]: Sequelize.literal(`JSON_CONTAINS(roles, '{"role": "${string.superAgent}"}')`)
+        role:  string.superAgent
       }
     });
 
     const subWhiteLabel = await admins.findAll({
       where: {
         createdById: adminId,
-        [Op.and]: Sequelize.literal(`JSON_CONTAINS(roles, '{"role": "${string.subWhiteLabel}"}')`)
+        role :  string.subWhiteLabel
       }
     });
 
     const subHyperAgent = await admins.findAll({
       where: {
         createdById: adminId,
-        [Op.and]: Sequelize.literal(`JSON_CONTAINS(roles, '{"role": "${string.subHyperAgent}"}')`)
+        role :  string.subHyperAgent
       }
     });
 
     const subMasterAgent = await admins.findAll({
       where: {
         createdById: adminId,
-        [Op.and]: Sequelize.literal(`JSON_CONTAINS(roles, '{"role": "${string.subMasterAgent}"}')`)
+        role :  string.subMasterAgent
       }
     });
 
     const subSuperAgent = await admins.findAll({
       where: {
         createdById: adminId,
-        [Op.and]: Sequelize.literal(`JSON_CONTAINS(roles, '{"role": "${string.subSuperAgent}"}')`)
+        role:  string.subSuperAgent
       }
     });
 
     const subAdmin = await admins.findAll({
       where: {
         createdById: adminId,
-        [Op.and]: Sequelize.literal(`JSON_CONTAINS(roles, '{"role": "${string.subAdmin}"}')`)
+        role :  string.subAdmin
       }
     });
 
     const user = await admins.findAll({
       where: {
         createdById: adminId,
-        [Op.and]: Sequelize.literal(`JSON_CONTAINS(roles, '{"role": "${string.user}"}')`)
+        role :  string.user
       }
     });
 
@@ -1371,6 +1371,7 @@ async (adminId, isActive, locked) => {
       }
     }
   } catch (error) {
+    console.log("error", error);
     return res.status(statusCode.internalServerError).json(
       apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message),
     );

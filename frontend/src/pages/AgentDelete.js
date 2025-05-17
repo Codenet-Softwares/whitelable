@@ -7,6 +7,7 @@ import {
 import { toast } from "react-toastify";
 import { useAppContext } from "../contextApi/context";
 import Pagination from "../components/common/Pagination";
+import strings from "../Utils/constant/stringConstant";
 
 const AgentDelete = () => {
   const { store, showLoader, hideLoader } = useAppContext();
@@ -116,7 +117,7 @@ const AgentDelete = () => {
         <div className="card ">
           <div className="">
             <h4
-              className="text-center text-uppercase fw-bold text-white bg-dark p-3"              
+              className="text-center text-uppercase fw-bold text-white bg-dark p-3"
             >
               Deleted Agents
             </h4>
@@ -159,7 +160,7 @@ const AgentDelete = () => {
             <div className="main_data">
               <table className="table mt-4">
                 <thead
-                className="P-3"
+                  className="P-3"
                   style={{
                     height: "10px",
                     backgroundColor: "#84B9DF",
@@ -193,9 +194,12 @@ const AgentDelete = () => {
                             className="btn text-dark fw-bold mx-2"
                             style={{ background: "#ED5E68" }}
                             onClick={() => handleDeleteAgent(data.trashId)}
-                            disabled={["suspended"].includes(
-                              store?.admin?.status
-                            )}
+                            disabled={
+                              ["suspended"].includes(store?.admin?.status) ||
+                              ![strings.deleteAdmin, strings.moveToTrash].every(perm =>
+                                store?.admin?.permissions?.includes(perm)
+                              )
+                            }
                           >
                             Delete{" "}
                             <i className="fa-solid fa-trash text-dark"></i>
@@ -204,9 +208,12 @@ const AgentDelete = () => {
                             className="btn text-dark rounded fw-bold"
                             style={{ background: "#F5C93A" }}
                             onClick={() => handleRestore(data.adminId)}
-                            disabled={["suspended"].includes(
-                              store?.admin?.status
-                            )}
+                            disabled={
+                              ["suspended"].includes(store?.admin?.status) ||
+                              ![strings.moveToTrash, strings.restoreAdmin].every(perm =>
+                                store?.admin?.permissions?.includes(perm)
+                              )
+                            }
                           >
                             Restore{" "}
                             <i className="fa-solid fa-arrow-rotate-left"></i>
