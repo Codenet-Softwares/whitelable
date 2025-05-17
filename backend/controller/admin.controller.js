@@ -355,7 +355,7 @@ export const viewAllSubAdminCreates = async (req, res) => {
     const userName = req.query.userName || '';
 
     const [results] = await sql.query(
-      `CALL getAllAdminData(?,?,?,?)`,
+      `CALL getAllSubAdminData(?,?,?,?)`,
       [userName, createdById, pageSize, page]
     );
 

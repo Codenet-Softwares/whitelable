@@ -51,6 +51,7 @@ export const adminLogin = async (req, res) => {
           const result = await Permission.findOne({ where: { UserId: existingAdmin.adminId } });
           permission = result ? [result.permission] : [];
         } else if (
+          roles === string.subAdmin ||
           roles === string.subWhiteLabel ||
           roles === string.subHyperAgent ||
           roles === string.subSuperAgent ||
