@@ -6,7 +6,6 @@ import { messages, string } from '../constructor/string.js';
 import { Op, fn, col, Sequelize } from 'sequelize';
 import { sql, sequelize } from '../db.js';
 import { statusCode } from '../helper/statusCodes.js';
-import trash from '../models/trash.model.js';
 import axios from 'axios';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';

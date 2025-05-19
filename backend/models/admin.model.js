@@ -115,10 +115,6 @@ const admins = sequelize.define(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
-    path: {
-      type: DataTypes.JSON,
-      allowNull: true,
-    },
     loginStatus: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -133,6 +129,14 @@ const admins = sequelize.define(
     },
     token: {
       type: DataTypes.TEXT,
+    },
+    isDeleted: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    isPermanentDeleted: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
   },
   {
