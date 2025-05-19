@@ -72,7 +72,6 @@ export const createAdmin = async (req, res) => {
 
     const [existingAdmin, existingTrashUser] = await Promise.all([
       admins.findOne({ where: { userName } }),
-      trash.findOne({ where: { userName } }),
     ]);
 
     if (existingAdmin || existingTrashUser) {
