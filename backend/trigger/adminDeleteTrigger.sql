@@ -1,16 +1,23 @@
+USE whiteLabel_refactor;
 DELIMITER $$
 
 CREATE TRIGGER deleteAdmin
-BEFORE UPDATE ON admins
+AFTER UPDATE ON admins
 FOR EACH ROW
 BEGIN
-  UPDATE whiteLabel_refactor_archive.admins
-  SET 
-    isDeleted = OLD.isDeleted,
-    isPermanentDeleted = OLD.isPermanentDeleted,
-    lastLoginTime = OLD.lastLoginTime,
-    loginStatus = OLD.loginStatus
-  WHERE adminId = OLD.adminId;
+  -- Handle isDeleted change
+  IF NEW.isDeleted = TRUE AND OLD.isDeleted = FALSE THEN
+    UPDATE whiteLabel_refactor_archive.admins
+    SET isDeleted = TRUE
+    WHERE adminId = OLD.adminId;
+  END IF;
+
+  -- Handle isPermanentDeleted change
+  IF NEW.isPermanentDeleted = TRUE AND OLD.isPermanentDeleted = FALSE THEN
+    UPDATE whiteLabel_refactor_archive.admins
+    SET isPermanentDeleted = TRUE
+    WHERE adminId = OLD.adminId;
+  END IF;
 END$$
 
 DELIMITER ;

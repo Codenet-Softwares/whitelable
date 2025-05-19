@@ -72,7 +72,6 @@ export const createAdmin = async (req, res) => {
 
     const [existingAdmin, existingTrashUser] = await Promise.all([
       admins.findOne({ where: { userName } }),
-      trash.findOne({ where: { userName } }),
     ]);
 
     if (existingAdmin || existingTrashUser) {
@@ -570,38 +569,38 @@ export const profileView = async (req, res) => {
       .send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
   }
 };
-// done
-export const buildRootPath = async (req, res) => {
-  try {
-    const { userName, action } = req.params;
-    const searchName = req.query.userName || '';
-    const page = parseInt(req.query.page, 10) || 1;
-    const pageSize = parseInt(req.query.pageSize, 10) || 10;
+// done NOT IN USE
+// export const buildRootPath = async (req, res) => {
+//   try {
+//     const { userName, action } = req.params;
+//     const searchName = req.query.userName || '';
+//     const page = parseInt(req.query.page, 10) || 1;
+//     const pageSize = parseInt(req.query.pageSize, 10) || 10;
 
-    const [results] = await sql.query(
-      `CALL getAllAdminDataByPath(?,?,?,?,?)`,
-      [searchName, userName, action, pageSize, page]
-    );
+//     const [results] = await sql.query(
+//       `CALL getAllAdminDataByPath(?,?,?,?,?)`,
+//       [searchName, userName, action, pageSize, page]
+//     );
     
-    const users = results[0];
-    const totalRecords = results[1][0]?.totalCount || 0;
-    const totalPages = Math.ceil(totalRecords / pageSize);
+//     const users = results[0];
+//     const totalRecords = results[1][0]?.totalCount || 0;
+//     const totalPages = Math.ceil(totalRecords / pageSize);
 
-    return res.status(statusCode.success).json(
-      apiResponseSuccess(users, true, statusCode.success, messages.success, {
-        totalRecords,
-        totalPages,
-        currentPage: page,
-        pageSize,
-      })
-    );
+//     return res.status(statusCode.success).json(
+//       apiResponseSuccess(users, true, statusCode.success, messages.success, {
+//         totalRecords,
+//         totalPages,
+//         currentPage: page,
+//         pageSize,
+//       })
+//     );
     
-  } catch (error) {
-    return res
-      .status(statusCode.internalServerError)
-      .send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
-  }
-};
+//   } catch (error) {
+//     return res
+//       .status(statusCode.internalServerError)
+//       .send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
+//   }
+// };
 
 
 // done
