@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { statusCode } from '../helper/statusCodes.js';
 import axios from 'axios';
 import { string } from '../constructor/string.js';
-import { Op } from 'sequelize';
+import { Op, where } from 'sequelize';
 import { admin_Balance } from './transaction.controller.js';
 import { sequelize } from '../db.js';
 
@@ -61,9 +61,10 @@ export const moveAdminToTrash = async (req, res) => {
     }
 
 
-    await admins.update({
-      isDeleted: true,
-    });
+    await admins.update(
+      { isDeleted: true },
+      { where: { adminId: requestId } }
+    );
 
     let message = '';
     if (admin.role === string.user) {
@@ -81,6 +82,7 @@ export const moveAdminToTrash = async (req, res) => {
 
     return res.status(statusCode.success).json(apiResponseSuccess(null, statusCode.success, true, 'Admin User moved to Trash' + " " + message));
   } catch (error) {
+    console.error('Error moving admin to trash:', error);
    return res
       .status(statusCode.internalServerError)
       .send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
