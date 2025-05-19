@@ -302,7 +302,7 @@ export async function deleteTrash_api(body = {}, isToast = false) {
   try {
     const callParams = await getAuthCallParams(strings.DELETE, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.deleteTrash}/${body.trashId}`,
+      `${UrlConstant.deleteTrash}/${body.adminId}`,
       callParams,
       isToast
     );

@@ -85,7 +85,9 @@ const ViewSubAdminPermission = () => {
   return (
     <ContainerWrapper>
       <BootstrapCard
-        title={editMode ? "Edit Sub-Admin Permissions" : "View Sub-Admin Permissions"}
+        title={
+          editMode ? "Edit Sub-Admin Permissions" : "View Sub-Admin Permissions"
+        }
         onBack={
           editMode
             ? () => {
@@ -103,8 +105,13 @@ const ViewSubAdminPermission = () => {
         ) : (
           <>
             {/* User Info */}
-            <div className="mb-4 pb-3 border-bottom">
-              <h5 className="text-secondary mb-3 ">Sub-Admin Details</h5>
+            <div
+              className="mb-4 pb-3 px-3 py-3 rounded shadow-sm text-center "
+              style={{ backgroundColor: "#f8f9fa" }}
+            >
+              <h5 className="text-uppercase text-primary mb-3 border-bottom pb-2 fw-bold fs-5 ">
+                Sub-Admin Profile
+              </h5>
               <InfoRow icon="user-tie" label="Username" value={data.userName} />
               <InfoRow icon="user-shield" label="Role" value={data.role} />
             </div>
@@ -119,9 +126,13 @@ const ViewSubAdminPermission = () => {
               {editMode ? (
                 <div className="row g-3 text-dark">
                   {strings.roles.map((roleObj) => (
-                    <div key={roleObj.role} className="col-sm-6 col-md-4 col-lg-3">
+                    <div
+                      key={roleObj.role}
+                      className="col-sm-6 col-md-4 col-lg-3"
+                    >
                       <ToggleSwitch
                         id={`perm-${roleObj.role}`}
+                        name={roleObj.role}
                         label={roleObj.name}
                         icon={roleObj.icon || "check"}
                         checked={data.permission.includes(roleObj.role)}
@@ -153,23 +164,27 @@ const ViewSubAdminPermission = () => {
             <div className="text-end pt-3 border-top ">
               {editMode ? (
                 <>
-                  <IconButton
-                    label="Cancel"
-                    icon="times"
-                    onClick={() => {
-                      setEditMode(false);
-                      fetchPermissions();
-                    }}
-                    variant="secondary"
-                    outline
-                  />
-                  <IconButton
-                    label="Save"
-                    icon="save"
-                    onClick={handleSave}
-                    variant="success"
-                    className="ms-2"
-                  />
+                  <>
+                    <IconButton
+                      label="Cancel"
+                      icon="times"
+                      onClick={() => {
+                        setEditMode(false);
+                        fetchPermissions();
+                      }}
+                      variant="secondary"
+                      outline
+                    />
+                  </>
+
+                  <>
+                    <IconButton
+                      label="Save"
+                      icon="save"
+                      onClick={handleSave}
+                      variant="success"
+                    />
+                  </>
                 </>
               ) : (
                 <IconButton
