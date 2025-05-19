@@ -61,8 +61,6 @@ export const adminLogin = async (req, res) => {
           permission = results.map((perm) => perm.permission);
         }
 
-        console.log('Permission:', permission);
-
         if (existingAdmin.isReset === true) {
             const resetTokenResponse = {
                 id: null,
@@ -135,6 +133,7 @@ export const adminLogin = async (req, res) => {
 
             existingAdmin.token = accessToken
             const loginTime = new Date();
+            
 
             await existingAdmin.update({ lastLoginTime: loginTime, loginStatus: 'login success' });
             await existingAdmin.save()
