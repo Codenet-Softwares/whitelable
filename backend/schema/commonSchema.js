@@ -105,7 +105,7 @@ export const creditRefSchema = [
 
 export const moveToTrashSchema = [body('requestId').exists().withMessage('Request Id is required')];
 
-export const deleteFromTrashSchema = [param('trashId').exists().withMessage('Trash Id is required')];
+export const deleteFromTrashSchema = [param('adminId').exists().withMessage('adminId Id is required')];
 
 export const activeStatusSchema = [param('adminId').exists().withMessage('Admin Id is required')];
 
