@@ -38,7 +38,7 @@ export const trashRoute = (app) => {
 
   // Delete Trash Data API ("DONE")
   app.delete(
-    '/api/delete/admin-user/:trashId',
+    '/api/delete/admin-user/:adminId',
     deleteFromTrashSchema,
     customErrorHandler,
     Authorize([

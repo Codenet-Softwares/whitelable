@@ -12,7 +12,6 @@ import {
   partnershipEditSchema,
   partnershipViewSchema,
   creditRefViewSchema,
-  rootPathSchema,
   viewSubAdminSchema,
   singleSubAdminSchema,
   subAdminPermissionSchema,
@@ -37,7 +36,6 @@ import {
   viewAllCreates,
   partnershipView,
   creditRefView,
-  buildRootPath,
   viewSubAdmins,
   singleSubAdmin,
   subAdminPermission,
@@ -273,8 +271,8 @@ export const adminRoute = (app) => {
     profileView,
   );
 
-  // Root Path API ("DONE")
-  app.post('/api/Root-Path/:userName/:action', rootPathSchema, customErrorHandler, buildRootPath);
+  // Root Path API ("DONE") NOT IN USE
+  // app.post('/api/Root-Path/:userName/:action', rootPathSchema, customErrorHandler, buildRootPath);
 
   // view-sub-admins ("DONE")
   app.get('/api/admin/view-sub-admins/:adminId',

@@ -160,7 +160,7 @@ export async function getAllSubAdminCreate(body = {}, isToast = false) {
   try {
     const callParams = await getAuthCallParams(strings.GET, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.allSubAdmin}/${body._id}?page=${body.pageNumber}&pageSize=${body.dataLimit}&searchQuery=${body.name}`,
+      `${UrlConstant.allSubAdmin}/${body._id}?page=${body.pageNumber}&pageSize=${body.dataLimit}&userName=${body.name}`,
       callParams,
       isToast
     );
@@ -302,7 +302,7 @@ export async function deleteTrash_api(body = {}, isToast = false) {
   try {
     const callParams = await getAuthCallParams(strings.DELETE, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.deleteTrash}/${body.trashId}`,
+      `${UrlConstant.deleteTrash}/${body.adminId}`,
       callParams,
       isToast
     );
