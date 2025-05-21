@@ -8,7 +8,7 @@ import {
 import { useAppContext } from "../../../contextApi/context";
 
 const UpdateGameSlider = () => {
-  const { store } = useAppContext();
+  const { store, showLoader, hideLoader  } = useAppContext();
   const [sliderImages, setSliderImages] = useState([]);
 
   useEffect(() => {
@@ -44,6 +44,7 @@ const UpdateGameSlider = () => {
     );
     setSliderImages(updatedImages);
 console.log("Image ID==========>",updatedImages)
+      showLoader(); 
     try {
       await activeInactiveGameImage(imageId, { isActive: newStatus });
       toast.success(
@@ -51,7 +52,9 @@ console.log("Image ID==========>",updatedImages)
       );
     } catch (error) {
       toast.error("Failed to update image status. Please try again.");
-    }
+    }finally {
+        hideLoader(); // Hide loader after the async operation is complete
+      }
   };
 
   return (

@@ -10,7 +10,7 @@ const CreateGameImage = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [validationMessage, setValidationMessage] = useState("");
   const [refreshImages, setRefreshImages] = useState(false); // 🔁 refresh trigger
-  const { store } = useAppContext();
+  const { showLoader, hideLoader } = useAppContext();
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -31,13 +31,19 @@ const CreateGameImage = () => {
   };
 
   const handleUploadImage = () => {
+    showLoader();
+
     if (!file) {
       setValidationMessage("Please select an image to upload.");
+      hideLoader();
+
       return;
     }
 
     if (!file.type.startsWith("image/")) {
       setValidationMessage("Please select a valid image file.");
+      hideLoader();
+
       return;
     }
 
@@ -59,7 +65,8 @@ const CreateGameImage = () => {
           setFile(null);
           setImagePreview(null);
           setValidationMessage("");
-          setRefreshImages((prev) => !prev); // 🔁 Trigger refresh
+          setRefreshImages((prev) => !prev);
+          hideLoader();
         })
         .catch((error) => {
           if (
@@ -71,6 +78,7 @@ const CreateGameImage = () => {
           } else {
             toast.error("Failed to upload the image. Please try again.");
           }
+          hideLoader();
         });
     };
 
@@ -116,13 +124,11 @@ const CreateGameImage = () => {
           style={{ display: "none" }}
         />
       </div>
-
       <div className="text-center">
         <button className="btn btn-primary" onClick={handleUploadImage}>
           Upload Image
         </button>
       </div>
-
       <UpdateGameSlider key={refreshImages} /> {/* 🔁 Refreshes child */}
     </div>
   );

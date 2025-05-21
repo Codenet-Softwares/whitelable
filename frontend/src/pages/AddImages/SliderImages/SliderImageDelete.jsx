@@ -5,7 +5,7 @@ import {
   activeInactiveImage,
 } from "../../../Utils/service/apiService";
 import "../Images.css";
-
+import { useAppContext } from "../../../contextApi/context";
 const SliderImageDelete = ({ sliderImages, refreshImages }) => {
   const handleDelete = async (imageId) => {
     try {
@@ -15,6 +15,7 @@ const SliderImageDelete = ({ sliderImages, refreshImages }) => {
       toast.error("Failed to delete the image. Please try again.");
     }
   };
+  const { store, showLoader, hideLoader } = useAppContext();
 
 const handleToggleActiveStatus = async (imageId, currentStatus) => {
   const newStatus = !currentStatus;
@@ -23,6 +24,7 @@ const handleToggleActiveStatus = async (imageId, currentStatus) => {
   const updatedImages = sliderImages.map((image) =>
     image.imageId === imageId ? { ...image, isActive: newStatus } : image
   );
+      showLoader(); 
 
   try {
     await activeInactiveImage(imageId, { isActive: newStatus });
@@ -32,7 +34,9 @@ const handleToggleActiveStatus = async (imageId, currentStatus) => {
     refreshImages(); // Optional: re-sync with backend
   } catch (error) {
     toast.error("Failed to update image status. Please try again.");
-  }
+  } finally {
+        hideLoader(); // Hide loader after the async operation is complete
+      }
 };
 
 
