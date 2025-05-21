@@ -10,7 +10,7 @@ const CreateInnerImage = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [validationMessage, setValidationMessage] = useState("");
   const [refreshImages, setRefreshImages] = useState(false); // <-- NEW
-  const { store } = useAppContext();
+  const { showLoader, hideLoader } = useAppContext();
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -31,13 +31,21 @@ const CreateInnerImage = () => {
   };
 
   const handleUploadImage = () => {
+    showLoader();
+
     if (!file) {
       setValidationMessage("Please select an image to upload.");
+      hideLoader();
+
       return;
     }
 
     if (!file.type.startsWith("image/")) {
-      setValidationMessage("Please select a valid image file (e.g., PNG, JPG, JPEG).");
+      setValidationMessage(
+        "Please select a valid image file (e.g., PNG, JPG, JPEG)."
+      );
+      hideLoader();
+
       return;
     }
 
@@ -67,11 +75,13 @@ const CreateInnerImage = () => {
 
           // Trigger child to refetch images
           setRefreshImages((prev) => !prev);
+          hideLoader();
         })
         .catch((error) => {
           toast.error(
             error?.response?.data?.errMessage || "Failed to upload the image."
           );
+          hideLoader();
         });
     };
 
