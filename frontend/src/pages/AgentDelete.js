@@ -19,8 +19,7 @@ const AgentDelete = () => {
   const [pageLimit, setPageLimit] = useState(10);
   const [search, setSearch] = useState("");
   const id = store?.admin?.id;
- 
-  console.log("data for admin id", id);
+
   async function viewApprovedDelete() {
     const response = await viewTrash_api({
       adminId: id,
@@ -38,34 +37,25 @@ const AgentDelete = () => {
   };
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+      viewApprovedDelete();
+    }, 1000)
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  useEffect(() => {
     viewApprovedDelete();
-  }, [reload, page, pageLimit, search]);
+  }, [reload, page, pageLimit]);
 
   const startIndex = Math.min((page - 1) * pageLimit + 1);
   const endIndex = Math.min(page * pageLimit, totalData);
 
-  // async function handleDeleteAgent(id) {
 
-  //   const response = await deleteTrash_api({ trashId: id });
-  //   if (response) {
-  //     toast.info(response.message);
-  //     setReload(!reload);
-  //   }
-  // }
-
-  // async function handleRestore(adminId) {
-  //   const data = { adminId: adminId };
-  //   const response = await restoreTrash_api(data);
-  //   if (response) {
-  //     toast.info(response.message);
-  //     setReload(!reload);
-  //   }
-  // }
   async function handleDeleteAgent(id) {
     console.log("adminId", id);
-    showLoader(); // Show loader before starting the async operation
+    showLoader();
     try {
-      const response = await deleteTrash_api({ adminId:id });
+      const response = await deleteTrash_api({ adminId: id });
       if (response) {
         toast.info(response.message);
 
@@ -145,7 +135,7 @@ const AgentDelete = () => {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         type="text"
-                        placeholder="Search content here..."
+                        placeholder="Search Content Here..."
                       />
                     </div>
                     <button type="submit">

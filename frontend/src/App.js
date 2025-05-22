@@ -118,10 +118,6 @@ function App() {
                 path="/downline-profit-loss"
                 element={<DownlineProfitLoss />}
               />
-              <Route
-                path="/downline-profit-loss"
-                element={<DownlineProfitLoss />}
-              />
               <Route path="/outer-image" element={<CreateImage />} />
               <Route path="/inner-image" element={<CreateInnerImage/>}/>
               <Route path="/GameImage-slider" element={<CreateGameImage/>}/>

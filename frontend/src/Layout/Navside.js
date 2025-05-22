@@ -67,12 +67,6 @@ const Navside = () => {
           />
         </a>
 
-        {/* <a className="small_logo" href="#">
-          <img src="../../img/mini_logo.png" alt="" />
-        </a>
-        <div className="sidebar_close_icon d-lg-none">
-          <i className="ti-close"></i>
-        </div> */}
       </div>
       <div className="mt-5">
         <ul id="sidebar_menu" class="metismenu">
@@ -155,9 +149,6 @@ const Navside = () => {
                     </span>
                   </Link>
                 </li>
-                {/* <li>
-                <a href="#">Light Sidebar</a>
-              </li> */}
               </ul>
             </li>
           )}

@@ -279,8 +279,8 @@ const Card = ({
       <StatusModal
         show={showModal}
         handleClose={handleClose}
-        name={role}
-        userRole={userName}
+        name={userName}
+        userRole={role}
         Status={Status}
         adminIdForStatus={adminIdForStatus}
         setRefresh={setRefresh}

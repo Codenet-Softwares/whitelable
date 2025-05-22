@@ -77,17 +77,19 @@ const DownlineProfitLoss = () => {
         item.isTotalRow ? (
           <strong>{item.userName}</strong>
         ) : (
-          <Link
-            className="btn btn-link p-0 "
-          
+          <span
+            className="btn p-0 "
+
             onClick={() =>
               item?.role === "user"
                 ? handleUserNavigateToProfitLoss(item.userName)
                 : handleAdminNavigateToChild(item.adminId, item.userName)
             }
           >
-            {item.userName}
-          </Link>
+            <span className={`${item?.role === "user" ? "" : "text-success"}`}>
+              {item.userName}
+            </span>
+          </span>
         ),
     },
     {

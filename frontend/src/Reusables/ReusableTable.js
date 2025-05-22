@@ -31,16 +31,17 @@ const ReusableTable = ({
   };
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setCurrentPage((prevPage) => {
-        // Only reset page if searchTerm is changing (non-empty)
-        if (searchTerm.length > 0) return 1;
-        return prevPage;
-      });
+    if (searchTerm.length === 0) {
+      // setCurrentPage(1);
       fetchDataForTable();
-    }, 500);
+    } else {
+      const timer = setTimeout(() => {
+        setCurrentPage(1);
+        fetchDataForTable();
+      }, 500);
 
-    return () => clearTimeout(timer);
+      return () => clearTimeout(timer);
+    }
   }, [searchTerm, currentPage, itemsPerPage, fetchData]);
 
   const onPageChange = (pageNumber) => {
