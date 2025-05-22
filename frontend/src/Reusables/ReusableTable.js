@@ -6,7 +6,7 @@ const ReusableTable = ({
   itemsPerPage,
   showSearch,
   paginationVisible,
-  fetchData, 
+  fetchData,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -31,19 +31,18 @@ const ReusableTable = ({
   };
 
   useEffect(() => {
-    if (searchTerm.length === 0) {
-      setCurrentPage(1);
+    const timer = setTimeout(() => {
+      setCurrentPage((prevPage) => {
+        // Only reset page if searchTerm is changing (non-empty)
+        if (searchTerm.length > 0) return 1;
+        return prevPage;
+      });
       fetchDataForTable();
-    } else {
-      const timer = setTimeout(() => {
-        setCurrentPage(1);
-        fetchDataForTable();
-      }, 500);
+    }, 500);
 
-      return () => clearTimeout(timer);
-    }
+    return () => clearTimeout(timer);
   }, [searchTerm, currentPage, itemsPerPage, fetchData]);
-  
+
   const onPageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
@@ -91,7 +90,7 @@ const ReusableTable = ({
                     {column.key === "serialNumber"
                       ? calculateSerialNumber(index)
                       : column.render
-                      ? column.render(row,index)
+                      ? column.render(row, index)
                       : row[column.key]}
                   </td>
                 ))}
