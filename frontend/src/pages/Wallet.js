@@ -36,6 +36,10 @@ const Wallet = () => {
   const handleAdminNavigateToChild = (adminId, adminName) => {
     setUserId(adminId);
     setNavigationBar((prev) => [...prev, { adminId, adminName }]);
+    setWalletCard((prevData) => ({
+      ...prevData,
+      currentPage: 1,
+    }));
   };
 
 
@@ -48,6 +52,10 @@ const Wallet = () => {
       setNavigationBar(trimmed);
       setUserId(clickedAdminId);
     }
+    setWalletCard((prevData) => ({
+      ...prevData,
+      currentPage: 1,
+    }));
   };
 
 
