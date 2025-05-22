@@ -3,6 +3,7 @@ import { apiResponseErr, apiResponseSuccess } from "../helper/errorHandler.js";
 import { statusCode } from "../helper/statusCodes.js";
 import admins from "../models/admin.model.js";
 import jwt from "jsonwebtoken";
+import { sql } from "../db.js";
 
 export const getLotteryBetHistory = async (req, res) => {
   try {
@@ -92,7 +93,7 @@ export const lotteryMarketAnalysis = async (req, res) => {
     const adminId = admin.adminId;
 
     const token = jwt.sign(
-      { roles: req.user.roles },
+      { role: req.user.role },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );
@@ -242,22 +243,8 @@ export const getBetHistoryP_L = async (req, res) => {
 }
 
 export const getHierarchyUsers = async (adminId) => {
-  let allUsers = [adminId];
-  let queue = [adminId];
-
-  while (queue.length) {
-    let currentId = queue.shift();
-
-    const users = await admins.findAll({
-      where: { createdById: currentId },
-      attributes: ["userName", "adminId"],
-    });
-
-    users.forEach((user) => {
-      allUsers.push(user.adminId);
-      queue.push(user.adminId);
-    });
-  }
-
-  return allUsers;
+  const [ result ] = await sql.query(`CALL getHierarchyUser(?)`, [adminId]);
+  const users = result[0] || [];
+  const adminIds = users.map(user => user.adminId);
+  return adminIds;
 };

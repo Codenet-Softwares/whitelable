@@ -52,7 +52,7 @@ export async function getAllCreate(body = {}, isToast = false) {
 
 export async function updateCreditRef(body = {}, isToast = false) {
   try {
-    const callParams = await getAuthCallParams(strings.PUT, body.data, isToast);
+    const callParams = await getAuthCallParams(strings.POST, body.data, isToast);
     const response = await makeCall(
       `${UrlConstant.updateCreditRef}/${body.id}`,
       callParams,
@@ -66,7 +66,7 @@ export async function updateCreditRef(body = {}, isToast = false) {
 
 export async function updatePartnership(body = {}, isToast = false) {
   try {
-    const callParams = await getAuthCallParams(strings.PUT, body.data, isToast);
+    const callParams = await getAuthCallParams(strings.POST, body.data, isToast);
     const response = await makeCall(
       `${UrlConstant.updatePartnership}/${body.id}`,
       callParams,
@@ -160,7 +160,7 @@ export async function getAllSubAdminCreate(body = {}, isToast = false) {
   try {
     const callParams = await getAuthCallParams(strings.GET, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.allSubAdmin}/${body._id}?page=${body.pageNumber}&pageSize=${body.dataLimit}&searchQuery=${body.name}`,
+      `${UrlConstant.allSubAdmin}/${body._id}?page=${body.pageNumber}&pageSize=${body.dataLimit}&userName=${body.name}`,
       callParams,
       isToast
     );
@@ -302,7 +302,7 @@ export async function deleteTrash_api(body = {}, isToast = false) {
   try {
     const callParams = await getAuthCallParams(strings.DELETE, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.deleteTrash}/${body.trashId}`,
+      `${UrlConstant.deleteTrash}/${body.adminId}`,
       callParams,
       isToast
     );
@@ -731,6 +731,330 @@ export async function getUserWiseBetHistoryColorGameLevelFour(body = {}, isToast
     const callParams = await getAuthCallParams(strings.GET, body, isToast);
     const response = await makeCall(
       `${UrlConstant.UsertwisecolorGameLevelFour}/${body.userName}/${body.marketId}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+export async function addOuterImage(body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.POST, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.OuterImage}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+export async function getAddOuterImage(body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.POST, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.user_carrouselImageDynamic}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function updateOuterImage(body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.GET, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.UpdateImage}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function deleteOuterImage(imageId,body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.DELETE,body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.DeleteImage}/${imageId}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function activeInactiveImage(imageId, body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.POST, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.ActiveInactiveOuterImage}/${imageId}`,
+      callParams,
+      isToast
+    );
+    
+    console.log("API Response==============>", response);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
+
+export async function addInnerImage(body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.POST, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.InnerImage}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+export async function updateInnerImage(body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.GET, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.UpdateInImage}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+export async function deleteInnerImage(imageId,body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.DELETE, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.DeleteInImage}/${imageId}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function activeInactiveInnerImage(imageId, body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.POST, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.ActiveInactiveInImage}/${imageId}`, 
+      callParams,
+      isToast
+    );
+    
+    console.log("API Response==============>", response); 
+    return response;
+  } catch (error) {
+    console.error("API Error:", error);
+    throw error;
+  }
+}
+export async function gameSliderImage(body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.POST, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.gameMiniImage}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function getGameSliderImage(body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.GET, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.UpdateGameImage}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function deleteGameCreatedImage(imageId, body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.DELETE, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.DeleteGameImage}/${imageId}`, 
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function activeInactiveGameImage(imageId, body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.POST, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.ActiveInactiveGmImage}/${imageId}`,
+
+      callParams,
+      isToast
+    );
+
+    console.log("API Response==============>", response); // Debugging the API response
+    return response;
+  } catch (error) {
+    console.error("API Error:", error);
+    throw error; // Propagate error to the calling function
+  }
+}
+
+
+export async function gifSliderImage(body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.POST, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.gifGameSliderImage}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+export async function getGifSlider(body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.GET, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.UpdateGIF}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+export async function deleteCreateGif(imageId,body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.DELETE, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.DeleteGameGIF}/${imageId}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function activeInactiveGameGif(imageId, body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.POST, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.ActiveInactiveGIF}/${imageId}`,
+      callParams,
+      isToast
+    );
+    
+    console.log("API Response==============>", response);
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+export async function CreateInnerAnnouncement(body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.POST, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.InnerGameAnnouncement}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function getInnerAnnouncement(body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.GET, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.UpdateInnerAnnouncement}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+export async function deleteInnerAnnouncement(announceId,body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.DELETE, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.InnerDeleteAnnouncement}/${announceId}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+export async function CreateOuterAnnouncement(body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.POST, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.OuterGameAnnouncement}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+export async function getOuterAnnouncement(body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.GET, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.UpdateOuterAnnouncement}`,
+      callParams,
+      isToast
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function deleteOuterAnnouncement(announceId,body = {}, isToast = false) {
+  try {
+    const callParams = await getAuthCallParams(strings.DELETE, body, isToast);
+    const response = await makeCall(
+      `${UrlConstant.OuterDeleteAnnouncement}/${announceId}`,
       callParams,
       isToast
     );

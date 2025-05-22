@@ -12,7 +12,6 @@ import {
   partnershipEditSchema,
   partnershipViewSchema,
   creditRefViewSchema,
-  rootPathSchema,
   viewSubAdminSchema,
   singleSubAdminSchema,
   subAdminPermissionSchema,
@@ -32,14 +31,11 @@ import {
   createSubAdmin,
   getIpDetail,
   viewAllSubAdminCreates,
-  editCreditRef,
   activeStatus,
   profileView,
   viewAllCreates,
-  editPartnership,
   partnershipView,
   creditRefView,
-  buildRootPath,
   viewSubAdmins,
   singleSubAdmin,
   subAdminPermission,
@@ -50,7 +46,9 @@ import {
   downLineUsers,
   getTotalProfitLoss,
   getMarketWiseProfitLoss,
-  getAllUserProfitLoss
+  getAllUserProfitLoss,
+  addCreditRef,
+  addPartnership
 
 } from '../controller/admin.controller.js';
 import { string } from '../constructor/string.js';
@@ -184,7 +182,7 @@ export const adminRoute = (app) => {
   );
 
   // Credit Ref Edit API ("DONE")
-  app.put('/api/admin/update-credit-ref/:adminId',
+  app.post('/api/admin/add-credit-ref/:adminId',
     creditRefSchema,
     customErrorHandler,
     Authorize([
@@ -195,11 +193,11 @@ export const adminRoute = (app) => {
       string.masterAgent,
       string.creditRefEdit
     ]),
-    editCreditRef,
+    addCreditRef,
   );
 
   // PartnerShip Edit API ("DONE")
-  app.put('/api/admin/update-partnership/:adminId',
+  app.post('/api/admin/add-partnership/:adminId',
     partnershipEditSchema,
     customErrorHandler,
     Authorize([
@@ -210,7 +208,7 @@ export const adminRoute = (app) => {
       string.masterAgent,
       string.partnershipEdit
     ]),
-    editPartnership,
+    addPartnership,
   );
 
   // PartnerShip View API ("DONE")
@@ -273,8 +271,8 @@ export const adminRoute = (app) => {
     profileView,
   );
 
-  // Root Path API ("DONE")
-  app.post('/api/Root-Path/:userName/:action', rootPathSchema, customErrorHandler, buildRootPath);
+  // Root Path API ("DONE") NOT IN USE
+  // app.post('/api/Root-Path/:userName/:action', rootPathSchema, customErrorHandler, buildRootPath);
 
   // view-sub-admins ("DONE")
   app.get('/api/admin/view-sub-admins/:adminId',
