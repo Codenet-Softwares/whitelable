@@ -312,6 +312,7 @@ const DownlineProfitLoss = () => {
                 showSearch={true}
                 paginationVisible={true}
                 fetchData={fetchData}
+                userId={userId}
               />
             </div>
 

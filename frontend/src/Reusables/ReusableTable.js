@@ -7,6 +7,7 @@ const ReusableTable = ({
   showSearch,
   paginationVisible,
   fetchData,
+  userId
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -14,6 +15,10 @@ const ReusableTable = ({
   const [totalPages, setTotalPages] = useState(1);
   const [totalData, setTotalData] = useState(0);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [userId]);
 
   // Function to fetch data from backend
   const fetchDataForTable = async () => {
@@ -91,8 +96,8 @@ const ReusableTable = ({
                     {column.key === "serialNumber"
                       ? calculateSerialNumber(index)
                       : column.render
-                      ? column.render(row, index)
-                      : row[column.key]}
+                        ? column.render(row, index)
+                        : row[column.key]}
                   </td>
                 ))}
               </tr>
