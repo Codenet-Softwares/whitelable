@@ -4,15 +4,17 @@ import bcrypt from 'bcrypt';
 import admins from '../models/admin.model.js';
 import { messages, string } from '../constructor/string.js';
 import { Op, fn, col, Sequelize } from 'sequelize';
-import sequelize from '../db.js';
+import { sql, sequelize } from '../db.js';
 import { statusCode } from '../helper/statusCodes.js';
-import trash from '../models/trash.model.js';
 import axios from 'axios';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import { admin_Balance, balance_hierarchy } from './transaction.controller.js';
 import { findCreatorHierarchy } from '../helper/createHierarchy.js';
 import { getAllConnectedUsers, getHierarchyUsers } from '../controller/lotteryGame.controller.js'
+import Permission from '../models/permissions.model.js';
+import CreditRef from '../models/creditRefs.model.js';
+import Partnership from '../models/partnerships.model.js';
 
 dotenv.config();
 
@@ -28,7 +30,9 @@ export const createAdmin = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const user = req.user;
-    const { userName, password, roles } = req.body;
+
+    const { userName, password, role } = req.body;
+
     const checkRolesMap = {
       [string.superAdmin]: [
         string.whiteLabel,
@@ -54,18 +58,20 @@ export const createAdmin = async (req, res) => {
       [string.masterAgent]: [string.user],
     };
 
-    const allowedRoles = checkRolesMap[user.roles[0].role] || [];
+    const allowedRoles = checkRolesMap[user.role] || [];
 
-    const isValidRole = roles.every((role) => allowedRoles.includes(role));
+    const isValidRole = allowedRoles.includes(role);
+
     if (!isValidRole) {
       return res.status(statusCode.forbidden).send(
         apiResponseErr(null, false, statusCode.forbidden, "You are not authorized to create one or more of the specified roles.")
       );
     }
-    const isUserRole = roles.includes(string.user)
+
+    const isUserRole = role === string.user;
+
     const [existingAdmin, existingTrashUser] = await Promise.all([
       admins.findOne({ where: { userName } }),
-      trash.findOne({ where: { userName } }),
     ]);
 
     if (existingAdmin || existingTrashUser) {
@@ -81,12 +87,6 @@ export const createAdmin = async (req, res) => {
       throw apiResponseErr(null, false, statusCode.unauthorize, "Account is locked");
     }
 
-    const defaultPermission = ['all-access'];
-    const rolesWithDefaultPermission = roles.map((role) => ({
-      role,
-      permission: defaultPermission,
-    }));
-
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -94,14 +94,21 @@ export const createAdmin = async (req, res) => {
       adminId: uuid4(),
       userName,
       password: hashedPassword,
-      roles: rolesWithDefaultPermission,
+      role,
       createdById: user.adminId,
       createdByUser: user.userName,
     }, { transaction });
 
-    const token = jwt.sign({ roles: req.user.roles }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
+    await Permission.create({
+      UserId: newAdmin.adminId,
+      permission: 'all-access',
+    }, { transaction })
+
+    const token = jwt.sign({ role: req.user.role }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
+
 
     let message = '';
+
     if (isUserRole) {
       const dataToSend = {
         userId: newAdmin.adminId,
@@ -117,6 +124,8 @@ export const createAdmin = async (req, res) => {
             Authorization: `Bearer ${token}`,
           },
         });
+
+        //console.log(response, "response");
 
         if (!response.data.success) {
           throw new Error('Failed to create user');
@@ -135,32 +144,30 @@ export const createAdmin = async (req, res) => {
       string.subHyperAgent,
       string.subSuperAgent,
       string.subMasterAgent,
-    ].includes(user.roles[0].role);
+    ].includes(user.role);
 
     if (isSubRole) {
       await newAdmin.update({ createdById: user.createdById || user.adminId }, { transaction });
     }
-    if (user.adminId) {
-      await calculateLoadBalance(user.adminId, transaction);
-    }
+    // if (user.adminId) {
+    //   await calculateLoadBalance(user.adminId, transaction);
+    // }
 
     await transaction.commit();
     const successMessage = isUserRole ? 'User created' : 'Admin created successfully';
 
-    return res.status(statusCode.create).send(apiResponseSuccess(null, true, statusCode.create, successMessage + " " + message));
+    return res.status(statusCode.create).send(apiResponseSuccess(null, true, statusCode.create, successMessage));
   } catch (error) {
-    console.error("Error during creation:", error.message);
+    console.error("Error during creation:", error);
     await transaction.rollback();
-    return res
-      .status(statusCode.internalServerError)
-      .send(apiResponseErr(null, false, statusCode.internalServerError, error.errMessage));
+    return res.status(statusCode.internalServerError).send(apiResponseErr(null, false, statusCode.internalServerError, error.errMessage));
   };
 }
 
 // done
 export const createSubAdmin = async (req, res) => {
   try {
-    const { userName, password, roles } = req.body;
+    const { userName, password, permission } = req.body;
     const user = req.user;
 
     if (user.isActive === false) {
@@ -178,28 +185,27 @@ export const createSubAdmin = async (req, res) => {
     }
 
     let subRole = '';
-    for (let i = 0; i < user.roles.length; i++) {
-      if (user.roles[i].role.includes(string.superAdmin)) {
+    switch (user.role) {
+      case string.superAdmin:
         subRole = string.subAdmin;
-      } else if (user.roles[i].role.includes(string.whiteLabel)) {
+        break;
+      case string.whiteLabel:
         subRole = string.subWhiteLabel;
-      } else if (user.roles[i].role.includes(string.hyperAgent)) {
+        break;
+      case string.hyperAgent:
         subRole = string.subHyperAgent;
-      } else if (user.roles[i].role.includes(string.superAgent)) {
+        break;
+      case string.superAgent:
         subRole = string.subSuperAgent;
-      } else if (user.roles[i].role.includes(string.masterAgent)) {
+        break;
+      case string.masterAgent:
         subRole = string.subMasterAgent;
-      } else {
+        break;
+      default:
         return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, messages.invalidRole));
-      }
     }
 
     const adminId = uuid4();
-    const createdByUser = user.userName;
-    const createdById = user.adminId;
-
-    const permissionsArray = Array.isArray(roles[0].permission) ? roles[0].permission : [roles[0].permission];
-
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -207,11 +213,18 @@ export const createSubAdmin = async (req, res) => {
       adminId,
       userName,
       password: hashedPassword,
-      roles: [{ role: subRole, permission: permissionsArray }],
-      createdById,
-      createdByUser,
+      role: subRole,
+      createdById: user.adminId,
+      createdByUser: user.userName,
     });
 
+    if (Array.isArray(permission)) {
+      const permissionData = permission.map((perm) => ({
+        UserId: adminId,
+        permission: perm,
+      }));
+      await Permission.bulkCreate(permissionData);
+    }
     return res.status(statusCode.create).json(apiResponseSuccess(newSubAdmin, true, statusCode.create, messages.subAdminCreated));
   } catch (error) {
     res
@@ -219,6 +232,7 @@ export const createSubAdmin = async (req, res) => {
       .send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
   }
 };
+
 // done
 export const getIpDetail = async (req, res) => {
   try {
@@ -261,81 +275,32 @@ export const getIpDetail = async (req, res) => {
 };
 
 export const calculateLoadBalance = async (adminId) => {
-  let loadBalance = 0
-  let totalBalance
-
-  const admin = await admins.findOne({ where: { adminId } });
-  if (!admin) return 0;
-
-  const adminBalance = await admin_Balance(admin.adminId)
-  const hierarchyBalance = await balance_hierarchy(admin.adminId)
-
-  let exposure
-  if (admin.roles[0].role === string.user) {
-    const baseUrl = process.env.COLOR_GAME_URL;
-    const user_Exposure = await axios.get(`${baseUrl}/api/external/get-exposure/${admin.adminId}`)
-    const { data } = user_Exposure
-    exposure = data.exposure
+  try {
+    const [result] = await sql.query(
+      'SELECT getLoadBalance(?)',
+      [adminId]
+    );
+    console.log("result", result);
+    const totalBalance = result[0]?.totalBalance ?? 0;
+    return totalBalance;
+  } catch (error) {
+    console.error('Error calculating load balance:', error);
+    return null;
   }
-  
-    totalBalance = adminBalance + (exposure ?? 0);
-
-    const children = await admins.findAll({
-      where: { createdById: adminId },
-    });
-
-    for (const child of children) {
-      const childBalance = await calculateLoadBalance(child.adminId);
-      totalBalance += childBalance;
-    }
-
-    if (loadBalance !== totalBalance) {
-      loadBalance = totalBalance
-    }
-  return totalBalance;
-  
 };
 
 export const calculateExposure = async (adminId) => {
-  let loadExposure = 0;
-  let totalExposure = 0;
-
-  const admin = await admins.findOne({ where: { adminId } });
-  if (!admin) return 0;
-
-  let exposure = 0;
-
-  if (admin.roles[0].role === string.user) {
-    const baseUrl = process.env.COLOR_GAME_URL;
-    try {
-      const user_Exposure = await axios.get(`${baseUrl}/api/external/get-exposure/${admin.adminId}`);
-      const { data } = user_Exposure;
-      exposure = parseFloat(data.exposure) || 0;
-    } catch (error) {
-      console.error("Error fetching exposure:", error.message);
-      exposure = 0;
-    }
+  try {
+    const [result] = await sql.query(
+      'SELECT getExposure(?)',
+      [adminId]
+    );
+    const totalExposure = result[0]?.totalBalance ?? 0;
+    return totalExposure;
+  } catch (error) {
+    console.error('Error calculating load balance:', error);
+    return null;
   }
-
-  totalExposure = exposure;
-
-  const children = await admins.findAll({
-    where: { createdById: adminId },
-  });
-
-  for (const child of children) {
-    let childExposure = await calculateExposure(child.adminId);
-
-    childExposure = parseFloat(childExposure) || 0;
-    totalExposure += childExposure;
-
-  }
-
-  if (loadExposure !== totalExposure) {
-    loadExposure = totalExposure;
-  }
-
-  return totalExposure;
 };
 
 // done
@@ -343,96 +308,57 @@ export const viewAllCreates = async (req, res) => {
   try {
     const createdById = req.params.createdById;
     const page = parseInt(req.query.page, 10) || 1;
-    const pageSize = parseInt(req.query.pageSize, 10) || 5;
+    const pageSize = parseInt(req.query.pageSize, 10) || 10;
 
-    const searchQuery = req.query.userName ? { userName: { [Op.like]: `%${req.query.userName}%` } } : {};
-    const allowedRoles = [
-      string.superAdmin,
-      string.whiteLabel,
-      string.hyperAgent,
-      string.superAgent,
-      string.masterAgent,
-      string.user,
-    ];
+    const userName = req.query.userName || '';
 
-    const totalRecords = await admins.count({
-      where: {
-        createdById,
-        ...searchQuery,
-        [Op.or]: allowedRoles.map((role) =>
-          fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))
-        ),
-      },
-    });
-
-    if (totalRecords === 0) {
-      return res
-        .status(statusCode.success)
-        .json(apiResponseSuccess(null, true, statusCode.success, messages.noRecordsFound));
-    }
-
-    const offset = (page - 1) * pageSize;
-    const adminsData = await admins.findAll({
-      where: {
-        createdById,
-        ...searchQuery,
-        [Op.or]: allowedRoles.map((role) =>
-          fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))
-        ),
-      },
-      offset,
-      limit: pageSize,
-      order: [['createdAt', 'DESC']],
-    });
-
-    // Map through adminsData and calculate load balance
-    const users = await Promise.all(
-      adminsData.map(async (admin) => {
-        let creditRefs = [];
-        let partnerships = [];
-
-        if (admin.creditRefs) {
-          try {
-            creditRefs = JSON.parse(admin.creditRefs);
-          } catch {
-            creditRefs = [];
-          }
-        }
-
-        if (admin.partnerships) {
-          try {
-            partnerships = JSON.parse(admin.partnerships);
-          } catch {
-            partnerships = [];
-          }
-        }
-
-        const adminBalance = await admin_Balance(admin.adminId);
-        const loadBalance = await calculateLoadBalance(admin.adminId);
-        const loadTotalExposure = await calculateExposure(admin.adminId);
-
-        return {
-          adminId: admin.adminId,
-          userName: admin.userName,
-          roles: admin.roles,
-          balance: adminBalance,
-          loadBalance, // Add loadBalance to response
-          creditRefs,
-          createdById: admin.createdById,
-          createdByUser: admin.createdByUser,
-          partnerships,
-          status: admin.isActive
-            ? 'Active'
-            : !admin.locked
-              ? 'Locked'
-              : !admin.isActive
-                ? 'Suspended'
-                : '',
-          exposure: loadTotalExposure,
-        };
-      })
+    const [results] = await sql.query(
+      `CALL getAllAdminData(?,?,?,?)`,
+      [userName, createdById, pageSize, page]
     );
 
+    const users = results[0];
+    const totalRecords = results[1][0]?.totalCount || 0;
+    const totalPages = Math.ceil(totalRecords / pageSize);
+
+    return res.status(statusCode.success).json(
+      apiResponseSuccess(users, true, statusCode.success, messages.success, {
+        totalRecords,
+        totalPages,
+        currentPage: page,
+        pageSize,
+      })
+    );
+  } catch (error) {
+    console.log("error", error);
+    return res.status(statusCode.internalServerError).json(
+      apiResponseErr(
+        error.data ?? null,
+        false,
+        error.responseCode ?? statusCode.internalServerError,
+        error.errMessage ?? error.message
+      )
+    );
+  }
+};
+
+
+// done
+export const viewAllSubAdminCreates = async (req, res) => {
+  try {
+    const createdById = req.params.createdById;
+    const page = parseInt(req.query.page, 10) || 1;
+    const pageSize = parseInt(req.query.pageSize, 10) || 10;
+
+    const userName = req.query.userName || '';
+
+    const [results] = await sql.query(
+      `CALL getAllSubAdminData(?,?,?,?)`,
+      [userName, createdById, pageSize, page]
+    );
+
+    const users = results[0];
+    const totalRecords = results[1][0]?.totalCount || 0;
     const totalPages = Math.ceil(totalRecords / pageSize);
 
     return res.status(statusCode.success).json(
@@ -445,116 +371,12 @@ export const viewAllCreates = async (req, res) => {
     );
   } catch (error) {
     return res.status(statusCode.internalServerError).json(
-      apiResponseErr(
-        error.data ?? null,
-        false,
-        error.responseCode ?? statusCode.internalServerError,
-        error.errMessage ?? error.message
-      )
-    );
-  }
-};
-
-// done
-export const viewAllSubAdminCreates = async (req, res) => {
-  try {
-    const createdById = req.params.createdById;
-
-    const { page = 1, pageSize = 10, searchQuery = ""  } = req.query;
-    const offset = (page - 1) * pageSize;
-
-    const allowedRoles = [
-      string.subAdmin,
-      string.subHyperAgent,
-      string.subMasterAgent,
-      string.subWhiteLabel,
-      string.subSuperAgent
-    ];
-
-    const whereCondition = { createdById, [Op.or]: allowedRoles.map(role => fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))) }
-
-    if(searchQuery)
-    {
-      whereCondition.userName = { [Op.like]: `%${searchQuery}%` }
-    }
-
-    const totalRecords = await admins.count({
-      where: whereCondition,
-      limit: parseInt(pageSize),
-      offset,
-      order: [['createdAt', 'DESC']],
-    });
-
-    if (totalRecords === 0) {
-      return res.status(statusCode.success).json(apiResponseSuccess([], true, statusCode.success, messages.noRecordsFound));
-    }
-
-    const adminsData = await admins.findAll({
-      where: whereCondition,
-      limit: parseInt(pageSize),
-      offset,
-      order: [['createdAt', 'DESC']],
-    });
-
-    const users = adminsData.map(admin => {
-      let creditRefs = [];
-      let partnerships = [];
-
-      if (admin.creditRefs) {
-        try {
-          creditRefs = JSON.parse(admin.creditRefs);
-        } catch {
-          creditRefs = [];
-        }
-      }
-
-      if (admin.partnerships) {
-        try {
-          partnerships = JSON.parse(admin.partnerships);
-        } catch {
-          partnerships = [];
-        }
-      }
-
-      return {
-        adminId: admin.adminId,
-        userName: admin.userName,
-        roles: admin.roles,
-        balance: admin.balance,
-        loadBalance: admin.loadBalance,
-        creditRefs,
-        createdById: admin.createdById,
-        createdByUser: admin.createdByUser,
-        partnerships,
-        status: admin.isActive ? "Active" : !admin.locked ? "Locked" : !admin.isActive ? "Suspended" : "",
-        exposure: admin.exposure
-      };
-    });
-
-    const totalPages = Math.ceil(totalRecords / pageSize);
-
-    return res.status(statusCode.success).json(
-      apiResponseSuccess(
-        users,
-        true,
-        statusCode.success,
-        messages.success,
-        {
-          totalRecords,
-          totalPages,
-          currentPage: parseInt(page),
-          pageSize,
-        }
-      ),
-    );
-  } catch (error) {
-    return res.status(statusCode.internalServerError).json(
       apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message),
     );
   }
 };
 // done
-export const editCreditRef = async (req, res) => {
+export const addCreditRef = async (req, res) => {
   try {
     const adminId = req.params.adminId;
     const authAdmin = req.user;
@@ -579,37 +401,17 @@ export const editCreditRef = async (req, res) => {
       return res.status(statusCode.unauthorize).json(apiResponseErr(null, false, statusCode.unauthorize, "Account is locked"));
     }
 
-    const newCreditRefEntry = {
-      value: creditRef,
-      date: new Date(),
-    };
-
-    let creditRefList = [];
-    if (typeof admin.creditRefs === 'string') {
-      try {
-        creditRefList = JSON.parse(admin.creditRefs);
-      } catch (error) {
-        return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, messages.invalidCreditRes));
-      }
-    } else if (Array.isArray(admin.creditRefs)) {
-      creditRefList = admin.creditRefs;
-    }
-
-    creditRefList.push(newCreditRefEntry);
-
-    if (creditRefList.length > 10) {
-      creditRefList.shift();
-    }
-
-    admin.creditRefs = JSON.stringify(creditRefList);
-    await admin.save();
+    const newCreditRefEntry = await CreditRef.create({
+      UserId: admin.adminId,
+      CreditRef: creditRef,
+    });
 
     const adminDetails = {
       adminId: admin.adminId,
       userName: admin.userName,
     };
 
-    return res.status(statusCode.success).json(apiResponseSuccess({ adminDetails, creditRef: creditRefList }, true, statusCode.success, 'CreditRef Edited successfully'));
+    return res.status(statusCode.success).json(apiResponseSuccess({ adminDetails, creditRef: newCreditRefEntry }, true, statusCode.success, 'CreditRef add successfully'));
   } catch (error) {
     res
       .status(statusCode.internalServerError)
@@ -617,7 +419,7 @@ export const editCreditRef = async (req, res) => {
   }
 };
 // done
-export const editPartnership = async (req, res) => {
+export const addPartnership = async (req, res) => {
   try {
     const adminId = req.params.adminId;
     const authAdmin = req.user;
@@ -644,36 +446,16 @@ export const editPartnership = async (req, res) => {
       return res.status(statusCode.unauthorize).json(apiResponseErr(null, false, statusCode.unauthorize, "Account is locked"));
     }
 
-    const newPartnershipEntry = {
-      value: partnership,
-      date: new Date(),
-    };
-
-    let partnershipsList;
-    try {
-      if (typeof admin.partnerships === 'string' && admin.partnerships.trim() !== '') {
-        partnershipsList = JSON.parse(admin.partnerships);
-      } else {
-        partnershipsList = [];
-      }
-    } catch (error) {
-      return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, messages.invalidPartnership));
-    }
-
-    partnershipsList.push(newPartnershipEntry);
-    if (partnershipsList.length > 10) {
-      partnershipsList = partnershipsList.slice(-10);
-    }
-
-    admin.partnerships = JSON.stringify(partnershipsList);
-    await admin.save();
+    const newPartnershipEntry = await Partnership.create({
+      UserId: admin.adminId,
+      partnership: partnership,
+    });
 
     const adminDetails = {
       adminId: admin.adminId,
       userName: admin.userName,
     };
-
-    return res.status(statusCode.success).json(apiResponseSuccess({ adminDetails, partnerships: partnershipsList }, true, statusCode.success, 'Partnership edited successfully'));
+    return res.status(statusCode.success).json(apiResponseSuccess({ adminDetails, partnerships: newPartnershipEntry }, true, statusCode.success, 'Partnership Add successfully'));
   } catch (error) {
     return res.status(statusCode.internalServerError).json(
       apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message)
@@ -690,31 +472,25 @@ export const partnershipView = async (req, res) => {
       return res.status(statusCode.notFound).json(apiResponseErr(null, false, statusCode.notFound, messages.adminNotFound));
     }
 
-    let partnershipsList;
-    if (typeof admin.partnerships === 'string') {
-      try {
-        partnershipsList = JSON.parse(admin.partnerships);
-      } catch (error) {
-        return res.status(statusCode.internalServerError).json(apiResponseErr(null, false, statusCode.internalServerError, messages.invalidPartnership));
-      }
-    } else if (Array.isArray(admin.partnerships)) {
-      partnershipsList = admin.partnerships;
-    } else {
-      partnershipsList = [];
+    const partnershipsData = await Partnership.findAll({
+      where: { UserId: admin.adminId },
+      order: [['id', 'DESC']],
+      limit: 10,
+    })
+
+    if (!partnershipsData || partnershipsData.length === 0) {
+      return res.status(statusCode.success).json(apiResponseErr(null, true, statusCode.success, messages.noRecordsFound));
     }
 
-    if (!Array.isArray(partnershipsList)) {
-      return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, 'partnerships not found or not an array'));
-    }
+    const result = partnershipsData.map((item) => {
+      return {
+        userName: admin.userName,
+        partnerships: item.partnership,
+        date: item.createdAt,
+      };
+    });
 
-    const last10partnerships = partnershipsList.slice(-10);
-
-    const transferData = {
-      partnerships: last10partnerships,
-      userName: admin.userName,
-    };
-
-    return res.status(statusCode.success).json(apiResponseSuccess(transferData, true, statusCode.success, messages.success));
+    return res.status(statusCode.success).json(apiResponseSuccess(result, true, statusCode.success, messages.success));
   } catch (error) {
     return res.status(statusCode.internalServerError).send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
   }
@@ -729,30 +505,26 @@ export const creditRefView = async (req, res) => {
       return res.status(statusCode.notFound).json(apiResponseErr(null, false, statusCode.notFound, messages.adminNotFound));
     }
 
-    let creditRefList;
-    if (typeof admin.creditRefs === 'string') {
-      try {
-        creditRefList = JSON.parse(admin.creditRefs);
-      } catch (error) {
-        return res.status(statusCode.internalServerError).json(apiResponseErr(null, false, statusCode.internalServerError, messages.invalidCreditRes));
-      }
-    } else if (Array.isArray(admin.creditRefs)) {
-      creditRefList = admin.creditRefs;
-    } else {
-      creditRefList = [];
+    const creditRefsData = await CreditRef.findAll({
+      where: { UserId: admin.adminId },
+      order: [['id', 'DESC']],
+      limit: 10,
+    })
+
+    if (!creditRefsData || creditRefsData.length === 0) {
+      return res.status(statusCode.success).json(apiResponseErr(null, true, statusCode.success, messages.noRecordsFound));
     }
 
-    if (!Array.isArray(creditRefList)) {
-      return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, 'creditRefs not found or not an array'));
-    }
+    const result = creditRefsData.map((item) => {
+      return {
+        userName: admin.userName,
+        creditRef: item.CreditRef,
+        date: item.createdAt,
+      };
+    });
 
-    const last10creditRefs = creditRefList.slice(-10);
 
-    const transferData = {
-      creditRefs: last10creditRefs,
-      userName: admin.userName,
-    };
-    return res.status(statusCode.success).json(apiResponseSuccess(transferData, true, statusCode.success, messages.success));
+    return res.status(statusCode.success).json(apiResponseSuccess(result, true, statusCode.success, messages.success));
   } catch (error) {
     return res.status(statusCode.internalServerError).send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
   }
@@ -782,165 +554,55 @@ export const profileView = async (req, res) => {
     const userName = req.params.userName;
     const admin = await admins.findOne({ where: { userName } });
     if (!admin) {
-      return res.status(statusCode.badRequest).json(apiResponseErr(null, statusCode.badRequest, false, messages.adminNotFound));
+      return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, messages.adminNotFound));
     }
     const transferData = {
       adminId: admin.adminId,
-      roles: admin.roles,
+      role: admin.role,
       userName: admin.userName,
       createdById: admin.createdById
     };
-    return res.status(statusCode.success).json(apiResponseSuccess(transferData, null, statusCode.success, true, 'successfully'));
+    return res.status(statusCode.success).json(apiResponseSuccess(transferData, true, statusCode.success, 'successfully'));
   } catch (error) {
     res
       .status(statusCode.internalServerError)
       .send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
   }
 };
-// done
-export const buildRootPath = async (req, res) => {
-  try {
-    const { userName, action } = req.params;
-    const searchName = req.query.searchName;
-    const page = parseInt(req.query.page) || 1;
-    const pageSize = parseInt(req.query.pageSize) || 5;
-    const allowedRoles = [
-      string.superAdmin,
-      string.whiteLabel,
-      string.hyperAgent,
-      string.superAgent,
-      string.masterAgent,
-      string.user
-    ];
-    if (!globalUsernames) {
-      globalUsernames = [];
-    }
+// done NOT IN USE
+// export const buildRootPath = async (req, res) => {
+//   try {
+//     const { userName, action } = req.params;
+//     const searchName = req.query.userName || '';
+//     const page = parseInt(req.query.page, 10) || 1;
+//     const pageSize = parseInt(req.query.pageSize, 10) || 10;
 
-    if (!userName) {
-      return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, 'userName parameter is required'));
-    }
+//     const [results] = await sql.query(
+//       `CALL getAllAdminDataByPath(?,?,?,?,?)`,
+//       [searchName, userName, action, pageSize, page]
+//     );
+    
+//     const users = results[0];
+//     const totalRecords = results[1][0]?.totalCount || 0;
+//     const totalPages = Math.ceil(totalRecords / pageSize);
 
-    const user = await admins.findOne({ where: { userName } });
+//     return res.status(statusCode.success).json(
+//       apiResponseSuccess(users, true, statusCode.success, messages.success, {
+//         totalRecords,
+//         totalPages,
+//         currentPage: page,
+//         pageSize,
+//       })
+//     );
+    
+//   } catch (error) {
+//     return res
+//       .status(statusCode.internalServerError)
+//       .send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
+//   }
+// };
 
-    if (!user) {
-      return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, messages.userNotFound));
-    }
 
-    if (action === 'store') {
-      const newPath = user.userName;
-      const indexToRemove = globalUsernames.indexOf(newPath);
-
-      if (indexToRemove !== -1) {
-        globalUsernames.splice(indexToRemove + 1);
-      } else {
-        globalUsernames.push(newPath);
-      }
-
-      const likeCondition = searchName ? { userName: { [Op.like]: `%${searchName}%` } } : {};
-      const totalRecords = await admins.count({
-        where: {
-          createdByUser: user.userName,
-          ...likeCondition,
-          [Op.or]: allowedRoles.map(role => fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))),
-        },
-      });
-
-      const totalPages = Math.ceil(totalRecords / pageSize);
-
-      const createdUsers = await admins.findAll({
-        where: {
-          createdByUser: user.userName,
-          ...likeCondition,
-          [Op.or]: allowedRoles.map(role => fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))),
-        },
-        offset: (page - 1) * pageSize,
-        limit: pageSize,
-      });
-
-      const createdUsersDetails = await Promise.all(
-        createdUsers.map(async (createdUser) => {
-          let creditRef = [];
-          let refProfitLoss = [];
-          let partnership = [];
-
-          try {
-            creditRef = createdUser.creditRefs ? JSON.parse(createdUser.creditRefs) : [];
-            refProfitLoss = createdUser.refProfitLoss ? JSON.parse(createdUser.refProfitLoss) : [];
-            partnership = createdUser.partnerships ? JSON.parse(createdUser.partnerships) : [];
-          } catch (e) {
-            console.error("JSON parsing error:", e);
-          }
-
-          const adminBalance = await admin_Balance(createdUser.adminId);
-          const loadBalance = await calculateLoadBalance(createdUser.adminId);
-          const loadTotalExposure = await calculateExposure(createdUser.adminId);
-
-          return {
-            id: createdUser.adminId,
-            userName: createdUser.userName,
-            roles: createdUser.roles,
-            balance: adminBalance,
-            loadBalance: loadBalance,
-            creditRef: creditRef,
-            refProfitLoss: refProfitLoss,
-            partnership: partnership,
-            status: createdUser.isActive
-            ? 'Active'
-            : !createdUser.locked
-              ? 'Locked'
-              : !createdUser.isActive
-                ? 'Suspended'
-                : '',
-            exposure: loadTotalExposure,
-          };
-        })
-      );
-
-      const userDetails = { createdUsers: createdUsersDetails };
-      const message = 'Path stored successfully';
-      return res.status(statusCode.create).json(
-        apiResponseSuccess(
-          {
-            path: globalUsernames,
-            userDetails,
-            page,
-            pageSize,
-            totalPages,
-            totalRecords
-          },
-          true,
-          statusCode.create,
-          message
-        )
-      );
-    } else if (action === 'clear') {
-      const lastUsername = globalUsernames.pop();
-
-      if (lastUsername) {
-        const indexToRemove = globalUsernames.indexOf(lastUsername);
-
-        if (indexToRemove !== -1) {
-          globalUsernames.splice(indexToRemove, 1);
-        }
-      }
-    } else if (action === 'clearAll') {
-      globalUsernames.length = 0;
-    } else {
-      throw { code: statusCode.badRequest, message: 'Invalid action provided' };
-    }
-
-    await user.update({ path: JSON.stringify(globalUsernames) });
-
-    const successMessage = action === 'store' ? 'Path stored successfully' : 'Path cleared successfully';
-    return res.status(statusCode.success).json(
-      apiResponseSuccess({ path: globalUsernames, page, pageSize, totalPages: 1 }, true, statusCode.success, successMessage)
-    );
-  } catch (error) {
-    return res
-      .status(statusCode.internalServerError)
-      .send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
-  }
-};
 // done
 export const viewSubAdmins = async (req, res) => {
   try {
@@ -958,15 +620,12 @@ export const viewSubAdmins = async (req, res) => {
     ];
 
     const subAdmins = await admins.findAll({
-      attributes: ['adminId', 'userName', 'roles', 'isActive', 'locked'],
+      attributes: ['adminId', 'userName', 'role', 'isActive', 'locked'],
       where: {
         createdById: id,
-        [Op.or]: allowedRoles.map(role => {
-          return sequelize.where(
-            sequelize.fn('JSON_CONTAINS', sequelize.col('roles'), JSON.stringify({ role })),
-            true
-          );
-        }),
+        role: {
+          [Op.or]: allowedRoles
+        },
         userName: {
           [Op.like]: `%${searchName}%`
         }
@@ -980,7 +639,7 @@ export const viewSubAdmins = async (req, res) => {
     const users = subAdmins.map(user => ({
       adminId: user.adminId,
       userName: user.userName,
-      roles: user.roles,
+      role: user.role,
       status: user.isActive ? "Active" : !user.locked ? "Locked" : !user.isActive ? "Suspended" : ""
     }));
 
@@ -1003,7 +662,7 @@ export const singleSubAdmin = async (req, res) => {
     const adminId = req.params.adminId;
 
     const subAdmin = await admins.findOne({
-      attributes: ['userName', 'roles'],
+      attributes: ['userName', 'role'],
       where: {
         adminId: adminId
       }
@@ -1013,9 +672,17 @@ export const singleSubAdmin = async (req, res) => {
       return res.status(statusCode.notFound).json(apiResponseErr(null, false, statusCode.notFound, 'Sub Admin not found with the given Id'));
     }
 
+    const permissions = await Permission.findAll({
+      where: { UserId: adminId },
+      attributes: ['permission']
+    })
+
+    const permissionValues = permissions.map(permission => permission.permission);
+
     const data = {
       userName: subAdmin.userName,
-      roles: subAdmin.roles,
+      role: subAdmin.role,
+      permission: permissionValues,
     };
 
     return res.status(statusCode.success).json(apiResponseSuccess(data, true, statusCode.success, messages.success));
@@ -1043,30 +710,26 @@ export const subAdminPermission = async (req, res) => {
       return res.status(statusCode.notFound).json(apiResponseErr(null, false, statusCode.notFound, 'Sub Admin not found'));
     }
 
-    let roles = subAdmin.roles;
+    let role = subAdmin.role;
 
-    if (!roles || roles.length === 0) {
+    if (!role || role.length === 0) {
       return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, 'Roles not found for Sub Admin'));
     }
 
     const permissionsArray = Array.isArray(permission) ? permission : [permission];
 
-    if (!roles[0]) {
-      roles[0] = { permission: [] };
-    }
+    await Permission.destroy({
+      where: { UserId: subAdminId }
+    });
 
-    roles[0].permission = permissionsArray;
+    const bulkPermissions = permissionsArray.map(per => ({
+      UserId: subAdminId,
+      permission: per
+    }));
 
-    await admins.update(
-      { roles: roles },
-      {
-        where: {
-          adminId: subAdminId
-        }
-      }
-    );
+    await Permission.bulkCreate(bulkPermissions);
 
-    return res.status(statusCode.success).json(apiResponseSuccess(null, true, statusCode.success, `${subAdmin.userName} permissions edited successfully`));
+    return res.status(statusCode.success).json(apiResponseSuccess(bulkPermissions, true, statusCode.success, `${subAdmin.userName} permissions edited successfully`));
   } catch (error) {
     res.status(statusCode.internalServerError).json(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
   }
@@ -1092,7 +755,6 @@ export const userStatus = async (req, res) => {
 
     return res.status(statusCode.success).json(apiResponseSuccess(userStatus, true, statusCode.success, messages.success));
   } catch (error) {
-    console.error('Error:', error);
     res.status(statusCode.internalServerError).json(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
   }
 };
@@ -1136,8 +798,8 @@ export const fetchUserHierarchy = async (req, res) => {
 
     if (!hierarchy) {
       return res
-      .status(statusCode.notFound)
-      .json(apiResponseErr(null, false, statusCode.notFound, 'User Not Found'));
+        .status(statusCode.notFound)
+        .json(apiResponseErr(null, false, statusCode.notFound, 'User Not Found'));
     }
 
     const formattedHierarchy = hierarchy.map(item => ({
@@ -1151,8 +813,8 @@ export const fetchUserHierarchy = async (req, res) => {
       .json(apiResponseSuccess(formattedHierarchy, true, statusCode.success, 'Hierarchy retractive successfully'));
   } catch (error) {
     res
-    .status(statusCode.internalServerError)
-    .json(apiResponseErr(null, false, statusCode.internalServerError, error.message));
+      .status(statusCode.internalServerError)
+      .json(apiResponseErr(null, false, statusCode.internalServerError, error.message));
   }
 };
 
@@ -1165,16 +827,16 @@ export const getHierarchyWiseUsers = async (req, res) => {
         where: {
           createdByUser: userName,
         },
-        attributes: ["adminId", "userName", "createdByUser", "roles"],
+        attributes: ["adminId", "userName", "createdByUser", "role"],
       });
 
       let allowedUserNames = [];
       for (const user of users) {
         const nestedUsers = await getAllowedUserNames(user.userName);
         allowedUserNames.push({
-          userId: user.adminId, 
+          userId: user.adminId,
           userName: user.userName,
-          roles: user.roles,
+          role: user.role,
         });
         allowedUserNames = allowedUserNames.concat(nestedUsers);
       }
@@ -1184,11 +846,13 @@ export const getHierarchyWiseUsers = async (req, res) => {
     const hierarchyWiseUsers = await getAllowedUserNames(userName);
 
     const filteredUsers = hierarchyWiseUsers.filter((user) => {
-      return (
-        user.roles &&
-        Array.isArray(user.roles) &&
-        user.roles.some((roleObj) => roleObj.role === "user") 
-      );
+      if (!user.role) return false;
+
+      if (Array.isArray(user.role)) {
+        return user.role.some((roleObj) => roleObj.role === "user");
+      }
+
+      return user.role === "user";
     });
 
 
@@ -1226,11 +890,11 @@ export const downLineUsers = async (req, res) => {
     const searchTerm = req.query.searchTerm || '';
     const page = parseInt(req.query.page, 10) || 1;
     const pageSize = parseInt(req.query.pageSize, 10) || 10;
-    const {dataType,startDate, endDate} = req.query;
+    const { dataType, startDate, endDate } = req.query;
 
     let profitLossResponse = { data: [] };
     try {
-     const baseURL = process.env.COLOR_GAME_URL;
+      const baseURL = process.env.COLOR_GAME_URL;
       const response = await axios.get(`${baseURL}/api/user-profit-loss`,
         {
           params: {
@@ -1254,7 +918,7 @@ export const downLineUsers = async (req, res) => {
 
     const allAdmins = await admins.findAll({
       raw: true,
-      attributes: ['adminId', 'userName', 'roles', 'createdById']
+      attributes: ['adminId', 'userName', 'role', 'createdById']
     });
 
     const downlineMap = {};
@@ -1267,21 +931,21 @@ export const downLineUsers = async (req, res) => {
 
     const getPrimaryRole = (roles) => {
       if (!roles || !roles.length) return null;
-      return roles[0].role; 
+      return roles[0].role;
     };
 
     const calculateDownlineProfitLoss = (adminId, role) => {
       let total = 0;
       const queue = [...(downlineMap[adminId] || [])];
-      
+
       while (queue.length > 0) {
         const current = queue.shift();
         if (current.adminId !== adminId) {
           total += profitLossMap[current.adminId] || 0;
         }
-        
-        const currentRole = getPrimaryRole(current.roles);
-        
+
+        const currentRole = getPrimaryRole(current.role);
+
         if (role === string.whiteLabel) {
           if ([string.hyperAgent, string.superAgent, string.masterAgent, string.user].includes(currentRole)) {
             queue.push(...(downlineMap[current.adminId] || []));
@@ -1303,7 +967,7 @@ export const downLineUsers = async (req, res) => {
           }
         }
       }
-      
+
       return total;
     };
 
@@ -1318,9 +982,9 @@ export const downLineUsers = async (req, res) => {
 
     const baseWhere = {
       createdById,
-      [Op.or]: allowedRoles.map((role) =>
-        fn('JSON_CONTAINS', col('roles'), JSON.stringify({ role }))
-      ),
+      role: {
+        [Op.or]: allowedRoles
+      },
     };
 
     if (searchTerm) {
@@ -1358,10 +1022,10 @@ export const downLineUsers = async (req, res) => {
     });
 
     const users = adminsData.map((admin) => {
-      const primaryRole = getPrimaryRole(admin.roles);
+      const primaryRole = getPrimaryRole(admin.role);
       const personalProfitLoss = (profitLossMap[admin.adminId] || 0);
       let downLineProfitLoss = 0;
-      
+
       if ([string.masterAgent, string.superAgent, string.hyperAgent, string.whiteLabel].includes(primaryRole)) {
         downLineProfitLoss = calculateDownlineProfitLoss(admin.adminId, primaryRole);
       }
@@ -1375,7 +1039,7 @@ export const downLineUsers = async (req, res) => {
       return {
         adminId: admin.adminId,
         userName: admin.userName,
-        roles: admin.roles,
+        role: admin.role,
         createdById: admin.createdById,
         createdByUser: admin.createdByUser,
         profitLoss: agentProfitLoss,
@@ -1401,25 +1065,35 @@ export const downLineUsers = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error("Error in downLineUsers:", error);
-    return res.status(statusCode.internalServerError).json({
-      data: null,
-      success: false,
-      successCode: statusCode.internalServerError,
-      message: error.message
-    });
+    if (error.response) {
+      return apiResponseErr(
+        null,
+        false,
+        error.response.status,
+        error.response.data.message || error.response.data.errMessage,
+        res
+      );
+    } else {
+      return apiResponseErr(
+        null,
+        false,
+        statusCode.internalServerError,
+        error.message,
+        res
+      );
+    }
   }
 };
 
 
 export const getTotalProfitLoss = async (req, res) => {
   try {
-    const { page = 1, pageSize = 10, search = "", dataType, startDate, endDate} = req.query;
+    const { page = 1, pageSize = 10, search = "", dataType, startDate, endDate } = req.query;
     const offset = (page - 1) * pageSize;
     const adminId = req.user?.adminId;
     const userId = await getHierarchyUsers(adminId);
     const token = jwt.sign(
-      { roles: req.user.roles },
+      { role: req.user.role },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );
@@ -1441,10 +1115,10 @@ export const getTotalProfitLoss = async (req, res) => {
         },
       }
     );
-    
+
     let data = Array.isArray(response.data)
-    ? response.data
-    : response.data?.data || [];
+      ? response.data
+      : response.data?.data || [];
 
     if (search) {
       const searchLower = search.toLowerCase();
@@ -1504,16 +1178,16 @@ export const getTotalProfitLoss = async (req, res) => {
   }
 };
 
-export const getMarketWiseProfitLoss = async(req,res) => {
+export const getMarketWiseProfitLoss = async (req, res) => {
   try {
-    const { page = 1, pageSize = 10, search = "", type , dataType, startDate, endDate} = req.query;
+    const { page = 1, pageSize = 10, search = "", type, dataType, startDate, endDate } = req.query;
     const offset = (parseInt(page) - 1) * parseInt(pageSize);
 
     const adminId = req.user?.adminId;
     const userId = await getHierarchyUsers(adminId);
 
     const token = jwt.sign(
-      { roles: req.user.roles },
+      { role: req.user.role },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );
@@ -1539,8 +1213,8 @@ export const getMarketWiseProfitLoss = async(req,res) => {
     );
 
     let data = Array.isArray(response.data)
-    ? response.data
-    : response.data?.data || [];
+      ? response.data
+      : response.data?.data || [];
 
     if (search) {
       const searchLower = search.toLowerCase();
@@ -1569,16 +1243,16 @@ export const getMarketWiseProfitLoss = async(req,res) => {
     };
 
     return res
-    .status(statusCode.success)
-    .send(
-      apiResponseSuccess(
-        paginatedData,
-        true,
-        statusCode.success,
-        "Market-wise porfit/loss fetched successfully",
-        Pagination
-      )
-    );
+      .status(statusCode.success)
+      .send(
+        apiResponseSuccess(
+          paginatedData,
+          true,
+          statusCode.success,
+          "Market-wise porfit/loss fetched successfully",
+          Pagination
+        )
+      );
   } catch (error) {
     if (error.response) {
       return apiResponseErr(
@@ -1597,19 +1271,19 @@ export const getMarketWiseProfitLoss = async(req,res) => {
         res
       );
     }
-}
+  }
 };
 
-export const getAllUserProfitLoss = async(req,res) => {
+export const getAllUserProfitLoss = async (req, res) => {
   try {
-    const { page = 1, pageSize = 10, search = "",dataType, startDate, endDate } = req.query;
+    const { page = 1, pageSize = 10, search = "", dataType, startDate, endDate } = req.query;
     const offset = (parseInt(page) - 1) * parseInt(pageSize);
 
     const adminId = req.user?.adminId;
     const userId = await getHierarchyUsers(adminId);
 
     const token = jwt.sign(
-      { roles: req.user.roles },
+      { role: req.user.role },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );
@@ -1624,7 +1298,7 @@ export const getAllUserProfitLoss = async(req,res) => {
         userId,
       },
       {
-        headers, 
+        headers,
         params: {
           dataType,
           startDate,
@@ -1632,10 +1306,10 @@ export const getAllUserProfitLoss = async(req,res) => {
         },
       }
     );
-    
+
     let data = Array.isArray(response.data)
-    ? response.data
-    : response.data?.data || [];
+      ? response.data
+      : response.data?.data || [];
 
     if (search) {
       const searchLower = search.toLowerCase();
@@ -1664,16 +1338,16 @@ export const getAllUserProfitLoss = async(req,res) => {
     };
 
     return res
-    .status(statusCode.success)
-    .send(
-      apiResponseSuccess(
-        paginatedData,
-        true,
-        statusCode.success,
-        "Market-wise all-user porfit/loss fetched successfully",
-        Pagination
-      )
-    );
+      .status(statusCode.success)
+      .send(
+        apiResponseSuccess(
+          paginatedData,
+          true,
+          statusCode.success,
+          "Market-wise all-user porfit/loss fetched successfully",
+          Pagination
+        )
+      );
   } catch (error) {
     if (error.response) {
       return apiResponseErr(

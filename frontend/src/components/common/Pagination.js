@@ -29,7 +29,7 @@ const Pagination = ({ currentPage, totalPages, handlePageChange, startIndex, end
         <nav aria-label="Page navigation example">
           <div className="d-flex justify-content-between">
             <p>
-              Showing {startIndex} to {endIndex} of {totalData} entries
+              Showing {startIndex} to {endIndex} of {totalData} Entries
             </p>
             <ul className="pagination justify-content-end">
               <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>

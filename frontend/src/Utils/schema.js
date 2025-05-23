@@ -17,10 +17,17 @@ export const CreateSubAdminSchema = Yup.object().shape({
     .max(25, "User Name Must Not Exceed 25 Characters")
     .matches(/^\S*$/, "User Name Must Not contain spaces")
     .required("Username Is Required"),
+
   password: Yup.string()
     .min(6, "Password Must Be At Least 6 Characters")
     .required("Password Is Required"),
+
+  permission: Yup.array()
+    .min(1, "At Least One Permission Is Required")
+    .of(Yup.string().required())
+    .required("Permissions Are Required"),
 });
+
 
 export const UpdateCreditRefAndPartnershipSchema = Yup.object().shape({
   amount: Yup.number().required("Amount is required"),
