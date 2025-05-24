@@ -55,6 +55,7 @@ export class StringConstants {
     { role: "transferBalance", name: "Transfer Balance" },
     { role: "status", name: "Status" },
     { role: "creditRef-Edit", name: "CreditRef Edit" },
+    { role: "creditRef-view", name: "CreditRef View" },
     { role: "partnership-Edit", name: "Partnership Edit" },
     { role: "partnership-view", name: "Partnership view" },
     { role: "user-profile-view", name: "User Profile View" },

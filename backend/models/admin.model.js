@@ -1,5 +1,5 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../db.js";
+import {sequelize} from "../db.js";
 import bcrypt from "bcrypt";
 
 const admins = sequelize.define(
@@ -31,8 +31,8 @@ const admins = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    roles: {
-      type: DataTypes.JSON,
+    role: {
+      type: DataTypes.STRING,
       allowNull: true,
     },
     lastLoginTime: {
@@ -115,20 +115,6 @@ const admins = sequelize.define(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
-    path: {
-      type: DataTypes.JSON,
-      allowNull: true,
-    },
-    creditRefs: {
-      type: DataTypes.JSON,
-      allowNull: true,
-      defaultValue: [],
-    },
-    partnerships: {
-      type: DataTypes.JSON,
-      allowNull: true,
-      defaultValue: [],
-    },
     loginStatus: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -143,6 +129,14 @@ const admins = sequelize.define(
     },
     token: {
       type: DataTypes.TEXT,
+    },
+    isDeleted: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    isPermanentDeleted: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
   },
   {

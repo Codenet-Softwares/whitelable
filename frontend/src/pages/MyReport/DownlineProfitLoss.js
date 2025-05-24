@@ -77,17 +77,19 @@ const DownlineProfitLoss = () => {
         item.isTotalRow ? (
           <strong>{item.userName}</strong>
         ) : (
-          <button
-            className="btn btn-link p-0 text-decoration-none"
-            style={{ color: "black" }}
+          <span
+            className="btn p-0 "
+
             onClick={() =>
-              item?.roles[0]?.role === "user"
+              item?.role === "user"
                 ? handleUserNavigateToProfitLoss(item.userName)
                 : handleAdminNavigateToChild(item.adminId, item.userName)
             }
           >
-            {item.userName}
-          </button>
+            <span className={`${item?.role === "user" ? "" : "text-success"}`}>
+              {item.userName}
+            </span>
+          </span>
         ),
     },
     {
@@ -310,6 +312,7 @@ const DownlineProfitLoss = () => {
                 showSearch={true}
                 paginationVisible={true}
                 fetchData={fetchData}
+                userId={userId}
               />
             </div>
 
