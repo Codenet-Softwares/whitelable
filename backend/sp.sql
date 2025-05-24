@@ -120,48 +120,67 @@ DELIMITER ;
 
 -- This script creates a stored procedure to get the user details based on the provided user ID.
 
-DELIMITER $$
-
-CREATE FUNCTION getLoadBalance(vAdminId VARCHAR(255))
-RETURNS FLOAT
-DETERMINISTIC
-READS SQL DATA
+CREATE DEFINER=`dbmasteruser`@`%` FUNCTION `getLoadBalance`(vRootAdminId VARCHAR(255)) RETURNS float
+    READS SQL DATA
+    DETERMINISTIC
 BEGIN
-  DECLARE exposureSum FLOAT DEFAULT 0;
-  DECLARE adminBalance FLOAT DEFAULT 0;
-  DECLARE totalBalance FLOAT DEFAULT 0;
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE vAdminId VARCHAR(255);
+    DECLARE totalBalance INT DEFAULT 0;
+    DECLARE exposureSum FLOAT DEFAULT 0;
+    DECLARE totalLoadBalance FLOAT DEFAULT 0;
+	DECLARE cur CURSOR FOR SELECT adminId FROM tempAdminHierarchy;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+	
 
-  -- Recursive CTE to get all admins under the hierarchy
-  WITH RECURSIVE AdminHierarchy AS (
-    SELECT adminId, role
-    FROM admins
-    WHERE adminId = vAdminId
+    CREATE TEMPORARY TABLE tempAdminHierarchy (
+        adminId VARCHAR(255) PRIMARY KEY,
+        role VARCHAR(50)
+    ) ENGINE=Memory;
 
-    UNION ALL
+    INSERT INTO tempAdminHierarchy (adminId, role)
+    SELECT adminId, role FROM (
+        WITH RECURSIVE AdminHierarchy AS (
+            SELECT adminId, role
+            FROM admins
+            WHERE adminId = vRootAdminId
 
-    SELECT a.adminId, a.role
-    FROM admins a
-    INNER JOIN AdminHierarchy ah ON a.createdById = ah.adminId
-  )
+            UNION ALL
 
-  -- Sum exposures of all users under this admin hierarchy
-  SELECT IFNULL(SUM(CAST(m.exposure AS FLOAT)), 0)
-  INTO exposureSum
-  FROM AdminHierarchy ah
-  LEFT JOIN colorgame_refactor.MarketListExposuers m
-    ON ah.adminId = m.userId
-  WHERE LOWER(ah.role) = 'user';
+            SELECT a.adminId, a.role
+            FROM admins a
+            INNER JOIN AdminHierarchy ah ON a.createdById = ah.adminId
+        )
+        SELECT adminId, role FROM AdminHierarchy
+    ) AS derived;
 
-  -- Get admin's balance
-  SET adminBalance = getAdminBalance(vAdminId);
+    SELECT IFNULL(SUM(CAST(m.exposure AS FLOAT)), 0)
+    INTO exposureSum
+    FROM tempAdminHierarchy t
+    LEFT JOIN colorgame_refactor.MarketListExposuers m
+      ON t.adminId = m.userId
+    WHERE LOWER(t.role) = 'user';
 
-  -- Total Load Balance = admin balance + exposure of all users in tree
-  SET totalBalance = adminBalance + exposureSum;
+    
 
-  RETURN totalBalance;
-END$$
+    OPEN cur;
 
-DELIMITER ;
+    read_loop: LOOP
+        FETCH cur INTO vAdminId;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        SET totalBalance = totalBalance + getAdminBalance(vAdminId);
+    END LOOP;
+
+    CLOSE cur;
+
+    SET totalLoadBalance = totalBalance + exposureSum;
+ DROP TEMPORARY TABLE IF EXISTS tempAdminHierarchy;
+    RETURN totalLoadBalance;
+ 
+END
 
 
 -- This script creates a stored procedure to get the user details based on the provided user ID.
