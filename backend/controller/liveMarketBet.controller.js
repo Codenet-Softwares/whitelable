@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import admins from "../models/admin.model.js";
 import { string } from "../constructor/string.js";
 import { Op, Sequelize } from "sequelize";
+import { sql } from "../db.js";
 dotenv.config();
 
 export const getUserBetMarket = async (req, res) => {
@@ -70,157 +71,52 @@ export const getUserBetMarket = async (req, res) => {
 
 export const getLiveBetGames = async (req, res) => {
   try {
-    const { page = 1 , limit = 10, search, type } = req.query;
-    const offset = (page - 1) * limit;
+    const { page = 1, limit = 10, search, type } = req.query;
+    const role = req.user.role;
+    const adminId = req.user.adminId;
+    let searchTerm = '';
 
-    const token = jwt.sign(
-      { role: req.user.role },
-      process.env.JWT_SECRET_KEY,
-      { expiresIn: "1h" }
-    );
-
-    const baseUrl = process.env.COLOR_GAME_URL;
-    const response = await axios.get(
-      `${baseUrl}/api/user-external-liveGamesBet`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    if (!response.data.success) {
-      return res.status(statusCode.badRequest).send(
-        apiResponseErr(
-          null,
-          false,
-          statusCode.badRequest,
-          "Failed to fetch live games data"
-        )
-      );
-    }
-
-    const baseUrlLottery = process.env.LOTTERY_URL;
-    const lotteryResponse = await axios.get(
-      `${baseUrlLottery}/api/get-live-markets`
-    );
-
-    const lotteryData = lotteryResponse.data?.data || [];
-    const liveGames = response.data.data || [];
-
-    const userNames = [
-      ...lotteryData.map((lottery) => lottery.userName),
-      ...liveGames.map((game) => game.userName),
-    ].filter(Boolean); 
-
-    // const adminsData = await admins.findAll({
-    //   where: {
-    //     userName: userNames, 
-    //   },
-    //   attributes: ["createdById", "createdByUser", "roles", "userName"],
-    // });
-
-
-    const isSuperAdmin = req.user.role === "superAdmin"
-
-    let combinedData = [];
-
-    if (isSuperAdmin) {
-      combinedData = [
-        ...lotteryData.map((lottery) => ({
-          marketId: lottery.marketId,
-          marketName: lottery.marketName,
-          gameName: lottery.gameName,
-          source: "lottery",
-        })),
-        ...liveGames.map((game) => ({
-          ...game,
-          source: "colorgame",
-        })),
-      ];
-    } else {
-      const getAllowedUserNames = async (userName) => {
-        const users = await admins.findAll({
-          where: {
-            createdByUser: userName,
-          },
-          attributes: ["userName"],
-        });
-
-        let allowedUserNames = [userName]; 
-        for (const user of users) {
-          const nestedUsers = await getAllowedUserNames(user.userName); 
-          allowedUserNames = [...allowedUserNames, ...nestedUsers];
-        }
-        return allowedUserNames;
-      };
-
-      const allowedUserNames = await getAllowedUserNames(req.user.userName);
-
-
-      const filteredLotteryData = lotteryData.filter((lottery) =>
-        allowedUserNames.includes(lottery.userName)
-      );
-
-      const filteredLiveGames = liveGames.filter((game) =>
-        allowedUserNames.includes(game.userName)
-      );
-
-
-      combinedData = [
-        ...filteredLotteryData.map((lottery) => ({
-          marketId: lottery.marketId,
-          marketName: lottery.marketName,
-          gameName: lottery.gameName,
-          source: "lottery",
-        })),
-        ...filteredLiveGames.map((game) => ({
-          ...game,
-          source: "colorgame",
-        })),
-      ];
-    }
-
-    if (type) {
-      combinedData = combinedData.filter((item) => item.source === type);
-    }
-
-
-    const uniqueData = Array.from(
-      new Set(combinedData.map((item) => item.marketId))
-    ).map((uniqueMarketId) =>
-      combinedData.find((item) => item.marketId === uniqueMarketId)
-    );
-    
-    let filterData = uniqueData;
-    
     if (search) {
-      filterData = uniqueData.filter(
-        (item) =>
-          item.marketName?.toLowerCase().includes(search.toLowerCase()) ||
-          (item.source === "colorgame" &&
-            item.gameName?.toLowerCase().includes(search.toLowerCase()))
+      searchTerm = search;
+    }
+
+    const [allResults] = await sql.query(
+      `CALL getLiveBetGames(?,?,?,?,?)`,
+      [role, adminId, searchTerm, 10000, 1] 
+    );
+
+    const [results] = await sql.query(
+      `CALL getLiveBetGames(?,?,?,?,?)`,
+      [role, adminId, searchTerm, limit, page]
+    );
+
+    let dataOnly = results[0];
+    const allData = allResults[0];
+    
+    if (!dataOnly ) {
+      return res.status(statusCode.badRequest).send(
+        apiResponseErr([], statusCode.badRequest, false, "Data Not Found")
       );
     }
-    
-    const totalItems = filterData.length;
-    const totalPages = Math.ceil(totalItems / limit);
-    
-    // Optional: handle page overflow
-    const validPage = page > totalPages ? 1 : page;
-    const validOffset = (validPage - 1) * limit;
-    
-    const paginatedData = filterData.slice(validOffset, validOffset + limit);
 
-    const pagination = {
-      Page: page,
-      limit: limit,
-      totalItems,
-      totalPages,
-    };
+        if (type) {
+          dataOnly = dataOnly.filter(
+            (item) =>
+              item.gameName &&
+              item.gameName.toLowerCase() === type.toLowerCase()
+          );
+        }
+
+    const totalItems = allData.length;
+    const totalPages = Math.ceil(totalItems / limit);
 
     return res.status(statusCode.success).send(
-      apiResponseSuccess(paginatedData, true, statusCode.success, "Success", pagination)
+      apiResponseSuccess(dataOnly, true, statusCode.success, "Success", {
+        currentPage: parseInt(page),
+        limit: parseInt(limit),
+        totalItems,
+        totalPages,
+      })
     );
   } catch (error) {
     res.status(statusCode.internalServerError).send(
