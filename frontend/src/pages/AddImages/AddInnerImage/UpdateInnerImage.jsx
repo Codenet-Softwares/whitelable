@@ -8,7 +8,7 @@ import {
 import { useAppContext } from "../../../contextApi/context";
 
 const UpdateInnerImage = () => {
-  const { store } = useAppContext();
+  const { store, showLoader, hideLoader  } = useAppContext();
   const [innerImages, setInnerImages] = useState([]);
 
   useEffect(() => {
@@ -42,6 +42,7 @@ const UpdateInnerImage = () => {
       img.imageId === imageId ? { ...img, isActive: newStatus } : img
     );
     setInnerImages(updatedImages);
+      showLoader(); 
 
     try {
       await activeInactiveInnerImage(imageId, { isActive: newStatus });
@@ -49,7 +50,9 @@ const UpdateInnerImage = () => {
     } catch (error) {
       toast.error("Failed to update image status. Please try again.");
       fetchInnerImages(); // Re-sync in case of failure
-    }
+    }finally {
+        hideLoader(); // Hide loader after the async operation is complete
+      }
   };
 
   return (

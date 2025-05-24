@@ -29,7 +29,7 @@ const ViewPartnershipAndCreditRefModal = (props) => {
     });
 
     if (response) {
-      SetViewCreditRefData(response.data);
+      SetViewCreditRefData(response.data || []);
     }
   }
 
@@ -39,7 +39,7 @@ const ViewPartnershipAndCreditRefModal = (props) => {
     });
 
     if (response) {
-      SetViewPartnershipData(response.data);
+      SetViewPartnershipData(response.data || []);
     }
   }
 

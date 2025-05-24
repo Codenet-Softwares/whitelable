@@ -141,11 +141,11 @@ const AdminAccountStatement = () => {
                   }
                 >
                   <option selected value="10">
-                    10 entries
+                    10 Entries
                   </option>
-                  <option value="25">25 entries</option>
-                  <option value="50">50 entries</option>
-                  <option value="100">100 entries</option>
+                  <option value="25">25 Entries</option>
+                  <option value="50">50 Entries</option>
+                  <option value="100">100 Entries</option>
                 </select>
               </div>
               <div class="col-sm">

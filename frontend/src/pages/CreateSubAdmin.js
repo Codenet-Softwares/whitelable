@@ -8,32 +8,11 @@ import { createSubAdmin } from "../Utils/service/apiService";
 import FullScreenLoader from "../components/FullScreenLoader";
 
 const CreateSubAdmin = () => {
-  const { store, dispatch, showLoader, hideLoader } = useAppContext();
+  const { store, showLoader, hideLoader } = useAppContext();
   const [createSubAdminState] = useState(getCreateSubAdmin);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // const {
-  //   values,
-  //   errors,
-  //   touched,
-  //   handleBlur,
-  //   handleChange,
-  //   handleSubmit,
-  //   resetForm,
-  //   setFieldValue,
-  // } = useFormik({
-  //   initialValues: {
-  //     ...createSubAdminState,
-  //     roles: createSubAdminState.roles || [{ permission: [] }],
-  //   },
-  //   validationSchema: CreateSubAdminSchema,
-  //   onSubmit: async (values, action) => {
-  //     await create_SubAdmin(values);
-  //     resetForm();
-  //   },
-  //   enableReinitialize: true,
-  // });
   const {
     values,
     errors,
@@ -49,32 +28,33 @@ const CreateSubAdmin = () => {
     },
     validationSchema: CreateSubAdminSchema,
     onSubmit: async (values, action) => {
-      showLoader(); // Show loader before starting the async operation
+      showLoader();
+      setIsLoading(true);
+      console.log("values",values)
       try {
-        await create_SubAdmin(values);
+        await createSubAdmin(values, true);
         resetForm();
+        // Optionally show success toast/message here
       } catch (error) {
         console.error("Error in creating sub-admin:", error);
+        // Optionally show error toast/message here
       } finally {
-        hideLoader(); // Hide loader in the finally block
+        setIsLoading(false);
+        hideLoader();
+        action.setSubmitting(false);
       }
     },
     enableReinitialize: true,
   });
 
   const handleCheckboxChange = (event) => {
-    const { name, checked } = event.target;
+    const { value, checked } = event.target;
     const updatedPermissions = checked
-      ? [...values.permission, name]
-      : values.permission.filter((item) => item !== name);
+      ? [...values.permission, value]
+      : values.permission.filter((item) => item !== value);
 
     setFieldValue("permission", updatedPermissions);
   };
-  async function create_SubAdmin(values) {
-    setIsLoading(true);
-    const response = await createSubAdmin(values, true);
-    setIsLoading(false);
-  }
 
   return (
     <div className="container" style={{ marginTop: "100px" }}>
@@ -90,52 +70,48 @@ const CreateSubAdmin = () => {
             </div>
 
             <div className="card-body">
-              <form>
+              <form onSubmit={handleSubmit}>
                 <div className="mb-3">
                   <label
                     htmlFor="userName"
                     className="form-label text-uppercase fw-bold"
-                    // style={{ fontWeight: "bold" }}
                   >
                     UserName
                   </label>
                   <input
                     type="text"
-                    className="form-control "
+                    className="form-control"
                     placeholder="Enter Username"
                     name="userName"
-                    // style={{ border: '1px solid black' }}
                     value={values.userName}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                   />
-                  <span>
-                    {errors.userName && touched.userName ? (
-                      <p className="text-danger fw-bold">{errors.userName}</p>
-                    ) : null}
-                  </span>
+                  {errors.userName && touched.userName && (
+                    <p className="text-danger fw-bold">{errors.userName}</p>
+                  )}
                 </div>
+
                 <div className="mb-3">
                   <label
                     htmlFor="password"
                     className="form-label text-uppercase fw-bold"
-                    // style={{ fontWeight: "bold" }}
                   >
                     Password
                   </label>
                   <div className="position-relative">
                     <input
                       type={showPassword ? "text" : "password"}
-                      className="form-control "
+                      className="form-control"
                       placeholder="Enter Password"
                       name="password"
-                      // style={{ border: '1px solid black' }}
                       value={values.password}
                       onChange={handleChange}
+                      onBlur={handleBlur}
                     />
                     <i
-                      className={`bi ${
-                        showPassword ? "bi-eye" : "bi-eye-slash"
-                      } position-absolute`}
+                      className={`bi ${showPassword ? "bi-eye" : "bi-eye-slash"
+                        } position-absolute`}
                       style={{
                         right: "10px",
                         top: "50%",
@@ -146,55 +122,51 @@ const CreateSubAdmin = () => {
                       onClick={() => setShowPassword(!showPassword)}
                     ></i>
                   </div>
-                  <span>
-                    {errors.password && touched.password ? (
-                      <p className="text-danger fw-bold">{errors.password}</p>
-                    ) : null}
-                  </span>
+                  {errors.password && touched.password && (
+                    <p className="text-danger fw-bold">{errors.password}</p>
+                  )}
                 </div>
 
                 <div className="mb-3 mt-4">
                   <div className="card bg-dark text-white">
-                    <h5
-                      className="card bg-dark text-white"
-                      style={{ textAlign: "center" }}
-                    >
-                      PERMISSIONS :
-                    </h5>
-
-                    <div className="card-body ">
+                    <h5 className="text-center py-2">PERMISSIONS :</h5>
+                    <div className="card-body">
                       {strings.roles.map((permission) => (
                         <div
-                          key={permission}
+                          key={permission.role}
                           className="form-check form-check-inline"
                         >
                           <input
                             type="checkbox"
                             className="form-check-input"
-                            name={permission.role}
+                            name="permission"
+                            value={permission.role}
                             checked={values.permission.includes(
                               permission.role
                             )}
                             onChange={handleCheckboxChange}
                           />
-                          <label
-                            htmlFor={permission.name}
-                            className="form-check-label"
-                          >
+                          <label className="form-check-label">
                             {permission.name}
                           </label>
                         </div>
                       ))}
+                      {errors.permission && touched.permission && (
+                        <p className="text-danger fw-bold mt-2">
+                          {errors.permission}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
 
-                <div className=" gap-2  ">
+                <div className="gap-2">
                   <button
-                    className="btn btn-primary "
-                    type="button"
-                    onClick={handleSubmit}
-                    disabled={["suspended"].includes(store?.admin?.status)}
+                    className="btn btn-primary"
+                    type="submit"
+                    disabled={
+                      isLoading || ["suspended"].includes(store?.admin?.status)
+                    }
                   >
                     Add User Role
                   </button>
@@ -207,4 +179,5 @@ const CreateSubAdmin = () => {
     </div>
   );
 };
+
 export default CreateSubAdmin;

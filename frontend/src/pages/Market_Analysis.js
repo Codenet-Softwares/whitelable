@@ -117,7 +117,7 @@ const Market_Analysis = () => {
                       onChange={handleChange}
                       type="text"
                       name="search"
-                      placeholder="Search content here..."
+                      placeholder="Search Content Here..."
                     />
                   </div>
                   {/* <button type="submit">
@@ -185,7 +185,7 @@ const Market_Analysis = () => {
                   ) : (
                     <tr>
                       <td colSpan="4" className="text-center">
-                        No Live bet games found.
+                        No Live Bet Games Found.
                       </td>
                     </tr>
                   )}
