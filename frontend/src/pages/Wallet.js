@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { getAllCreateState } from "../Utils/service/initiateState";
 import { permissionObj } from "../Utils/constant/permission";
 import { getAllCreate, viewBalance } from "../Utils/service/apiService";
@@ -25,14 +25,20 @@ const Wallet = () => {
     { adminName: store?.admin?.adminName, adminId: store?.admin?.id },
   ]);
   const [userId, setUserId] = useState(store?.admin?.id);
+  console.log("clicked id", userId);
+  const userIdRef = useRef(store?.admin?.id);
   //  debounced search handler
   const debouncedGetAllCreate = useCallback(
     debounce((searchName) => {
-      getAll_Create(searchName);
+      getAll_Create(searchName, userIdRef.current);
     }, 1500),
     []
   );
-  console.log("navigationBar", navigationBar)
+  useEffect(() => {
+    userIdRef.current = userId;
+  }, [userId]);
+
+  console.log("navigationBar", navigationBar);
   const handleAdminNavigateToChild = (adminId, adminName) => {
     setUserId(adminId);
     setNavigationBar((prev) => [...prev, { adminId, adminName }]);
@@ -41,7 +47,6 @@ const Wallet = () => {
       currentPage: 1,
     }));
   };
-
 
   const handleBreadcrumbClick = (clickedAdminId) => {
     const index = navigationBar.findIndex(
@@ -58,11 +63,11 @@ const Wallet = () => {
     }));
   };
 
-
   const handleChange = (name, value) => {
     setWalletCard((prevData) => ({
       ...prevData,
       [name]: value,
+      ...(name === "name" && { currentPage: 1 }), 
     }));
 
     if (name === "name") {
@@ -93,7 +98,7 @@ const Wallet = () => {
     walletCard.totalEntries,
     refresh,
     adminDelete,
-    userId
+    userId,
   ]);
 
   useEffect(() => {
@@ -107,9 +112,9 @@ const Wallet = () => {
     }
   }, [refresh]);
 
-  async function getAll_Create(searchName = walletCard.name) {
+  async function getAll_Create(searchName = walletCard.name, id = userId) {
     const response = await getAllCreate({
-      _id: userId,
+      _id: id,
       pageNumber: walletCard.currentPage,
       dataLimit: walletCard.totalEntries,
       name: searchName,
@@ -211,23 +216,22 @@ const Wallet = () => {
                     <React.Fragment key={item.adminId}>
                       <span
                         role="button"
-                        className={`text-decoration-none ${isLast ? 'text-primary' : 'text-black'}`}
+                        className={`text-decoration-none ${
+                          isLast ? "text-primary" : "text-black"
+                        }`}
                         style={{
                           fontSize: "20px",
                           cursor: "pointer",
-                          fontWeight: isLast ? "bold" : "normal"
+                          fontWeight: isLast ? "bold" : "normal",
                         }}
                         onClick={() => handleBreadcrumbClick(item.adminId)}
                       >
                         {item.adminName}
                       </span>
-                      {!isLast && (
-                        <span className="text-muted mx-1">/</span>
-                      )}
+                      {!isLast && <span className="text-muted mx-1">/</span>}
                     </React.Fragment>
                   );
                 })}
-
               </div>
               <div class="QA_section">
                 <div class="white_box_tittle list_header">
@@ -249,7 +253,9 @@ const Wallet = () => {
                     <select
                       class="form-select form-select-sm w-25"
                       aria-label=".form-select-sm example"
-                      onChange={(e) => handleChange("totalEntries", e.target.value)}
+                      onChange={(e) =>
+                        handleChange("totalEntries", e.target.value)
+                      }
                       value={walletCard.totalEntries}
                     >
                       <option selected value="5">
@@ -281,8 +287,8 @@ const Wallet = () => {
                             />
                           </div>
                           <button type="submit">
-                            {' '}
-                            <i class="ti-search"></i>{' '}
+                            {" "}
+                            <i class="ti-search"></i>{" "}
                           </button>
                         </form>
                       </div>
@@ -291,9 +297,11 @@ const Wallet = () => {
                 </div>
 
                 <div class="QA_table mb_30">
-                  {isLoading ? (<div className='text-center'>Loading...</div>) : walletCard?.userList?.length > 0 ? (
+                  {isLoading ? (
+                    <div className="text-center">Loading...</div>
+                  ) : walletCard?.userList?.length > 0 ? (
                     <>
-                      {' '}
+                      {" "}
                       <table class="table lms_table_active table-bordered table-striped">
                         <thead
                           style={{
@@ -384,15 +392,15 @@ const Wallet = () => {
                               adminId={data.adminId}
                               userId={data.adminId} // pending for decision TOM
                               exposure={data.exposure}
-                              partnership={
-                                data?.partnerships
-                              }
+                              partnership={data?.partnerships}
                               Status={data.status}
                               setRefresh={setRefresh}
                               adminDelete={setAdminDelete}
                               setIsLoading={setIsLoading}
                               adminBalance={balance}
-                              handleAdminNavigateToChild={handleAdminNavigateToChild}
+                              handleAdminNavigateToChild={
+                                handleAdminNavigateToChild
+                              }
                               navigationBar={navigationBar}
                             />
                           );
