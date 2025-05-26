@@ -82,6 +82,13 @@ export const transactionViewSchema = [
   .withMessage("Valid values are 'live', 'olddata', or 'backup'."),
   query('page').optional().toInt().isInt({ min: 1 }).withMessage('Page number must be a positive integer.'),
   query('limit').optional().toInt().isInt({ min: 1 }).withMessage('Limit must be a positive integer.'),
+  query(['startDate', 'endDate']).custom((value, { req }) => {
+    const { startDate, endDate } = req.query;
+    if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+      throw new Error('startDate must be less than or equal to endDate.');
+    }
+    return true;
+  })
 ];
 export const viewAllCreatesSchema = [
   param('createdById').exists().withMessage('Id is required.'),
@@ -164,6 +171,13 @@ export const accountStatementSchema = [
   .withMessage("Valid values are 'live', 'olddata', or 'backup'."),
   query('page').optional().toInt().isInt({ min: 1 }).withMessage('Page number must be a positive integer.'),
   query('limit').optional().toInt().isInt({ min: 1 }).withMessage('Limit must be a positive integer.'),
+    query(['startDate', 'endDate']).custom((value, { req }) => {
+    const { startDate, endDate } = req.query;
+    if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+      throw new Error('startDate must be less than or equal to endDate.');
+    }
+    return true;
+  })
 ];
 
 export const userStatusSchema = [param('userName').exists().withMessage('User Name is required.')];
@@ -219,7 +233,14 @@ export const betHistorySchema = [
     .withMessage("Username is required."),
   param("gameId")
     .notEmpty()
-    .withMessage("Game Id is required.")
+    .withMessage("Game Id is required."),
+      query(['startDate', 'endDate']).custom((value, { req }) => {
+    const { startDate, endDate } = req.query;
+    if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+      throw new Error('startDate must be less than or equal to endDate.');
+    }
+    return true;
+  })
 ];
 
 export const activeInactive = [

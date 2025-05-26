@@ -398,7 +398,7 @@ export const getUserMasterBook = async (req, res) => {
         .map((user) => ({
           userName: user.userName,
           userId: user.userId,
-          roles: string.user,
+          role: string.user,
           marketId: user.marketId,
           runnerBalance: user.runnerBalance,
         }));
@@ -431,7 +431,7 @@ export const getUserMasterBook = async (req, res) => {
         }));
 
       const filteredSubAdmins = subAdmins.filter(
-        (subAdmin) => !subAdmin.roles.some((role) => role.role === "user")
+        (subAdmin) => !subAdmin.role.some((role) => role === "user")
       );
 
       const formattedSubAdmins = await Promise.all(
@@ -442,7 +442,7 @@ export const getUserMasterBook = async (req, res) => {
             return {
               adminId: subAdmin.adminId,
               userName: subAdmin.userName,
-              roles: subAdmin.roles[0]?.role || null,
+              role: subAdmin.role.role || null,
             };
           }
 
