@@ -32,9 +32,10 @@ export const createAnnouncements = async (req, res) => {
 export const getAnnouncement = async (req, res) => {
   try {
     const announcement = await announcementSchema.findAll();
+   
 
-    if (!announcement) {
-        return res.status(statusCode.badRequest).send(apiResponseErr(null, false, statusCode.badRequest, 'Announcement not found'));
+    if (!announcement.length) {
+        return res.status(statusCode.notFound).send(apiResponseErr(null, false, statusCode.notFound, 'Announcement not found'));
     }
     return res.status(statusCode.create).send(apiResponseSuccess(announcement, true, statusCode.create, 'Success'));
   } catch (error) {
@@ -103,8 +104,8 @@ export const getInnerAnnouncement = async (req, res) => {
   try {
     const announcement = await innerAnnouncementSchema.findAll();
 
-    if (!announcement) {
-        return res.status(statusCode.badRequest).send(apiResponseErr(null, false, statusCode.badRequest, 'Announcement not found'));
+   if (!announcement.length) {
+        return res.status(statusCode.notFound).send(apiResponseErr(null, false, statusCode.notFound, 'Inner announcement not found'));
     }
     return res.status(statusCode.create).send(apiResponseSuccess(announcement, true, statusCode.create, 'Success'));
     
