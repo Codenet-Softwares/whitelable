@@ -179,11 +179,6 @@ export const createSubAdmin = async (req, res) => {
       return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, messages.adminExists));
     }
 
-    const existingTrashAdmin = await trash.findOne({ where: { userName } });
-    if (existingTrashAdmin) {
-      return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, "Admin is exist in trash. Please restore or delete it."));
-    }
-
     let subRole = '';
     switch (user.role) {
       case string.superAdmin:
