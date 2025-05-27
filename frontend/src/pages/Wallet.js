@@ -269,7 +269,7 @@ const Wallet = () => {
                     </select>
                     <div class="serach_field_2">
                       <div class="search_inner">
-                        <form Active="#">
+                       
                           <div class="search_field">
                             <input
                               type="text"
@@ -290,7 +290,7 @@ const Wallet = () => {
                             {" "}
                             <i class="ti-search"></i>{" "}
                           </button>
-                        </form>
+                    
                       </div>
                     </div>
                   </div>

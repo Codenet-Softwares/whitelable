@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Pagination from "../components/common/Pagination";
-// import ShimmerEffect from "../ShimmerEffect";
 
 const AccountStatement = ({
   props,
@@ -22,7 +21,7 @@ const AccountStatement = ({
   handleDateStatement,
   dataSource,
 }) => {
-
+  const [currentDate] = useState(new Date()); // Store current date for live data
   function formatDate(dateString) {
     const options = {
       year: "numeric",
@@ -38,7 +37,13 @@ const AccountStatement = ({
     );
     return formattedDate;
   }
-
+  // Determine if the Get Statement button should be disabled
+  const isGetStatementDisabled = () => {
+    if (dataSource === "live") {
+      return true; // Always disabled for live data
+    }
+    return !startDate || !endDate; // Disabled if either date is missing for backup/olddata
+  };
   return (
     <div className="col-sm-8 mt-3">
       <div className="card mb-3 w-100 rounded">
@@ -69,8 +74,12 @@ const AccountStatement = ({
                       setState((prevState) => ({
                         ...prevState,
                         dataSource: e.target.value,
+                        // Reset dates when changing data source
+                        backupStartDate: null,
+                        backupEndDate: null,
                       }));
                     }}
+                    value={dataSource}
                   >
                     <option value="live" selected>
                       LIVE DATA
@@ -80,30 +89,53 @@ const AccountStatement = ({
                   </select>
                 </div>
                 <div class="col-sm">
-                  <DatePicker
-                    selected={startDate}
-                    onChange={(date) => setStartDate(date)}
-                    placeholderText={"Select Start Date"}
-                    disabled={dataSource === "live"}
-                    readonly // Prevent manual typing 
-                    onKeyDown={(e) => e.preventDefault()} // Block manual input from keyboard
-                  />
+                  {dataSource === "live" ? (
+                    <DatePicker
+                      type="date"
+                      className="form-control"
+                      value={currentDate.toLocaleDateString()}
+                      readOnly
+                    />
+                  ) : (
+                    <DatePicker
+                      type="date"
+                      className="form-control"
+                      selected={startDate}
+                      onChange={(date) => setStartDate(date)}
+                      placeholderText={"Select Start Date"}
+                      disabled={dataSource === "live"}
+                      readonly // Prevent manual typing
+                      maxDate={new Date()}
+                      onKeyDown={(e) => e.preventDefault()} // Block manual input from keyboard
+                    />
+                  )}
                 </div>
                 <div class="col-sm">
-                  {" "}
-                  <DatePicker
-                    selected={endDate}
-                    onChange={(date) => setEndDate(date)}
-                    placeholderText={"Select End Date"}
-                    disabled={dataSource === "live"}
-                    readonly // Prevent manual typing 
-                    onKeyDown={(e) => e.preventDefault()} // Block manual input from keyboard
-                  />
+                  {dataSource === "live" ? (
+                    <DatePicker
+                      type="date"
+                      className="form-control"
+                      value={currentDate.toLocaleDateString()}
+                      readOnly
+                    />
+                  ) : (
+                    <DatePicker
+                      type="date"
+                      className="form-control"
+                      selected={endDate}
+                      onChange={(date) => setEndDate(date)}
+                      placeholderText={"Select End Date"}
+                      disabled={dataSource === "live"}
+                      readonly // Prevent manual typing
+                      maxDate={new Date()}
+                      onKeyDown={(e) => e.preventDefault()} // Block manual input from keyboard
+                    />
+                  )}
                 </div>
                 <div class="col-sm">
                   <button
                     className="btn btn-primary mb-2"
-                    disabled={startDate === null || endDate === null}
+                    disabled={isGetStatementDisabled()}
                     onClick={handleDateStatement}
                   >
                     Get Statement

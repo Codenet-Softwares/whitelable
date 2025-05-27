@@ -399,7 +399,7 @@ export async function getProfitLossEvent(body = {}, isToast = false) {
   try {
     const callParams = await getAuthCallParams(strings.GET, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.getProfitLossEvent}/${body.userName}/${body.gameId}?page=${body.pageNumber}&limit=${body.dataLimit}&searchMarketName=${body.searchName}`, ///((by search sending blank server is not giving data))
+      `${UrlConstant.getProfitLossEvent}/${body.userName}/${body.gameId}?page=${body.pageNumber}&pageSize=${body.dataLimit}&search=${body.searchName}`,
       callParams,
       isToast
     );
@@ -413,7 +413,7 @@ export async function getProfitLossRunner(body = {}, isToast = false) {
   try {
     const callParams = await getAuthCallParams(strings.GET, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.getProfitLossRunner}/${body.userName}/${body.marketId}`, ///((by search sending blank server is not giving data))
+      `${UrlConstant.getProfitLossRunner}/${body.userName}/${body.marketId}?page=${body.pageNumber}&pageSize=${body.dataLimit}&search=${body.searchName}`, 
       callParams,
       isToast
     );
@@ -455,7 +455,7 @@ export async function getBetList(body = {}, isToast = false) {
   try {
     const callParams = await getAuthCallParams(strings.GET, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.betList}/${body.userName}/${body.runnerId}?page=${body.page}&pageSize=${body.limit}`, ///&limit=${body.limit}&search=${body.searchName} ((by search sending blank server is not giving data))
+      `${UrlConstant.betList}/${body.userName}/${body.marketId}?page=${body.page}&pageSize=${body.limit}`, ///&limit=${body.limit}&search=${body.searchName} ((by search sending blank server is not giving data))
       callParams,
       isToast
     );
@@ -525,7 +525,7 @@ export async function getlotteryProfitLossEvent(body = {}, isToast = false) {
   try {
     const callParams = await getAuthCallParams(strings.GET, body, isToast);
     const response = await makeCall(
-      `${UrlConstant.getLotteryProfitLossEvent}/${body.userName}?page=${body.pageNumber}&limit=${body.dataLimit}&searchMarketName=${body.searchName}`,
+      `${UrlConstant.getLotteryProfitLossEvent}/${body.userName}?page=${body.pageNumber}&pageSize=${body.dataLimit}&search=${body.searchName}`,
       callParams,
       isToast
     );

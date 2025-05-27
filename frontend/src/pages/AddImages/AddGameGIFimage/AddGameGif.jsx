@@ -151,7 +151,9 @@ const AddGameGif = () => {
         />
       </div>
       <div className="text-center">
-        <button className="btn btn-primary" onClick={handleUploadGif}>
+        <button className="btn btn-primary" onClick={handleUploadGif}
+        style={{ backgroundColor: "#0d6efd", borderColor: "#0d6efd" }}
+        >
           Upload GIF
         </button>
       </div>

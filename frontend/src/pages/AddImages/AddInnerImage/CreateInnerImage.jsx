@@ -134,7 +134,9 @@ const CreateInnerImage = () => {
         </div>
 
         <div className="text-center">
-          <button className="btn btn-primary" onClick={handleUploadImage}>
+          <button className="btn btn-primary" onClick={handleUploadImage}
+           style={{ backgroundColor: "#0d6efd", borderColor: "#0d6efd" }}
+          >
             Upload Image
           </button>
         </div>

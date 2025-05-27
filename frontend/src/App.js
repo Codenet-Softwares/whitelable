@@ -92,7 +92,7 @@ function App() {
               {/* 
               /*last page table to render for colorgame*/}
               <Route
-                path="betHistForPL/:userName/:runnerId"
+                path="betHistForPL/:userName/:marketId"
                 element={<BetHistoryForPl />}
               />
               <Route

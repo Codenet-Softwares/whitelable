@@ -30,14 +30,12 @@ const CreateSubAdmin = () => {
     onSubmit: async (values, action) => {
       showLoader();
       setIsLoading(true);
-      console.log("values",values)
+      console.log("values", values);
       try {
         await createSubAdmin(values, true);
         resetForm();
-        // Optionally show success toast/message here
       } catch (error) {
         console.error("Error in creating sub-admin:", error);
-        // Optionally show error toast/message here
       } finally {
         setIsLoading(false);
         hideLoader();
@@ -57,30 +55,25 @@ const CreateSubAdmin = () => {
   };
 
   return (
-    <div className="container" style={{ marginTop: "100px" }}>
+    <div className="container py-5">
       <FullScreenLoader show={isLoading} />
       <div className="row justify-content-center">
-        <div className="col-lg-8">
-          <div className="card">
-            <div
-              className="card-header text-white p-3"
-              style={{ backgroundColor: "#1E2761", textAlign: "center" }}
-            >
-              <b className="mb-0 text-uppercase">CREATE USER ROLE</b>
+        <div className="col-xl-8 col-lg-9">
+          <div className="card shadow-lg border-0 rounded-4">
+            <div className="modal-header justify-content-center theme_bg_1">
+              <h4 className="mb-0 text-uppercase fw-bold text-white">Create User Role</h4>
             </div>
 
-            <div className="card-body">
-              <form onSubmit={handleSubmit}>
-                <div className="mb-3">
-                  <label
-                    htmlFor="userName"
-                    className="form-label text-uppercase fw-bold"
-                  >
-                    UserName
+            <div className="card-body bg-light-subtle px-4 py-5">
+              <form onSubmit={handleSubmit} className="needs-validation">
+                <div className="mb-4">
+                  <label htmlFor="userName" className="form-label text-uppercase fw-bold">
+                    Username
                   </label>
                   <input
                     type="text"
-                    className="form-control"
+                    className={`form-control ${errors.userName && touched.userName ? "is-invalid" : ""
+                      }`}
                     placeholder="Enter Username"
                     name="userName"
                     value={values.userName}
@@ -88,85 +81,83 @@ const CreateSubAdmin = () => {
                     onBlur={handleBlur}
                   />
                   {errors.userName && touched.userName && (
-                    <p className="text-danger fw-bold">{errors.userName}</p>
+                    <div className="invalid-feedback d-block fw-bold">
+                      {errors.userName}
+                    </div>
                   )}
                 </div>
 
-                <div className="mb-3">
-                  <label
-                    htmlFor="password"
-                    className="form-label text-uppercase fw-bold"
-                  >
+                <div className="mb-4">
+                  <label htmlFor="password" className="form-label text-uppercase fw-bold">
                     Password
                   </label>
-                  <div className="position-relative">
+                  <div className="input-group">
                     <input
                       type={showPassword ? "text" : "password"}
-                      className="form-control"
+                      className={`form-control ${errors.password && touched.password ? "is-invalid" : ""
+                        }`}
                       placeholder="Enter Password"
                       name="password"
                       value={values.password}
                       onChange={handleChange}
                       onBlur={handleBlur}
                     />
-                    <i
-                      className={`bi ${showPassword ? "bi-eye" : "bi-eye-slash"
-                        } position-absolute`}
-                      style={{
-                        right: "10px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        cursor: "pointer",
-                        fontSize: "1.2rem",
-                      }}
+                    <button
+                      type="button"
+                      className="btn btn-outline-secondary"
                       onClick={() => setShowPassword(!showPassword)}
-                    ></i>
+                      tabIndex={-1}
+                    >
+                      <i className={`bi ${showPassword ? "bi-eye" : "bi-eye-slash"}`}></i>
+                    </button>
                   </div>
                   {errors.password && touched.password && (
-                    <p className="text-danger fw-bold">{errors.password}</p>
+                    <div className="invalid-feedback d-block fw-bold">
+                      {errors.password}
+                    </div>
                   )}
                 </div>
 
-                <div className="mb-3 mt-4">
-                  <div className="card bg-dark text-white">
-                    <h5 className="text-center py-2">PERMISSIONS :</h5>
-                    <div className="card-body">
+                <div className="mb-5 text-uppercase">
+                  <div className="card border-0 shadow-sm">
+                    <div className="card-header bg-dark text-white text-center fw-bold">
+                      Permissions
+                    </div>
+                    <div className="card-body d-flex flex-wrap gap-3 ">
                       {strings.roles.map((permission) => (
-                        <div
-                          key={permission.role}
-                          className="form-check form-check-inline"
-                        >
+                        <div className="form-check form-switch " key={permission.role}>
                           <input
+                            className="form-check-input "
                             type="checkbox"
-                            className="form-check-input"
                             name="permission"
                             value={permission.role}
-                            checked={values.permission.includes(
-                              permission.role
-                            )}
+                            id={`permission-${permission.role}`}
+                            checked={values.permission.includes(permission.role)}
                             onChange={handleCheckboxChange}
                           />
-                          <label className="form-check-label">
+                          <label
+                            className="form-check-label text-capitalize"
+                            htmlFor={`permission-${permission.role}`}
+                          >
                             {permission.name}
                           </label>
                         </div>
                       ))}
-                      {errors.permission && touched.permission && (
-                        <p className="text-danger fw-bold mt-2">
-                          {errors.permission}
-                        </p>
-                      )}
                     </div>
+                    {errors.permission && touched.permission && (
+                      <div className="px-3 pb-3 text-danger fw-semibold">
+                        {errors.permission}
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                <div className="gap-2">
+                <div className="text-center">
                   <button
-                    className="btn btn-primary"
                     type="submit"
-                    disabled={
-                      isLoading || ["suspended"].includes(store?.admin?.status)
-                    }
+                    className="btn btn-lg px-5 fw-bold text-white"
+                    style={{ backgroundColor: "#4682B4" }}
+                    disabled={isLoading || store?.admin?.status === "suspended"}
                   >
                     Add User Role
                   </button>

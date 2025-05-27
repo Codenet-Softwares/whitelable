@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { getLotteryBetList } from "../Utils/service/apiService";
 import { formatDateForUi } from "../Utils/helper";
 
@@ -7,15 +7,14 @@ const BetHistoryLotteryForPl = () => {
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [betList, SetBetList] = useState([]);
   const { userName, id } = useParams();
-  
+  const navigate = useNavigate(); // Add navigate hook
   const toggleDropdown = (id) => {
     setDropdownOpen(dropdownOpen === id ? null : id);
   };
   const fetchBetList = async () => {
-
     const response = await getLotteryBetList({
       userName: userName,
-      marketId: id
+      marketId: id,
     });
     SetBetList(response?.data);
   };
@@ -23,7 +22,9 @@ const BetHistoryLotteryForPl = () => {
   useEffect(() => {
     fetchBetList();
   }, []);
-
+  const handleBack = () => {
+    navigate(-1); // This will go back to the previous page
+  };
   return (
     <div className="m-4">
       <div className="d-flex justify-content-end gap-1">
@@ -41,6 +42,14 @@ const BetHistoryLotteryForPl = () => {
           style={{ backgroundColor: "#26416e" }}
         >
           <b>&nbsp;&nbsp;Bet History</b>
+          <span
+            style={{ cursor: "pointer" }}
+            title="Back"
+            onClick={handleBack} 
+          >
+            {" "}
+            <i className="fas fa-arrow-left"></i>
+          </span>
         </div>
         <div className="m-1 d-flex justify-content-between align-items-center"></div>
 
@@ -102,7 +111,10 @@ const BetHistoryLotteryForPl = () => {
                             <td>{data?.marketName}</td>
                             <td>{"WINNER"}</td>
                             <td>
-                              <div className="dropdown" style={{ position: "relative" }}>
+                              <div
+                                className="dropdown"
+                                style={{ position: "relative" }}
+                              >
                                 <button
                                   className="btn btn-link dropdown-toggle"
                                   type="button"
@@ -113,8 +125,12 @@ const BetHistoryLotteryForPl = () => {
                                 <div
                                   className="custom-dropdown-content"
                                   style={{
-                                    height: dropdownOpen === index ? "200px" : "0",
-                                    overflow: dropdownOpen === index ? "auto" : "hidden",
+                                    height:
+                                      dropdownOpen === index ? "200px" : "0",
+                                    overflow:
+                                      dropdownOpen === index
+                                        ? "auto"
+                                        : "hidden",
                                     transition: "height 0.3s ease",
                                     background: "white",
                                     border: "1px solid #ccc",
@@ -130,10 +146,21 @@ const BetHistoryLotteryForPl = () => {
                                         padding: "10px", // Optional: Space inside the dropdown
                                       }}
                                     >
-                                      <span style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>
+                                      <span
+                                        style={{
+                                          fontWeight: "bold",
+                                          display: "block",
+                                          marginBottom: "5px",
+                                        }}
+                                      >
                                         Ticket Numbers:
                                       </span>
-                                      <hr style={{ margin: "5px 0", borderColor: "#ddd" }} />
+                                      <hr
+                                        style={{
+                                          margin: "5px 0",
+                                          borderColor: "#ddd",
+                                        }}
+                                      />
                                       {data?.tickets?.length > 0 ? (
                                         data?.tickets?.map((number, i) => (
                                           <span
@@ -149,14 +176,18 @@ const BetHistoryLotteryForPl = () => {
                                           </span>
                                         ))
                                       ) : (
-                                        <span style={{ color: "#999", fontStyle: "italic" }}>
+                                        <span
+                                          style={{
+                                            color: "#999",
+                                            fontStyle: "italic",
+                                          }}
+                                        >
                                           No ticket numbers available
                                         </span>
                                       )}
                                     </div>
                                   )}
                                 </div>
-
                               </div>
                             </td>
                             <td>{data?.sem}</td>

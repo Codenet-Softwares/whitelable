@@ -128,6 +128,7 @@ const OuterAnnouncement = () => {
                   className="btn btn-primary"
                   onClick={handleCreateAnnouncement}
                   disabled={isLoading}
+                   style={{ backgroundColor: "#0d6efd", borderColor: "#0d6efd" }}
                 >
                   {isLoading ? "Creating..." : "Create Outer Announcement"}
                 </button>

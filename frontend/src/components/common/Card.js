@@ -25,7 +25,7 @@ const Card = ({
   exposure,
   adminBalance,
   handleAdminNavigateToChild,
-  navigationBar
+  navigationBar,
 }) => {
   const navigate = useNavigate();
   const { store } = useAppContext();
@@ -107,7 +107,10 @@ const Card = ({
             {navigationBar.length === 1 ? (
               <span className="">
                 <button
-                  className={`border border-0  btn ${hasPermission(strings.creditRefEdit, store)}`}
+                  className={`border border-0  btn ${hasPermission(
+                    strings.creditRefEdit,
+                    store
+                  )}`}
                   aria-label="Close"
                   onClick={() =>
                     handelOpenTransactionModal(true, "creditRefProvider")
@@ -118,10 +121,12 @@ const Card = ({
               </span>
             ) : null}
 
-
             <span>
               <button
-                className={`border border-0 btn ${hasPermission(strings.creditRefView, store)}`}
+                className={`border border-0 btn ${hasPermission(
+                  strings.creditRefView,
+                  store
+                )}`}
                 onClick={() => handelOpenViewModal(true, "creditRefViewer")}
               >
                 <i className="fa-regular fa-eye" aria-label="Close"></i>
@@ -135,7 +140,10 @@ const Card = ({
             {navigationBar.length === 1 ? (
               <span className="">
                 <button
-                  className={`border border-0  btn ${hasPermission(strings.partnershipEdit, store)}`}
+                  className={`border border-0  btn ${hasPermission(
+                    strings.partnershipEdit,
+                    store
+                  )}`}
                 >
                   <i
                     className="fa-solid fa-pen-to-square"
@@ -150,7 +158,10 @@ const Card = ({
 
             <span>
               <button
-                className={`border border-0 btn ${hasPermission(strings.partnershipEdit, store)}`}
+                className={`border border-0 btn ${hasPermission(
+                  strings.partnershipEdit,
+                  store
+                )}`}
                 onClick={() => handelOpenViewModal(true, "partnershipViewer")}
               >
                 <i className="fa-regular fa-eye"></i>
@@ -173,8 +184,9 @@ const Card = ({
           </td>
           <td
             scope="row"
-            className={`fs-6 text-center ${loadBalance - creditRef < 0 ? "text-danger" : "text-dark"
-              }`}
+            className={`fs-6 text-center ${
+              loadBalance - creditRef < 0 ? "text-danger" : "text-dark"
+            }`}
           >
             {isNaN(creditRef - loadBalance)
               ? loadBalance
@@ -182,12 +194,13 @@ const Card = ({
           </td>
           <td scope="row" className="fs-6 text-center">
             <p
-              className={`border border-1 w-75 text-center rounded-pill ${Status === "Active"
-                ? "bg-success"
-                : Status === "Suspended"
+              className={`border border-1 w-75 text-center rounded-pill ${
+                Status === "Active"
+                  ? "bg-success"
+                  : Status === "Suspended"
                   ? "bg-danger"
                   : "bg-secondary"
-                }`}
+              }`}
             >
               {Status}
             </p>
@@ -198,7 +211,10 @@ const Card = ({
                 {" "}
                 <span className="mx-1">
                   <button
-                    className={`btn border border-1 rounded ${hasPermission(strings.transferBalance, store)}`}
+                    className={`btn border border-1 rounded ${hasPermission(
+                      strings.transferBalance,
+                      store
+                    )}`}
                     onClick={() =>
                       handelOpenTransactionModal(
                         true,
@@ -214,7 +230,10 @@ const Card = ({
                 </span>
                 <span className="mx-1">
                   <button
-                    className={`btn border border-2 rounded ${hasPermission(strings.status, store)}`}
+                    className={`btn border border-2 rounded ${hasPermission(
+                      strings.status,
+                      store
+                    )}`}
                     style={{ background: "#25F1F7" }}
                     title="Setting"
                     type="button"
@@ -228,7 +247,10 @@ const Card = ({
 
             <span className="mx-1">
               <button
-                className={`btn border border-2 rounded ${hasPermission(strings.profileView, store)}`}
+                className={`btn border border-2 rounded ${hasPermission(
+                  strings.profileView,
+                  store
+                )}`}
                 style={{ background: "#F5C93A" }}
                 title="Profile"
                 onClick={() => takeMeToAccount(userName)}
@@ -239,7 +261,10 @@ const Card = ({
             {navigationBar.length === 1 ? (
               <span className="mx-1">
                 <button
-                  className={`btn border border-2 rounded  ${hasPermission(strings.deleteAdmin, store)}`}
+                  className={`btn border border-2 rounded  ${hasPermission(
+                    strings.deleteAdmin,
+                    store
+                  )}`}
                   style={{ background: "#ED5E68" }}
                   title="Delete"
                   onClick={(e) => handleDelete()}
@@ -248,7 +273,6 @@ const Card = ({
                 </button>
               </span>
             ) : null}
-
           </td>
         </tr>
       </tbody>

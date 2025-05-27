@@ -97,7 +97,7 @@ const CreateImage = () => {
           } else {
             toast.error("Failed to upload the image. Please try again.");
           }
-          hideLoader(); // ✅ hideLoader on error
+          hideLoader(); // hideLoader on error
         });
     };
 
@@ -142,7 +142,11 @@ const CreateImage = () => {
         </div>
 
         <div className="text-center">
-          <button className="btn btn-primary" onClick={handleAddImage}>
+          <button
+            className="btn btn-primary"
+            onClick={handleAddImage}
+            style={{ backgroundColor: "#0d6efd", borderColor: "#0d6efd" }}
+          >
             Upload Image
           </button>
         </div>

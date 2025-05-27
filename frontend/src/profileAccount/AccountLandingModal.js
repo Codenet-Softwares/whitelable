@@ -107,6 +107,7 @@ useEffect(() => {
   }
 }, [
   userName,
+  state.dataSource,
   state.currentPage,
   state.startDate,
   state.endDate,
@@ -252,22 +253,29 @@ async function getHistoryForLotteryBetHistory() {
 
 
   // For Game wise Profit Loss Data to show
-  async function getProfitLossGameWise() {
-    const response = await getProfitLossGame({
-      userName,
-      fromDate: profitLossData.startDate,
-      toDate: profitLossData.endDate,
-      limit: profitLossData.itemPerPage,
-      searchName: profitLossData.searchItem,
-      dataSource: profitLossData.dataSource,
-    });
+async function getProfitLossGameWise() {
+  const response = await getProfitLossGame({
+    userName,
+    fromDate: profitLossData.startDate,
+    toDate: profitLossData.endDate,
+    limit: profitLossData.itemPerPage,
+    searchName: profitLossData.searchItem,
+    dataSource: profitLossData.dataSource,
+  });
+
+  if (response && response.data && response.pagination) {
     SetProfitLossData((prevState) => ({
       ...prevState,
       dataGameWise: response.data,
       totalPages: response.pagination.totalPages,
       totalData: response.pagination.totalItems,
     }));
+  } else {
+    console.error("Invalid response from getProfitLossGame:", response);
+    // Optionally set fallback or show error state here
   }
+}
+
   const startIndex = Math.min((state.currentPage - 1) * state.totalEntries + 1);
   const endIndex = Math.min(
     state.currentPage * state.totalEntries,
@@ -454,6 +462,7 @@ async function getHistoryForLotteryBetHistory() {
         handlePageChange={handleProfitLossPageChange}
         SetProfitLossData={SetProfitLossData}
         handleDateForProfitLoss={handleDateForProfitLoss}
+        dataSource={profitLossData.dataSource} 
       />
     );
   }
@@ -462,7 +471,7 @@ async function getHistoryForLotteryBetHistory() {
       <div className="row row-no-gutters">
         {/* First Section */}
         <div className="col-sm-4">
-          <span className="me-3" onClick={() => navigate(-1)}>
+           <span className="me-3" onClick={() => navigate('/wallet')}>
             <button className="btn btn-secondary">&#8592;</button>
           </span>
           <div className="card mt-3" style={{ width: "18rem" }}>

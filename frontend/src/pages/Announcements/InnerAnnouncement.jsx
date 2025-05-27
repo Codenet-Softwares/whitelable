@@ -7,23 +7,112 @@ import "./Announcement.css";
 
 const InnerAnnouncement = () => {
   const { store } = useAppContext();
-  const [announcementData, setAnnouncementData] = useState({ announcement: "" });
+  const [announcementData, setAnnouncementData] = useState({
+    announcement: "",
+  });
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [refreshTrigger, setRefreshTrigger] = useState(0); // trigger child reload
 
-const emojis = [
-    "😊", "😂", "😍", "😎", "🤔", "🥺", "💯", "🎉", "👍", "🙏",
-    "❤️", "💙", "💚", "💛", "💜", "🧡", "🤍", "🤎",
-    "⚽", "🏀", "🏈", "⚾", "🎾", "🏐", "🏉", "🎱", "🎮", "🎲",
-    "🌞", "🌈", "🌧️", "⛅", "🌨️", "❄️", "🌬️", "🌪️", "🌟", "🌙",
-    "🚗", "🚕", "🚙", "🚌", "🚎", "🏎️", "🚓", "🚑", "🚒", "🚐",
-    "🎵", "🎶", "🎤", "🎧", "🎼", "🎷", "🎸", "🎻", "🥁", "🎺",
-    "🎬", "📽️", "🍿", "🎥", "📺", "📷", "📸", "📡", "🎮", "🎧",
-    "💻", "🖥️", "📱", "📞", "📡", "💾", "🖱️", "🖲️", "⌨️", "💻",
-    "🎁", "💌", "🎉", "🎊", "🎈", "🧧", "🧸", "🛍️", "📦",
-    "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "0️⃣"
+  const emojis = [
+    "😊",
+    "😂",
+    "😍",
+    "😎",
+    "🤔",
+    "🥺",
+    "💯",
+    "🎉",
+    "👍",
+    "🙏",
+    "❤️",
+    "💙",
+    "💚",
+    "💛",
+    "💜",
+    "🧡",
+    "🤍",
+    "🤎",
+    "⚽",
+    "🏀",
+    "🏈",
+    "⚾",
+    "🎾",
+    "🏐",
+    "🏉",
+    "🎱",
+    "🎮",
+    "🎲",
+    "🌞",
+    "🌈",
+    "🌧️",
+    "⛅",
+    "🌨️",
+    "❄️",
+    "🌬️",
+    "🌪️",
+    "🌟",
+    "🌙",
+    "🚗",
+    "🚕",
+    "🚙",
+    "🚌",
+    "🚎",
+    "🏎️",
+    "🚓",
+    "🚑",
+    "🚒",
+    "🚐",
+    "🎵",
+    "🎶",
+    "🎤",
+    "🎧",
+    "🎼",
+    "🎷",
+    "🎸",
+    "🎻",
+    "🥁",
+    "🎺",
+    "🎬",
+    "📽️",
+    "🍿",
+    "🎥",
+    "📺",
+    "📷",
+    "📸",
+    "📡",
+    "🎮",
+    "🎧",
+    "💻",
+    "🖥️",
+    "📱",
+    "📞",
+    "📡",
+    "💾",
+    "🖱️",
+    "🖲️",
+    "⌨️",
+    "💻",
+    "🎁",
+    "💌",
+    "🎉",
+    "🎊",
+    "🎈",
+    "🧧",
+    "🧸",
+    "🛍️",
+    "📦",
+    "1️⃣",
+    "2️⃣",
+    "3️⃣",
+    "4️⃣",
+    "5️⃣",
+    "6️⃣",
+    "7️⃣",
+    "8️⃣",
+    "9️⃣",
+    "0️⃣",
   ];
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -47,7 +136,8 @@ const emojis = [
       setRefreshTrigger((prev) => prev + 1); // trigger reload in child
     } catch (error) {
       toast.error(
-        error?.response?.data?.errMessage || "Failed to create announcement. Please try again."
+        error?.response?.data?.errMessage ||
+          "Failed to create announcement. Please try again."
       );
     } finally {
       setIsLoading(false);
@@ -124,6 +214,7 @@ const emojis = [
                 className="btn btn-primary"
                 onClick={handleCreateAnnouncement}
                 disabled={isLoading}
+                style={{ backgroundColor: "#0d6efd", borderColor: "#0d6efd" }}
               >
                 {isLoading ? "Creating..." : "Create Inner Announcement"}
               </button>
@@ -132,7 +223,7 @@ const emojis = [
         </div>
 
         <div className="col-6">
-<UpdateInnerAnnouncement refreshTrigger={refreshTrigger} />
+          <UpdateInnerAnnouncement refreshTrigger={refreshTrigger} />
         </div>
       </div>
     </div>
