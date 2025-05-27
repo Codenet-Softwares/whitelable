@@ -58,7 +58,7 @@ export const getSliderTextImg = async (req, res) => {
       },
     });
     if (!sliders.length) {
-        return res.status(statusCode.notFound).send(apiResponseErr(null, false, statusCode.notFound, 'No active sliders found.'));
+        return res.status(statusCode.badRequest).send(apiResponseErr(null, false, statusCode.badRequest, 'No active sliders found.'));
     }
     return res.status(statusCode.success).send(apiResponseSuccess(sliders, true, statusCode.success,'Success.'));
   } catch (error) {
@@ -189,7 +189,7 @@ export const getGif = async (req, res) => {
       },
     });
     if (!gif.length) {
-        return res.status(statusCode.notFound).send(apiResponseErr(null, false, statusCode.notFound, 'No active gif found.'));
+        return res.status(statusCode.badRequest).send(apiResponseErr(null, false, statusCode.badRequest, 'No active gif found.'));
     }
     return res.status(statusCode.success).send(apiResponseSuccess(gif, true, statusCode.success,'Success'));
   } catch (error) {
@@ -317,7 +317,7 @@ export const getGameImg = async (req, res) => {
       },
     });
     if (!sliders.length) {
-        return res.status(statusCode.notFound).send(apiResponseErr(null, false, statusCode.notFound, 'No active game image found.'));
+        return res.status(statusCode.badRequest).send(apiResponseErr(null, false, statusCode.badRequest, 'No active game image found.'));
     }
     return res.status(statusCode.success).send(apiResponseSuccess(sliders, true, statusCode.success,'Success'));
   } catch (error) {
@@ -438,7 +438,7 @@ export const getInnerImg = async (req, res) => {
       },
     });
     if (!sliders.length) {
-      return res.status(statusCode.notFound).send(apiResponseErr(null, false, statusCode.notFound, 'No active image found.'));
+      return res.status(statusCode.badRequest).send(apiResponseErr(null, false, statusCode.badRequest, 'No active image found.'));
     }
     return res.status(statusCode.success).send(apiResponseSuccess(sliders, true, statusCode.success, 'Success'));
   } catch (error) {

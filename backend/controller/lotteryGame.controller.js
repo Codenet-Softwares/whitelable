@@ -182,10 +182,11 @@ export const lotteryMarketAnalysis = async (req, res) => {
 export const getLotteryP_L = async (req, res) => {
   try {
     const { userName } = req.params
-        const { page = 1, limit = 10 } = req.query;
+        const { page = 1, limit = 10, search } = req.query;
         const params = {
           page,
           limit,
+          search,
         };
     const baseURL = process.env.COLOR_GAME_URL;
 

@@ -35,7 +35,7 @@ export const getAnnouncement = async (req, res) => {
    
 
     if (!announcement.length) {
-        return res.status(statusCode.notFound).send(apiResponseErr(null, false, statusCode.notFound, 'Announcement not found'));
+        return res.status(statusCode.badRequest).send(apiResponseErr(null, false, statusCode.badRequest, 'Announcement not found'));
     }
     return res.status(statusCode.create).send(apiResponseSuccess(announcement, true, statusCode.create, 'Success'));
   } catch (error) {
@@ -105,7 +105,7 @@ export const getInnerAnnouncement = async (req, res) => {
     const announcement = await innerAnnouncementSchema.findAll();
 
    if (!announcement.length) {
-        return res.status(statusCode.notFound).send(apiResponseErr(null, false, statusCode.notFound, 'Inner announcement not found'));
+        return res.status(statusCode.badRequest).send(apiResponseErr(null, false, statusCode.badRequest, 'Inner announcement not found'));
     }
     return res.status(statusCode.create).send(apiResponseSuccess(announcement, true, statusCode.create, 'Success'));
     
