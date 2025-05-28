@@ -72,6 +72,7 @@ const Market_Analysis = () => {
     setLiveGmes((prev) => ({
       ...prev,
       [name]: value,
+      currentPage: 1,
     }));
   };
 

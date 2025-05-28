@@ -50,6 +50,7 @@ export class StringConstants {
   moveToTrash = "move-to-trash";
   trashView = "trash-view";
   marketAnalysis = "market-analysis";
+  myReport = "my-report"
 
   roles = [
     { role: "transferBalance", name: "Transfer Balance" },
@@ -61,13 +62,13 @@ export class StringConstants {
     { role: "user-profile-view", name: "User Profile View" },
     { role: "profile-view", name: "Profile View" },
     { role: "accountStatement", name: "Account Statement" },
-    { role: "activityLog", name: "Activity Log" },
+    // { role: "activityLog", name: "Activity Log" },
     { role: "delete-admin", name: "Delete Admin" },
     { role: "restore-admin", name: "Restore Admin" },
     { role: "move-to-trash", name: "Move To Trash" },
     { role: "trash-view", name: "Trash View" },
     { role: "market-analysis", name: "Market Analysis" },
-     { role: "my-report", name: "My Report" }
+    { role: "my-report", name: "My Report" }
   ];
   // roles = [
   //   'transferBalance',
