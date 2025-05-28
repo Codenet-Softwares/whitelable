@@ -213,7 +213,7 @@ const Navside = () => {
                       <li>
                         <Link to="/agentDelete">
                           <span>
-                            <i className="fa-solid fa-circle"></i> Approve delete
+                            <i className="fa-solid fa-circle"></i> Agent Delete
                           </span>
                         </Link>
                       </li>
@@ -388,7 +388,7 @@ const Navside = () => {
             </>
           )}
 
-          {permissionObj.allAdmin.includes(store.admin.role) && (
+          {permissionObj.allAdmin.includes(store?.admin?.role) && (
             <li>
               <Link to="/Market_analysis" aria-expanded="false">
                 <div className="nav_icon_small">
@@ -423,7 +423,8 @@ const Navside = () => {
             </li>
           )}
           {/* Added this new section for My Report */}
-          {isReport ? (
+
+          {permissionObj.allAdmin.includes(store?.admin?.role) && <>{isReport ? (
             <li className="" onClick={handleReportToggle}>
               <a className="has-arrow" href="#" aria-expanded="false">
                 <div className="nav_icon_small">
@@ -483,7 +484,71 @@ const Navside = () => {
                 </li>
               </ul>
             </li>
-          )}
+          )}</>}
+
+          {store.admin.permission.includes(strings.myReport) && <>{isReport ? (
+            <li className="" onClick={handleReportToggle}>
+              <a className="has-arrow" href="#" aria-expanded="false">
+                <div className="nav_icon_small">
+                  <i
+                    class="fa-solid fa-chart-pie"
+                    style={{ color: "black", fontSize: "20px" }}
+                  ></i>
+                </div>
+                <div className="nav_title">
+                  <span>My Report</span>
+                </div>
+              </a>
+            </li>
+          ) : (
+            <li className="" onClick={handleReportToggle}>
+              <a className="has-arrow" href="#" aria-expanded="false">
+                <div className="nav_icon_small">
+                  <i
+                    class="fa-solid fa-chart-pie"
+                    style={{ color: "black", fontSize: "20px" }}
+                  ></i>
+                </div>
+                <div className="nav_title">
+                  <span>My Report</span>
+                </div>
+              </a>
+              <ul>
+                <li>
+                  <Link to="event-profit-loss">
+                    <span>
+                      <i
+                        class="fa-solid fa-chart-column"
+                        style={{
+                          color: "black",
+                          fontSize: "20px",
+                          marginLeft: "50px",
+                        }}
+                      ></i>
+                      Event Profit/Loss
+                    </span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="downline-profit-loss">
+                    <span>
+                      <i
+                        class="fa-solid fa-chart-line"
+                        style={{
+                          color: "black",
+                          fontSize: "20px",
+                          marginLeft: "50px",
+                        }}
+                      ></i>
+                      Downline Profit/Loss
+                    </span>
+                  </Link>
+                </li>
+              </ul>
+            </li>
+          )}</>}
+
+
           {/* Added this new section for My Report */}
           {store.admin.role === strings.superAdmin &&
             (isImage ? (
@@ -577,68 +642,68 @@ const Navside = () => {
                 </ul>
               </li>
             ))}
-{store.admin.role === strings.superAdmin &&
-          (gameAnnouncements ? (
-            <li className="" onClick={handleGameAnnoucementToggle}>
-              <a className="has-arrow" href="#" aria-expanded="false">
-                <div className="nav_icon_small">
-                  <i
-                    class="fa-solid fa-chart-pie"
-                    style={{ color: "black", fontSize: "20px" }}
-                  ></i>
-                </div>
-                <div className="nav_title">
-                  <span>Game Announcement</span>
-                </div>
-              </a>
-            </li>
-          ) : (
-            <li className="" onClick={handleGameAnnoucementToggle}>
-              <a className="has-arrow" href="#" aria-expanded="false">
-                <div className="nav_icon_small">
-                  <i
-                    class="fa-solid fa-chart-pie"
-                    style={{ color: "black", fontSize: "20px" }}
-                  ></i>
-                </div>
-                <div className="nav_title">
-                  <span>Game Announcement</span>
-                </div>
-              </a>
-              <ul>
-                <li>
-                  <Link to="outer-announcement">
-                    <span>
-                      <i
-                        class="fa-solid fa-chart-column"
-                        style={{
-                          color: "black",
-                          fontSize: "20px",
-                          marginLeft: "50px",
-                        }}
-                      ></i>
-                      Outer Slider Image
-                    </span>
-                  </Link>
-                </li>
-                <li>
-                  <Link to="inner-announcement">
-                    <span>
-                      <i
-                        class="fa-solid fa-chart-line"
-                        style={{
-                          color: "black",
-                          fontSize: "20px",
-                          marginLeft: "50px",
-                        }}
-                      ></i>
-                      Inner Slider Image
-                    </span>
-                  </Link>
-                </li>
-              </ul>
-            </li>
-          ))}
+          {store.admin.role === strings.superAdmin &&
+            (gameAnnouncements ? (
+              <li className="" onClick={handleGameAnnoucementToggle}>
+                <a className="has-arrow" href="#" aria-expanded="false">
+                  <div className="nav_icon_small">
+                    <i
+                      class="fa-solid fa-chart-pie"
+                      style={{ color: "black", fontSize: "20px" }}
+                    ></i>
+                  </div>
+                  <div className="nav_title">
+                    <span>Game Announcement</span>
+                  </div>
+                </a>
+              </li>
+            ) : (
+              <li className="" onClick={handleGameAnnoucementToggle}>
+                <a className="has-arrow" href="#" aria-expanded="false">
+                  <div className="nav_icon_small">
+                    <i
+                      class="fa-solid fa-chart-pie"
+                      style={{ color: "black", fontSize: "20px" }}
+                    ></i>
+                  </div>
+                  <div className="nav_title">
+                    <span>Game Announcement</span>
+                  </div>
+                </a>
+                <ul>
+                  <li>
+                    <Link to="outer-announcement">
+                      <span>
+                        <i
+                          class="fa-solid fa-chart-column"
+                          style={{
+                            color: "black",
+                            fontSize: "20px",
+                            marginLeft: "50px",
+                          }}
+                        ></i>
+                        Outer Slider Image
+                      </span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="inner-announcement">
+                      <span>
+                        <i
+                          class="fa-solid fa-chart-line"
+                          style={{
+                            color: "black",
+                            fontSize: "20px",
+                            marginLeft: "50px",
+                          }}
+                        ></i>
+                        Inner Slider Image
+                      </span>
+                    </Link>
+                  </li>
+                </ul>
+              </li>
+            ))}
         </ul>
       </div>
     </nav>
