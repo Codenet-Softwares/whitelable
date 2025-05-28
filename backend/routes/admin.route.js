@@ -330,6 +330,7 @@ export const adminRoute = (app) => {
   app.get("/api/users-hierarchy/:userName", getHierarchyWiseUsers );
   app.get("/api/downLineUsers/:createdById",validateDownLineProfitLoss, customErrorHandler, Authorize([
     string.superAdmin,
+    string.subAdmin,
     string.whiteLabel,
     string.hyperAgent,
     string.superAgent,
@@ -338,29 +339,42 @@ export const adminRoute = (app) => {
 
   app.get("/api/total-profitloss-hierarchy", validateProfitLossInput, customErrorHandler, Authorize([
     string.superAdmin,
+    string.subAdmin,
     string.whiteLabel,
     string.hyperAgent,
     string.superAgent,
     string.masterAgent,
+    string.subWhiteLabel,
+    string.subHyperAgent,
+    string.subMasterAgent,
+    string.subSuperAgent
   ]), getTotalProfitLoss);
 
   app.get("/api/market-wise-profit-loss",validateProfitLossMarket,customErrorHandler, Authorize([
     string.superAdmin,
+    string.subAdmin,
     string.whiteLabel,
     string.hyperAgent,
     string.superAgent,
     string.masterAgent,
+     string.subWhiteLabel,
+    string.subHyperAgent,
+    string.subMasterAgent,
+    string.subSuperAgent
   ]), getMarketWiseProfitLoss)
 
 
   app.get("/api/market-allUser-profit-loss/:marketId",validateAllUserProfitLossMarket, customErrorHandler, Authorize([
     string.superAdmin,
+    string.subAdmin,
     string.whiteLabel,
     string.hyperAgent,
     string.superAgent,
     string.masterAgent,
+     string.subWhiteLabel,
+    string.subHyperAgent,
+    string.subMasterAgent,
+    string.subSuperAgent
   ]), getAllUserProfitLoss)
 
-
-  
 };

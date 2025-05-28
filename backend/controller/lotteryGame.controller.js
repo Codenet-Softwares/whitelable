@@ -244,7 +244,19 @@ export const getBetHistoryP_L = async (req, res) => {
 }
 
 export const getHierarchyUsers = async (adminId) => {
-  const [ result ] = await sql.query(`CALL getHierarchyUser(?)`, [adminId]);
+
+  const existingAdmin = await admins.findOne({ where: { adminId } });
+
+  let vAdminId;
+
+  if(existingAdmin.role === 'subAdmin' || existingAdmin.role === 'subWhiteLabel')
+  {
+    vAdminId = existingAdmin.createdById;
+  }else{
+    vAdminId = adminId;
+  }
+  
+  const [ result ] = await sql.query(`CALL getHierarchyUser(?)`, [vAdminId]);
   const users = result[0] || [];
   const adminIds = users.map(user => user.adminId);
   return adminIds;

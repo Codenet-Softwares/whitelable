@@ -151,7 +151,7 @@ export const subAdminPermissionSchema = [
       'creditRef-Edit', 'partnership-Edit', 'creditRef-View', 'partnership-view',
       'user-profile-view', 'profile-view', 'view-admin-data', 'create-user',
       'accountStatement', 'activityLog', 'delete-admin', 'restore-admin',
-      'move-to-trash', 'trash-view', 'view-subAdmin', 'view-balance','market-analysis'
+      'move-to-trash', 'trash-view', 'view-subAdmin', 'view-balance','market-analysis','my-report'
     ];
     for (let i = 0; i < value.length; i++) {
       if (!allowedPermissions.includes(value[i])) {

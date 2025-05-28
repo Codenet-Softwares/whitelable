@@ -30,7 +30,7 @@ export const Authorize = (requiredRolesOrPermissions = []) => {
         );
       }
 
-      const existingUser = await admins.findOne({ where: { adminId: decoded.adminId } });
+      const existingUser = await admins.findOne({ where: { userName : decoded.userName } });
 
       if (!existingUser) {
         return res.status(statusCode.unauthorize).json(
@@ -74,7 +74,12 @@ export const Authorize = (requiredRolesOrPermissions = []) => {
         string.whiteLabel,
         string.superAgent,
         string.hyperAgent,
-        string.masterAgent
+        string.masterAgent,
+        string.subAdmin,
+        string.subWhiteLabel,
+        string.subHyperAgent,
+        string.subMasterAgent,
+        string.subSuperAgent
       ];
 
       if (checkRoles.includes(userRole)) {
