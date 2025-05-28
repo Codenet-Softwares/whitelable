@@ -39,6 +39,7 @@ const AgentDelete = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       viewApprovedDelete();
+      setPage(1);
     }, 1000)
     return () => clearTimeout(timer);
   }, [search]);
@@ -115,7 +116,7 @@ const AgentDelete = () => {
                 <select
                   className="form-select form-select-sm"
                   aria-label=".form-select-sm example"
-                  onChange={(e) => setPageLimit(Number(e.target.value))}
+                  onChange={(e) => { setPageLimit(Number(e.target.value)); setPage(1) }}
                 >
                   <option value="10">Show 10 Entries</option>
                   <option value="25">25 Entries</option>
