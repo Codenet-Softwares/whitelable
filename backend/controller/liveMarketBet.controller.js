@@ -73,49 +73,35 @@ export const getLiveBetGames = async (req, res) => {
   try {
     const { page = 1, limit = 10, search, type } = req.query;
     const role = req.user.role;
-    const adminId = req.user.adminId;
-    let searchTerm = '';
-
-    if (search) {
-      searchTerm = search;
-    }
-
-    const [allResults] = await sql.query(
-      `CALL getLiveBetGames(?,?,?,?,?)`,
-      [role, adminId, searchTerm, 10000, 1] 
-    );
-
-    const [results] = await sql.query(
-      `CALL getLiveBetGames(?,?,?,?,?)`,
-      [role, adminId, searchTerm, limit, page]
-    );
-
-    let dataOnly = results[0];
-    const allData = allResults[0];
+    const username = req.user.username; 
     
-    if (!dataOnly ) {
+    const [results] = await sql.query(
+      `CALL sp_getLiveBetGames(?, ?, ?, ?, ?, ?)`,
+      [
+        parseInt(page),       
+        parseInt(limit),      
+        search || null,      
+        type || null,        
+        role,                 
+        username             
+      ]
+    );
+
+    const data = results[0];
+    const paginationInfo = results[1][0];
+
+    if (!data || data.length === 0) {
       return res.status(statusCode.badRequest).send(
         apiResponseErr([], statusCode.badRequest, false, "Data Not Found")
       );
     }
 
-        if (type) {
-          dataOnly = dataOnly.filter(
-            (item) =>
-              item.gameName &&
-              item.gameName.toLowerCase() === type.toLowerCase()
-          );
-        }
-
-    const totalItems = allData.length;
-    const totalPages = Math.ceil(totalItems / limit);
-
     return res.status(statusCode.success).send(
-      apiResponseSuccess(dataOnly, true, statusCode.success, "Success", {
-        currentPage: parseInt(page),
+      apiResponseSuccess(data, true, statusCode.success, "Success", {
+        Page: parseInt(page),
         limit: parseInt(limit),
-        totalItems,
-        totalPages,
+        totalItems: paginationInfo.totalItems,
+        totalPages: paginationInfo.totalPages,
       })
     );
   } catch (error) {
