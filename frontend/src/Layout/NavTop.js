@@ -171,7 +171,7 @@ const NavTop = () => {
                   >
                     <div className="profile_author_name">
                       <p className="mb-1 small">
-                        {store?.admin?.role}
+                        {/* {store?.admin?.role.toUpperCase()} */}
                       </p>
                       <h5 className="m-0">{store?.admin?.adminName.toUpperCase()}</h5>
                       <p className="m-0">ROLE: {store?.admin?.role.toUpperCase()}</p>
