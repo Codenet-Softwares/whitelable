@@ -22,7 +22,6 @@ const ResetPassword = () => {
       const response = await ResetAdminPassword(resetValues, true);
       if (response?.success) {
         navigate("/login");
-        toast.success("Password changed successfully!");
       } 
     } catch (error) {
       toast.error(customErrorHandler(error));
