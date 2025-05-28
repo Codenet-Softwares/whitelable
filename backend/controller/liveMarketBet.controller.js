@@ -72,9 +72,31 @@ export const getUserBetMarket = async (req, res) => {
 export const getLiveBetGames = async (req, res) => {
   try {
     const { page = 1, limit = 10, search, type } = req.query;
+
     const role = req.user.role;
-    const username = req.user.username; 
-    
+    const userName = req.user.userName;
+
+    const existingAdmin = await admins.findOne({ where: { userName } });
+
+    if (!existingAdmin) {
+      return res
+        .status(statusCode.success)
+        .send(apiResponseErr([], statusCode.success, true, "Data Not Found"));
+    }
+
+    let vUsername;
+    let vRole;
+    if (role == string.subAdmin || role == string.subWhiteLabel || role == string.subHyperAgent || role == string.subMasterAgent || role == string.subSuperAgent) {
+      const user = await admins.findOne({
+        where: { userName: existingAdmin.createdByUser },
+      });
+      vRole = user.role;
+      vUsername = existingAdmin.createdByUser;
+    } else {
+      vUsername = userName;
+      vRole = role;
+    }
+
     const [results] = await sql.query(
       `CALL sp_getLiveBetGames(?, ?, ?, ?, ?, ?)`,
       [
@@ -82,8 +104,8 @@ export const getLiveBetGames = async (req, res) => {
         parseInt(limit),      
         search || null,      
         type || null,        
-        role,                 
-        username             
+        vRole,                 
+        vUsername             
       ]
     );
 
@@ -91,8 +113,8 @@ export const getLiveBetGames = async (req, res) => {
     const paginationInfo = results[1][0];
 
     if (!data || data.length === 0) {
-      return res.status(statusCode.badRequest).send(
-        apiResponseErr([], statusCode.badRequest, false, "Data Not Found")
+      return res.status(statusCode.success).send(
+        apiResponseErr([], statusCode.success, false, "Data Not Found")
       );
     }
 
