@@ -82,7 +82,7 @@ const ResetModal = ({ show, handleClose, userName }) => {
               <input
                 type={visibility[field] ? "text" : "password"}
                 className="form-control"
-                placeholder="Type here..."
+                placeholder="Type Here..."
                 name={field}
                 value={passwords[field]}
                 onChange={handleChange}

@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import admins from "../models/admin.model.js";
 import { string } from "../constructor/string.js";
 import { Op, Sequelize } from "sequelize";
+import { sql } from "../db.js";
 dotenv.config();
 
 export const getUserBetMarket = async (req, res) => {
@@ -70,159 +71,38 @@ export const getUserBetMarket = async (req, res) => {
 
 export const getLiveBetGames = async (req, res) => {
   try {
-    const { page = 1 , limit = 10, search, type } = req.query;
-    const offset = (page - 1) * limit;
-
-    const token = jwt.sign(
-      { roles: req.user.roles },
-      process.env.JWT_SECRET_KEY,
-      { expiresIn: "1h" }
+    const { page = 1, limit = 10, search, type } = req.query;
+    const role = req.user.role;
+    const username = req.user.username; 
+    
+    const [results] = await sql.query(
+      `CALL sp_getLiveBetGames(?, ?, ?, ?, ?, ?)`,
+      [
+        parseInt(page),       
+        parseInt(limit),      
+        search || null,      
+        type || null,        
+        role,                 
+        username             
+      ]
     );
 
-    const baseUrl = process.env.COLOR_GAME_URL;
-    const response = await axios.get(
-      `${baseUrl}/api/user-external-liveGamesBet`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const data = results[0];
+    const paginationInfo = results[1][0];
 
-    if (!response.data.success) {
+    if (!data || data.length === 0) {
       return res.status(statusCode.badRequest).send(
-        apiResponseErr(
-          null,
-          false,
-          statusCode.badRequest,
-          "Failed to fetch live games data"
-        )
+        apiResponseErr([], statusCode.badRequest, false, "Data Not Found")
       );
     }
-
-    const baseUrlLottery = process.env.LOTTERY_URL;
-    const lotteryResponse = await axios.get(
-      `${baseUrlLottery}/api/get-live-markets`
-    );
-
-    const lotteryData = lotteryResponse.data?.data || [];
-    const liveGames = response.data.data || [];
-
-    const userNames = [
-      ...lotteryData.map((lottery) => lottery.userName),
-      ...liveGames.map((game) => game.userName),
-    ].filter(Boolean); 
-
-    // const adminsData = await admins.findAll({
-    //   where: {
-    //     userName: userNames, 
-    //   },
-    //   attributes: ["createdById", "createdByUser", "roles", "userName"],
-    // });
-
-
-    const isSuperAdmin =
-      Array.isArray(req.user.roles) &&
-      req.user.roles.some((roleObj) => roleObj.role === "superAdmin");
-
-    let combinedData = [];
-
-    if (isSuperAdmin) {
-      combinedData = [
-        ...lotteryData.map((lottery) => ({
-          marketId: lottery.marketId,
-          marketName: lottery.marketName,
-          gameName: lottery.gameName,
-          source: "lottery",
-        })),
-        ...liveGames.map((game) => ({
-          ...game,
-          source: "colorgame",
-        })),
-      ];
-    } else {
-      const getAllowedUserNames = async (userName) => {
-        const users = await admins.findAll({
-          where: {
-            createdByUser: userName,
-          },
-          attributes: ["userName"],
-        });
-
-        let allowedUserNames = [userName]; 
-        for (const user of users) {
-          const nestedUsers = await getAllowedUserNames(user.userName); 
-          allowedUserNames = [...allowedUserNames, ...nestedUsers];
-        }
-        return allowedUserNames;
-      };
-
-      const allowedUserNames = await getAllowedUserNames(req.user.userName);
-
-
-      const filteredLotteryData = lotteryData.filter((lottery) =>
-        allowedUserNames.includes(lottery.userName)
-      );
-
-      const filteredLiveGames = liveGames.filter((game) =>
-        allowedUserNames.includes(game.userName)
-      );
-
-
-      combinedData = [
-        ...filteredLotteryData.map((lottery) => ({
-          marketId: lottery.marketId,
-          marketName: lottery.marketName,
-          gameName: lottery.gameName,
-          source: "lottery",
-        })),
-        ...filteredLiveGames.map((game) => ({
-          ...game,
-          source: "colorgame",
-        })),
-      ];
-    }
-
-    if (type) {
-      combinedData = combinedData.filter((item) => item.source === type);
-    }
-
-
-    const uniqueData = Array.from(
-      new Set(combinedData.map((item) => item.marketId))
-    ).map((uniqueMarketId) =>
-      combinedData.find((item) => item.marketId === uniqueMarketId)
-    );
-    
-    let filterData = uniqueData;
-    
-    if (search) {
-      filterData = uniqueData.filter(
-        (item) =>
-          item.marketName?.toLowerCase().includes(search.toLowerCase()) ||
-          (item.source === "colorgame" &&
-            item.gameName?.toLowerCase().includes(search.toLowerCase()))
-      );
-    }
-    
-    const totalItems = filterData.length;
-    const totalPages = Math.ceil(totalItems / limit);
-    
-    // Optional: handle page overflow
-    const validPage = page > totalPages ? 1 : page;
-    const validOffset = (validPage - 1) * limit;
-    
-    const paginatedData = filterData.slice(validOffset, validOffset + limit);
-
-    const pagination = {
-      Page: page,
-      limit: limit,
-      totalItems,
-      totalPages,
-    };
 
     return res.status(statusCode.success).send(
-      apiResponseSuccess(paginatedData, true, statusCode.success, "Success", pagination)
+      apiResponseSuccess(data, true, statusCode.success, "Success", {
+        Page: parseInt(page),
+        limit: parseInt(limit),
+        totalItems: paginationInfo.totalItems,
+        totalPages: paginationInfo.totalPages,
+      })
     );
   } catch (error) {
     res.status(statusCode.internalServerError).send(
@@ -365,7 +245,7 @@ export const getLiveUserBetMarket = async (req, res) => {
     const { marketId } = req.params;
     const loggedInAdminId = req.user.adminId;
     const token = jwt.sign(
-      { roles: req.user.roles },
+      { role: req.user.role },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );
@@ -437,7 +317,7 @@ export const getUserMasterBook = async (req, res) => {
     const { marketId, adminId, role, type } = req.body;
 
     const token = jwt.sign(
-      { roles: req.user.roles },
+      { role: req.user.role },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );
@@ -494,7 +374,7 @@ export const getUserMasterBook = async (req, res) => {
         where: {
           createdById: adminId,
         },
-        attributes: ["userName", "createdById", "createdByUser","roles"],
+        attributes: ["userName", "createdById", "createdByUser","role"],
       });
 
       users = data.usersDetails
@@ -504,7 +384,7 @@ export const getUserMasterBook = async (req, res) => {
         .map((user) => ({
           userName: user.userName,
           userId: user.userId,
-          roles: string.user,
+          role: string.user,
           marketId: user.marketId,
           runnerBalance: user.runnerBalance,
         }));
@@ -518,7 +398,7 @@ export const getUserMasterBook = async (req, res) => {
           "adminId",
           "createdById",
           "createdByUser",
-          "roles",
+          "role",
         ],
       });
 
@@ -537,7 +417,7 @@ export const getUserMasterBook = async (req, res) => {
         }));
 
       const filteredSubAdmins = subAdmins.filter(
-        (subAdmin) => !subAdmin.roles.some((role) => role.role === "user")
+        (subAdmin) => !subAdmin.role.some((role) => role === "user")
       );
 
       const formattedSubAdmins = await Promise.all(
@@ -548,7 +428,7 @@ export const getUserMasterBook = async (req, res) => {
             return {
               adminId: subAdmin.adminId,
               userName: subAdmin.userName,
-              roles: subAdmin.roles[0]?.role || null,
+              role: subAdmin.role.role || null,
             };
           }
 
@@ -605,7 +485,7 @@ export const userLiveBet = async (req, res) => {
     const adminId = admin.adminId;
 
     const token = jwt.sign(
-      { roles: req.user.roles },
+      { role: req.user.role },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );

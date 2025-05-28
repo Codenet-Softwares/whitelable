@@ -13,24 +13,29 @@ const ProfitAndLossEvent = ({
   handlePageChange,
   gameId,
   getProfitLossEventWise,
-  profitLossEventData
+  profitLossEventData,
 }) => {
-  const startIndex = Math.min((data.currentPage - 1) * 10 + 1);
-  const endIndex = Math.min(data.currentPage * 10, data.totalData);
+  // Calculate indices based on the current data state
+  const startIndex = data?.data?.length > 0 ? (data.currentPage - 1) * data.itemPerPage + 1 : 0;
+  const endIndex = data?.data?.length > 0 ? Math.min(data.currentPage * data.itemPerPage, data.totalData) : 0;
   const [renderApi, setRenderApi] = useState(null);
 
   const handelGotoRunnerWiseProfitLoss = (marketId, componentName) => {
     SetComponent(componentName);
     SetMarketId(marketId);
   };
-  const handelItemPerPage = (event) => {
-    SetProfitLossEventData((prevState) => ({
-      ...prevState,
-      itemPerPage: Number(event.target.value),
-      currentPage: Number(currentPage),
-    }));
-    toast.error("Work Pending From ServerSide");
-  };
+const handelItemPerPage = (event) => {
+  const newItemPerPage = Number(event.target.value);
+
+  SetProfitLossEventData((prevState) => ({
+    ...prevState,
+    itemPerPage: newItemPerPage,
+    currentPage: 1,
+  }));
+
+  // Trigger API call after setting itemPerPage
+ getProfitLossEventWise(gameId, "ProfitAndLossEvent", profitLossEventData.searchItem, 1, newItemPerPage);
+};
 
   const handleSearch = (e) => {
     SetProfitLossEventData((prev) => ({
@@ -41,24 +46,26 @@ const ProfitAndLossEvent = ({
 
   useEffect(() => {
     let timer = setTimeout(() => {
-      getProfitLossEventWise(gameId, "ProfitAndLossEvent", profitLossEventData.searchItem);
+      getProfitLossEventWise(
+        gameId,
+        "ProfitAndLossEvent",
+        profitLossEventData.searchItem
+      );
     }, 300);
     return () => clearTimeout(timer);
   }, [profitLossEventData.searchItem]);
 
   const handlePageChangeProfitAndLossLEvent = async (page) => {
     handlePageChange(page);
-    let flag = Math.random()
+    let flag = Math.random();
     setRenderApi(flag);
-  }
-
+  };
 
   useEffect(() => {
     if (renderApi !== null) {
       getProfitLossEventWise(gameId, "ProfitAndLossEvent");
     }
   }, [renderApi]);
-
 
   return (
     <>
@@ -84,10 +91,10 @@ const ProfitAndLossEvent = ({
           <select
             className="form-select w-auto m-1"
             onChange={handelItemPerPage}
+            value={profitLossEventData.itemPerPage}
           >
-            <option value="10" selected>
-              10 Entries
-            </option>
+            { console.log('line 94',profitLossEventData.itemPerPage)}
+            <option value="10">10 Entries</option>
             <option value="25">25 Entries</option>
             <option value="50">50 Entries</option>
             <option value="100">100 Entries</option>
@@ -159,18 +166,20 @@ const ProfitAndLossEvent = ({
                               </td>
                               <td>{data?.commission || "NDS"}</td>
                               <td
-                                className={`fw-bold ${data?.totalProfitLoss > 0
-                                  ? "text-success"
-                                  : "text-danger"
-                                  }`}
+                                className={`fw-bold ${
+                                  data?.totalProfitLoss > 0
+                                    ? "text-success"
+                                    : "text-danger"
+                                }`}
                               >
                                 {data?.totalProfitLoss || "NDS"}
                               </td>
                               <td
-                                className={`fw-bold ${data?.totalProfitLoss > 0
-                                  ? "text-success"
-                                  : "text-danger"
-                                  }`}
+                                className={`fw-bold ${
+                                  data?.totalProfitLoss > 0
+                                    ? "text-success"
+                                    : "text-danger"
+                                }`}
                               >
                                 {data?.totalProfitLoss}
                               </td>

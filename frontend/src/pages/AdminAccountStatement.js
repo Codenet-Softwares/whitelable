@@ -24,35 +24,38 @@ const AdminAccountStatement = () => {
   };
 
   const formatDate = (dateString) => {
-    // Parse the date string to create a Date object
     const date = new Date(dateString);
-
-    // Extract the year, month, and day
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-indexed
+    const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
-
-    // Format the date as "YYYY-MM-DD"
     return `${year}-${month}-${day}`;
   };
 
-  async function AccountStatement() {
-    const response = await getAccountStatement_api({
-      _id: store?.admin?.id,
-      pageNumber: state.currentPage,
-      dataLimit: state.totalEntries,
-      fromDate: state.startDate,
-      toDate: state.endDate,
-      dataSource: state.dataSource,
-    });
+ async function AccountStatement() {
+  const today = new Date();
+  const fromDate = state.dataSource === "live" ? formatDate(today) : state.startDate;
+  const toDate = state.dataSource === "live" ? formatDate(today) : state.endDate;
 
+  const response = await getAccountStatement_api({
+    _id: store?.admin?.id,
+    pageNumber: state.currentPage,
+    dataLimit: state.totalEntries,
+    fromDate: fromDate,
+    toDate: toDate,
+    dataSource: state.dataSource,
+  });
+
+  if (response && response.data) {
     setState((prevState) => ({
       ...prevState,
       statement: response.data,
-      totalPages: response?.pagination?.totalPages,
-      totalData: response?.pagination?.totalItems,
+      totalPages: response?.pagination?.totalPages || 0,
+      totalData: response?.pagination?.totalItems || 0,
     }));
+  } else {
+    console.error("Account statement API returned null or unexpected data:", response);
   }
+}
 
   function handlePageChange(page) {
     setState((prevState) => ({
@@ -64,8 +67,8 @@ const AdminAccountStatement = () => {
   useEffect(() => {
     if (store?.admin) {
       if (
-        permissionObj.allAdmin.includes(store?.admin?.roles[0].role) ||
-        permissionObj.allSubAdmin.includes(store?.admin?.roles[0].role)
+        permissionObj.allAdmin.includes(store?.admin?.role) ||
+        permissionObj.allSubAdmin.includes(store?.admin?.role)
       ) {
         AccountStatement();
       }
@@ -102,8 +105,32 @@ const AdminAccountStatement = () => {
       ...prevState,
       startDate: formatDate(backupDate.startDate),
       endDate: formatDate(backupDate.endDate),
+        currentPage: 1, 
     }));
   };
+
+  // Set today's date when dataSource changes to live
+  useEffect(() => {
+    if (state.dataSource === "live") {
+      const today = new Date();
+      setStartDate(today);
+      setEndDate(today);
+      setState(prev => ({
+        ...prev,
+        startDate: formatDate(today),
+        endDate: formatDate(today)
+      }));
+    }else {
+      // For backup and olddata, reset dates to null and empty strings
+      setStartDate(null);
+      setEndDate(null);
+      setState(prev => ({
+        ...prev,
+        startDate: "",
+        endDate: ""
+      }));
+    }
+  }, [state.dataSource]);
 
   return (
     <div className="d-flex justify-content-center m-5 rounded-2">
@@ -141,11 +168,11 @@ const AdminAccountStatement = () => {
                   }
                 >
                   <option selected value="10">
-                    10 entries
+                    10 Entries
                   </option>
-                  <option value="25">25 entries</option>
-                  <option value="50">50 entries</option>
-                  <option value="100">100 entries</option>
+                  <option value="25">25 Entries</option>
+                  <option value="50">50 Entries</option>
+                  <option value="100">100 Entries</option>
                 </select>
               </div>
               <div class="col-sm">
@@ -159,10 +186,9 @@ const AdminAccountStatement = () => {
                       dataSource: e.target.value,
                     }));
                   }}
+                  value={state.dataSource}
                 >
-                  <option value="live" selected>
-                    LIVE DATA
-                  </option>
+                  <option value="live">LIVE DATA</option>
                   <option value="backup">BACKUP DATA</option>
                   <option value="olddata">OLD DATA</option>
                 </select>
@@ -171,7 +197,7 @@ const AdminAccountStatement = () => {
                 <DatePicker
                   selected={backupDate.startDate}
                   onChange={(date) => setStartDate(date)}
-                  disabled={state.dataSource === "live"} // Disable if datasource is 'live'
+                  disabled={state.dataSource === "live"}
                   placeholderText={"Select Start Date"}
                 />
               </div>
@@ -180,7 +206,7 @@ const AdminAccountStatement = () => {
                 <DatePicker
                   selected={backupDate.endDate}
                   onChange={(date) => setEndDate(date)}
-                  disabled={state.dataSource === "live"} // Disable if datasource is 'live'
+                  disabled={state.dataSource === "live"}
                   placeholderText={"Select End Date"}
                 />
               </div>
@@ -189,7 +215,8 @@ const AdminAccountStatement = () => {
                 <button
                   className="btn mb-2" style={{background:"#84B9DF"}}
                   disabled={
-                    backupDate.endDate === null || backupDate.startDate === null
+                    (backupDate.endDate === null || backupDate.startDate === null) &&
+                    state.dataSource !== "live"
                   }
                   onClick={handleGetDate}
                 >

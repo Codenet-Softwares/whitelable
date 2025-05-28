@@ -3,39 +3,32 @@ import { useNavigate } from "react-router-dom";
 import { useAppContext } from "../../contextApi/context";
 import CustomTransactionModal from "../../modal/customTransactionModal";
 import ViewPartnershipAndCreditRefModal from "../../modal/viewPartnershipAndCreditRefModal";
-import {
-  getHierarchy,
-  getPartnershipLog,
-} from "../../Utils/service/apiService";
 import StatusModal from "../../modal/StatusModal";
 import { moveToTrash_api } from "../../Utils/service/apiService";
-import Button from "react-bootstrap/Button";
 import strings from "../../Utils/constant/stringConstant";
 import { permissionObj } from "../../Utils/constant/permission";
 import { toast } from "react-toastify";
+import { hasPermission } from "../../Utils/helper";
 
 const Card = ({
   role,
   adminId,
   userName,
-  statusId,
   creditRef,
   balance,
   loadBalance,
-  refProfitLoss,
   partnership,
   Status,
-  creditRefLength,
-  partnershipLength,
-  callingParent,
   setRefresh,
   adminDelete,
   setIsLoading,
   exposure,
-  adminBalance
+  adminBalance,
+  handleAdminNavigateToChild,
+  navigationBar,
 }) => {
   const navigate = useNavigate();
-  const { dispatch, store } = useAppContext();
+  const { store } = useAppContext();
   const [transactionModalShow, setTransactionModalShow] = useState(false);
   const [viewModalShow, setViewModalShow] = useState(false);
   const [differentiate, setDifferentiate] = useState("");
@@ -60,8 +53,6 @@ const Card = ({
     setAdminIdForStatus(adminId);
   };
 
-  const handleStatusChange = (status) => { };
-
   async function handleDelete() {
     const userConfirmed = window.confirm(
       "Balance should be 0 to move the Admin User to trash"
@@ -81,33 +72,6 @@ const Card = ({
 
     setDifferentiate(differentiateParam);
   };
-  let action = "";
-  async function takeMeToHierarchy(userName) {
-    if (role !== "user") {
-      if (callingParent === "HierarchyPageView") {
-        action = "store";
-      } else {
-        action = "clearAll";
-      }
-
-      const response = await getHierarchy({
-        adminName: userName,
-        action: action,
-      });
-      if (response.successCode) {
-        navigate(`/hierarchyView/${userName}`);
-      }
-    }
-  }
-
-  const handleStatus = () => {
-    // Any additional logic for handling status button click
-  };
-
-  const isAdminOrPartnerView =
-    store?.admin?.roles[0].permission.some(
-      (role) => role === strings.partnershipView
-    ) || permissionObj.allAdmin.includes(store?.admin?.roles[0].role);
 
   const takeMeToAccount = (userName) => {
     navigate(`/account-landing/${userName}/statement`);
@@ -118,19 +82,19 @@ const Card = ({
         <tr>
           <th scope="row" className="">
             <button
-              className="border border-1 text-center rounded-pill fw-bold p-1"
-              // data-bs-toggle="modal"
-              // data-bs-target={`#hierarchyview-${userId}`}
+              className="border border-1 text-center rounded-pill fw-bold p-1 text-uppercase"
               style={{ cursor: "auto", background: "#F5C93A", width: "90px" }}
             >
               {role}
             </button>
 
             <p
-              className="fw-bold text-dark"
-              onClick={() => {
-                takeMeToHierarchy(userName);
-              }}
+              className="fw-bold text-dark text-uppercase"
+              onClick={() =>
+                role === "user"
+                  ? ""
+                  : handleAdminNavigateToChild(adminId, userName)
+              }
               style={{ cursor: "pointer" }}
             >
               <b>{userName}</b>
@@ -138,22 +102,15 @@ const Card = ({
           </th>
 
           <td scope="row" className="fs-6 text-center">
-            {creditRefLength > 0 ? <span>{creditRef}</span> : <span>0</span>}
-            {callingParent === "Wallet" ? (
+            <span>{creditRef}</span>
+
+            {navigationBar.length === 1 ? (
               <span className="">
                 <button
-                  className={`border border-0 bg-white btn ${["suspended"].includes(store?.admin?.status)
-                      ? "disabled"
-                      : store?.admin?.roles[0].permission.some(
-                        (role) => role === strings.creditRefEdit
-                      )
-                        ? ""
-                        : permissionObj.allAdmin.includes(
-                          store?.admin?.roles[0].role
-                        )
-                          ? ""
-                          : "disabled"
-                    }`}
+                  className={`border border-0  btn ${hasPermission(
+                    strings.creditRefEdit,
+                    store
+                  )}`}
                   aria-label="Close"
                   onClick={() =>
                     handelOpenTransactionModal(true, "creditRefProvider")
@@ -166,47 +123,27 @@ const Card = ({
 
             <span>
               <button
-                className={`border border-0 bg-white btn ${["suspended"].includes(store?.admin?.status)
-                    ? "disabled"
-                    : store?.admin?.roles[0].permission.some(
-                      (role) => role === strings.creditRefView
-                    )
-                      ? ""
-                      : permissionObj.allAdmin.includes(
-                        store?.admin?.roles[0].role
-                      )
-                        ? ""
-                        : "disabled"
-                  }`}
+                className={`border border-0 btn ${hasPermission(
+                  strings.creditRefView,
+                  store
+                )}`}
                 onClick={() => handelOpenViewModal(true, "creditRefViewer")}
               >
-                <i class="fa-regular fa-eye" aria-label="Close"></i>
+                <i className="fa-regular fa-eye" aria-label="Close"></i>
               </button>
             </span>
           </td>
 
           <td scope="row" className="fs-6 text-center">
-            {partnershipLength > 0 ? (
-              <span>{partnership}</span>
-            ) : (
-              <span>0</span>
-            )}
+            <span>{partnership}</span>
 
-            {callingParent === "Wallet" ? (
+            {navigationBar.length === 1 ? (
               <span className="">
                 <button
-                  className={`border border-0 bg-white btn ${["suspended"].includes(store?.admin?.status)
-                      ? "disabled"
-                      : store?.admin?.roles[0].permission.some(
-                        (role) => role === strings.partnershipEdit
-                      )
-                        ? ""
-                        : permissionObj.allAdmin.includes(
-                          store?.admin?.roles[0].role
-                        )
-                          ? ""
-                          : "disabled"
-                    }`}
+                  className={`border border-0  btn ${hasPermission(
+                    strings.partnershipEdit,
+                    store
+                  )}`}
                 >
                   <i
                     className="fa-solid fa-pen-to-square"
@@ -221,18 +158,10 @@ const Card = ({
 
             <span>
               <button
-                className={`border border-0 bg-white btn ${["suspended"].includes(store?.admin?.status)
-                    ? "disabled"
-                    : store?.admin?.roles[0].permission.some(
-                      (role) => role === strings.partnershipEdit
-                    )
-                      ? ""
-                      : permissionObj.allAdmin.includes(
-                        store?.admin?.roles[0].role
-                      )
-                        ? ""
-                        : "disabled"
-                  }`}
+                className={`border border-0 btn ${hasPermission(
+                  strings.partnershipEdit,
+                  store
+                )}`}
                 onClick={() => handelOpenViewModal(true, "partnershipViewer")}
               >
                 <i className="fa-regular fa-eye"></i>
@@ -255,8 +184,9 @@ const Card = ({
           </td>
           <td
             scope="row"
-            className={`fs-6 text-center ${loadBalance - creditRef < 0 ? "text-danger" : "text-dark"
-              }`}
+            className={`fs-6 text-center ${
+              loadBalance - creditRef < 0 ? "text-danger" : "text-dark"
+            }`}
           >
             {isNaN(creditRef - loadBalance)
               ? loadBalance
@@ -264,34 +194,27 @@ const Card = ({
           </td>
           <td scope="row" className="fs-6 text-center">
             <p
-              className={`border border-1 w-75 text-center rounded-pill ${Status === "Active"
+              className={`border border-1 w-75 text-center rounded-pill ${
+                Status === "Active"
                   ? "bg-success"
                   : Status === "Suspended"
-                    ? "bg-danger"
-                    : "bg-secondary"
-                }`}
+                  ? "bg-danger"
+                  : "bg-secondary"
+              }`}
             >
               {Status}
             </p>
           </td>
           <td scope="row" className="fs-6 text-center">
-            {callingParent === "Wallet" ? (
+            {navigationBar.length === 1 ? (
               <>
                 {" "}
                 <span className="mx-1">
                   <button
-                    className={`btn border border-1 rounded ${["suspended"].includes(store?.admin?.status)
-                        ? "disabled"
-                        : store?.admin?.roles[0].permission.some(
-                          (role) => role === strings.transferBalance
-                        )
-                          ? ""
-                          : permissionObj.allAdmin.includes(
-                            store?.admin?.roles[0].role
-                          )
-                            ? ""
-                            : "disabled"
-                      }`}
+                    className={`btn border border-1 rounded ${hasPermission(
+                      strings.transferBalance,
+                      store
+                    )}`}
                     onClick={() =>
                       handelOpenTransactionModal(
                         true,
@@ -302,23 +225,15 @@ const Card = ({
                     style={{ background: "#84B9DF" }}
                     title="Addmoney"
                   >
-                    <i class="fa-solid fa-circle-dollar-to-slot"></i>
+                    <i className="fa-solid fa-circle-dollar-to-slot"></i>
                   </button>
                 </span>
                 <span className="mx-1">
                   <button
-                    className={`btn border border-2 rounded ${["suspended"].includes(store?.admin?.status)
-                        ? "disabled"
-                        : store?.admin?.roles[0].permission.some(
-                          (role) => role === strings.status
-                        )
-                          ? ""
-                          : permissionObj.allAdmin.includes(
-                            store?.admin?.roles[0].role
-                          )
-                            ? ""
-                            : "disabled"
-                      }`}
+                    className={`btn border border-2 rounded ${hasPermission(
+                      strings.status,
+                      store
+                    )}`}
                     style={{ background: "#25F1F7" }}
                     title="Setting"
                     type="button"
@@ -332,56 +247,32 @@ const Card = ({
 
             <span className="mx-1">
               <button
-                className={`btn border border-2 rounded ${store?.admin?.roles[0].permission.some(
-                  (role) => role === strings.profileView
-                )
-                    ? ""
-                    : permissionObj.allAdmin.includes(
-                      store?.admin?.roles[0].role
-                    )
-                      ? ""
-                      : "disabled"
-                  }`}
+                className={`btn border border-2 rounded ${hasPermission(
+                  strings.profileView,
+                  store
+                )}`}
                 style={{ background: "#F5C93A" }}
                 title="Profile"
-                onClick={() => {
-                  takeMeToAccount(userName);
-                }}
+                onClick={() => takeMeToAccount(userName)}
               >
-                <i class="fa-solid fa-user"></i>
+                <i className="fa-solid fa-user"></i>
               </button>
             </span>
-            {callingParent === "Wallet" ? (
+            {navigationBar.length === 1 ? (
               <span className="mx-1">
                 <button
-                  className={`btn border border-2 rounded  ${["suspended"].includes(store?.admin?.status)
-                      ? "disabled"
-                      : store?.admin?.roles[0].permission.some(
-                        (role) => role === strings.deleteAdmin
-                      )
-                        ? ""
-                        : permissionObj.allAdmin.includes(
-                          store?.admin?.roles[0].role
-                        )
-                          ? ""
-                          : "disabled"
-                    }`}
+                  className={`btn border border-2 rounded  ${hasPermission(
+                    strings.deleteAdmin,
+                    store
+                  )}`}
                   style={{ background: "#ED5E68" }}
                   title="Delete"
-                  onClick={(e) => {
-                    handleDelete();
-                  }}
+                  onClick={(e) => handleDelete()}
                 >
-                  <i class="fa-light fas fa-trash"></i>
+                  <i className="fa-light fas fa-trash"></i>
                 </button>
               </span>
             ) : null}
-
-            {/* <span className="mx-1">
-              <button className="btn border border-2 rounded" title="Wallet">
-                <i class="fa-regular fas fa-wallet"></i>
-              </button>
-            </span> */}
           </td>
         </tr>
       </tbody>
@@ -412,8 +303,8 @@ const Card = ({
       <StatusModal
         show={showModal}
         handleClose={handleClose}
-        name={role}
-        userRole={userName}
+        name={userName}
+        userRole={role}
         Status={Status}
         adminIdForStatus={adminIdForStatus}
         setRefresh={setRefresh}

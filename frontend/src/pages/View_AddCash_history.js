@@ -40,8 +40,8 @@ const View_AddCash_history = () => {
   useEffect(() => {
     if (store?.admin) {
       if (
-        permissionObj.allAdmin.includes(store?.admin?.roles[0].role) ||
-        permissionObj.allSubAdmin.includes(store?.admin?.roles[0].role)
+        permissionObj.allAdmin.includes(store?.admin?.role) ||
+        permissionObj.allSubAdmin.includes(store?.admin?.role)
       ) {
         getView_AddCash_history();
       }

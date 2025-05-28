@@ -1,18 +1,19 @@
-import { apiResponseErr, apiResponseSuccess, apiResponsePagination } from '../helper/errorHandler.js';
+import { apiResponseErr, apiResponseSuccess } from '../helper/errorHandler.js';
 import admins from '../models/admin.model.js';
 import { v4 as uuidv4 } from 'uuid';
-import trash from '../models/trash.model.js';
 import { statusCode } from '../helper/statusCodes.js';
 import axios from 'axios';
 import { string } from '../constructor/string.js';
-import { Op } from 'sequelize';
+import { Op, where } from 'sequelize';
 import { admin_Balance } from './transaction.controller.js';
+import { sequelize } from '../db.js';
 
 async function checkHierarchyBalance(adminId) {
   const subAdmins = await admins.findAll({ where: { createdById: adminId } });
 
   for (const subAdmin of subAdmins) {
-    if (subAdmin.balance !== 0) {
+    const balance = await admin_Balance(subAdmin.adminId)
+    if (balance[0]?.[0].adminBalance !== 0) {
       return true;
     }
 
@@ -39,7 +40,7 @@ export const moveAdminToTrash = async (req, res) => {
 
     const adminBalance = await admin_Balance(admin.adminId)
 
-    if (adminBalance !== 0) {
+    if (adminBalance[0]?.[0].adminBalance !== 0) {
       return res.status(statusCode.badRequest).json(
         apiResponseErr(null, false, statusCode.badRequest, `Balance should be 0 to move to Trash`)
       );
@@ -59,46 +60,14 @@ export const moveAdminToTrash = async (req, res) => {
       return res.status(statusCode.badRequest).json(apiResponseErr(null, false, statusCode.badRequest, `Admin is inactive or locked`));
     }
 
-    const updatedTransactionData = {
-      adminId: admin.adminId,
-      roles: admin.roles || [],
-      userName: admin.userName,
-      password: admin.password,
-      balance: admin.balance || 0,
-      loadBalance: admin.loadBalance || 0,
-      creditRefs: admin.creditRefs || [],
-      partnerships: admin.partnerships || [],
-      createdById: admin.createdById || '',
-      createdByUser: admin.createdByUser || '',
-    };
 
-    const trashEntry = await trash.create({
-      trashId: uuidv4(),
-      roles: updatedTransactionData.roles,
-      userName: updatedTransactionData.userName,
-      password: updatedTransactionData.password,
-      balance: updatedTransactionData.balance,
-      loadBalance: updatedTransactionData.loadBalance,
-      creditRefs: updatedTransactionData.creditRefs,
-      partnerships: updatedTransactionData.partnerships,
-      createdById: updatedTransactionData.createdById,
-      adminId: updatedTransactionData.adminId,
-      createdByUser: updatedTransactionData.createdByUser,
-    });
+    await admins.update(
+      { isDeleted: true },
+      { where: { adminId: requestId } }
+    );
 
-    if (!trashEntry) {
-      return res.status(statusCode.badRequest).json(apiResponseErr(null, statusCode.badRequest, false, `Failed to backup Admin User`));
-    }
-
-    const deleteResult = await admin.destroy();
-
-    if (!deleteResult) {
-      return res.status(statusCode.badRequest).json(apiResponseErr(null, statusCode.badRequest, false, `Failed to delete Admin User with id: ${requestId}`));
-    }
-
-    // sync with colorgame user
     let message = '';
-    if (admin.roles[0].role === string.user) {
+    if (admin.role === string.user) {
       const dataToSend = {
         userId: requestId,
       };
@@ -113,7 +82,8 @@ export const moveAdminToTrash = async (req, res) => {
 
     return res.status(statusCode.success).json(apiResponseSuccess(null, statusCode.success, true, 'Admin User moved to Trash' + " " + message));
   } catch (error) {
-    res
+    console.error('Error moving admin to trash:', error);
+   return res
       .status(statusCode.internalServerError)
       .send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
   }
@@ -126,90 +96,91 @@ export const viewTrash = async (req, res) => {
 
     page = Math.max(parseInt(page, 10), 1);
     limit = Math.max(parseInt(limit, 10), 1);
+    const offset = (page - 1) * limit;
 
-    let offset = (page - 1) * limit;
-
-    const searched = {
+    const whereCondition = {
       createdById: adminId,
-      ...(search && { userName: { [Op.like]: `%${search}%` } }), 
+      isDeleted: true,
+      ...(search && { userName: { [Op.like]: `%${search}%` } }),
     };
 
-    const { count, rows: trashEntries } = await trash.findAndCountAll({
-      where: searched,
+    const { count, rows: results } = await admins.findAndCountAll({
+      where: whereCondition,
       offset,
       limit,
     });
 
     const totalPages = Math.ceil(count / limit);
 
+    let finalResults = results;
     if (page > totalPages && totalPages > 0) {
       page = totalPages;
-      offset = (page - 1) * limit;
+      const adjustedOffset = (page - 1) * limit;
 
-      const { rows: adjustedEntries } = await trash.findAndCountAll({
-        where: searched,
-        offset,
+      const { rows: adjustedRows } = await admins.findAndCountAll({
+        where: whereCondition,
+        offset: adjustedOffset,
         limit,
       });
-      return res.status(statusCode.success).json(apiResponseSuccess(adjustedEntries, true, statusCode.success, 'Successfully retrieved', {
+      finalResults = adjustedRows;
+    }
+
+    return res.status(statusCode.success).json(
+      apiResponseSuccess(finalResults, true, statusCode.success, 'Successfully retrieved', {
         page,
         limit,
         totalPages,
         totalItems: count,
-      }));
-    }
-
-    return res.status(statusCode.success).json(apiResponseSuccess(trashEntries, true, statusCode.success, 'Successfully retrieved', {
-      page,
-      limit,
-      totalPages,
-      totalItems: count,
-    }));
+      })
+    );
 
   } catch (error) {
-    return res
-      .status(statusCode.internalServerError)
-      .send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
+    return res.status(statusCode.internalServerError).json(
+      apiResponseErr(error?.data ?? null, false, error?.responseCode ?? statusCode.internalServerError, error?.errMessage ?? error.message)
+    );
   }
 };
 
-
-
-
 export const deleteTrashData = async (req, res) => {
-  try {
-    const trashId = req.params.trashId;
+  const t = await sequelize.transaction();
 
-    const record = await trash.findOne({ where: { trashId } });
+  try {
+    const adminId = req.params.adminId;
+
+    const record = await admins.findOne({ where: { adminId }, transaction: t });
 
     if (!record) {
+      await t.rollback();
       return res
         .status(statusCode.notFound)
         .json(apiResponseErr('Data not found', false, statusCode.notFound, 'Data not found'));
     }
 
-    const adminId = record.adminId;
-
-    const deleteHierarchy = async (adminId) => {
-      const subAdmins = await admins.findAll({ where: { createdById: adminId } });
+    const deleteHierarchy = async (parentId) => {
+      const subAdmins = await admins.findAll({ where: { createdById: parentId }, transaction: t });
 
       for (const subAdmin of subAdmins) {
         await deleteHierarchy(subAdmin.adminId);
-        await subAdmin.destroy();
+        await subAdmin.destroy({ transaction: t });
       }
     };
 
-    // Delete the hierarchy
+    await admins.update(
+      { isPermanentDeleted: true },
+      { where: { adminId }, transaction: t }
+    );
+
     await deleteHierarchy(adminId);
 
-    // Delete the trash record
-    await record.destroy();
+    await record.destroy({ transaction: t });
 
-    return res
-      .status(statusCode.success)
-      .json(apiResponseSuccess(null, true, statusCode.success, 'Data deleted successfully'));
+    // Commit the transaction
+    await t.commit();
+
+    return res.status(statusCode.success).json(apiResponseSuccess(null, true, statusCode.success, 'Data deleted successfully'));
   } catch (error) {
-    res
+    await t.rollback();
+    return res
       .status(statusCode.internalServerError)
       .send(
         apiResponseErr(
@@ -226,7 +197,7 @@ export const deleteTrashData = async (req, res) => {
 export const restoreAdminUser = async (req, res) => {
   try {
     const { adminId } = req.body;
-    const existingAdminUser = await trash.findOne({ where: { adminId } });
+    const existingAdminUser = await admins.findOne({ where: { adminId } });
  
     const  createdId = existingAdminUser.createdById;
 
@@ -246,34 +217,19 @@ export const restoreAdminUser = async (req, res) => {
       return res.status(statusCode.notFound).json(apiResponseErr(null, false, statusCode.notFound, 'Admin not found in trash'));
     }
 
-    const restoreRemoveData = {
-      roles: existingAdminUser.roles,
-      userName: existingAdminUser.userName,
-      password: existingAdminUser.password,
-      balance: existingAdminUser.balance,
-      loadBalance: existingAdminUser.loadBalance,
-      creditRefs: existingAdminUser.creditRefs,
-      partnerships: existingAdminUser.partnerships,
-      createdById: existingAdminUser.createdById,
-      adminId: existingAdminUser.adminId,
-      createdByUser: existingAdminUser.createdByUser,
-    };
 
-    const restoreResult = await admins.create(restoreRemoveData);
+    const restoreResult = await admins.update(
+      { isDeleted: false },
+      { where: { adminId }, returning: true }
+    );
 
     if (!restoreResult) {
       return res.status(statusCode.badRequest).json(apiResponseErr(null, statusCode.badRequest, false, 'Failed to restore Admin User'));
     }
 
-    const deleteResult = await existingAdminUser.destroy();
-
-    if (!deleteResult) {
-      return res.status(statusCode.badRequest).json(apiResponseErr(null, statusCode.badRequest, false, `Failed to delete Admin User from Trash with adminId: ${adminId}`));
-    }
-    
     // sync with colorgame user
     let message = '';
-    if (existingAdminUser.roles[0].role === string.user) {
+    if (existingAdminUser.role === string.user) {
     const dataToSend = {
       userId : adminId,
     };
@@ -290,7 +246,7 @@ export const restoreAdminUser = async (req, res) => {
   }
     return res.status(statusCode.success).json(apiResponseSuccess(null, statusCode.success, true, 'Admin restored from trash' + " " + message));
   } catch (error) {
-    res
+    return res
       .status(statusCode.internalServerError)
       .send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
   }
