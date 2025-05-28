@@ -51,8 +51,8 @@ const Market_Analysis = () => {
   useEffect(() => {
     if (store?.admin) {
       if (
-        permissionObj.allAdmin.includes(store?.admin?.roles[0].role) ||
-        permissionObj.allSubAdmin.includes(store?.admin?.roles[0].role)
+        permissionObj.allAdmin.includes(store?.admin?.role) ||
+        permissionObj.allSubAdmin.includes(store?.admin?.role)
       ) {
         getView_LiveGames();
       }
@@ -72,6 +72,7 @@ const Market_Analysis = () => {
     setLiveGmes((prev) => ({
       ...prev,
       [name]: value,
+      currentPage: 1,
     }));
   };
 
@@ -117,7 +118,7 @@ const Market_Analysis = () => {
                       onChange={handleChange}
                       type="text"
                       name="search"
-                      placeholder="Search content here..."
+                      placeholder="Search Content Here..."
                     />
                   </div>
                   {/* <button type="submit">
@@ -160,7 +161,7 @@ const Market_Analysis = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {liveGmes && liveGmes?.data.length > 0 ? (
+                  { liveGmes?.data?.length > 0 ? (
                     liveGmes.data.map((data, i) => (
                       <tr className="fw-bold" key={data.marketId}>
                         <td>{i + 1}</td>
@@ -185,7 +186,7 @@ const Market_Analysis = () => {
                   ) : (
                     <tr>
                       <td colSpan="4" className="text-center">
-                        No Live bet games found.
+                        No Live Bet Games Found.
                       </td>
                     </tr>
                   )}

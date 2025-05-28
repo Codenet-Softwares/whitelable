@@ -8,7 +8,7 @@ import {
 } from "../Utils/service/apiService";
 import ProfitAndLossEvent from "./ProfitAndLossEvent";
 import ProfitAndLossRunner from "./ProfitLossRunner";
-import ProfitAndLossLotteryEvent from "./ProfitAndLossLotteryEvent"
+import ProfitAndLossLotteryEvent from "./ProfitAndLossLotteryEvent";
 
 const ProfitAndLoss = ({
   UserName,
@@ -23,6 +23,7 @@ const ProfitAndLoss = ({
   totalPages,
   SetProfitLossData,
   handleDateForProfitLoss,
+  dataSource,
 }) => {
   //Pagination
   const startIndex = Math.min((currentPage - 1) * 10 + 1);
@@ -65,7 +66,8 @@ const ProfitAndLoss = ({
     const response = await getProfitLossRunner({
       userName: UserName,
       marketId: marketId,
-      limit: profitLossRunnerData.itemPerPage,
+      pageNumber: profitLossRunnerData.currentPage,
+      dataLimit: profitLossRunnerData.itemPerPage,
       searchName: profitLossRunnerData.searchItem,
     });
     SetProfitLossRunnerData((prevState) => ({
@@ -76,7 +78,6 @@ const ProfitAndLoss = ({
     }));
   }
 
-
   useEffect(() => {
     if (marketId) getProfitLossRunnerWise();
   }, [
@@ -85,18 +86,25 @@ const ProfitAndLoss = ({
     profitLossRunnerData.searchItem,
   ]);
 
-  async function getProfitLossEventWise(gameId, componentName, searchName) {
-    // if useEffcet  added give condition toggle must be false for end point to hit
+  async function getProfitLossEventWise(
+    gameId,
+    componentName,
+    searchName,
+    pageNumber,
+    dataLimit
+  ) {
     SetToggle(false);
     SetComponent(componentName);
-    SetGameId(gameId)
+    SetGameId(gameId);
+
     const response = await getProfitLossEvent({
       userName: UserName,
       gameId: gameId,
-      pageNumber: profitLossEventData.currentPage,
-      dataLimit: profitLossEventData.itemPerPage,
-      searchName: searchName,
+      pageNumber: pageNumber || profitLossEventData.currentPage,
+      dataLimit: dataLimit || profitLossEventData.itemPerPage,
+      searchName: searchName || profitLossEventData.searchItem || "",
     });
+
     SetProfitLossEventData((prevState) => ({
       ...prevState,
       data: response.data,
@@ -105,16 +113,19 @@ const ProfitAndLoss = ({
     }));
   }
 
-  async function getLotteryProfitLossEventWise(gameId, componentName, searchName) {
+  async function getLotteryProfitLossEventWise(
+    gameId,
+    componentName,
+    searchName
+  ) {
     SetToggle(false);
     SetComponent(componentName);
-    SetGameId(gameId)
+    SetGameId(gameId);
     const response = await getlotteryProfitLossEvent({
       userName: UserName,
-      // gameId: gameId,
       pageNumber: profitLossLotteryEventData.currentPage,
       dataLimit: profitLossLotteryEventData.itemPerPage,
-      searchName: searchName,
+      searchName: searchName || profitLossLotteryEventData.searchItem || "",
     });
     SetProfitLossLotteryEventData((prevState) => ({
       ...prevState,
@@ -123,7 +134,6 @@ const ProfitAndLoss = ({
       totalData: response?.pagination?.totalItems,
     }));
   }
-
 
   const handelProfitLossLotteryEventDataPage = (page) => {
     SetProfitLossLotteryEventData((prevState) => ({
@@ -183,9 +193,8 @@ const ProfitAndLoss = ({
         getLotteryProfitLossEventWise={getLotteryProfitLossEventWise}
         profitLossLotteryEventData={profitLossLotteryEventData}
       />
-    )
+    );
   } else {
-
   }
 
   const handelItemPerPage = (event) => {
@@ -244,6 +253,8 @@ const ProfitAndLoss = ({
                         SetProfitLossData((prevState) => ({
                           ...prevState,
                           dataSource: e.target.value,
+                          backupStartDate: null,
+                          backupEndDate: null,
                         }));
                       }}
                     >
@@ -256,21 +267,31 @@ const ProfitAndLoss = ({
                   </div>
                   <div class="col-sm">
                     <DatePicker
-                      selected={startDate}
+                      selected={dataSource === "live" ? new Date() : startDate}
+                      disabled={dataSource === "live"}
                       onChange={(date) => setStartDate(date)}
-                      placeholderText={"Select Start Date"}
-                      readonly // Prevent manual typing 
+                      placeholderText={
+                        dataSource === "live" ? "Today" : "Select Start Date"
+                      }
+                      readonly // Prevent manual typing
                       onKeyDown={(e) => e.preventDefault()} // Block manual input from keyboard
+                      className="form-control"
+                      maxDate={new Date()}
                     />
                   </div>
                   <div class="col-sm">
                     {" "}
                     <DatePicker
-                      selected={endDate}
+                      selected={dataSource === "live" ? new Date() : endDate}
+                      disabled={dataSource === "live"}
                       onChange={(date) => setEndDate(date)}
-                      placeholderText={"Select End Date"}
-                      readonly // Prevent manual typing 
+                      placeholderText={
+                        dataSource === "live" ? "Today" : "Select End Date"
+                      }
+                      readonly // Prevent manual typing
                       onKeyDown={(e) => e.preventDefault()} // Block manual input from keyboard
+                      className="form-control"
+                      maxDate={new Date()}
                     />
                   </div>
                   <div class="col-sm">
@@ -352,11 +373,17 @@ const ProfitAndLoss = ({
                               {" "}
                               <td
                                 onClick={() =>
-                                  data?.gameName === "Lottery" ? getLotteryProfitLossEventWise(data?.gameId,
-                                    "ProfitAndLossLotteryEvent") : getProfitLossEventWise(
-                                      data?.gameId,
-                                      "ProfitAndLossEvent"
-                                    )
+                                  data?.gameName === "Lottery"
+                                    ? getLotteryProfitLossEventWise(
+                                        data?.gameId,
+                                        "ProfitAndLossLotteryEvent",
+                                        profitLossEventData.searchItem
+                                      )
+                                    : getProfitLossEventWise(
+                                        data?.gameId,
+                                        "ProfitAndLossEvent",
+                                        profitLossEventData.searchItem
+                                      )
                                 }
                                 className="text-primary fw-bold"
                                 style={{ cursor: "pointer" }}
@@ -364,20 +391,22 @@ const ProfitAndLoss = ({
                                 {data?.gameName}
                               </td>
                               <td
-                                className={`fw-bold ${data?.totalProfitLoss > 0
-                                  ? "text-success"
-                                  : "text-danger"
-                                  }`}
+                                className={`fw-bold ${
+                                  data?.totalProfitLoss > 0
+                                    ? "text-success"
+                                    : "text-danger"
+                                }`}
                               >
                                 {data?.totalProfitLoss || "NDS"}
                               </td>
                               <td>{data?.commission || "NDS"}</td>
                               <td>
                                 <span
-                                  className={`fw-bold ${data?.totalProfitLoss > 0
-                                    ? "text-success"
-                                    : "text-danger"
-                                    }`}
+                                  className={`fw-bold ${
+                                    data?.totalProfitLoss > 0
+                                      ? "text-success"
+                                      : "text-danger"
+                                  }`}
                                 >
                                   {data?.totalProfitLoss}
                                 </span>
@@ -401,16 +430,6 @@ const ProfitAndLoss = ({
                   </div>
                   {/* Table */}
                 </div>
-
-                {/* No Data Found */}
-                {/* {props.length === 0 && (
-                <div className="alert text-dark bg-light mt-3" role="alert">
-                  <div className="alert-text d-flex justify-content-center">
-                    <b> &#128680; No Data Found !! </b>
-                  </div>
-                </div>
-              )} */}
-                {/* End of No Data Found */}
               </div>
             </li>
             <li class="list-group-item">

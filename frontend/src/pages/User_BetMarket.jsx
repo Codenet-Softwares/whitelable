@@ -15,7 +15,7 @@ import { toast } from "react-toastify";
 import { customErrorHandler } from "../Utils/helper";
 import { useAppContext } from "../contextApi/context";
 import { permissionObj } from "../Utils/constant/permission";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import Picture from "../Assets/Picture.webp";
 import "./DemoMarket_Analysis.css";
 import ReusableModal from "../components/common/ReusableModal";
@@ -26,7 +26,8 @@ import { useNavigate } from "react-router-dom";
 const User_BetMarket = () => {
   const navigate = useNavigate();
 
-  const { dispatch, store } = useAppContext();
+    const { dispatch,store, showLoader, hideLoader  } = useAppContext();
+  
   const [user_marketWithRunnerData, setUser_marketWithRunnerData] = useState(
     getMarketWithRunnerDataInitialState()
   );
@@ -79,7 +80,7 @@ const User_BetMarket = () => {
     setBodyData({
       marketId: marketId,
       adminId: store?.admin?.id,
-      role: store?.admin?.roles[0]?.role,
+      role: store?.admin?.role,
       type: "master-book",
     });
   };
@@ -101,7 +102,7 @@ const User_BetMarket = () => {
     setBodyData({
       marketId: marketId,
       adminId: store?.admin?.id,
-      role: store?.admin?.roles[0]?.role,
+      role: store?.admin?.role,
       type: "master-book",
     });
   };
@@ -111,7 +112,7 @@ const User_BetMarket = () => {
     setBodyData({
       marketId: marketId,
       adminId: store?.admin?.id,
-      role: store?.admin?.roles[0]?.role,
+      role: store?.admin?.role,
       type: "user-book",
     });
   };
@@ -150,11 +151,12 @@ const User_BetMarket = () => {
     entries = user_LiveBet.totalEntries,
     search = ""
   ) {
+
     try {
       const response = await getMarket_LiveBet({
         marketId: marketId,
         adminId: store?.admin?.id,
-        role: store?.admin?.roles[0]?.role,
+        role: store?.admin?.role,
         pageNumber: page,
         totalEntries: entries,
         search,
@@ -183,6 +185,7 @@ const User_BetMarket = () => {
   );
 
   async function getView_User_BetMarket() {
+    showLoader(); 
     try {
       const response = await getUserGetMarket({
         userName: store.admin.adminName,
@@ -192,6 +195,10 @@ const User_BetMarket = () => {
     } catch (error) {
       toast.error(customErrorHandler(error));
     }
+    finally {
+        hideLoader(); // Hide loader after the async operation is complete
+      }          
+
   }
 
   async function fetch_BetBookData() {
@@ -210,8 +217,8 @@ const User_BetMarket = () => {
   useEffect(() => {
     if (store?.admin) {
       if (
-        permissionObj.allAdmin.includes(store?.admin?.roles[0].role) ||
-        permissionObj.allSubAdmin.includes(store?.admin?.roles[0].role)
+        permissionObj.allAdmin.includes(store?.admin?.role) ||
+        permissionObj.allSubAdmin.includes(store?.admin?.role)
       ) {
         getView_User_BetMarket();
       }
@@ -454,7 +461,7 @@ const User_BetMarket = () => {
                     <button
                       className="btn text-white fw-bolder px-5 text-uppercase"
                       style={{ background: "#1E2761" }}
-                      disabled={store?.admin?.roles[0]?.role === "superAdmin"}
+                      disabled={store?.admin?.role === "superAdmin"}
                       onClick={handleOpenUserBookModal}
                     >
                       User Book
@@ -494,20 +501,20 @@ const User_BetMarket = () => {
                       />
                     </div>
                     {/* View More Section */}
-                    <h4
-                      className="card-header text-white fw-bold py-3 mb-0 bg-transparent ms-auto text-uppercase"
+                    <Link
+                      className="card-header text-info h5 mb-0  ms-auto text-uppercase text-decoration-underline"
                       style={{
-                        cursor: !liveToggle ? "not-allowed" : "pointer", // Disable when liveToggle is OFF
-                        opacity: !liveToggle ? 0.5 : 1, // Dim when disabled
+                        cursor: !liveToggle ? "not-allowed" : "pointer",
+                        opacity: !liveToggle ? 0.5 : 1, 
                       }}
                       onClick={() => {
                         if (liveToggle) {
-                          handleOpenViewMoreModal(); // Enable only when liveToggle is ON
+                          handleOpenViewMoreModal(); 
                         }
                       }}
                     >
-                      View More Live Bet.....
-                    </h4>
+                      View More
+                    </Link>
                   </div>
                   <ReusableModal
                     isOpen={viewMoreModalOpen}
@@ -673,6 +680,7 @@ const User_BetMarket = () => {
                                         className="col-2 fw-bold"
                                         style={{
                                           fontSize: "15px",
+                                          cursor:"pointer",
                                           color:
                                             data.type === "back"
                                               ? "#007bff"
@@ -834,6 +842,7 @@ const User_BetMarket = () => {
                                         className="col-3 fw-bold"
                                         style={{
                                           fontSize: "15px",
+                                          cursor:"pointer",
                                           color:
                                             data.type === "back"
                                               ? "#007bff"

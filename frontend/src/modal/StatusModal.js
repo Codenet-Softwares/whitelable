@@ -16,9 +16,9 @@ const StatusModal = ({
   adminIdForStatus,
   setRefresh,
 }) => {
-  const { store,showLoader, hideLoader } = useAppContext();
+  const { store, showLoader, hideLoader } = useAppContext();
   const [state, setState] = useState(activeInactiveInitialState());
-  console.log('Line 21',store)
+  console.log('Line 21', store)
 
 
   // Set modal state based on Status when it opens
@@ -156,6 +156,7 @@ const StatusModal = ({
                 textAlign: "center",
                 boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
               }}
+              className="text-uppercase"
             >
               {name}
             </span>
@@ -169,6 +170,7 @@ const StatusModal = ({
                 letterSpacing: "0.5px",
                 display: "inline-block",
               }}
+              className="text-uppercase"
             >
               {userRole}
             </span>
