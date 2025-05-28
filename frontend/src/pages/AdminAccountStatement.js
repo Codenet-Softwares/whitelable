@@ -31,28 +31,31 @@ const AdminAccountStatement = () => {
     return `${year}-${month}-${day}`;
   };
 
-  async function AccountStatement() {
-    // Set today's date if dataSource is live
-    const today = new Date();
-    const fromDate = state.dataSource === "live" ? formatDate(today) : state.startDate;
-    const toDate = state.dataSource === "live" ? formatDate(today) : state.endDate;
+ async function AccountStatement() {
+  const today = new Date();
+  const fromDate = state.dataSource === "live" ? formatDate(today) : state.startDate;
+  const toDate = state.dataSource === "live" ? formatDate(today) : state.endDate;
 
-    const response = await getAccountStatement_api({
-      _id: store?.admin?.id,
-      pageNumber: state.currentPage,
-      dataLimit: state.totalEntries,
-      fromDate: fromDate,
-      toDate: toDate,
-      dataSource: state.dataSource,
-    });
+  const response = await getAccountStatement_api({
+    _id: store?.admin?.id,
+    pageNumber: state.currentPage,
+    dataLimit: state.totalEntries,
+    fromDate: fromDate,
+    toDate: toDate,
+    dataSource: state.dataSource,
+  });
 
+  if (response && response.data) {
     setState((prevState) => ({
       ...prevState,
       statement: response.data,
-      totalPages: response?.pagination?.totalPages,
-      totalData: response?.pagination?.totalItems,
+      totalPages: response?.pagination?.totalPages || 0,
+      totalData: response?.pagination?.totalItems || 0,
     }));
+  } else {
+    console.error("Account statement API returned null or unexpected data:", response);
   }
+}
 
   function handlePageChange(page) {
     setState((prevState) => ({
