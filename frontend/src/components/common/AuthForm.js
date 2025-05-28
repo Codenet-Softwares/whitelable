@@ -146,7 +146,7 @@ const Authform = ({ purpose, authFormApi }) => {
                   </h5>
                 </div>
                 <div className="modal-body">
-                  <form>
+                  <form onSubmit={handleSubmit}>
                     <div className="">
                       <input
                         type="text"
@@ -218,28 +218,25 @@ const Authform = ({ purpose, authFormApi }) => {
 
                     {purpose === "create" && values?.role?.length > 0 && (
                       <button
-                        className={`btn_1 full_width text-center`}
+                        type="submit"
+                        className="btn_1 full_width text-center"
                         disabled={["suspended"].includes(store?.admin?.status)}
-                        style={{
-                          cursor: "pointer",
-                        }}
-                        onClick={handleSubmit}
+                        style={{ cursor: "pointer" }}
                       >
                         Create
-                      </button>
+                     </button>
                     )}
 
                     {purpose === "login" && (
-                      <a
+                      <button
+                        type="submit"
                         className="btn_1 full_width text-center"
-                        style={{
-                          cursor: "pointer",
-                        }}
-                        onClick={handleSubmit}
+                        style={{ cursor: "pointer" }}
                       >
                         Log In
-                      </a>
+                      </button>
                     )}
+
                   </form>
                 </div>
               </div>
