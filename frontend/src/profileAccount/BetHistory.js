@@ -183,6 +183,7 @@ const BetHistory = ({
                   className="form-control"
                   disabled={data.dataSource === "live"} // Disable for LIVE data
                   maxDate={new Date()}
+                  onKeyDown={(e) => e.preventDefault()}
                 />
               </div>
               <div class="col-sm">
@@ -199,6 +200,7 @@ const BetHistory = ({
                   className="form-control"
                   disabled={data.dataSource === "live"} // Disable for LIVE data
                   maxDate={new Date()}
+                  onKeyDown={(e) => e.preventDefault()}
                 />
               </div>
               <div class="col-sm">
