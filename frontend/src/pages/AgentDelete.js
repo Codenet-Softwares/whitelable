@@ -7,6 +7,7 @@ import {
 import { toast } from "react-toastify";
 import { useAppContext } from "../contextApi/context";
 import Pagination from "../components/common/Pagination";
+import strings from "../Utils/constant/stringConstant";
 
 const AgentDelete = () => {
   const { store, showLoader, hideLoader } = useAppContext();
@@ -18,7 +19,6 @@ const AgentDelete = () => {
   const [pageLimit, setPageLimit] = useState(10);
   const [search, setSearch] = useState("");
   const id = store?.admin?.id;
-  // const pageLimit = 10;
 
   async function viewApprovedDelete() {
     const response = await viewTrash_api({
@@ -37,39 +37,32 @@ const AgentDelete = () => {
   };
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+      viewApprovedDelete();
+      setPage(1);
+    }, 1000)
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  useEffect(() => {
     viewApprovedDelete();
-  }, [reload, page, pageLimit, search]);
+  }, [reload, page, pageLimit]);
 
   const startIndex = Math.min((page - 1) * pageLimit + 1);
   const endIndex = Math.min(page * pageLimit, totalData);
 
-  // async function handleDeleteAgent(id) {
 
-  //   const response = await deleteTrash_api({ trashId: id });
-  //   if (response) {
-  //     toast.info(response.message);
-  //     setReload(!reload);
-  //   }
-  // }
-
-  // async function handleRestore(adminId) {
-  //   const data = { adminId: adminId };
-  //   const response = await restoreTrash_api(data);
-  //   if (response) {
-  //     toast.info(response.message);
-  //     setReload(!reload);
-  //   }
-  // }
   async function handleDeleteAgent(id) {
-    showLoader(); // Show loader before starting the async operation
+    console.log("adminId", id);
+    showLoader();
     try {
-      const response = await deleteTrash_api({ trashId: id });
+      const response = await deleteTrash_api({ adminId: id });
       if (response) {
         toast.info(response.message);
 
         // Reload the data first
         const updatedData = viewAgentDelete.filter(
-          (item) => item.trashId !== id
+          (item) => item.adminId !== id
         );
         setViewAgentDelete(updatedData);
 
@@ -115,9 +108,7 @@ const AgentDelete = () => {
       <div className="container-fluid d-flex justify-content-center mt-5 rounded-5 px-5">
         <div className="card ">
           <div className="">
-            <h4
-              className="text-center text-uppercase fw-bold text-white bg-dark p-3"              
-            >
+            <h4 className="text-center text-uppercase fw-bold text-white bg-dark p-3">
               Deleted Agents
             </h4>
             <div className="white_box_tittle list_header px-3">
@@ -125,7 +116,7 @@ const AgentDelete = () => {
                 <select
                   className="form-select form-select-sm"
                   aria-label=".form-select-sm example"
-                  onChange={(e) => setPageLimit(Number(e.target.value))}
+                  onChange={(e) => { setPageLimit(Number(e.target.value)); setPage(1) }}
                 >
                   <option value="10">Show 10 Entries</option>
                   <option value="25">25 Entries</option>
@@ -145,7 +136,7 @@ const AgentDelete = () => {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         type="text"
-                        placeholder="Search content here..."
+                        placeholder="Search Content Here..."
                       />
                     </div>
                     <button type="submit">
@@ -159,7 +150,7 @@ const AgentDelete = () => {
             <div className="main_data">
               <table className="table mt-4">
                 <thead
-                className="P-3"
+                  className="P-3"
                   style={{
                     height: "10px",
                     backgroundColor: "#84B9DF",
@@ -192,10 +183,7 @@ const AgentDelete = () => {
                           <button
                             className="btn text-dark fw-bold mx-2"
                             style={{ background: "#ED5E68" }}
-                            onClick={() => handleDeleteAgent(data.trashId)}
-                            disabled={["suspended"].includes(
-                              store?.admin?.status
-                            )}
+                            onClick={() => handleDeleteAgent(data.adminId)}
                           >
                             Delete{" "}
                             <i className="fa-solid fa-trash text-dark"></i>
@@ -204,9 +192,6 @@ const AgentDelete = () => {
                             className="btn text-dark rounded fw-bold"
                             style={{ background: "#F5C93A" }}
                             onClick={() => handleRestore(data.adminId)}
-                            disabled={["suspended"].includes(
-                              store?.admin?.status
-                            )}
                           >
                             Restore{" "}
                             <i className="fa-solid fa-arrow-rotate-left"></i>

@@ -38,7 +38,7 @@ export const getUserBetHistory = async (req, res) => {
   try {
     const { gameId, userName } = req.params;
     const { startDate, endDate, page = 1, limit = 10, dataType, type } = req.query;
-    const token = jwt.sign({ roles: req.user.roles }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
+    const token = jwt.sign({ role: req.user.role }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
     const params = {
       gameId,
       userName,
@@ -92,7 +92,7 @@ export const getColorGameProfitLoss = async (req, res) => {
     const { page = 1, pageSize = 10, search = '', startDate, endDate } = req.query;
     const limit = parseInt(pageSize);
     const dataType = req.query.dataType;
-    const token = jwt.sign({ roles: req.user.roles }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
+    const token = jwt.sign({ role: req.user.role }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
     const params = {
       userName,
       search,
@@ -147,7 +147,7 @@ export const marketProfitLoss = async (req, res) => {
     const { gameId, userName, } = req.params;
     const { page = 1, pageSize = 10, search = '' } = req.query;
     const limit = parseInt(pageSize);
-    const token = jwt.sign({ roles: req.user.roles }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
+    const token = jwt.sign({ role: req.user.role }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
     const params = {
       userName,
       gameId,
@@ -194,7 +194,23 @@ export const marketProfitLoss = async (req, res) => {
       );
   } catch (error) {
     console.error("Error from API:", error.response ? error.response.data : error.message);
-    res.status(statusCode.internalServerError).json(apiResponseErr(null, false, statusCode.internalServerError, error.message));
+        if (error.response) {
+      return apiResponseErr(
+        null,
+        false,
+        error.response.status,
+        error.response.data.message || error.response.data.errMessage,
+        res
+      );
+    } else {
+      return apiResponseErr(
+        null,
+        false,
+        statusCode.internalServerError,
+        error.message,
+        res
+      );
+    }
   }
 };
 
@@ -203,7 +219,7 @@ export const runnerProfitLoss = async (req, res) => {
     const { marketId, userName } = req.params;
     const { page = 1, pageSize = 10, search = '' } = req.query;
     const limit = parseInt(pageSize);
-    const token = jwt.sign({ roles: req.user.roles }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
+    const token = jwt.sign({ role: req.user.role }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
 
     const params = {
       userName,

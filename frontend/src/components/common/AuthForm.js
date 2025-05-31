@@ -24,7 +24,7 @@ const Authform = ({ purpose, authFormApi }) => {
   };
   const renderRoleOptions = () => {
     if (purpose === "create") {
-      const availableRoles = roleOptions[store?.admin?.roles[0]?.role] || [];
+      const availableRoles = roleOptions[store?.admin?.role] || [];
       // const availableRoles = [];
 
       return (
@@ -47,50 +47,6 @@ const Authform = ({ purpose, authFormApi }) => {
     }
     return null;
   };
-  //need not delete this part this is the old portion for formik down is the new portion changed by me tamoghna sanyal
-  // const {
-  //   values,
-  //   errors,
-  //   touched,
-  //   handleBlur,
-  //   handleChange,
-  //   handleSubmit,
-  //   resetForm,
-  //   setFieldValue,
-  // } = useFormik({
-  //   initialValues: {
-  //     ...authForm,
-  //     roles: authForm.roles || [], // Ensure role is an array
-  //   },
-  //   validationSchema: LoginSchema,
-  //   onSubmit: (values, action) => {
-  //     authFormHandler(values);
-  //     resetForm();
-  //   },
-  //   enableReinitialize: true,
-  // });
-  // async function authFormHandler(values) {
-  //   dispatch({
-  //     type: strings.isLoading,
-  //     payload: true,
-  //   });
-  //   setIsLoading(true);
-  //   const response = await authFormApi(values, true);
-  //   if (purpose === "login" && response) {
-  //     dispatch({
-  //       type: strings.LOG_IN,
-  //       payload: { isLogin: true, ...response.data },
-  //     });
-  //     navigate("/welcome");
-
-  //     // setShowLogin(!showLogin);
-  //   }
-  //   dispatch({
-  //     type: strings.isLoading,
-  //     payload: false,
-  //   });
-  //   setIsLoading(false);
-  // }
 
   const {
     values,
@@ -104,7 +60,7 @@ const Authform = ({ purpose, authFormApi }) => {
   } = useFormik({
     initialValues: {
       ...authForm,
-      roles: authForm.roles || [], // Ensure role is an array
+      role: authForm.role || [],
     },
     validationSchema: LoginSchema,
     onSubmit: async (values, action) => {
@@ -132,7 +88,7 @@ const Authform = ({ purpose, authFormApi }) => {
 
     // API call to authenticate
     const response =
-      values?.roles[0]?.length == 0 ? "" : await authFormApi(values, true);
+      !values?.role ? "" : await authFormApi(values, true);
 
     if (response && response.data) {
       if (purpose === "login") {
@@ -154,7 +110,7 @@ const Authform = ({ purpose, authFormApi }) => {
       }
     }
 
-    // Reset loading state
+    // Reset loading state  
     dispatch({
       type: strings.isLoading,
       payload: false,
@@ -164,7 +120,7 @@ const Authform = ({ purpose, authFormApi }) => {
 
   const handleRoleChange = (event) => {
     const selectedRole = event.target.value;
-    setFieldValue("roles", [selectedRole]);
+    setFieldValue("role", selectedRole);
   };
 
   return (
@@ -190,15 +146,14 @@ const Authform = ({ purpose, authFormApi }) => {
                   </h5>
                 </div>
                 <div className="modal-body">
-                  <form>
+                  <form onSubmit={handleSubmit}>
                     <div className="">
                       <input
                         type="text"
-                        className={`form-control ${
-                          errors.userName && touched.userName
-                            ? "border-danger"
-                            : ""
-                        }`}
+                        className={`form-control ${errors.userName && touched.userName
+                          ? "border-danger"
+                          : ""
+                          }`}
                         placeholder="Enter Username"
                         name="userName"
                         value={values.userName}
@@ -216,11 +171,10 @@ const Authform = ({ purpose, authFormApi }) => {
                     <div className="position-relative">
                       <input
                         type={showPassword ? "text" : "password"}
-                        className={`form-control ${
-                          errors.password && touched.password
-                            ? "border-danger"
-                            : ""
-                        }`}
+                        className={`form-control ${errors.password && touched.password
+                          ? "border-danger"
+                          : ""
+                          }`}
                         placeholder="Enter Password"
                         name="password"
                         value={values.password}
@@ -228,9 +182,8 @@ const Authform = ({ purpose, authFormApi }) => {
                         style={{ paddingRight: "2.5rem" }}
                       />
                       <i
-                        className={`bi ${
-                          showPassword ? "bi-eye-slash" : "bi-eye"
-                        } position-absolute`}
+                        className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"
+                          } position-absolute`}
                         style={{
                           right: "10px",
                           top: "25px",
@@ -254,7 +207,7 @@ const Authform = ({ purpose, authFormApi }) => {
                         <select
                           className="form-select"
                           name="role"
-                          value={values.roles || ""}
+                          value={values.role || ""}
                           onChange={handleRoleChange}
                           onBlur={handleBlur}
                         >
@@ -263,31 +216,27 @@ const Authform = ({ purpose, authFormApi }) => {
                       </div>
                     )}
 
-                    {purpose === "create" && values.roles.length > 0 && (
+                    {purpose === "create" && values?.role?.length > 0 && (
                       <button
-                        className={`btn_1 full_width text-center`}
+                        type="submit"
+                        className="btn_1 full_width text-center"
                         disabled={["suspended"].includes(store?.admin?.status)}
-                        style={{
-                          cursor: values.roles ? "pointer" : "not-allowed",
-                        }}
-                        onClick={values.roles ? handleSubmit : undefined}
+                        style={{ cursor: "pointer" }}
                       >
-                        {purpose === "create" && "Create"}
-                        {purpose === "login" && "Log In"}
+                        Create
+                     </button>
+                    )}
+
+                    {purpose === "login" && (
+                      <button
+                        type="submit"
+                        className="btn_1 full_width text-center"
+                        style={{ cursor: "pointer" }}
+                      >
+                        Log In
                       </button>
                     )}
-                    {purpose === "login" && (
-                      <a
-                        className="btn_1 full_width text-center"
-                        style={{
-                          cursor: values.roles ? "pointer" : "not-allowed",
-                        }}
-                        onClick={values.roles ? handleSubmit : undefined}
-                      >
-                        {purpose === "create" && "Create"}
-                        {purpose === "login" && "Log In"}
-                      </a>
-                    )}
+
                   </form>
                 </div>
               </div>

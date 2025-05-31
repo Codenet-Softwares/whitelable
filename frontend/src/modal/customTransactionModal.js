@@ -241,6 +241,7 @@ const CustomTransactionModal = (props) => {
                   textAlign: "center",
                   boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
                 }}
+                className="text-uppercase"
               >
                 {props?.role}
               </span>
@@ -254,6 +255,7 @@ const CustomTransactionModal = (props) => {
                   letterSpacing: "0.5px",
                   display: "inline-block",
                 }}
+                className="text-uppercase"
               >
                 {props?.adminName}{" "}
                 {props.differentiate === "walletAmountProvider" && (

@@ -147,7 +147,7 @@ const NavTop = () => {
                 }}
               >
                 <span style={{ color: "#F5C93A" }}>
-                  {store?.admin?.roles[0]?.role}
+                  {store?.admin?.role}
                 </span>{" "}
                 Admin <span style={{ color: "#F5C93A" }}>Panel</span>
               </h2>
@@ -171,12 +171,13 @@ const NavTop = () => {
                   >
                     <div className="profile_author_name">
                       <p className="mb-1 small">
-                        {store?.admin?.roles[0]?.role}
+                        {/* {store?.admin?.role.toUpperCase()} */}
                       </p>
-                      <h5 className="m-0">{store?.admin?.adminName}</h5>
+                      <h5 className="m-0">{store?.admin?.adminName.toUpperCase()}</h5>
+                      <p className="m-0">ROLE: {store?.admin?.role.toUpperCase()}</p>
                     </div>
                     <div className="profile_info_details">
-                      {store.admin.roles[0].role === "superAdmin" && (
+                      {store.admin.role === "superAdmin" && (
                         <a
                           style={{ cursor: "pointer" }}
                           onClick={() => openModal()}
@@ -208,7 +209,7 @@ const NavTop = () => {
             <div className="modal-content">
               <div className="modal-header">
                 <h4 className="modal-title fw-bold text-uppercase">Reset Password</h4>
-                <button type="button" className="close" onClick={closeModal}>
+                <button type="button" className="close border-0 bg-white fs-3" onClick={closeModal}>
                   &times;
                 </button>
               </div>

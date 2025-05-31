@@ -1,27 +1,28 @@
 import React, { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { getBetList } from "../Utils/service/apiService";
 import { formatDateForUi } from "../Utils/helper";
 import Pagination from "../components/common/Pagination";
 
 const BetHistoryForPl = () => {
   const [betList, SetBetList] = useState([]);
-  const { userName, runnerId } = useParams();
-  const [page, setPage] = useState(1)
+  const { userName, marketId } = useParams();
+  const [page, setPage] = useState(1);
   const [totalData, setTotalData] = useState(0);
   const [totalPage, setTotalPage] = useState(0);
-  const pageLimit=10
-
+  const pageLimit = 10;
+  const navigate = useNavigate();
+  console.log("marketId through params", marketId);
   const fetchBetList = async () => {
     const response = await getBetList({
       userName: userName,
-      runnerId: runnerId,
-      page:page,
-      limit:pageLimit
+      marketId: marketId,
+      page: page,
+      limit: pageLimit,
     });
     SetBetList(response?.data);
-    setTotalData(response?.pagination?.totalItems)
-    setTotalPage(response?.pagination?.totalPages)
+    setTotalData(response?.pagination?.totalItems);
+    setTotalPage(response?.pagination?.totalPages);
   };
 
   useEffect(() => {
@@ -33,6 +34,10 @@ const BetHistoryForPl = () => {
 
   const selectPageHandler = (selectedPage) => {
     setPage(selectedPage);
+  };
+
+  const handleBack = () => {
+    navigate(-1);
   };
 
   return (
@@ -51,7 +56,15 @@ const BetHistoryForPl = () => {
           className="card-heade text-white p-1 d-flex justify-content-between"
           style={{ backgroundColor: "#26416e" }}
         >
-          <b>&nbsp;&nbsp;Bet History</b>
+          <b>&nbsp;&nbsp;Bet History11</b>
+           <span
+            style={{ cursor: "pointer" }}
+            title="Back"
+            onClick={handleBack} 
+          >
+            {" "}
+            <i className="fas fa-arrow-left"></i>
+          </span>
         </div>
         <div className="m-1 d-flex justify-content-between align-items-center"></div>
 

@@ -19,42 +19,6 @@ export const createAdminSchema = [
 export const createSubAdminSchema = [
   body('userName').trim().notEmpty().withMessage('User Name is required'),
   body('password').trim().notEmpty().withMessage('Password is required'),
-  body('roles')
-    .isArray({ min: 1 }).withMessage('Roles must be an array with at least one role')
-    .custom((value) => {
-      const allowedPermissions = [
-        string.transferBalance,
-        string.status,
-        string.creditRefEdit,
-        string.partnershipEdit,
-        string.creditRefView,
-        string.partnershipView,
-        string.userProfileView,
-        string.profileView,
-        string.viewAdminData,
-        string.createAdmin,
-        string.createUser,
-        string.accountStatement,
-        string.activityLog,
-        string.deleteAdmin,
-        string.restoreAdmin,
-        string.moveToTrash,
-        string.trashView,
-        string.viewSubAdmin,
-        string.marketAnalysis
-      ];
-      for (let i = 0; i < value.length; i++) {
-        if (!value[i].permission || !Array.isArray(value[i].permission) || value[i].permission.length === 0) {
-          throw new Error('Permission must be a non-empty array');
-        }
-        for (let j = 0; j < value[i].permission.length; j++) {
-          if (!allowedPermissions.includes(value[i].permission[j])) {
-            throw new Error(`Invalid permission: ${value[i].permission[j]}`);
-          }
-        }
-      }
-      return true;
-    })
 ];
 
 export const adminLoginSchema = [
@@ -111,8 +75,20 @@ export const transferAmountSchema = [
 
 export const transactionViewSchema = [
   param('userName').exists().withMessage('User Name is required.'),
+  query("dataType")
+  .exists()
+  .withMessage("dataType is required.")
+  .isIn(["live", "olddata", "backup"])
+  .withMessage("Valid values are 'live', 'olddata', or 'backup'."),
   query('page').optional().toInt().isInt({ min: 1 }).withMessage('Page number must be a positive integer.'),
   query('limit').optional().toInt().isInt({ min: 1 }).withMessage('Limit must be a positive integer.'),
+  query(['startDate', 'endDate']).custom((value, { req }) => {
+    const { startDate, endDate } = req.query;
+    if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+      throw new Error('startDate must be less than or equal to endDate.');
+    }
+    return true;
+  })
 ];
 export const viewAllCreatesSchema = [
   param('createdById').exists().withMessage('Id is required.'),
@@ -136,7 +112,7 @@ export const creditRefSchema = [
 
 export const moveToTrashSchema = [body('requestId').exists().withMessage('Request Id is required')];
 
-export const deleteFromTrashSchema = [param('trashId').exists().withMessage('Trash Id is required')];
+export const deleteFromTrashSchema = [param('adminId').exists().withMessage('adminId Id is required')];
 
 export const activeStatusSchema = [param('adminId').exists().withMessage('Admin Id is required')];
 
@@ -175,7 +151,7 @@ export const subAdminPermissionSchema = [
       'creditRef-Edit', 'partnership-Edit', 'creditRef-View', 'partnership-view',
       'user-profile-view', 'profile-view', 'view-admin-data', 'create-user',
       'accountStatement', 'activityLog', 'delete-admin', 'restore-admin',
-      'move-to-trash', 'trash-view', 'view-subAdmin', 'view-balance','market-analysis'
+      'move-to-trash', 'trash-view', 'view-subAdmin', 'view-balance','market-analysis','my-report'
     ];
     for (let i = 0; i < value.length; i++) {
       if (!allowedPermissions.includes(value[i])) {
@@ -188,8 +164,20 @@ export const subAdminPermissionSchema = [
 
 export const accountStatementSchema = [
   param('adminId').exists().withMessage('Id is required.'),
+  query("dataType")
+  .exists()
+  .withMessage("dataType is required.")
+  .isIn(["live", "olddata", "backup"])
+  .withMessage("Valid values are 'live', 'olddata', or 'backup'."),
   query('page').optional().toInt().isInt({ min: 1 }).withMessage('Page number must be a positive integer.'),
   query('limit').optional().toInt().isInt({ min: 1 }).withMessage('Limit must be a positive integer.'),
+    query(['startDate', 'endDate']).custom((value, { req }) => {
+    const { startDate, endDate } = req.query;
+    if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+      throw new Error('startDate must be less than or equal to endDate.');
+    }
+    return true;
+  })
 ];
 
 export const userStatusSchema = [param('userName').exists().withMessage('User Name is required.')];
@@ -245,7 +233,14 @@ export const betHistorySchema = [
     .withMessage("Username is required."),
   param("gameId")
     .notEmpty()
-    .withMessage("Game Id is required.")
+    .withMessage("Game Id is required."),
+      query(['startDate', 'endDate']).custom((value, { req }) => {
+    const { startDate, endDate } = req.query;
+    if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+      throw new Error('startDate must be less than or equal to endDate.');
+    }
+    return true;
+  })
 ];
 
 export const activeInactive = [

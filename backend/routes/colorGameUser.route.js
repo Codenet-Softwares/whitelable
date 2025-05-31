@@ -10,10 +10,15 @@ export const colorGameUserRoute = (app) => {
   app.get('/api/user-colorGame-betHistory/:userName/:gameId', betHistorySchema, customErrorHandler,
     Authorize([
       string.superAdmin,
+      string.subAdmin,
       string.whiteLabel,
       string.hyperAgent,
       string.superAgent,
-      string.masterAgent
+      string.masterAgent,
+      string.subWhiteLabel,
+      string.subHyperAgent,
+      string.subMasterAgent,
+      string.subSuperAgent
     ]),
     getUserBetHistory
   );
@@ -21,30 +26,45 @@ export const colorGameUserRoute = (app) => {
   app.get('/api/user-colorGame-profitLoss/:userName', calculateProfitLossSchema, customErrorHandler,
     Authorize([
       string.superAdmin,
+      string.subAdmin,
       string.whiteLabel,
       string.hyperAgent,
       string.superAgent,
-      string.masterAgent
+      string.masterAgent,
+      string.subWhiteLabel,
+      string.subHyperAgent,
+      string.subMasterAgent,
+      string.subSuperAgent
     ]),
     getColorGameProfitLoss);
 
   app.get('/api/user-colorGame-market_profitLoss/:userName/:gameId', marketProfitLossSchema, customErrorHandler,
     Authorize([
       string.superAdmin,
+      string.subAdmin,
       string.whiteLabel,
       string.hyperAgent,
       string.superAgent,
-      string.masterAgent
+      string.masterAgent,
+      string.subWhiteLabel,
+      string.subHyperAgent,
+      string.subMasterAgent,
+      string.subSuperAgent
     ]),
     marketProfitLoss);
 
   app.get('/api/user-colorGame-runner_profitLoss/:userName/:marketId', runnerProfitLossSchema, customErrorHandler,
     Authorize([
       string.superAdmin,
+      string.subAdmin,
       string.whiteLabel,
       string.hyperAgent,
       string.superAgent,
-      string.masterAgent
+      string.masterAgent,
+      string.subWhiteLabel,
+      string.subHyperAgent,
+      string.subMasterAgent,
+      string.subSuperAgent
     ]),
     runnerProfitLoss);
 

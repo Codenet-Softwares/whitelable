@@ -11,6 +11,7 @@ const ProfitAndLossRunner = ({
   totalItems,
   UserName,
 }) => {
+  console.log('===>> line marketId',data)
   const startIndex = Math.min((data.currentPage - 1) * 10 + 1);
   const endIndex = Math.min(data.currentPage * 10, data.totalData);
 
@@ -18,9 +19,9 @@ const ProfitAndLossRunner = ({
     SetProfitLossRunnerData((prevState) => ({
       ...prevState,
       itemPerPage: Number(event.target.value),
-      currentPage: Number(currentPage),
+      currentPage: 1,
     }));
-    toast.error("Work Pending From ServerSide");
+    
   };
   const handleSearch = (e) => {
     SetProfitLossRunnerData((prev) => ({
@@ -54,6 +55,7 @@ const ProfitAndLossRunner = ({
           <select
             className="form-select w-auto m-1"
             onChange={handelItemPerPage}
+            value={data.itemPerPage} // This binds the selected value properly
           >
             <option value="10" selected>
               10 Entries
@@ -80,7 +82,9 @@ const ProfitAndLossRunner = ({
                   style={{ height: "100px" }}
                 >
                   <tr align="center">
-                    <td colSpan="10"> {/* Fixed typo from colspan="10" to colSpan="10" */}
+                    <td colSpan="10">
+                      {" "}
+                      {/* Fixed typo from colspan="10" to colSpan="10" */}
                       <div className="alert alert-info fw-bold" role="alert">
                         No Data Found !!
                       </div>
@@ -136,7 +140,7 @@ const ProfitAndLossRunner = ({
                                 style={{ cursor: "pointer" }}
                                 onClick={() => {
                                   nav(
-                                    `/betHistForPL/${UserName}/${data.runnerId}`
+                                    `/betHistForPL/${UserName}/${data.marketId}`
                                   );
                                 }}
                               >
