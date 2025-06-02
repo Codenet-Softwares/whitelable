@@ -1,6 +1,6 @@
 /**
  * @desc this file will hold all the function for retrive, upload, delete files from S3 bucket
- * @author CodeNet Softwares Pvt. Ltd.
+ * @author 
  * @file aws.js
  */
 
