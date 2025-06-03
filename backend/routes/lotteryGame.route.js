@@ -9,10 +9,15 @@ export const lotteryGameModule = (app) => {
 
     app.get('/api/get-lottery-marketAnalysis/:marketId', Authorize([
           string.superAdmin,
+          string.subAdmin,
           string.whiteLabel,
           string.hyperAgent,
           string.superAgent,
           string.masterAgent,
+          string.subWhiteLabel,
+          string.subHyperAgent,
+          string.subMasterAgent,
+          string.subSuperAgent,
           string.marketAnalysis
         ]), lotteryMarketAnalysis);
 

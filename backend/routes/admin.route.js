@@ -331,6 +331,10 @@ export const adminRoute = (app) => {
   app.get("/api/downLineUsers/:createdById",validateDownLineProfitLoss, customErrorHandler, Authorize([
     string.superAdmin,
     string.subAdmin,
+    string.subWhiteLabel,
+    string.subHyperAgent,
+    string.subSuperAgent,
+    string.subMasterAgent,
     string.whiteLabel,
     string.hyperAgent,
     string.superAgent,
