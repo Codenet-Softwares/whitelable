@@ -63,7 +63,7 @@ const Navside = () => {
           <img
             src="../../img/sidebarAdmin_icon.png"
             alt=""
-            style={{ width: "50px", height: "40px" }}
+            style={{ width: "75px", height: "60px" }}
           />
         </a>
 

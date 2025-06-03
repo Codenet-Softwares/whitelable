@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios"; // Assuming you're using Axios for API calls
+import { toast } from "react-toastify";
 
 const SuperAdminResetpassword = ({ closeModal }) => {
     const [formValues, setFormValues] = useState({
@@ -21,7 +22,7 @@ const SuperAdminResetpassword = ({ closeModal }) => {
 
         // Check if newPassword and confirmPassword match
         if (newPassword !== confirmPassword) {
-            alert("New Password and Confirm Password do not match!");
+            toast.warn("New Password and Confirm Password do not match!");
             return;
         }
 
@@ -36,12 +37,12 @@ const SuperAdminResetpassword = ({ closeModal }) => {
             // Make API call
             const response = await axios.post("API_ENDPOINT", payload); // Replace 'API_ENDPOINT' with your endpoint
             if (response.status === 200) {
-                alert("Password reset successfully!");
+                toast.success("Password reset successfully!");
                 closeModal(); // Close the modal after successful reset
             }
         } catch (error) {
             console.error("Error resetting password:", error);
-            alert("Failed to reset password. Please try again.");
+            toast.warn("Failed to reset password. Please try again.");
         }
     };
 

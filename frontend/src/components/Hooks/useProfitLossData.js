@@ -7,6 +7,7 @@ import {
   getUserWiseBetHistoryLotteryLevelFour,
 } from "../../Utils/service/apiService";
 import { getUseProfitLossState } from "../../Utils/service/initiateState";
+import { toast } from "react-toastify";
 
 const useProfitLossData = () => {
   const [state, setState] = useState(getUseProfitLossState());
@@ -382,7 +383,7 @@ const useProfitLossData = () => {
       state.dataType !== "live" &&
       (!state.dateRange.from || !state.dateRange.to)
     ) {
-      alert("Please select both From and To dates");
+      toast.info("Please select both From and To dates");
       return;
     }
 
