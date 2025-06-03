@@ -15,6 +15,7 @@ export class StringConstants {
 
   LOG_IN = "LOG_IN";
   LOG_OUT = "LOG_OUT";
+  NAVIGATION_BAR ="NAVIGATION_BAR"
 
   // roles
   superAdmin = "superAdmin";

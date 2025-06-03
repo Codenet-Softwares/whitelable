@@ -21,10 +21,9 @@ const Wallet = () => {
   const [refresh, setRefresh] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [adminDelete, setAdminDelete] = useState("");
-  const [navigationBar, setNavigationBar] = useState([
-    { adminName: store?.admin?.adminName, adminId: store?.admin?.id },
-  ]);
+  const [navigationBar, setNavigationBar] = useState(store?.admin?.navigationBar);
   const [userId, setUserId] = useState(store?.admin?.id);
+  console.log("navigationBar", navigationBar)
   console.log("clicked id", userId);
   const userIdRef = useRef(store?.admin?.id);
   //  debounced search handler
@@ -38,36 +37,68 @@ const Wallet = () => {
     userIdRef.current = userId;
   }, [userId]);
 
-  console.log("navigationBar", navigationBar);
+  console.log("navigationBar", navigationBar, userId);
   const handleAdminNavigateToChild = (adminId, adminName) => {
+    const newEntry = { adminId, adminName };
+
     setUserId(adminId);
-    setNavigationBar((prev) => [...prev, { adminId, adminName }]);
+
+    // Update local or context state
+    setNavigationBar((prev) => {
+      const updated = [...prev, newEntry];
+
+      // Sync with global reducer
+      dispatch({
+        type: strings.NAVIGATION_BAR,
+        payload: updated,
+      });
+
+      return updated;
+    });
+
     setWalletCard((prevData) => ({
       ...prevData,
       currentPage: 1,
     }));
   };
 
+
   const handleBreadcrumbClick = (clickedAdminId) => {
+    // Find the index of the clicked admin in the navigation bar
     const index = navigationBar.findIndex(
       (entry) => entry.adminId === clickedAdminId
     );
+
     if (index !== -1) {
+      // Keep only the path up to the clicked admin
       const trimmed = navigationBar.slice(0, index + 1);
+
+      // Update local state
       setNavigationBar(trimmed);
+
+      // Update context/global state with the trimmed breadcrumb
+      dispatch({
+        type: strings.NAVIGATION_BAR,
+        payload: trimmed,
+      });
+
+      // Set the current user ID to the clicked admin
       setUserId(clickedAdminId);
     }
+
+    // Reset wallet card pagination to the first page
     setWalletCard((prevData) => ({
       ...prevData,
       currentPage: 1,
     }));
   };
+
 
   const handleChange = (name, value) => {
     setWalletCard((prevData) => ({
       ...prevData,
       [name]: value,
-      ...(name === "name" && { currentPage: 1 }), 
+      ...(name === "name" && { currentPage: 1 }),
     }));
 
     if (name === "name") {
@@ -114,7 +145,7 @@ const Wallet = () => {
 
   async function getAll_Create(searchName = walletCard.name, id = userId) {
     const response = await getAllCreate({
-      _id: id,
+      _id: navigationBar[navigationBar?.length-1]?.adminId,
       pageNumber: walletCard.currentPage,
       dataLimit: walletCard.totalEntries,
       name: searchName,
@@ -210,15 +241,14 @@ const Wallet = () => {
           <div class="white_card card_height_100 mb_30 pt-4">
             <div class="white_card_body">
               <div className="d-flex align-items-center flex-wrap gap-2 my-2">
-                {navigationBar.map((item, index) => {
+                {store?.admin?.navigationBar?.map((item, index) => {
                   const isLast = index === navigationBar.length - 1;
                   return (
                     <React.Fragment key={item.adminId}>
                       <span
                         role="button"
-                        className={`text-decoration-none ${
-                          isLast ? "text-primary" : "text-black"
-                        }`}
+                        className={`text-decoration-none ${isLast ? "text-primary" : "text-black"
+                          }`}
                         style={{
                           fontSize: "20px",
                           cursor: "pointer",
@@ -269,28 +299,28 @@ const Wallet = () => {
                     </select>
                     <div class="serach_field_2">
                       <div class="search_inner">
-                       
-                          <div class="search_field">
-                            <input
-                              type="text"
-                              placeholder="Search Content Here..."
-                              value={walletCard.name}
-                              onChange={(e) => {
-                                handleChange("name", e.target.value);
-                              }}
-                              onKeyPress={(e) => {
-                                if (e.key === "Enter") {
-                                  e.preventDefault(); // Prevent default behavior
-                                  debouncedGetAllCreate(walletCard.name); // Call the search function
-                                }
-                              }}
-                            />
-                          </div>
-                          <button type="submit">
-                            {" "}
-                            <i class="ti-search"></i>{" "}
-                          </button>
-                    
+
+                        <div class="search_field">
+                          <input
+                            type="text"
+                            placeholder="Search Content Here..."
+                            value={walletCard.name}
+                            onChange={(e) => {
+                              handleChange("name", e.target.value);
+                            }}
+                            onKeyPress={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault(); // Prevent default behavior
+                                debouncedGetAllCreate(walletCard.name); // Call the search function
+                              }
+                            }}
+                          />
+                        </div>
+                        <button type="submit">
+                          {" "}
+                          <i class="ti-search"></i>{" "}
+                        </button>
+
                       </div>
                     </div>
                   </div>

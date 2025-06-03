@@ -10,6 +10,15 @@ export const reducer = (state, action) => {
         ...state,
         admin: getAdminInitialState({ isLogin: false }),
       };
+    case strings.NAVIGATION_BAR:
+      return {
+        ...state,
+        admin: getAdminInitialState({
+          ...state.admin,
+          navigationBar: action.payload,
+        }),
+      };
+
 
     default:
       return state;

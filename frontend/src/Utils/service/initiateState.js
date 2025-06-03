@@ -10,6 +10,12 @@ export function getAdminInitialState(body = {}) {
     createdById: body?.createdById ?? null,
     createdByUser: body?.createdByUser ?? null,
     balance: body?.balance ?? 0,
+    navigationBar: body?.navigationBar ?? [
+      {
+        adminName: body?.userName ?? "",
+        adminId: body?.adminId ?? "",
+      },
+    ],
   };
 }
 
@@ -66,7 +72,7 @@ export function getSubAdminPermissionData(body = {}) {
   return {
     userName: "",
     role: "",
-    permission:[]
+    permission: []
   };
 }
 
@@ -228,3 +234,4 @@ export const getUseProfitLossState = (body = {}) => {
     ...body,
   };
 };
+
