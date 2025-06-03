@@ -885,11 +885,11 @@ export const downLineUsers = async (req, res) => {
     const searchTerm = req.query.searchTerm || '';
     const page = parseInt(req.query.page, 10) || 1;
     const pageSize = parseInt(req.query.pageSize, 10) || 10;
-    const { dataType, startDate, endDate } = req.query;
+    const {dataType,startDate, endDate} = req.query;
 
     let profitLossResponse = { data: [] };
     try {
-      const baseURL = process.env.COLOR_GAME_URL;
+     const baseURL = process.env.COLOR_GAME_URL;
       const response = await axios.get(`${baseURL}/api/user-profit-loss`,
         {
           params: {
@@ -926,7 +926,7 @@ export const downLineUsers = async (req, res) => {
 
     const getPrimaryRole = (roles) => {
       if (!roles || !roles.length) return null;
-      return roles[0].role;
+      return roles; 
     };
 
     const calculateDownlineProfitLoss = (adminId, role) => {
@@ -978,13 +978,13 @@ export const downLineUsers = async (req, res) => {
     const baseWhere = {
       createdById,
       role: {
-        [Op.or]: allowedRoles
+        [Op.in]: allowedRoles,
       },
     };
 
     if (searchTerm) {
       baseWhere.userName = {
-        [Op.like]: `%${searchTerm}%`
+        [Op.like]: `%${searchTerm}%`,
       };
     }
 
