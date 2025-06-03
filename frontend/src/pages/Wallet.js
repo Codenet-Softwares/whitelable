@@ -21,10 +21,20 @@ const Wallet = () => {
   const [refresh, setRefresh] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [adminDelete, setAdminDelete] = useState("");
-  const [navigationBar, setNavigationBar] = useState([
-    { adminName: store?.admin?.adminName, adminId: store?.admin?.id },
-  ]);
-  const [userId, setUserId] = useState(store?.admin?.id);
+  const [navigationBar, setNavigationBar] = useState(() => {
+    const savedNav = localStorage.getItem('walletNavigationBar');
+    return savedNav
+      ? JSON.parse(savedNav)
+      : [{ adminName: store?.admin?.adminName, adminId: store?.admin?.id }];
+  });
+
+  const [userId, setUserId] = useState(() => {
+    const savedId = localStorage.getItem('walletUserId');
+    return savedId || store?.admin?.id;
+  });
+
+
+
   console.log("clicked id", userId);
   const userIdRef = useRef(store?.admin?.id);
   //  debounced search handler
@@ -33,10 +43,27 @@ const Wallet = () => {
       getAll_Create(searchName, userIdRef.current);
     }, 1500),
     []
+
+
   );
+
+  // Persist state to localStorage
   useEffect(() => {
-    userIdRef.current = userId;
+    localStorage.setItem('walletNavigationBar', JSON.stringify(navigationBar));
+  }, [navigationBar]);
+
+  useEffect(() => {
+    localStorage.setItem('walletUserId', userId);
   }, [userId]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      localStorage.removeItem('walletNavigationBar');
+      localStorage.removeItem('walletUserId');
+    };
+  }, []);
+
 
   console.log("navigationBar", navigationBar);
   const handleAdminNavigateToChild = (adminId, adminName) => {
@@ -67,7 +94,7 @@ const Wallet = () => {
     setWalletCard((prevData) => ({
       ...prevData,
       [name]: value,
-      ...(name === "name" && { currentPage: 1 }), 
+      ...(name === "name" && { currentPage: 1 }),
     }));
 
     if (name === "name") {
@@ -216,9 +243,8 @@ const Wallet = () => {
                     <React.Fragment key={item.adminId}>
                       <span
                         role="button"
-                        className={`text-decoration-none ${
-                          isLast ? "text-primary" : "text-black"
-                        }`}
+                        className={`text-decoration-none ${isLast ? "text-primary" : "text-black"
+                          }`}
                         style={{
                           fontSize: "20px",
                           cursor: "pointer",
@@ -269,28 +295,28 @@ const Wallet = () => {
                     </select>
                     <div class="serach_field_2">
                       <div class="search_inner">
-                       
-                          <div class="search_field">
-                            <input
-                              type="text"
-                              placeholder="Search Content Here..."
-                              value={walletCard.name}
-                              onChange={(e) => {
-                                handleChange("name", e.target.value);
-                              }}
-                              onKeyPress={(e) => {
-                                if (e.key === "Enter") {
-                                  e.preventDefault(); // Prevent default behavior
-                                  debouncedGetAllCreate(walletCard.name); // Call the search function
-                                }
-                              }}
-                            />
-                          </div>
-                          <button type="submit">
-                            {" "}
-                            <i class="ti-search"></i>{" "}
-                          </button>
-                    
+
+                        <div class="search_field">
+                          <input
+                            type="text"
+                            placeholder="Search Content Here..."
+                            value={walletCard.name}
+                            onChange={(e) => {
+                              handleChange("name", e.target.value);
+                            }}
+                            onKeyPress={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault(); // Prevent default behavior
+                                debouncedGetAllCreate(walletCard.name); // Call the search function
+                              }
+                            }}
+                          />
+                        </div>
+                        <button type="submit">
+                          {" "}
+                          <i class="ti-search"></i>{" "}
+                        </button>
+
                       </div>
                     </div>
                   </div>

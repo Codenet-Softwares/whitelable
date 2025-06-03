@@ -121,10 +121,7 @@ const Market_Analysis = () => {
                       placeholder="Search Content Here..."
                     />
                   </div>
-                  {/* <button type="submit">
-                                        {" "}
-                                        <i className="ti-search"></i>{" "}
-                                    </button> */}
+                  
                 </form>
               </div>
             </div>
