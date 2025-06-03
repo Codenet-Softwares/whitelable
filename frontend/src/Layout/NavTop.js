@@ -114,12 +114,10 @@ const NavTop = () => {
     try {
       const response = await resetPasswordSuperAdmin(payload);
       if (response.successCode === 200) {
-        // alert("Password reset successfully!");
         closeModal();
       }
     } catch (error) {
       console.error("Error resetting password:", error);
-      // alert("Failed to reset password. Please try again.");
     }
   };
   const closeModal = () => {

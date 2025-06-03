@@ -5,6 +5,7 @@ import { getAuthForm } from "../../Utils/service/initiateState";
 import { LoginSchema } from "../../Utils/schema";
 import { useAppContext } from "../../contextApi/context";
 import strings from "../../Utils/constant/stringConstant";
+import { toast } from "react-toastify";
 
 const Authform = ({ purpose, authFormApi }) => {
   const [authForm] = useState(getAuthForm);
@@ -71,7 +72,7 @@ const Authform = ({ purpose, authFormApi }) => {
 
         resetForm(); // Reset the form after successful submission
       } catch (error) {
-        alert("There was an error during authentication"); // Handle error, if any
+        toast.error("There was an error during authentication"); // Handle error, if any
       } finally {
         hideLoader(); // Hide loader after the async operation is complete
       }
@@ -87,8 +88,7 @@ const Authform = ({ purpose, authFormApi }) => {
     // setIsLoading(true);
 
     // API call to authenticate
-    const response =
-      !values?.role ? "" : await authFormApi(values, true);
+    const response = !values?.role ? "" : await authFormApi(values, true);
 
     if (response && response.data) {
       if (purpose === "login") {
@@ -110,7 +110,7 @@ const Authform = ({ purpose, authFormApi }) => {
       }
     }
 
-    // Reset loading state  
+    // Reset loading state
     dispatch({
       type: strings.isLoading,
       payload: false,
@@ -150,10 +150,11 @@ const Authform = ({ purpose, authFormApi }) => {
                     <div className="">
                       <input
                         type="text"
-                        className={`form-control ${errors.userName && touched.userName
-                          ? "border-danger"
-                          : ""
-                          }`}
+                        className={`form-control ${
+                          errors.userName && touched.userName
+                            ? "border-danger"
+                            : ""
+                        }`}
                         placeholder="Enter Username"
                         name="userName"
                         value={values.userName}
@@ -171,10 +172,11 @@ const Authform = ({ purpose, authFormApi }) => {
                     <div className="position-relative">
                       <input
                         type={showPassword ? "text" : "password"}
-                        className={`form-control ${errors.password && touched.password
-                          ? "border-danger"
-                          : ""
-                          }`}
+                        className={`form-control ${
+                          errors.password && touched.password
+                            ? "border-danger"
+                            : ""
+                        }`}
                         placeholder="Enter Password"
                         name="password"
                         value={values.password}
@@ -182,8 +184,9 @@ const Authform = ({ purpose, authFormApi }) => {
                         style={{ paddingRight: "2.5rem" }}
                       />
                       <i
-                        className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"
-                          } position-absolute`}
+                        className={`bi ${
+                          showPassword ? "bi-eye-slash" : "bi-eye"
+                        } position-absolute`}
                         style={{
                           right: "10px",
                           top: "25px",
@@ -224,7 +227,7 @@ const Authform = ({ purpose, authFormApi }) => {
                         style={{ cursor: "pointer" }}
                       >
                         Create
-                     </button>
+                      </button>
                     )}
 
                     {purpose === "login" && (
@@ -236,7 +239,6 @@ const Authform = ({ purpose, authFormApi }) => {
                         Log In
                       </button>
                     )}
-
                   </form>
                 </div>
               </div>
