@@ -26,8 +26,8 @@ import { useNavigate } from "react-router-dom";
 const User_BetMarket = () => {
   const navigate = useNavigate();
 
-    const { dispatch,store, showLoader, hideLoader  } = useAppContext();
-  
+  const { dispatch, store, showLoader, hideLoader } = useAppContext();
+
   const [user_marketWithRunnerData, setUser_marketWithRunnerData] = useState(
     getMarketWithRunnerDataInitialState()
   );
@@ -54,21 +54,21 @@ const User_BetMarket = () => {
   const [isInsideViewMoreModal, setIsInsideViewMoreModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   // useEffect(()=>{fetch_BetBookData()},[bodyData])
-  const handleUsernameClick = (userName , fromViewMore = false) => {
+  const handleUsernameClick = (userName, fromViewMore = false) => {
     console.log("onclick", userName);
     setSelectedUser(userName);
     setHirerchyModalOpen(true); // Open the modal when a username is clicked
-    handleCloseViewMoreModal();// #####
+    handleCloseViewMoreModal(); // #####
     setIsInsideViewMoreModal(fromViewMore); // Track if the click was from View More modal
   };
   const handleHirerchyCloseModal = () => {
     setHirerchyModalOpen(false);
     setSelectedUser(null); // Reset user selection
-     // Only reopen "View More" modal if it was opened from inside it
-     if (isInsideViewMoreModal) {
+    // Only reopen "View More" modal if it was opened from inside it
+    if (isInsideViewMoreModal) {
       setViewMoreModalOpen(true);
-  }
-};
+    }
+  };
 
   const handleLiveToggle = () => {
     setLiveToggle(!liveToggle);
@@ -151,7 +151,6 @@ const User_BetMarket = () => {
     entries = user_LiveBet.totalEntries,
     search = ""
   ) {
-
     try {
       const response = await getMarket_LiveBet({
         marketId: marketId,
@@ -185,7 +184,7 @@ const User_BetMarket = () => {
   );
 
   async function getView_User_BetMarket() {
-    showLoader(); 
+    showLoader();
     try {
       const response = await getUserGetMarket({
         userName: store.admin.adminName,
@@ -194,11 +193,9 @@ const User_BetMarket = () => {
       setUser_marketWithRunnerData(response.data);
     } catch (error) {
       toast.error(customErrorHandler(error));
+    } finally {
+      hideLoader(); // Hide loader after the async operation is complete
     }
-    finally {
-        hideLoader(); // Hide loader after the async operation is complete
-      }          
-
   }
 
   async function fetch_BetBookData() {
@@ -281,6 +278,10 @@ const User_BetMarket = () => {
       fetchData();
     }
   }, [bodyData]);
+  console.log(
+    "user_marketWithRunnerData",
+    user_marketWithRunnerData?.runners[0]?.runnerName?.runnerId.length
+  );
 
   return (
     <div className="container-fluid my-5">
@@ -370,47 +371,163 @@ const User_BetMarket = () => {
                   <tbody>
                     {/* Dynamically Populate Runner Data */}
 
-                    {user_marketWithRunnerData?.runners?.map(
-                      (runnerData, index) => (
-                        <tr key={index}>
-                          <td className="team-name px-3">
-                            <h4 className="fw-bolder">
-                              {runnerData.runnerName.name || "Team Name"}
-                            </h4>
-                            <span className="number">
-                              <i
-                                className={`fa fa-arrow-right fw-bold ${
-                                  runnerData?.runnerName?.bal <= 0
-                                    ? "green_icon"
-                                    : "red_icon"
-                                }`}
-                                aria-hidden="true"
-                              ></i>
-                              <span
-                                className={`px-2 fw-bold ${
-                                  runnerData?.runnerName?.bal <= 0
-                                    ? "green_icon"
-                                    : "red_icon"
-                                }`}
-                              >
-                                {runnerData?.runnerName?.bal <= 0
-                                  ? `+${Math.abs(
-                                      runnerData?.runnerName?.bal || 0
-                                    )}`
-                                  : `-${runnerData?.runnerName?.bal}`}
+                    {user_marketWithRunnerData?.runners[0]?.runnerName?.name
+                      .length > 0 ? (
+                      user_marketWithRunnerData?.runners?.map(
+                        (runnerData, index) => (
+                          <tr key={index}>
+                            <td className="team-name px-3">
+                              <h4 className="fw-bolder">
+                                {runnerData.runnerName.name || "Team Name"}
+                              </h4>
+                              <span className="number">
+                                <i
+                                  className={`fa fa-arrow-right fw-bold ${
+                                    runnerData?.runnerName?.bal <= 0
+                                      ? "green_icon"
+                                      : "red_icon"
+                                  }`}
+                                  aria-hidden="true"
+                                ></i>
+                                <span
+                                  className={`px-2 fw-bold ${
+                                    runnerData?.runnerName?.bal <= 0
+                                      ? "green_icon"
+                                      : "red_icon"
+                                  }`}
+                                >
+                                  {runnerData?.runnerName?.bal <= 0
+                                    ? `+${Math.abs(
+                                        runnerData?.runnerName?.bal || 0
+                                      )}`
+                                    : `-${runnerData?.runnerName?.bal}`}
+                                </span>
                               </span>
-                            </span>
-                          </td>
-                          <td className="back-cell text-center fw-bold">
-                            <h6>{runnerData.rate?.[0].back || "--"}</h6>
-                            <span>{runnerData.backSize || "--"}</span>
-                          </td>
-                          <td className="lay-cell text-center fw-bold">
-                            <h6>{runnerData.rate?.[0].lay || "--"}</h6>
-                            <span>{runnerData.laySize || "--"}</span>
-                          </td>
-                        </tr>
+                            </td>
+                            <td className="back-cell text-center fw-bold">
+                              <h6>{runnerData.rate?.[0].back || "--"}</h6>
+                              <span>{runnerData.backSize || "--"}</span>
+                            </td>
+                            <td className="lay-cell text-center fw-bold">
+                              <h6>{runnerData.rate?.[0].lay || "--"}</h6>
+                              <span>{runnerData.laySize || "--"}</span>
+                            </td>
+                          </tr>
+                        )
                       )
+                    ) : (
+                      <tr>
+                        <td className="team-name px-3">
+                          <h4
+                            className="fw-bolder"
+                            style={{
+                              background: "#f6f7f8",
+                              height: "1rem",
+                              width: "50%",
+                              borderRadius: "4px",
+                              position: "relative",
+                              overflow: "hidden",
+                            }}
+                          >
+                            <span
+                              style={{
+                                position: "absolute",
+                                top: 0,
+                                left: "-150px",
+                                height: "100%",
+                                width: "150px",
+                                background:
+                                  "linear-gradient(to right, transparent 0%, #e0e0e0 50%, transparent 100%)",
+                                animation: "shimmer 1.5s infinite",
+                                content: '""',
+                                display: "block",
+                              }}
+                            ></span>
+                          </h4>
+                          <span className="number d-flex align-items-center mt-2">
+                            <span
+                              className="fw-bold"
+                              style={{
+                                background: "#f6f7f8",
+                                height: "1rem",
+                                width: "25%",
+                                borderRadius: "4px",
+                                position: "relative",
+                                overflow: "hidden",
+                              }}
+                            >
+                              <span
+                                style={{
+                                  position: "absolute",
+                                  top: 0,
+                                  left: "-150px",
+                                  height: "100%",
+                                  width: "150px",
+                                  background:
+                                    "linear-gradient(to right, transparent 0%, #e0e0e0 50%, transparent 100%)",
+                                  animation: "shimmer 1.5s infinite",
+                                  content: '""',
+                                  display: "block",
+                                }}
+                              ></span>
+                            </span>
+                          </span>
+                        </td>
+                        <td
+                          className="back-cell text-center fw-bold"
+                          style={{
+                            background: "#f6f7f8",
+                            height: "1.5rem",
+                            width: "50%",
+                            margin: "0 auto",
+                            borderRadius: "6px",
+                            position: "relative",
+                            overflow: "hidden",
+                          }}
+                        >
+                          <span
+                            style={{
+                              position: "absolute",
+                              top: 0,
+                              left: "-150px",
+                              height: "100%",
+                              width: "150px",
+                              background:
+                                "linear-gradient(to right, transparent 0%, #e0e0e0 50%, transparent 100%)",
+                              animation: "shimmer 1.5s infinite",
+                              content: '""',
+                              display: "block",
+                            }}
+                          ></span>
+                        </td>
+                        <td
+                          className="lay-cell text-center fw-bold"
+                          style={{
+                            background: "#f6f7f8",
+                            height: "1.5rem",
+                            width: "50%",
+                            margin: "0 auto",
+                            borderRadius: "6px",
+                            position: "relative",
+                            overflow: "hidden",
+                          }}
+                        >
+                          <span
+                            style={{
+                              position: "absolute",
+                              top: 0,
+                              left: "-150px",
+                              height: "100%",
+                              width: "150px",
+                              background:
+                                "linear-gradient(to right, transparent 0%, #e0e0e0 50%, transparent 100%)",
+                              animation: "shimmer 1.5s infinite",
+                              content: '""',
+                              display: "block",
+                            }}
+                          ></span>
+                        </td>
+                      </tr>
                     )}
                   </tbody>
                 </table>
@@ -505,11 +622,11 @@ const User_BetMarket = () => {
                       className="card-header text-info h5 mb-0  ms-auto text-uppercase text-decoration-underline"
                       style={{
                         cursor: !liveToggle ? "not-allowed" : "pointer",
-                        opacity: !liveToggle ? 0.5 : 1, 
+                        opacity: !liveToggle ? 0.5 : 1,
                       }}
                       onClick={() => {
                         if (liveToggle) {
-                          handleOpenViewMoreModal(); 
+                          handleOpenViewMoreModal();
                         }
                       }}
                     >
@@ -680,14 +797,17 @@ const User_BetMarket = () => {
                                         className="col-2 fw-bold"
                                         style={{
                                           fontSize: "15px",
-                                          cursor:"pointer",
+                                          cursor: "pointer",
                                           color:
                                             data.type === "back"
                                               ? "#007bff"
                                               : "#FFB6C1",
                                         }}
                                         onClick={() =>
-                                          handleUsernameClick(data.userName,  true)
+                                          handleUsernameClick(
+                                            data.userName,
+                                            true
+                                          )
                                         }
                                       >
                                         {data.userName}
@@ -736,7 +856,7 @@ const User_BetMarket = () => {
                       </div>
                     }
                   />
-               
+
                   <div className="card-body">
                     <h5
                       style={{
@@ -842,14 +962,17 @@ const User_BetMarket = () => {
                                         className="col-3 fw-bold"
                                         style={{
                                           fontSize: "15px",
-                                          cursor:"pointer",
+                                          cursor: "pointer",
                                           color:
                                             data.type === "back"
                                               ? "#007bff"
                                               : "#FFB6C1",
                                         }}
                                         onClick={() =>
-                                          handleUsernameClick(data.userName,  false)
+                                          handleUsernameClick(
+                                            data.userName,
+                                            false
+                                          )
                                         }
                                       >
                                         {data.userName}
@@ -947,7 +1070,7 @@ const User_BetMarket = () => {
                     betBookData.map((master, index) => {
                       return (
                         <tr key={index}>
-                          {permissionObj.allAdmin.includes(master?.roles) ? (
+                          {permissionObj.allAdmin.includes(master?.role) ? (
                             <td
                               style={{
                                 border: "1px solid #ddd",
@@ -956,7 +1079,7 @@ const User_BetMarket = () => {
                               onClick={() =>
                                 handleClick_To_InnerHierarcy(
                                   master?.adminId,
-                                  master?.roles
+                                  master?.role
                                 )
                               }
                               className="text-primary"
@@ -977,7 +1100,7 @@ const User_BetMarket = () => {
                           <td
                             style={{ border: "1px solid #ddd", padding: "8px" }}
                           >
-                            {master?.roles}
+                            {master?.role}
                           </td>
                           {master?.runnerBalance?.map((data) => {
                             return (
@@ -1049,7 +1172,7 @@ const User_BetMarket = () => {
                     betBookData.map((master, index) => {
                       return (
                         <tr key={index}>
-                          {permissionObj.allAdmin.includes(master?.roles) ? (
+                          {permissionObj.allAdmin.includes(master?.role) ? (
                             <td
                               style={{
                                 border: "1px solid #ddd",
@@ -1058,7 +1181,7 @@ const User_BetMarket = () => {
                               onClick={() =>
                                 handleClick_To_InnerHierarcy(
                                   master?.adminId,
-                                  master?.roles
+                                  master?.role
                                 )
                               }
                               className="text-primary"
@@ -1079,7 +1202,7 @@ const User_BetMarket = () => {
                           <td
                             style={{ border: "1px solid #ddd", padding: "8px" }}
                           >
-                            {master?.roles}
+                            {master?.role}
                           </td>
                           {master?.runnerBalance?.map((data) => {
                             return (
