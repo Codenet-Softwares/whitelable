@@ -90,6 +90,7 @@ export const lotteryMarketAnalysis = async (req, res) => {
     const { marketId } = req.params;
     const { page = 1, limit = 10, search = '' } = req.query;
     const admin = req.user;
+    const role = admin.role;
     const adminId = admin.adminId;
 
     const token = jwt.sign(
@@ -123,7 +124,17 @@ export const lotteryMarketAnalysis = async (req, res) => {
     }
 
     // Fetch connected users (downline users) for the admin
-    const connectedUsers = await getAllConnectedUsers(adminId);
+    let connectedUsers;
+    if(role == 'subAdmin' || role == 'subWhiteLabel' || role == 'subHyperAgent' || role == 'subSuperAgent' || role == 'subMasterAgent') {
+      const existingAdmin = await admins.findOne({ where: { adminId } });
+      const id = existingAdmin?.dataValues?.createdById;
+      connectedUsers = await getAllConnectedUsers(id);
+    }else{
+      connectedUsers = await getAllConnectedUsers(adminId);
+    }
+
+
+    console.log("Connected Users:", connectedUsers);
 
     if (!Array.isArray(connectedUsers)) {
       return res.status(statusCode.internalServerError).send(

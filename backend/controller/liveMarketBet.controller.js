@@ -13,6 +13,32 @@ export const getUserBetMarket = async (req, res) => {
   try {
     const { marketId ,userName} = req.params;
 
+    const existingAdmin = await admins.findOne({ where: { userName } });
+
+    if (!existingAdmin) {
+      return res
+        .status(statusCode.success) 
+        .send(
+          apiResponseErr(
+            [],
+            statusCode.success,
+            false,
+            "User not found"
+          )
+        );
+    };
+
+    let vUserName;
+
+    if(existingAdmin.role === string.subAdmin || existingAdmin.role === string.subWhiteLabel || existingAdmin.role === string.subHyperAgent || existingAdmin.role === string.subMasterAgent || existingAdmin.role === string.subSuperAgent) {
+      const user = await admins.findOne({
+        where: { userName: existingAdmin.createdByUser },
+      });
+     vUserName = user.dataValues.userName;
+    }else{
+      vUserName = userName;
+    }
+
     if (!marketId) {
       return res
         .status(statusCode.badRequest)
@@ -31,7 +57,7 @@ export const getUserBetMarket = async (req, res) => {
     };
     const baseUrl = process.env.COLOR_GAME_URL;
     const response = await axios.get(
-      `${baseUrl}/api/user-external-liveBet/${userName}/${marketId}`,
+      `${baseUrl}/api/user-external-liveBet/${vUserName}/${marketId}`,
       {
         params,
        
@@ -52,11 +78,11 @@ export const getUserBetMarket = async (req, res) => {
 
     const { data } = response.data;
 
-    res
+    return res
       .status(statusCode.success)
       .send(apiResponseSuccess(data, true, statusCode.success, "Success"));
   } catch (error) {
-    res
+    return res
       .status(statusCode.internalServerError)
       .send(
         apiResponseErr(
@@ -137,6 +163,7 @@ export const getLiveUserBet = async (req, res) => {
   try {
     const { marketId } = req.params;
     const loggedInAdminId = req.user.adminId;
+    const role = req.user.role;
     const baseUrl = process.env.COLOR_GAME_URL;
 
     const response = await axios.get(
@@ -209,9 +236,17 @@ export const getLiveUserBet = async (req, res) => {
 
         return hierarchy;
       };
-
+      
+      let hierarchy;
       // Build the hierarchy starting from the logged-in admin
-      const hierarchy = await buildHierarchy(loggedInAdminId);
+      if(role == string.subAdmin || role == string.subWhiteLabel || role == string.subHyperAgent || role == string.subMasterAgent || role == string.subSuperAgent) {
+        const existingAdmin = await admins.findOne({ where: { adminId: loggedInAdminId } });
+        const adminId = existingAdmin?.dataValues?.createdById || loggedInAdminId;
+         hierarchy = await buildHierarchy(adminId);
+      }else{
+         hierarchy = await buildHierarchy(loggedInAdminId);
+      }
+
 
       // Filter the relevant users for the logged-in admin
       const relevantUsers = data.usersDetails.filter(
@@ -337,6 +372,7 @@ export const getLiveUserBetMarket = async (req, res) => {
 export const getUserMasterBook = async (req, res) => {
   try {
     const { marketId, adminId, role, type } = req.body;
+    const roles = req.user.role;
 
     const token = jwt.sign(
       { role: req.user.role },
@@ -438,9 +474,12 @@ export const getUserMasterBook = async (req, res) => {
           runnerBalance: user.runnerBalance,
         }));
 
-      const filteredSubAdmins = subAdmins.filter(
-        (subAdmin) => !subAdmin.role.some((role) => role === "user")
-      );
+      const filteredSubAdmins = subAdmins.filter((subAdmin) => {
+        if (Array.isArray(subAdmin.role)) {
+          return !subAdmin.role.includes("user");
+        }
+        return subAdmin.role !== "user";
+      });
 
       const formattedSubAdmins = await Promise.all(
         filteredSubAdmins.map(async (subAdmin) => {
@@ -450,7 +489,7 @@ export const getUserMasterBook = async (req, res) => {
             return {
               adminId: subAdmin.adminId,
               userName: subAdmin.userName,
-              role: subAdmin.role.role || null,
+              role: subAdmin.role || null,
             };
           }
 
@@ -468,6 +507,7 @@ export const getUserMasterBook = async (req, res) => {
       .status(statusCode.success)
       .send(apiResponseSuccess(users, true, statusCode.success, "Success"));
   } catch (error) {
+    console.error("Error from API:", error.response ? error.response.data : error.message);
     return res
       .status(statusCode.internalServerError)
       .send(
@@ -504,6 +544,7 @@ export const userLiveBet = async (req, res) => {
     const { page = 1, pageSize = 10, search = '' } = req.query;
 
     const admin = req.user;
+    const role = admin.role;
     const adminId = admin.adminId;
 
     const token = jwt.sign(
@@ -536,7 +577,14 @@ export const userLiveBet = async (req, res) => {
         .send(apiResponseSuccess([], true, statusCode.success, "No data found"));
     }
 
-    const connectedUsers = await getAllConnectedUsers(adminId);
+    let connectedUsers;
+    if(role == 'subAdmin' || role == 'subWhiteLabel' || role == 'subHyperAgent' || role == 'subSuperAgent' || role == 'subMasterAgent') {
+      const existingAdmin = await admins.findOne({ where: { adminId } });
+      const id = existingAdmin?.dataValues?.createdById;
+      connectedUsers = await getAllConnectedUsers(id);
+    }else{
+      connectedUsers = await getAllConnectedUsers(adminId);
+    }
 
     if (!Array.isArray(connectedUsers)) {
       return res.status(statusCode.internalServerError).send(
