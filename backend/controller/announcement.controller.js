@@ -3,6 +3,8 @@ import { statusCode } from "../helper/statusCodes.js";
 import announcementSchema from "../models/announcement.model.js";
 import innerAnnouncementSchema from "../models/innerAnnouncement.model.js";
 import { v4 as uuidv4 } from 'uuid';
+import { db } from "../Firebase/firebase-db.js";
+import { deleteLotteryFromFirebase } from "../Firebase/firebase.delete.js";
 
 /*
   Announcement Apis Starts's.....
@@ -22,6 +24,16 @@ export const createAnnouncements = async (req, res) => {
       announceId: announceId,
       announcement
     }) 
+
+     const formatDateTime = (date) => date.toISOString().slice(0, 19).replace("T", " ");
+
+    await db.collection('whitelabel').doc(create_announcement.announceId).set({
+      announceId: create_announcement.announceId,
+      announcement: create_announcement.announcement,
+      createdAt: formatDateTime(new Date()),
+      updatedAt: formatDateTime(new Date())
+    });
+
     return res.status(statusCode.create).send(apiResponseSuccess(create_announcement, true, statusCode.create, 'Announcement created successfully'));
   } catch (error) {
     return res.status(statusCode.internalServerError).send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
@@ -63,6 +75,8 @@ export const deleteAnnouncementData = async (req, res) => {
       },
     });
 
+    await deleteLotteryFromFirebase(announceId)
+
     return res
       .status(statusCode.success)
       .send(apiResponseSuccess(announcement_Data, true, statusCode.success, 'Announcement Deleted Successfully'));
@@ -93,7 +107,18 @@ export const createInnerAnnouncements = async (req, res) => {
     const create_announcement = await innerAnnouncementSchema.create({
       announceId: announceId,
       announcement
-    }) 
+    });
+
+
+     const formatDateTime = (date) => date.toISOString().slice(0, 19).replace("T", " ");
+
+    await db.collection('whitelabel').doc(create_announcement.announceId).set({
+      announceId: create_announcement.announceId,
+      announcement: create_announcement.announcement,
+      createdAt: formatDateTime(new Date()),
+      updatedAt: formatDateTime(new Date())
+    });
+
     return res.status(statusCode.create).send(apiResponseSuccess(create_announcement, true, statusCode.create, 'Announcement created successfully'));
   } catch (error) {
     return res.status(statusCode.internalServerError).send(apiResponseErr(error.data ?? null, false, error.responseCode ?? statusCode.internalServerError, error.errMessage ?? error.message));
@@ -133,6 +158,8 @@ export const deleteInnerAnnouncementData = async (req, res) => {
         announceId: announceId,
       },
     });
+
+    await deleteLotteryFromFirebase(announceId)
 
     return res
       .status(statusCode.success)
