@@ -105,7 +105,7 @@ export const getInnerAnnouncement = async (req, res) => {
     const announcement = await innerAnnouncementSchema.findAll();
 
    if (!announcement.length) {
-        return res.status(statusCode.badRequest).send(apiResponseErr(null, false, statusCode.badRequest, 'Inner announcement not found'));
+        return res.status(statusCode.success).send(apiResponseErr([], false, statusCode.success, 'Inner announcement not found'));
     }
     return res.status(statusCode.create).send(apiResponseSuccess(announcement, true, statusCode.create, 'Success'));
     
