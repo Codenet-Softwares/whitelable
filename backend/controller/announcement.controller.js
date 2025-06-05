@@ -35,7 +35,7 @@ export const getAnnouncement = async (req, res) => {
    
 
     if (!announcement.length) {
-        return res.status(statusCode.badRequest).send(apiResponseErr(null, false, statusCode.badRequest, 'Announcement not found'));
+        return res.status(statusCode.success).send(apiResponseErr([], true, statusCode.success, 'Announcement not found'));
     }
     return res.status(statusCode.create).send(apiResponseSuccess(announcement, true, statusCode.create, 'Success'));
   } catch (error) {
@@ -54,7 +54,7 @@ export const deleteAnnouncementData = async (req, res) => {
     });
 
     if (!announcement_Data) {
-      return res.status(statusCode.notFound).send(apiResponseErr(null, false, statusCode.notFound, 'Announcement not found'));
+      return res.status(statusCode.success).send(apiResponseErr(null, false, statusCode.success, 'Announcement not found'));
     }
 
     await announcementSchema.destroy({
@@ -105,7 +105,7 @@ export const getInnerAnnouncement = async (req, res) => {
     const announcement = await innerAnnouncementSchema.findAll();
 
    if (!announcement.length) {
-        return res.status(statusCode.success).send(apiResponseErr([], false, statusCode.success, 'Inner announcement not found'));
+        return res.status(statusCode.success).send(apiResponseErr([], true, statusCode.success, 'Inner announcement not found'));
     }
     return res.status(statusCode.create).send(apiResponseSuccess(announcement, true, statusCode.create, 'Success'));
     
@@ -125,7 +125,7 @@ export const deleteInnerAnnouncementData = async (req, res) => {
     });
 
     if (!announcement_Data) {
-      return res.status(statusCode.notFound).send(apiResponseErr(null, false, statusCode.notFound, 'Announcement not found'));
+      return res.status(statusCode.success).send(apiResponseErr(null, true, statusCode.success, 'Announcement not found'));
     }
 
     await innerAnnouncementSchema.destroy({
