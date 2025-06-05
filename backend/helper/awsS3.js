@@ -20,19 +20,22 @@ const awsS3Obj = {
       if (!base64Data || !fileName || !bucketName || !fileType) {
         throw new Error('Missing required parameters.');
       }
+
       const fileBuffer = Buffer.from(base64Data, 'base64');
       const fileExtension = fileType.substring(fileType.lastIndexOf('/') + 1);
       const uniqueFileName = `${fileName}_${Date.now()}.${fileExtension}`;
+
       const params = {
         Bucket: bucketName,
         Key: uniqueFileName,
         Body: fileBuffer,
         ContentType: fileType,
         ContentEncoding: 'base64',
-        ACL: 'public-read',
       };
-      const uploadResult = await s3.upload(params).promise();
-      return uploadResult.Location;
+
+      await s3.upload(params).promise();
+
+      return uniqueFileName;
     } catch (error) {
       console.error('Error uploading file to S3:', error);
       throw new Error(`Error uploading file to S3: ${error.message}`);
@@ -42,7 +45,7 @@ const awsS3Obj = {
 
   deleteDocumentsFromS3: async function (fileName, bucketName) {
     try {
-      const ans = await s3
+      await s3
         .deleteObject({
           Bucket: bucketName,
           Key: fileName,
