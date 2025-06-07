@@ -1,5 +1,5 @@
 import admin from 'firebase-admin';
-import serviceAccount from './firebase.json' with { type: "json" };
+import serviceAccount from './firebase.json' assert { type: "json" };
 
 
 const initializeFirebase = () => {
