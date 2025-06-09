@@ -149,7 +149,7 @@ const ViewSubAdminPermission = () => {
                       className="badge bg-secondary-subtle border text-dark fw-semibold px-3 py-2"
                     >
                       <i className="fas fa-check-circle text-success me-1"></i>
-                      {perm.toUpperCase()}
+                      {perm.charAt(0).toUpperCase() + perm.slice(1).toLowerCase()}
                     </span>
                   ))}
                 </div>
