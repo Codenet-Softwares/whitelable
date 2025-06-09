@@ -22,13 +22,13 @@ export const createSlider = async (req, res) => {
         .send(apiResponseErr(null, false, statusCode.badRequest, 'Data must be an array'));
     }
 
-    const activeImagesCount = await sliderSchema.count({ where: { isActive: true } });
+    // const activeImagesCount = await sliderSchema.count({ where: { isActive: true } });
 
-    if (activeImagesCount + data.length > 3) {
-      return res
-        .status(statusCode.badRequest)
-        .send(apiResponseErr(null, false, statusCode.badRequest, 'Cannot add more than 3 active images. Please deactivate or delete existing images.'));
-    }
+    // if (activeImagesCount + data.length > 3) {
+    //   return res
+    //     .status(statusCode.badRequest)
+    //     .send(apiResponseErr(null, false, statusCode.badRequest, 'Cannot add more than 3 active images. Please deactivate or delete existing images.'));
+    // }
 
     let sliderArray = [];
 
@@ -168,13 +168,13 @@ export const createGif = async (req, res) => {
         .send(apiResponseErr(null, false, statusCode.badRequest, 'Data must be an array'));
     }
 
-    const activeGifsCount = await gifSchema.count({ where: { isActive: true } });
+    // const activeGifsCount = await gifSchema.count({ where: { isActive: true } });
 
-    if (activeGifsCount + data.length > 2) {
-      return res
-        .status(statusCode.badRequest)
-        .send(apiResponseErr(null, false, statusCode.badRequest, 'Cannot add more than 2 active GIFs. Please deactivate or delete existing GIFs.'));
-    }
+    // if (activeGifsCount + data.length > 2) {
+    //   return res
+    //     .status(statusCode.badRequest)
+    //     .send(apiResponseErr(null, false, statusCode.badRequest, 'Cannot add more than 2 active GIFs. Please deactivate or delete existing GIFs.'));
+    // }
 
     let gifArray = [];
 
@@ -324,13 +324,13 @@ export const createGameImg = async (req, res) => {
         .send(apiResponseErr(null, false, statusCode.badRequest, 'Data must be an array'));
     }
 
-    const activeImagesCount = await gameImgSchema.count({ where: { isActive: true } });
+    // const activeImagesCount = await gameImgSchema.count({ where: { isActive: true } });
 
-    if (activeImagesCount + data.length > 3) {
-      return res
-        .status(statusCode.badRequest)
-        .send(apiResponseErr(null, false, statusCode.badRequest, 'Cannot add more than 3 active images. Please deactivate or delete existing images.'));
-    }
+    // if (activeImagesCount + data.length > 3) {
+    //   return res
+    //     .status(statusCode.badRequest)
+    //     .send(apiResponseErr(null, false, statusCode.badRequest, 'Cannot add more than 3 active images. Please deactivate or delete existing images.'));
+    // }
 
     let imageArray = [];
 
