@@ -68,7 +68,7 @@ const LiveBetModal = ({ show, handleClose, user_LiveBet }) => {
                         data.type === "back" ? "#7DBCE8" : "#FFB6C1",
                     }}
                   >
-                    {data.type.toUpperCase()}
+                    {data.type.charAt(0).toUpperCase() + data.type.slice(1).toLowerCase()}
                   </span>
                 </td>
                 <td>Match Odds</td>
