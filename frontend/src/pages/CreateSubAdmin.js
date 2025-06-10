@@ -30,7 +30,6 @@ const CreateSubAdmin = () => {
     onSubmit: async (values, action) => {
       showLoader();
       setIsLoading(true);
-      console.log("values", values);
       try {
         await createSubAdmin(values, true);
         resetForm();

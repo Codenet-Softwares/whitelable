@@ -392,7 +392,6 @@ const useProfitLossData = () => {
       currentState.dateRange.to !== lastDateRange.current.to;
 
     if (!datesChanged && currentState.dataType !== "live") {
-      console.log("Dates haven't changed - skipping API call");
       return;
     }
 

@@ -96,7 +96,6 @@ useEffect(() => {
           getHistoryForBetHistory();
         }
       } else if (isBackup && noDatesSelected) {
-        console.log("Fetching backup/olddata with empty dates");
         if (SelectedGameId === "lottery") {
           getHistoryForLotteryBetHistory();
         } else {

@@ -43,7 +43,6 @@ const UpdateGameSlider = () => {
       img.imageId === imageId ? { ...img, isActive: newStatus } : img
     );
     setSliderImages(updatedImages);
-console.log("Image ID==========>",updatedImages)
       showLoader(); 
     try {
       await activeInactiveGameImage(imageId, { isActive: newStatus });

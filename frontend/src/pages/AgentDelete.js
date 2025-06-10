@@ -53,7 +53,6 @@ const AgentDelete = () => {
 
 
   async function handleDeleteAgent(id) {
-    console.log("adminId", id);
     showLoader();
     try {
       const response = await deleteTrash_api({ adminId: id });

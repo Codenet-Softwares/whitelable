@@ -54,8 +54,7 @@ const User_BetMarket = () => {
   const [isInsideViewMoreModal, setIsInsideViewMoreModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   // useEffect(()=>{fetch_BetBookData()},[bodyData])
-  const handleUsernameClick = (userName, fromViewMore = false) => {
-    console.log("onclick", userName);
+  const handleUsernameClick = (userName , fromViewMore = false) => {
     setSelectedUser(userName);
     setHirerchyModalOpen(true); // Open the modal when a username is clicked
     handleCloseViewMoreModal(); // #####
@@ -138,7 +137,6 @@ const User_BetMarket = () => {
   }, [marketId]);
 
   useEffect(() => {
-    console.log("API Called");
     getView_LiveBet(
       user_LiveBet.currentPage,
       user_LiveBet.totalEntries,

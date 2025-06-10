@@ -11,7 +11,6 @@ const ProfitAndLossRunner = ({
   totalItems,
   UserName,
 }) => {
-  console.log('===>> line marketId',data)
   const startIndex = Math.min((data.currentPage - 1) * 10 + 1);
   const endIndex = Math.min(data.currentPage * 10, data.totalData);
 

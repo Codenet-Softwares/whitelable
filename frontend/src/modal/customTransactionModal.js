@@ -13,7 +13,6 @@ import { useAppContext } from "../contextApi/context";
 import { toast } from "react-toastify";
 import "./customTransactionModal.css";
 const CustomTransactionModal = (props) => {
-  console.log("====>> line 16", props.balance);
   const { setIsLoading } = props;
   const [formData, setFormData] = useState({
     amount: null,

@@ -18,7 +18,6 @@ const StatusModal = ({
 }) => {
   const { store, showLoader, hideLoader } = useAppContext();
   const [state, setState] = useState(activeInactiveInitialState());
-  console.log('Line 21', store)
 
 
   // Set modal state based on Status when it opens
