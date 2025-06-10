@@ -14,9 +14,7 @@ const UpdateInnerAnnouncement = ({ refreshTrigger }) => {
 const fetchAnnouncements = async () => {
   try {
     const response = await getInnerAnnouncement(store.user);
-    console.log("Fetched inner announcements:", response.data);
     setAnnouncements(response.data || []);
-    console.log("Announcement Response================>", response.data)
   } catch (error) {
     toast.error("Failed to fetch inner announcements.");
     console.error("Error fetching inner announcements:", error);

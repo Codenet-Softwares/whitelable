@@ -803,7 +803,6 @@ export async function activeInactiveImage(imageId, body = {}, isToast = false) {
       isToast
     );
     
-    console.log("API Response==============>", response);
     return response;
   } catch (error) {
     throw error;
@@ -860,7 +859,6 @@ export async function activeInactiveInnerImage(imageId, body = {}, isToast = fal
       isToast
     );
     
-    console.log("API Response==============>", response); 
     return response;
   } catch (error) {
     console.error("API Error:", error);
@@ -919,7 +917,6 @@ export async function activeInactiveGameImage(imageId, body = {}, isToast = fals
       isToast
     );
 
-    console.log("API Response==============>", response); // Debugging the API response
     return response;
   } catch (error) {
     console.error("API Error:", error);
@@ -977,7 +974,6 @@ export async function activeInactiveGameGif(imageId, body = {}, isToast = false)
       isToast
     );
     
-    console.log("API Response==============>", response);
     return response;
   } catch (error) {
     throw error;

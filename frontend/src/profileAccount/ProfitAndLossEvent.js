@@ -93,7 +93,6 @@ const handelItemPerPage = (event) => {
             onChange={handelItemPerPage}
             value={profitLossEventData.itemPerPage}
           >
-            { console.log('line 94',profitLossEventData.itemPerPage)}
             <option value="10">10 Entries</option>
             <option value="25">25 Entries</option>
             <option value="50">50 Entries</option>

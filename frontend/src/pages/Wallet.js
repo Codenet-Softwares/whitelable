@@ -65,7 +65,14 @@ const Wallet = () => {
   }, []);
 
 
-  console.log("navigationBar", navigationBar);
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      localStorage.removeItem('walletNavigationBar');
+      localStorage.removeItem('walletUserId');
+    };
+  }, []);
+
   const handleAdminNavigateToChild = (adminId, adminName) => {
     setUserId(adminId);
     setNavigationBar((prev) => [...prev, { adminId, adminName }]);

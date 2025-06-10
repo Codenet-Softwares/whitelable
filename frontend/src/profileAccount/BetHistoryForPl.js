@@ -12,7 +12,6 @@ const BetHistoryForPl = () => {
   const [totalPage, setTotalPage] = useState(0);
   const pageLimit = 10;
   const navigate = useNavigate();
-  console.log("marketId through params", marketId);
   const fetchBetList = async () => {
     const response = await getBetList({
       userName: userName,
