@@ -442,8 +442,8 @@ const BetHistory = ({
                                 <td>{history?.sem}</td>
                                 <td>{history?.ticketPrice}</td>
                                 <td className="fw-bold">{history?.amount}</td>
-                                <td>{formatDateForUi(history?.placeDate)}</td>
-                                <td>{formatDateForUi(history?.date)}</td>
+                                <td>{formatDateForUi(history?.placeDate ||  "N.D.A"  )}</td>
+                                <td>{formatDateForUi(history?.date || "N.D.A")}</td>
                               </tr>
                             ))
                           : // Render No Data Found message only if a sport is selected and there's no data

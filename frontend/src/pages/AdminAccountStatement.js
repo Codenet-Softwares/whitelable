@@ -88,17 +88,21 @@ const AdminAccountStatement = () => {
     state.startDate,
   ]);
 
-  function formatDateForUi(dateString) {
-    const options = {
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-      hour: "numeric",
-      minute: "numeric",
-      second: "numeric",
-    };
-    return new Date(dateString).toLocaleDateString("en-US", options);
-  }
+  function convertToISTFormat(utcDateString) {
+  const date = new Date(utcDateString);
+  const options = {
+    timeZone: 'Asia/Kolkata',
+    day: 'numeric',
+    month: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+    hour12: true
+  };
+  const formatter = new Intl.DateTimeFormat('en-IN', options);
+  return formatter.format(date);
+}
 
   const startIndex = Math.min((state.currentPage - 1) * state.totalEntries + 1);
   const endIndex = Math.min(
@@ -278,7 +282,7 @@ const AdminAccountStatement = () => {
                       <tr key={transaction._id} className="border">
                         <th scope="row">
                           <a href="#" className="question_content">
-                            {formatDateForUi(transaction.date)}
+                            {convertToISTFormat(transaction.date)}
                           </a>
                         </th>
                         <td>
