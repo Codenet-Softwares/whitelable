@@ -212,6 +212,7 @@ const AdminAccountStatement = () => {
                   disabled={state.dataSource === "live"}
                   placeholderText={"Select Start Date"}
                   onKeyDown={(e) => e.preventDefault()}
+                  dateFormat="dd/MM/yyyy"
                 />
               </div>
               <div class="col-sm">
@@ -222,6 +223,7 @@ const AdminAccountStatement = () => {
                   disabled={state.dataSource === "live"}
                   placeholderText={"Select End Date"}
                   onKeyDown={(e) => e.preventDefault()}
+                  dateFormat="dd/MM/yyyy"
                 />
               </div>
 

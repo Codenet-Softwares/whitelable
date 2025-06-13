@@ -277,6 +277,7 @@ const ProfitAndLoss = ({
                       onKeyDown={(e) => e.preventDefault()} // Block manual input from keyboard
                       className="form-control"
                       maxDate={new Date()}
+                      dateFormat="dd/MM/yyyy"
                     />
                   </div>
                   <div class="col-sm">
@@ -292,6 +293,7 @@ const ProfitAndLoss = ({
                       onKeyDown={(e) => e.preventDefault()} // Block manual input from keyboard
                       className="form-control"
                       maxDate={new Date()}
+                      dateFormat="dd/MM/yyyy"
                     />
                   </div>
                   <div class="col-sm">

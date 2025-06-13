@@ -107,6 +107,7 @@ const AccountStatement = ({
                       readonly // Prevent manual typing
                       maxDate={new Date()}
                       onKeyDown={(e) => e.preventDefault()} // Block manual input from keyboard
+                      dateFormat="dd/MM/yyyy"
                     />
                   )}
                 </div>
@@ -129,6 +130,7 @@ const AccountStatement = ({
                       readonly // Prevent manual typing
                       maxDate={new Date()}
                       onKeyDown={(e) => e.preventDefault()} // Block manual input from keyboard
+                      dateFormat="dd/MM/yyyy"
                     />
                   )}
                 </div>
