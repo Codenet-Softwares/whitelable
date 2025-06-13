@@ -671,21 +671,7 @@ const Navside = () => {
                   </div>
                 </a>
                 <ul>
-                  <li>
-                    <Link to="outer-announcement">
-                      <span>
-                        <i
-                          class="fa-solid fa-chart-column"
-                          style={{
-                            color: "black",
-                            fontSize: "20px",
-                            marginLeft: "50px",
-                          }}
-                        ></i>
-                        Outer Slider Image
-                      </span>
-                    </Link>
-                  </li>
+                 
                   <li>
                     <Link to="inner-announcement">
                       <span>
@@ -697,7 +683,7 @@ const Navside = () => {
                             marginLeft: "50px",
                           }}
                         ></i>
-                        Inner Slider Image
+                        Inner Announcement
                       </span>
                     </Link>
                   </li>

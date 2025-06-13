@@ -22,22 +22,23 @@ const AccountStatement = ({
   dataSource,
 }) => {
   const [currentDate] = useState(new Date()); // Store current date for live data
-  function formatDate(dateString) {
+
+  function convertToISTFormat(utcDateString) {
+    const date = new Date(utcDateString);
     const options = {
-      year: "numeric",
-      month: "numeric",
+      timeZone: "Asia/Kolkata",
       day: "numeric",
+      month: "numeric",
+      year: "numeric",
       hour: "numeric",
       minute: "numeric",
       second: "numeric",
+      hour12: true,
     };
-    const formattedDate = new Date(dateString).toLocaleDateString(
-      "en-US",
-      options
-    );
-    return formattedDate;
+    const formatter = new Intl.DateTimeFormat("en-IN", options);
+    return formatter.format(date);
   }
-  // Determine if the Get Statement button should be disabled
+
   const isGetStatementDisabled = () => {
     if (dataSource === "live") {
       return true; // Always disabled for live data
@@ -211,7 +212,7 @@ const AccountStatement = ({
                       <tr key={transaction.id}>
                         <th scope="row">
                           <a href="#" className="question_content">
-                            {formatDate(transaction.date)}
+                            {convertToISTFormat(transaction.date)}
                           </a>
                         </th>
                         <td>
